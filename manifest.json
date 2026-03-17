@@ -1,0 +1,36 @@
+{
+  "name": "TruckFlow — Hub Transport",
+  "short_name": "TruckFlow",
+  "description": "Gestion logistique hub de transport — quais, camions, livraisons",
+  "start_url": "./truckflow_2058.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0d1117",
+  "theme_color": "#0a84ff",
+  "lang": "fr",
+  "categories": ["productivity", "logistics"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Mode Monitor",
+      "short_name": "Monitor",
+      "description": "Ouvrir la vue secondaire écran",
+      "url": "./truckflow_2058.html#monitor"
+    }
+  ]
+}
