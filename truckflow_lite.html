@@ -277,6 +277,37 @@ html,body{
 }
 .btn-refresh:active{background:rgba(10,132,255,.2);transform:scale(.98)}
 
+/* ── Timestamps tab ─────────────────────── */
+.ts-card{margin-bottom:8px}
+.ts-truck-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px 10px;
+}
+.ts-steps-row{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.ts-step-btn{
+  display:flex;flex-direction:column;align-items:center;
+  padding:10px 4px 12px;
+  background:transparent;border:none;border-right:1px solid rgba(255,255,255,.05);
+  cursor:pointer;gap:3px;transition:background .15s;width:100%;
+}
+.ts-step-btn:last-child{border-right:none}
+.ts-step-btn:active{background:rgba(255,255,255,.07)}
+.ts-step-label{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.3px;text-transform:uppercase}
+.ts-step-time{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--t3)}
+.ts-step-btn.set .ts-step-time{color:var(--step-col,var(--green))}
+.ts-step-btn.set .ts-step-label{color:var(--step-col,var(--green));opacity:.8}
+.btn-export-ts{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;
+  background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.25);
+  border-radius:14px;color:var(--green);font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .15s;margin-bottom:10px;
+}
+.btn-export-ts:active{background:rgba(48,209,88,.2);transform:scale(.98)}
+
 /* ── Toast ─────────────────────────────── */
 .toast{
   position:fixed;bottom:calc(var(--safe-bot) + 80px);left:50%;transform:translateX(-50%) translateY(20px);
@@ -402,6 +433,14 @@ html,body{
     <div style="height:8px"></div>
   </div>
 
+  <!-- ── TAB: Timestamps ── -->
+  <div class="panel" id="tab-ts">
+    <button class="btn-export-ts" onclick="exportTSJson()">📤 Exporter timestamps → Desktop</button>
+    <div class="sec-lbl" id="tsLabel">Timestamps camions</div>
+    <div id="tsContent"></div>
+    <div style="height:8px"></div>
+  </div>
+
 </div><!-- /scroll -->
 
 <!-- Bottom Nav -->
@@ -417,6 +456,9 @@ html,body{
   </button>
   <button class="nav-btn" id="nb-stats" onclick="showTab('stats')">
     <span class="nav-ico">📈</span>Stats
+  </button>
+  <button class="nav-btn" id="nb-ts" onclick="showTab('ts')">
+    <span class="nav-ico">⏱</span>Timestamps
   </button>
 </nav>
 
@@ -512,6 +554,7 @@ function renderAll(){
   renderTrucks();
   renderPlanning();
   renderStats();
+  renderTimestamps();
 }
 
 // ─── Header ────────────────────────────────────────────────────────────────
@@ -801,6 +844,97 @@ function renderStats(){
     '<div class="empty-state" style="padding:20px"><div class="empty-sub">Aucun quai assigné</div></div>';
 }
 
+// ─── Timestamps tab ────────────────────────────────────────────────────────
+var TS_STEPS = [
+  {key:'arr',  label:'Arrivé',  col:'var(--amber)'},
+  {key:'quai', label:'À quai',  col:'var(--blue)'},
+  {key:'chg',  label:'Chgt',    col:'var(--teal)'},
+  {key:'dep',  label:'Parti',   col:'var(--green)'},
+];
+
+function renderTimestamps(){
+  var tod = today();
+  var list = trucks.filter(function(t){ return t.date === tod; });
+  if(!list.length) list = trucks;
+  list = list.slice().sort(function(a,b){ return creToMin(a.creneau) - creToMin(b.creneau); });
+
+  document.getElementById('tsLabel').textContent = 'Timestamps camions ('+list.length+')';
+
+  if(!list.length){
+    document.getElementById('tsContent').innerHTML =
+      '<div class="empty-state"><div class="empty-ico">⏱</div>'+
+      '<div class="empty-title">Aucun camion</div>'+
+      '<div class="empty-sub">Importez une session desktop pour commencer</div></div>';
+    return;
+  }
+
+  var html = list.map(function(t){
+    var ts = timestamps[t.id]||{};
+    var status = getTruckStatus(t, ts);
+    var dotCol = {wait:'var(--t3)',arr:'var(--amber)',quai:'var(--blue)',chg:'var(--teal)',dep:'var(--green)'}[status];
+    var stepsHtml = TS_STEPS.map(function(s){
+      var val = ts[s.key];
+      var isSet = !!val;
+      return '<button class="ts-step-btn '+(isSet?'set':'unset')+'"'+
+        (isSet?' style="--step-col:'+s.col+'"':'')+
+        ' onclick="setTS(\''+t.id.replace(/'/g,"\\'")+"','"+s.key+'\')">'+
+        '<span class="ts-step-label">'+s.label+'</span>'+
+        '<span class="ts-step-time">'+(isSet?fmtTime(val):'—')+'</span>'+
+        '</button>';
+    }).join('');
+    return '<div class="ts-card gc">'+
+      '<div class="ts-truck-hdr">'+
+        '<div class="truck-status-dot" style="color:'+dotCol+';background:'+dotCol+'"></div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="truck-id" style="font-size:13px">'+(t.id||'?')+'</div>'+
+          '<div class="truck-meta">'+(t.transporteur||'—')+(t.creneau?' · '+t.creneau:'')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="ts-steps-row">'+stepsHtml+'</div>'+
+      '</div>';
+  }).join('');
+
+  document.getElementById('tsContent').innerHTML = html;
+}
+
+function setTS(truckId, step){
+  if(!timestamps[truckId]) timestamps[truckId] = {};
+  if(timestamps[truckId][step]){
+    delete timestamps[truckId][step];
+    showToast(step === 'arr' ? 'Arrivée effacée' :
+              step === 'quai' ? 'Mise à quai effacée' :
+              step === 'chg' ? 'Chargement effacé' : 'Départ effacé');
+  } else {
+    timestamps[truckId][step] = new Date().toISOString();
+    var stepLabel = step === 'arr' ? 'Arrivée' :
+                    step === 'quai' ? 'Mise à quai' :
+                    step === 'chg' ? 'Chargement' : 'Départ';
+    showToast(stepLabel+' enregistré ✓ '+fmtTime(timestamps[truckId][step]));
+  }
+  try{ localStorage.setItem('th10_ts', JSON.stringify(timestamps)); }catch(e){}
+  renderTimestamps();
+  if(_currentTab === 'dash') renderDash();
+  if(_currentTab === 'cam') renderTrucks();
+}
+
+function exportTSJson(){
+  var tod = today();
+  var list = trucks.filter(function(t){ return t.date === tod; });
+  if(!list.length) list = trucks;
+  var ts = {};
+  list.forEach(function(t){ if(timestamps[t.id]) ts[t.id] = timestamps[t.id]; });
+  var n = Object.keys(ts).length;
+  if(!n){ showToast('Aucun timestamp à exporter'); return; }
+  var data = { type:'tf-mobile-ts', date:tod, exportedAt:new Date().toISOString(), timestamps:ts };
+  var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'tf-timestamps-'+tod+'.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Export '+n+' camion'+(n>1?'s':'')+' ✓');
+}
+
 // ─── Tab navigation ────────────────────────────────────────────────────────
 function showTab(name){
   _currentTab = name;
@@ -810,8 +944,8 @@ function showTab(name){
   var btn = document.getElementById('nb-'+name);
   if(panel) panel.classList.add('on');
   if(btn) btn.classList.add('on');
-  // Scroll to top
   document.querySelector('.scroll').scrollTop = 0;
+  if(name === 'ts') renderTimestamps();
 }
 
 // ─── Clock tick ───────────────────────────────────────────────────────────

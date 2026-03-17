@@ -1207,10 +1207,12 @@ html.tv-mode body{overflow:auto}
     <input type="file" id="fi-vl06o" accept=".xlsx,.xls,.xlsm,.xlsb,.csv" style="display:none" onchange="doImportVL06O(event)">
     <input type="file" id="fi-archive" accept=".json" style="display:none" onchange="importArchiveFile(event)">
     <input type="file" id="fi-session" accept=".json" style="display:none" onchange="importSession(event)">
+    <input type="file" id="fi-mobile-ts" accept=".json" style="display:none" onchange="importMobileTS(event)">
     <!-- Groupe Import -->
     <div class="hdr-group">
       <button class="btn-imp btn-vl06o" onclick="triggerVL06O()" title="Importer fichier VL06O">&#x2191; VL06O</button>
       <button class="btn-imp" style="color:var(--teal);border-color:rgba(38,201,211,.3)" onclick="document.getElementById('fi-session').click()" title="Importer session JSON">&#x2191; Sync</button>
+      <button class="btn-imp" style="color:var(--amber);border-color:rgba(255,159,10,.3)" onclick="document.getElementById('fi-mobile-ts').click()" title="Importer timestamps depuis mobile">&#128241; Mobile</button>
     </div>
     <div class="hdr-sep"></div>
     <!-- Groupe Export -->
@@ -3458,6 +3460,32 @@ function importSession(event){
       var archMsg=(_dailyArchive&&_dailyArchive.length)?' (+ '+_dailyArchive.length+'j d\u2019archive)':'';
       showToast(APP.deliveries.length+' livraisons restaur\u00e9es depuis la session'+archMsg+' \u2705');
     }catch(e){ showToast('Erreur import session : '+e.message); }
+  };
+  reader.readAsText(file);
+}
+
+// ─── Import timestamps mobile ────────────────────────────────────────────
+function importMobileTS(event){
+  var file = event.target.files[0]; event.target.value='';
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var d = JSON.parse(ev.target.result);
+      if(d.type !== 'tf-mobile-ts' || !d.timestamps) throw new Error('Format invalide (attendu tf-mobile-ts)');
+      var count = 0;
+      Object.keys(d.timestamps).forEach(function(id){
+        var mts = d.timestamps[id];
+        if(!timestamps[id]) timestamps[id] = {};
+        ['arr','quai','chg','dep'].forEach(function(step){
+          if(mts[step]) timestamps[id][step] = mts[step];
+        });
+        count++;
+      });
+      save();
+      renderAll();
+      showToast('\uD83D\uDCF1 '+count+' camion'+(count>1?'s':'')+' mis à jour depuis mobile \u2705');
+    }catch(e){ showToast('Erreur import mobile : '+e.message); }
   };
   reader.readAsText(file);
 }
