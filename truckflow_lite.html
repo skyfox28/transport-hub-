@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TruckFlow">
+<title>TruckFlow Lite</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d1117;
+  --sf:rgba(28,28,30,.85);
+  --bd:rgba(255,255,255,.08);
+  --bd2:rgba(255,255,255,.14);
+  --t1:#f5f5f7;
+  --t2:#c7c7cc;
+  --t3:#8e8e93;
+  --blue:#0a84ff;
+  --green:#30d158;
+  --amber:#ff9f0a;
+  --red:#ff453a;
+  --purple:#bf5af2;
+  --teal:#5ac8fa;
+  --orange:#ff6b35;
+  --indigo:#5e5ce6;
+  --glass:rgba(140,180,220,.05);
+  --glass-bd:rgba(160,210,255,.18);
+  --r:20px;
+  --safe-top:env(safe-area-inset-top, 0px);
+  --safe-bot:env(safe-area-inset-bottom, 0px);
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--t1);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;
+  overflow:hidden;
+}
+
+/* ── Orbs ─────────────────────────────── */
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+.orb1{width:500px;height:500px;top:-150px;left:-150px;background:radial-gradient(circle,rgba(10,132,255,.18) 0%,transparent 70%);filter:blur(60px);animation:of1 20s ease-in-out infinite}
+.orb2{width:450px;height:450px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(191,90,242,.15) 0%,transparent 70%);filter:blur(60px);animation:of2 25s ease-in-out infinite}
+.orb3{width:350px;height:350px;top:40%;left:30%;background:radial-gradient(circle,rgba(90,200,250,.1) 0%,transparent 70%);filter:blur(50px);animation:of3 18s ease-in-out infinite}
+@keyframes of1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+@keyframes of2{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-40px)}}
+@keyframes of3{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-25px)}}
+
+/* ── Header ─────────────────────────────── */
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:calc(var(--safe-top) + 14px) 20px 14px;
+  background:rgba(13,17,23,.7);
+  backdrop-filter:saturate(200%) blur(28px);
+  -webkit-backdrop-filter:saturate(200%) blur(28px);
+  border-bottom:1px solid rgba(160,210,255,.12);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-ico{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 2px 12px rgba(10,132,255,.4);
+}
+.hdr-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.hdr-sub{font-size:11px;color:var(--t3);letter-spacing:.2px;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-time{font-size:13px;font-weight:600;color:var(--t2);font-variant-numeric:tabular-nums}
+.hdr-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+
+/* ── Bottom nav ─────────────────────────── */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  padding:10px 0 calc(var(--safe-bot) + 8px);
+  background:rgba(13,17,23,.8);
+  backdrop-filter:saturate(200%) blur(28px);
+  -webkit-backdrop-filter:saturate(200%) blur(28px);
+  border-top:1px solid rgba(160,210,255,.1);
+  display:flex;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  border:none;background:transparent;color:var(--t3);
+  font-size:10px;font-weight:600;cursor:pointer;
+  transition:color .2s;padding:2px 0;letter-spacing:.2px;
+}
+.nav-btn .nav-ico{font-size:22px;line-height:1;transition:transform .2s}
+.nav-btn.on{color:var(--blue)}
+.nav-btn.on .nav-ico{transform:scale(1.1)}
+
+/* ── Scroll container ───────────────────── */
+.scroll{
+  position:fixed;
+  top:calc(var(--safe-top) + 70px);
+  bottom:calc(var(--safe-bot) + 68px);
+  left:0;right:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  z-index:1;
+}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ── Panels ─────────────────────────────── */
+.panel{display:none;padding:16px 16px 8px;min-height:100%}
+.panel.on{display:block}
+
+/* ── Glass card ─────────────────────────── */
+.gc{
+  background:var(--glass);
+  border:1px solid var(--glass-bd);
+  border-radius:var(--r);
+  backdrop-filter:saturate(180%) blur(18px);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);
+  box-shadow:inset 0 1px 0 rgba(160,210,255,.15),0 4px 20px rgba(0,0,0,.3);
+  overflow:hidden;position:relative;
+}
+.gc::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(160,210,255,.04) 0%,transparent 60%);
+  pointer-events:none;
+}
+
+/* ── Section title ───────────────────────── */
+.sec-lbl{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px}
+.sec-lbl:first-child{margin-top:4px}
+
+/* ── KPI grid ───────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.kpi-card{
+  padding:16px 14px;
+  border-radius:16px;
+  background:var(--glass);
+  border:1px solid var(--glass-bd);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(160,210,255,.12),0 4px 16px rgba(0,0,0,.25);
+  position:relative;overflow:hidden;
+}
+.kpi-card::after{
+  content:'';position:absolute;top:-30px;right:-20px;
+  width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,var(--kpi-acc,.3) 0%,transparent 70%);
+  opacity:.15;pointer-events:none;
+}
+.kpi-ico{font-size:22px;margin-bottom:8px;display:block}
+.kpi-val{font-size:28px;font-weight:700;color:var(--t1);line-height:1;letter-spacing:-.5px}
+.kpi-lbl{font-size:11px;color:var(--t3);margin-top:4px;font-weight:600;letter-spacing:.2px}
+.kpi-sub{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* Accent colors on kpi */
+.kpi-card.blue{--kpi-acc:rgba(10,132,255,1);border-color:rgba(10,132,255,.2)}
+.kpi-card.blue .kpi-val{color:var(--blue)}
+.kpi-card.green{--kpi-acc:rgba(48,209,88,1);border-color:rgba(48,209,88,.2)}
+.kpi-card.green .kpi-val{color:var(--green)}
+.kpi-card.amber{--kpi-acc:rgba(255,159,10,1);border-color:rgba(255,159,10,.2)}
+.kpi-card.amber .kpi-val{color:var(--amber)}
+.kpi-card.red{--kpi-acc:rgba(255,69,58,1);border-color:rgba(255,69,58,.2)}
+.kpi-card.red .kpi-val{color:var(--red)}
+.kpi-card.purple{--kpi-acc:rgba(191,90,242,1);border-color:rgba(191,90,242,.2)}
+.kpi-card.purple .kpi-val{color:var(--purple)}
+.kpi-card.teal{--kpi-acc:rgba(90,200,250,1);border-color:rgba(90,200,250,.2)}
+.kpi-card.teal .kpi-val{color:var(--teal)}
+
+/* ── Progress bar ───────────────────────── */
+.prog-wrap{padding:16px 16px 14px}
+.prog-lbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-text{font-size:13px;font-weight:600;color:var(--t1)}
+.prog-pct{font-size:13px;font-weight:700;color:var(--blue)}
+.prog-track{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* ── Truck list ─────────────────────────── */
+.truck-item{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 14px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  cursor:pointer;transition:background .15s;
+  position:relative;
+}
+.truck-item:last-child{border-bottom:none}
+.truck-item:active{background:rgba(255,255,255,.04)}
+.truck-status-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  box-shadow:0 0 6px currentColor;
+}
+.truck-main{flex:1;min-width:0}
+.truck-id{font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.truck-meta{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.truck-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.truck-badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;
+  white-space:nowrap;letter-spacing:.2px;
+}
+.truck-time{font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums}
+.truck-creneau{font-size:11px;color:var(--blue);font-weight:600}
+
+/* Status colors */
+.s-wait{color:var(--t3)}
+.s-arr{color:var(--amber)}
+.s-quai{color:var(--blue)}
+.s-chg{color:var(--teal)}
+.s-dep{color:var(--green)}
+.s-late{color:var(--red)}
+.bg-wait{background:rgba(142,142,147,.15);color:var(--t3)}
+.bg-arr{background:rgba(255,159,10,.15);color:var(--amber)}
+.bg-quai{background:rgba(10,132,255,.15);color:var(--blue)}
+.bg-chg{background:rgba(90,200,250,.15);color:var(--teal)}
+.bg-dep{background:rgba(48,209,88,.15);color:var(--green)}
+.bg-late{background:rgba(255,69,58,.15);color:var(--red)}
+
+/* ── Timeline (Planning) ────────────────── */
+.timeline-wrap{padding:0 0 12px}
+.tl-slot{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 14px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.tl-slot:last-child{border-bottom:none}
+.tl-hour{
+  font-size:12px;font-weight:700;color:var(--t3);
+  width:36px;flex-shrink:0;padding-top:2px;
+  font-variant-numeric:tabular-nums;
+}
+.tl-line{width:2px;flex-shrink:0;border-radius:99px;min-height:36px;align-self:stretch;background:rgba(255,255,255,.06)}
+.tl-line.has-truck{background:var(--blue)}
+.tl-trucks{flex:1;display:flex;flex-direction:column;gap:6px}
+.tl-truck-chip{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:12px;
+  background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.2);
+}
+.tl-truck-chip.s-dep{background:rgba(48,209,88,.08);border-color:rgba(48,209,88,.18)}
+.tl-truck-chip.s-arr{background:rgba(255,159,10,.08);border-color:rgba(255,159,10,.18)}
+.tl-tc-id{font-size:12px;font-weight:700;color:var(--t1)}
+.tl-tc-info{font-size:10px;color:var(--t3)}
+.tl-tc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tl-empty{font-size:11px;color:rgba(255,255,255,.15);padding-top:2px;font-style:italic}
+
+/* ── Stat bars ──────────────────────────── */
+.stat-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.stat-row:last-child{border-bottom:none}
+.stat-ico{font-size:16px;width:28px;text-align:center;flex-shrink:0}
+.stat-info{flex:1;min-width:0}
+.stat-name{font-size:13px;font-weight:600;color:var(--t1)}
+.stat-track{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-top:4px}
+.stat-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.stat-val{font-size:13px;font-weight:700;color:var(--t2);min-width:28px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── No data ────────────────────────────── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:12px;text-align:center;
+}
+.empty-ico{font-size:48px;opacity:.4}
+.empty-title{font-size:16px;font-weight:600;color:var(--t2)}
+.empty-sub{font-size:13px;color:var(--t3);line-height:1.5;max-width:240px}
+
+/* ── Ponct badge ─────────────────────────── */
+.ponct-row{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ponct-row:last-child{border-bottom:none}
+.ponct-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.ponct-bar{height:100%;border-radius:99px}
+.ponct-lbl{font-size:11px;color:var(--t2);font-weight:600;width:70px;flex-shrink:0}
+.ponct-cnt{font-size:11px;color:var(--t3);width:28px;text-align:right;font-variant-numeric:tabular-nums}
+.ponct-pct{font-size:11px;color:var(--t3);width:36px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── Refresh button ─────────────────────── */
+.btn-refresh{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:13px;
+  background:rgba(10,132,255,.12);border:1px solid rgba(10,132,255,.25);
+  border-radius:14px;color:var(--blue);font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .15s;margin-top:6px;
+}
+.btn-refresh:active{background:rgba(10,132,255,.2);transform:scale(.98)}
+
+/* ── Toast ─────────────────────────────── */
+.toast{
+  position:fixed;bottom:calc(var(--safe-bot) + 80px);left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(28,28,30,.92);border:1px solid var(--bd2);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;
+  color:var(--t1);z-index:200;opacity:0;transition:all .25s;pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Orbs -->
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-ico">🚛</div>
+    <div>
+      <div class="hdr-title">TruckFlow</div>
+      <div class="hdr-sub" id="hdrDate">Chargement…</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-dot" id="liveDot"></div>
+    <div class="hdr-time" id="hdrTime">--:--</div>
+  </div>
+</header>
+
+<!-- Scroll area -->
+<div class="scroll">
+
+  <!-- ── TAB: Dashboard ── -->
+  <div class="panel on" id="tab-dash">
+    <div class="sec-lbl">Vue d'ensemble</div>
+
+    <!-- KPI cards 2×2 -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card blue"><span class="kpi-ico">📦</span><div class="kpi-val" id="k-livs">—</div><div class="kpi-lbl">Livraisons</div></div>
+      <div class="kpi-card amber"><span class="kpi-ico">🚚</span><div class="kpi-val" id="k-trucks">—</div><div class="kpi-lbl">Camions</div></div>
+      <div class="kpi-card teal"><span class="kpi-ico">⏳</span><div class="kpi-val" id="k-encours">—</div><div class="kpi-lbl">En cours</div></div>
+      <div class="kpi-card green"><span class="kpi-ico">✅</span><div class="kpi-val" id="k-done">—</div><div class="kpi-lbl">Terminés</div></div>
+    </div>
+
+    <!-- Progress camions -->
+    <div class="gc" style="margin-bottom:10px">
+      <div class="prog-wrap">
+        <div class="prog-lbl">
+          <span class="prog-text">Progression camions</span>
+          <span class="prog-pct" id="progPct">0%</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Ponctualité -->
+    <div class="sec-lbl">Ponctualité</div>
+    <div class="gc" style="margin-bottom:10px">
+      <div id="ponctRows"><div class="empty-state" style="padding:24px"><div class="empty-sub">Aucune donnée</div></div></div>
+    </div>
+
+    <!-- KPI livraisons SGP/SWM -->
+    <div class="sec-lbl">Avancement livraisons</div>
+    <div class="gc" style="margin-bottom:10px">
+      <div id="livAdvRows"></div>
+    </div>
+
+    <button class="btn-refresh" onclick="loadData();showToast('Données actualisées ✓')">↻ Actualiser</button>
+    <div style="height:8px"></div>
+  </div>
+
+  <!-- ── TAB: Camions ── -->
+  <div class="panel" id="tab-cam">
+    <div class="sec-lbl" id="camLabel">Camions</div>
+    <!-- Filter chips -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="camFilters">
+      <button class="truck-badge bg-wait on" onclick="setCamFilter('')" id="cf-all">Tous</button>
+      <button class="truck-badge bg-arr" onclick="setCamFilter('arr')" id="cf-arr">Arrivé</button>
+      <button class="truck-badge bg-quai" onclick="setCamFilter('quai')" id="cf-quai">À quai</button>
+      <button class="truck-badge bg-chg" onclick="setCamFilter('chg')" id="cf-chg">Chargement</button>
+      <button class="truck-badge bg-dep" onclick="setCamFilter('dep')" id="cf-dep">Parti</button>
+    </div>
+    <div class="gc">
+      <div id="truckList"></div>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+
+  <!-- ── TAB: Planning ── -->
+  <div class="panel" id="tab-plan">
+    <div class="sec-lbl">Planning du jour</div>
+    <div class="gc">
+      <div class="timeline-wrap" id="timelineRows"></div>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+
+  <!-- ── TAB: Stats ── -->
+  <div class="panel" id="tab-stats">
+    <div class="sec-lbl">Transporteurs</div>
+    <div class="gc" style="margin-bottom:12px">
+      <div id="carrierRows"></div>
+    </div>
+    <div class="sec-lbl">Quais actifs</div>
+    <div class="gc" style="margin-bottom:10px">
+      <div id="quaiRows"></div>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+
+</div><!-- /scroll -->
+
+<!-- Bottom Nav -->
+<nav class="nav">
+  <button class="nav-btn on" id="nb-dash" onclick="showTab('dash')">
+    <span class="nav-ico">📊</span>Dashboard
+  </button>
+  <button class="nav-btn" id="nb-cam" onclick="showTab('cam')">
+    <span class="nav-ico">🚚</span>Camions
+  </button>
+  <button class="nav-btn" id="nb-plan" onclick="showTab('plan')">
+    <span class="nav-ico">🗓</span>Planning
+  </button>
+  <button class="nav-btn" id="nb-stats" onclick="showTab('stats')">
+    <span class="nav-ico">📈</span>Stats
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+var trucks = [];
+var timestamps = {};
+var deliveries = [];
+var completed = [];
+var camFilter = '';
+var _currentTab = 'dash';
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+function fmt2(n){ return String(n).padStart(2,'0'); }
+function fmtTime(iso){
+  if(!iso) return '--:--';
+  var d = new Date(iso);
+  return fmt2(d.getHours())+':'+fmt2(d.getMinutes());
+}
+function today(){
+  var d = new Date();
+  return d.getFullYear()+'-'+fmt2(d.getMonth()+1)+'-'+fmt2(d.getDate());
+}
+
+function getTruckStatus(t, ts){
+  if(!ts) return 'wait';
+  if(ts.dep) return 'dep';
+  if(ts.chg) return 'chg';
+  if(ts.quai) return 'quai';
+  if(ts.arr) return 'arr';
+  return 'wait';
+}
+
+function getStatusLabel(s){
+  return {wait:'En attente',arr:'Arrivé',quai:'À quai',chg:'Chargement',dep:'Parti'}[s]||s;
+}
+
+function getPonctBadge(t, ts){
+  if(!t.creneau || !ts || !ts.arr) return null;
+  var parts = t.creneau.split('-');
+  if(!parts.length) return null;
+  var p = parts[0].trim().split(':');
+  if(p.length < 2) return null;
+  var planned = new Date(); planned.setHours(+p[0], +p[1], 0, 0);
+  var actual = new Date(ts.arr);
+  var diff = Math.round((actual - planned) / 60000);
+  if(diff <= 0) return {lbl:'À l\'heure', cls:'bg-dep', diff:diff};
+  if(diff <= 15) return {lbl:'+'+diff+'min', cls:'bg-arr', diff:diff};
+  return {lbl:'+'+diff+'min RETARD', cls:'bg-late', diff:diff};
+}
+
+function creToMin(cren){
+  if(!cren) return 9999;
+  var p = cren.split('-')[0].trim().split(':');
+  return +p[0]*60+(+p[1]||0);
+}
+
+function showToast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 2000);
+}
+
+// ─── Load data from localStorage ──────────────────────────────────────────
+function loadData(){
+  try{
+    var _t = localStorage.getItem('th10_trucks');
+    trucks = _t ? JSON.parse(_t) : [];
+  }catch(e){ trucks = []; }
+  try{
+    var _ts = localStorage.getItem('th10_ts');
+    timestamps = _ts ? JSON.parse(_ts) : {};
+  }catch(e){ timestamps = {}; }
+  try{
+    var _d = localStorage.getItem('th10_deliveries');
+    deliveries = _d ? JSON.parse(_d) : [];
+  }catch(e){ deliveries = []; }
+  try{
+    var _c = localStorage.getItem('tf_completed');
+    completed = _c ? JSON.parse(_c) : [];
+  }catch(e){ completed = []; }
+
+  renderAll();
+}
+
+function renderAll(){
+  renderHeader();
+  renderDash();
+  renderTrucks();
+  renderPlanning();
+  renderStats();
+}
+
+// ─── Header ────────────────────────────────────────────────────────────────
+function renderHeader(){
+  var now = new Date();
+  var days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var months = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  document.getElementById('hdrDate').textContent =
+    days[now.getDay()]+' '+now.getDate()+' '+months[now.getMonth()];
+  document.getElementById('hdrTime').textContent =
+    fmt2(now.getHours())+':'+fmt2(now.getMinutes());
+  var hasData = trucks.length > 0;
+  document.getElementById('liveDot').style.background = hasData ? 'var(--green)' : 'var(--amber)';
+  document.getElementById('liveDot').style.boxShadow = hasData
+    ? '0 0 6px var(--green)' : '0 0 6px var(--amber)';
+}
+
+// ─── Dashboard ─────────────────────────────────────────────────────────────
+function renderDash(){
+  var tod = today();
+  var todTrucks = trucks.filter(function(t){ return t.date === tod; });
+  if(!todTrucks.length) todTrucks = trucks; // fallback: all
+
+  var totalLivs = deliveries.length;
+  var totalCam = todTrucks.length;
+  var enCours = todTrucks.filter(function(t){
+    var ts = timestamps[t.id]||{};
+    return (ts.arr||ts.quai||ts.chg) && !ts.dep;
+  }).length;
+  var done = todTrucks.filter(function(t){
+    var ts = timestamps[t.id]||{};
+    return !!ts.dep;
+  }).length;
+
+  document.getElementById('k-livs').textContent = totalLivs||0;
+  document.getElementById('k-trucks').textContent = totalCam||0;
+  document.getElementById('k-encours').textContent = enCours||0;
+  document.getElementById('k-done').textContent = done||0;
+
+  // Progress
+  var pct = totalCam ? Math.round(done/totalCam*100) : 0;
+  document.getElementById('progPct').textContent = pct+'%';
+  document.getElementById('progFill').style.width = pct+'%';
+
+  // Ponctualité
+  var ponctData = {ok:0, retard:0, avant:0};
+  todTrucks.forEach(function(t){
+    var ts = timestamps[t.id]||{};
+    if(!ts.arr || !t.creneau) return;
+    var pb = getPonctBadge(t, ts);
+    if(!pb) return;
+    if(pb.diff <= 0) ponctData.avant++;
+    else if(pb.diff <= 15) ponctData.ok++;
+    else ponctData.retard++;
+  });
+  var total = ponctData.ok + ponctData.retard + ponctData.avant;
+  var ponctRows = '';
+  var ponctItems = [
+    {lbl:'À l\'heure', n:ponctData.avant, color:'var(--green)'},
+    {lbl:'≤15 min', n:ponctData.ok, color:'var(--amber)'},
+    {lbl:'Retard', n:ponctData.retard, color:'var(--red)'},
+  ];
+  if(total > 0){
+    ponctItems.forEach(function(p){
+      var pct = Math.round(p.n/total*100);
+      ponctRows += '<div class="ponct-row">'+
+        '<div class="ponct-lbl">'+p.lbl+'</div>'+
+        '<div class="ponct-bar-wrap"><div class="ponct-bar" style="width:'+pct+'%;background:'+p.color+'"></div></div>'+
+        '<div class="ponct-cnt">'+p.n+'</div>'+
+        '<div class="ponct-pct">'+pct+'%</div>'+
+        '</div>';
+    });
+  } else {
+    ponctRows = '<div class="empty-state" style="padding:20px"><div class="empty-sub">Aucun camion arrivé</div></div>';
+  }
+  document.getElementById('ponctRows').innerHTML = ponctRows;
+
+  // Avancement livraisons
+  var spC=0,spB=0,spA=0,wmC=0,wmB=0;
+  deliveries.forEach(function(d){
+    if(d.sp==='C') spC++; else if(d.sp==='B') spB++; else spA++;
+    if(d.wm==='C') wmC++; else if(d.wm==='B') wmB++;
+  });
+  var tot = deliveries.length||1;
+  var advRows = [
+    {lbl:'SGP Terminé', n:spC, color:'var(--green)', ico:'✅'},
+    {lbl:'SGP En cours', n:spB, color:'var(--amber)', ico:'🔄'},
+    {lbl:'SWM Terminé', n:wmC, color:'var(--teal)', ico:'✔️'},
+  ];
+  var advHtml = advRows.map(function(r){
+    var pct = Math.round(r.n/tot*100);
+    return '<div class="stat-row">'+
+      '<div class="stat-ico">'+r.ico+'</div>'+
+      '<div class="stat-info">'+
+        '<div class="stat-name">'+r.lbl+'</div>'+
+        '<div class="stat-track"><div class="stat-fill" style="width:'+pct+'%;background:'+r.color+'"></div></div>'+
+      '</div>'+
+      '<div class="stat-val">'+r.n+'</div>'+
+      '</div>';
+  }).join('');
+  document.getElementById('livAdvRows').innerHTML = advHtml||
+    '<div class="empty-state" style="padding:20px"><div class="empty-sub">Aucune livraison</div></div>';
+}
+
+// ─── Trucks ────────────────────────────────────────────────────────────────
+var camFilter = '';
+function setCamFilter(f){
+  camFilter = f;
+  ['all','arr','quai','chg','dep'].forEach(function(k){
+    var el = document.getElementById('cf-'+k);
+    if(el) el.classList.toggle('on', (k==='all' && f==='') || k===f);
+  });
+  renderTrucks();
+}
+
+function renderTrucks(){
+  var tod = today();
+  var list = trucks.filter(function(t){ return t.date === tod; });
+  if(!list.length) list = trucks;
+
+  // sort by creneau
+  list = list.slice().sort(function(a,b){ return creToMin(a.creneau) - creToMin(b.creneau); });
+
+  // filter by status
+  if(camFilter){
+    list = list.filter(function(t){
+      return getTruckStatus(t, timestamps[t.id]||{}) === camFilter;
+    });
+  }
+
+  document.getElementById('camLabel').textContent = 'Camions ('+list.length+')';
+
+  if(!list.length){
+    document.getElementById('truckList').innerHTML =
+      '<div class="empty-state"><div class="empty-ico">🚛</div>'+
+      '<div class="empty-title">Aucun camion</div>'+
+      '<div class="empty-sub">'+(trucks.length?'Aucun résultat pour ce filtre':'Importez le VL06O pour commencer')+'</div></div>';
+    return;
+  }
+
+  var html = list.map(function(t){
+    var ts = timestamps[t.id]||{};
+    var status = getTruckStatus(t, ts);
+    var dotColor = {wait:'var(--t3)',arr:'var(--amber)',quai:'var(--blue)',chg:'var(--teal)',dep:'var(--green)'}[status];
+    var badgeCls = {wait:'bg-wait',arr:'bg-arr',quai:'bg-quai',chg:'bg-chg',dep:'bg-dep'}[status];
+    var time = ts.dep ? fmtTime(ts.dep) : ts.chg ? fmtTime(ts.chg) : ts.quai ? fmtTime(ts.quai) : ts.arr ? fmtTime(ts.arr) : '';
+    var timeLabel = ts.dep ? 'Départ '+time : ts.chg ? 'Chgt '+time : ts.quai ? 'Quai '+time : ts.arr ? 'Arr. '+time : '';
+    var transLabel = [t.transporteur||'', t.quai ? 'Q'+t.quai : ''].filter(Boolean).join(' · ');
+    var nDelivs = (t.deliveries||[]).length;
+
+    // Check if late
+    var pb = getPonctBadge(t, ts);
+    var isLate = pb && pb.diff > 15;
+    if(isLate) badgeCls = 'bg-late';
+
+    return '<div class="truck-item">'+
+      '<div class="truck-status-dot" style="color:'+dotColor+';background:'+dotColor+'"></div>'+
+      '<div class="truck-main">'+
+        '<div class="truck-id">'+(t.id||'?')+' <span style="font-size:11px;font-weight:500;color:var(--t3)">'+nDelivs+' liv.</span></div>'+
+        '<div class="truck-meta">'+(transLabel||'—')+'</div>'+
+      '</div>'+
+      '<div class="truck-right">'+
+        '<span class="truck-badge '+badgeCls+'">'+getStatusLabel(status)+'</span>'+
+        (timeLabel?'<div class="truck-time">'+timeLabel+'</div>':'')+
+        (t.creneau?'<div class="truck-creneau">⏰ '+t.creneau+'</div>':'')+
+      '</div>'+
+      '</div>';
+  }).join('');
+
+  document.getElementById('truckList').innerHTML = html;
+}
+
+// ─── Planning ──────────────────────────────────────────────────────────────
+function renderPlanning(){
+  var tod = today();
+  var list = trucks.filter(function(t){ return t.date === tod; });
+  if(!list.length) list = trucks;
+
+  // Group by creneau hour slot
+  var slots = {};
+  for(var h = 5; h <= 21; h++){
+    slots[h] = [];
+  }
+  list.forEach(function(t){
+    if(!t.creneau) return;
+    var p = t.creneau.split('-')[0].trim().split(':');
+    var hr = +p[0];
+    if(hr>=5 && hr<=21) slots[hr].push(t);
+  });
+
+  var usedHours = [];
+  for(var h = 5; h <= 21; h++){
+    if(slots[h].length) usedHours.push(h);
+  }
+
+  if(!usedHours.length){
+    document.getElementById('timelineRows').innerHTML =
+      '<div class="empty-state"><div class="empty-ico">🗓</div>'+
+      '<div class="empty-title">Aucun créneau</div>'+
+      '<div class="empty-sub">Assignez des créneaux aux camions</div></div>';
+    return;
+  }
+
+  var html = usedHours.map(function(h){
+    var truckList = slots[h];
+    var hasTs = truckList.some(function(t){ return !!(timestamps[t.id]||{}).arr; });
+    var chipsHtml = truckList.map(function(t){
+      var ts = timestamps[t.id]||{};
+      var status = getTruckStatus(t, ts);
+      var dotColor = {wait:'var(--t3)',arr:'var(--amber)',quai:'var(--blue)',chg:'var(--teal)',dep:'var(--green)'}[status];
+      var chipCls = status === 'dep' ? 's-dep' : status === 'arr' ? 's-arr' : '';
+      return '<div class="tl-truck-chip '+chipCls+'">'+
+        '<div class="tl-tc-dot" style="background:'+dotColor+'"></div>'+
+        '<div class="tl-tc-id">'+(t.id||'?')+'</div>'+
+        '<div class="tl-tc-info">'+(t.transporteur||'')+(t.quai?' · Q'+t.quai:'')+' · '+(t.creneau||'')+'</div>'+
+        '</div>';
+    }).join('');
+    return '<div class="tl-slot">'+
+      '<div class="tl-hour">'+fmt2(h)+'h</div>'+
+      '<div class="tl-line'+(hasTs?' has-truck':'')+'"></div>'+
+      '<div class="tl-trucks">'+chipsHtml+'</div>'+
+      '</div>';
+  }).join('');
+
+  document.getElementById('timelineRows').innerHTML = html;
+}
+
+// ─── Stats ─────────────────────────────────────────────────────────────────
+function renderStats(){
+  var tod = today();
+  var list = trucks.filter(function(t){ return t.date === tod; });
+  if(!list.length) list = trucks;
+
+  // Carriers
+  var carriers = {};
+  list.forEach(function(t){
+    var c = t.transporteur || 'Inconnu';
+    if(!carriers[c]) carriers[c] = {n:0, done:0};
+    carriers[c].n++;
+    if((timestamps[t.id]||{}).dep) carriers[c].done++;
+  });
+  var carrierArr = Object.entries(carriers).sort(function(a,b){ return b[1].n - a[1].n; });
+  var maxCar = carrierArr.length ? carrierArr[0][1].n : 1;
+
+  var carHtml = carrierArr.slice(0,8).map(function(entry){
+    var c = entry[0], d = entry[1];
+    var pct = Math.round(d.done/d.n*100);
+    var fillColor = pct === 100 ? 'var(--green)' : pct > 50 ? 'var(--teal)' : 'var(--blue)';
+    return '<div class="stat-row">'+
+      '<div class="stat-ico">🚛</div>'+
+      '<div class="stat-info">'+
+        '<div class="stat-name">'+c+'</div>'+
+        '<div class="stat-track"><div class="stat-fill" style="width:'+Math.round(d.n/maxCar*100)+'%;background:'+fillColor+'"></div></div>'+
+      '</div>'+
+      '<div class="stat-val">'+d.n+'</div>'+
+      '</div>';
+  }).join('');
+
+  document.getElementById('carrierRows').innerHTML = carHtml||
+    '<div class="empty-state" style="padding:20px"><div class="empty-sub">Aucun transporteur</div></div>';
+
+  // Quais
+  var quais = {};
+  list.forEach(function(t){
+    if(!t.quai) return;
+    var q = 'Q'+t.quai;
+    if(!quais[q]) quais[q] = {n:0, done:0};
+    quais[q].n++;
+    if((timestamps[t.id]||{}).dep) quais[q].done++;
+  });
+  var quaiArr = Object.entries(quais).sort(function(a,b){ return a[0].localeCompare(b[0]); });
+
+  var quaiHtml = quaiArr.map(function(entry){
+    var q = entry[0], d = entry[1];
+    var pct = Math.round(d.done/d.n*100);
+    return '<div class="stat-row">'+
+      '<div class="stat-ico">🏭</div>'+
+      '<div class="stat-info">'+
+        '<div class="stat-name">'+q+' — '+d.n+' camion'+(d.n>1?'s':'')+'</div>'+
+        '<div class="stat-track"><div class="stat-fill" style="width:'+pct+'%;background:var(--blue)"></div></div>'+
+      '</div>'+
+      '<div class="stat-val">'+pct+'%</div>'+
+      '</div>';
+  }).join('');
+
+  document.getElementById('quaiRows').innerHTML = quaiHtml||
+    '<div class="empty-state" style="padding:20px"><div class="empty-sub">Aucun quai assigné</div></div>';
+}
+
+// ─── Tab navigation ────────────────────────────────────────────────────────
+function showTab(name){
+  _currentTab = name;
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('on'); });
+  var panel = document.getElementById('tab-'+name);
+  var btn = document.getElementById('nb-'+name);
+  if(panel) panel.classList.add('on');
+  if(btn) btn.classList.add('on');
+  // Scroll to top
+  document.querySelector('.scroll').scrollTop = 0;
+}
+
+// ─── Clock tick ───────────────────────────────────────────────────────────
+function tick(){
+  var now = new Date();
+  document.getElementById('hdrTime').textContent =
+    fmt2(now.getHours())+':'+fmt2(now.getMinutes());
+}
+
+// ─── Listen for storage changes from main app ─────────────────────────────
+window.addEventListener('storage', function(e){
+  if(e.key && (e.key.startsWith('th10_') || e.key.startsWith('tf_'))){
+    loadData();
+    showToast('Données mises à jour ↻');
+  }
+});
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+loadData();
+setInterval(tick, 10000);
+setInterval(function(){
+  if(_currentTab === 'dash') renderDash();
+  if(_currentTab === 'cam') renderTrucks();
+}, 30000);
+</script>
+</body>
+</html>
