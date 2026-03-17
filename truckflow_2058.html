@@ -3666,6 +3666,7 @@ function autoGenTrucks(){
 // ─── renderAll ────────────────────────────────────────────────────────────
 function renderAll(){
   renderWelcome();
+  renderArchive();
   if(!APP.deliveries||!APP.deliveries.length) return;
   renderExportToggle();
   renderKPIs();
@@ -3681,7 +3682,6 @@ function renderAll(){
   renderQuai();
   renderPlanning();
   renderStats();
-  renderArchive();
   try{archiveSession();}catch(e){}
 }
 
@@ -7286,7 +7286,7 @@ function renderArchive(){
   var el=document.getElementById('archiveContent');
   if(!el) return;
   if(!_completedTrucks.length){
-    el.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">\uD83D\uDCC1</div><p>Aucun camion archiv\u00e9.<br>Les camions termin\u00e9s (4 timestamps + livraisons C) seront archiv\u00e9s ici pendant 10 jours.</p></div>';
+    el.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">\uD83D\uDCC1</div><p>Aucun camion archiv\u00e9.<br>Les camions marqu\u00e9s "Parti" sont archiv\u00e9s ici automatiquement (10 jours de r\u00e9tention).</p></div>';
     return;
   }
   // Group by date
