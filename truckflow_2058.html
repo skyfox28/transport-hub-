@@ -8211,6 +8211,46 @@ function assignQuai(tid,quaiNum){
   saveQ(tid,quaiNum);
   if(tval){stampM(tid,'quai',tval);}else{stamp(tid,'quai');}
 }
+function ringColor(m){return m<30?'#4ade80':m<60?'#fbbf24':m<90?'#fb923c':'#f87171';}
+function makeRing(elMin,refMin){
+  var pct=Math.min(elMin/refMin,1);
+  var r=20,cx=26,cy=26,sw=4.5;
+  var circ=2*Math.PI*r;
+  var dash=(pct*circ).toFixed(1)+' '+((1-pct)*circ).toFixed(1);
+  var col=ringColor(elMin);
+  var lbl=fm(elMin);
+  var critical=elMin>=90;
+  return '<div style="position:relative;width:52px;height:52px;flex-shrink:0">'
+    +'<svg width="52" height="52" style="transform:rotate(-90deg)">'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="'+sw+'"/>'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-dasharray="'+dash+'" stroke-linecap="round"'+(critical?' style="filter:drop-shadow(0 0 4px '+col+')"':'')+'/>'
+    +'</svg>'
+    +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:'+col+';text-align:center;line-height:1.1">'+lbl+'</div>'
+    +'</div>';
+}
+function timeWidget(t,ts){
+  var s=getStatus(ts);
+  if(s==='w'||s==='p')return '';
+  var now=Date.now();
+  var stageStarts={a:ts.arr,d:ts.quai,l:ts.chg,lo:ts.fin_chg};
+  var stageStart=stageStarts[s];
+  if(!stageStart)return '';
+  var stEl=Math.round((now-new Date(stageStart))/60000);
+  var totEl=ts.arr?Math.round((now-new Date(ts.arr))/60000):0;
+  var stLbl=s==='a'?'Sur site':s==='d'?'À quai':s==='l'?'En chargement':'Att. départ';
+  var col=ringColor(stEl);
+  var critical=stEl>=90;
+  var ring=makeRing(stEl,120);
+  var anim=critical?' style="animation:blink 1.2s infinite"':'';
+  return '<div style="display:flex;align-items:center;gap:10px;margin:8px 0;padding:9px 10px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.07)'+(critical?';border-color:'+col+'40':'')+'">'
+    +ring
+    +'<div style="flex:1;min-width:0">'
+    +'<div'+anim+' style="font-size:13px;font-weight:900;color:'+col+'">'+stLbl+' — '+fm(stEl)+(critical?' ⚠️':'')+' </div>'
+    +(s!=='a'&&totEl?'<div style="font-size:9px;color:var(--t2);margin-top:2px">🚛 Arrivé il y a '+fm(totEl)+'</div>':'')
+    +(s==='d'||s==='a'?'<div style="font-size:9px;color:var(--t3);margin-top:1px">Réf. 2h = anneau complet</div>':'')
+    +'</div>'
+    +'</div>';
+}
 function parseCren(c){
   if(!c)return null;
   var m=c.match(/(\d{1,2})[h:](\d{0,2})\s*[-–]\s*(\d{1,2})[h:](\d{0,2})/i);
@@ -8258,11 +8298,7 @@ function makeCard(t,ts,quai,prio){
   else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin chargement';}
   else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Enregistrer départ';}
   var now=Date.now();
-  var chr='';
-  if(s==='l'&&ts.chg){var el=Math.round((now-new Date(ts.chg))/60000);chr='<div class="chr'+(el>60?' hot':'')+'">'+( el>60?'⚠️ ':'⏱ ')+'Chargement '+fm(el)+(el>60?' — Dépassement !':'')+'</div>';}
-  else if(s==='lo'&&ts.chg&&ts.fin_chg){var ld=Math.round((new Date(ts.fin_chg)-new Date(ts.chg))/60000);var wa=Math.round((now-new Date(ts.fin_chg))/60000);chr='<div class="chr ok">✅ Chargé en '+fm(ld)+' · ⏳ Att. départ '+fm(wa)+'</div>';}
-  else if(s==='d'&&ts.quai){var wa2=Math.round((now-new Date(ts.quai))/60000);chr='<div class="chr">🔄 À quai depuis '+fm(wa2)+'</div>';}
-  else if(s==='a'&&ts.arr){var wa3=Math.round((now-new Date(ts.arr))/60000);chr='<div class="chr">🚛 Sur site depuis '+fm(wa3)+'</div>';}
+  var twg=timeWidget(t,ts);
   var nDel=(t.deliveries||[]).length;
   var tid=t.id;
   var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
@@ -8288,7 +8324,7 @@ function makeCard(t,ts,quai,prio){
     +'</div>'
     +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="tc-sub">'+(t.dest||t.itin||'—')+'</div>'
-    +prog+ab+chr
+    +prog+twg+ab
     +'</div>';
 }
 function render(){
@@ -8330,7 +8366,7 @@ function tick(){
 }
 tick();render();
 setInterval(tick,1000);
-setInterval(render,15000);
+setInterval(render,10000);
 window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key===LQ)render();});
   */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
 
