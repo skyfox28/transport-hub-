@@ -130,8 +130,6 @@ html.light .syn-view-toggle{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.
 html.light .syn-view-btn.on{background:rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 4px rgba(0,0,0,.08)}
 html.light .toast{background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(24px);border-color:rgba(255,255,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 32px rgba(0,0,0,.1);color:var(--t1)}
 html.light .undo-toast{background:rgba(255,255,255,.82);border-color:rgba(255,255,255,.5)}
-html.light .carrier-group-hdr{background:rgba(255,255,255,.7);border-color:rgba(0,0,0,.06)}
-html.light .carrier-group-hdr:hover{background:rgba(255,255,255,.85)}
 html.light .analysis-card{background:rgba(255,255,255,.7);border-color:rgba(255,255,255,.5)}
 html.light .btn-sm{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08);color:var(--t1);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
 html.light .btn-cancel{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
@@ -1013,12 +1011,6 @@ html.tv-mode body{overflow:auto}
 /* ── Fil alertes live ────────────────────────────────────────── */
 
 /* ── Regroupement transporteur ───────────────────────────────── */
-.carrier-group-hdr{display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(160,210,255,.04);backdrop-filter:blur(14px);border:1px solid rgba(160,210,255,.15);border-radius:16px;margin-bottom:6px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--glass-glow)}
-.carrier-group-hdr:hover{background:rgba(160,210,255,.08);box-shadow:var(--glass-glow-s)}
-.carrier-group-hdr .cg-name{font-size:13px;font-weight:800;color:var(--t1);flex:1}
-.carrier-group-hdr .cg-count{font-size:11px;color:var(--t2);font-weight:700}
-.carrier-group-hdr .cg-arrow{font-size:10px;color:var(--t3);transition:transform .2s}
-.carrier-group-hdr .cg-arrow.open{transform:rotate(90deg)}
 
 /* ── Comparatif mensuel ──────────────────────────────────────── */
 .monthly-chart{margin-top:12px}
@@ -1306,7 +1298,6 @@ html.tv-mode body{overflow:auto}
       <button class="btn-sm sort-urgency-btn" id="sortUrgBtn" onclick="toggleSortUrgency()">&#x26A0; Urgence</button>
       <button class="btn-sm" style="background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.25);color:var(--blue)" onclick="openAdvFilter()">&#128270; Filtres</button>
       <button class="btn-sm" style="background:rgba(94,92,230,.1);border-color:rgba(94,92,230,.25);color:var(--indigo)" onclick="openKanban()">&#128203; Kanban</button>
-      <button class="btn-sm" id="groupByBtn" style="background:rgba(255,159,10,.08);border-color:rgba(255,159,10,.2);color:var(--amber)" onclick="toggleGroupByCarrier()">&#128666; Grouper</button>
 
       <button class="btn-new" onclick="regenTrucks()">&#x21BB; Regenerer VL06O</button>
       <button class="btn-sm" onclick="var r=cleanCompletedTrucks();showToast(r?r+' camion(s) nettoye(s)':'Aucun camion termine')">&#128465; Nettoyer termines</button>
@@ -4696,7 +4687,6 @@ function init(){
       try{applyTruckStatusBorders();}catch(e){}
       try{addQuickStampButtons();}catch(e){}
       try{addETABadges();}catch(e){}
-      try{applyCarrierGrouping();}catch(e){}
     }
     updatePonctStats();
     renderSynPonct();
@@ -7021,8 +7011,6 @@ function enterFocusMode(truckId){
   document.querySelectorAll('.tc').forEach(function(c){
     c.style.display=c.dataset.truckId===truckId?'':'none';
   });
-  // Also hide carrier group headers
-  document.querySelectorAll('.carrier-group-hdr').forEach(function(h){h.style.display='none';});
   showToast('\uD83D\uDD0D Mode focus activ\u00e9');
 }
 function exitFocusMode(){
@@ -7030,7 +7018,6 @@ function exitFocusMode(){
   var bar=document.getElementById('focusBar');
   if(bar)bar.classList.remove('on');
   document.querySelectorAll('.tc').forEach(function(c){c.style.display='';});
-  document.querySelectorAll('.carrier-group-hdr').forEach(function(h){h.style.display='';});
   showToast('Mode focus d\u00e9sactiv\u00e9');
 }
 function toggleFocusPrompt(){
@@ -7360,50 +7347,6 @@ function renderArchive(){
   el.innerHTML=html;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ─── #10 REGROUPEMENT PAR TRANSPORTEUR ──────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
-var _groupByCarrier=false;
-try{_groupByCarrier=localStorage.getItem('tf_group_carrier')==='true';}catch(e){}
-function toggleGroupByCarrier(){
-  _groupByCarrier=!_groupByCarrier;
-  try{localStorage.setItem('tf_group_carrier',_groupByCarrier?'true':'false');}catch(e){}
-  var btn=document.getElementById('groupByBtn');
-  if(btn)btn.style.background=_groupByCarrier?'rgba(255,159,10,.25)':'rgba(255,159,10,.08)';
-  renderTrucks();
-  showToast(_groupByCarrier?'\uD83D\uDE9A Regroup\u00e9 par transporteur':'Liste normale');
-}
-function applyCarrierGrouping(){
-  if(!_groupByCarrier)return;
-  var container=document.getElementById('truckList');if(!container)return;
-  var cards=Array.from(container.querySelectorAll('.tc'));
-  if(!cards.length)return;
-  // Group by carrier
-  var groups={};
-  cards.forEach(function(c){
-    var tid=c.dataset.truckId;
-    var t=trucks.find(function(tr){return tr.id===tid;});
-    var carrier=t?(t.transporteur||t.itin||'Autre'):'Autre';
-    if(!groups[carrier])groups[carrier]=[];
-    groups[carrier].push(c);
-  });
-  while(container.firstChild)container.removeChild(container.firstChild);
-  var carriers=Object.keys(groups).sort();
-  carriers.forEach(function(carrier){
-    var hdr=document.createElement('div');hdr.className='carrier-group-hdr';
-    var count=groups[carrier].length;
-    hdr.innerHTML='<span class="cg-arrow open">\u25b6</span><span class="cg-name">\uD83D\uDE9A '+carrier+'</span><span class="cg-count">'+count+' camion'+(count>1?'s':'')+'</span>';
-    var wrap=document.createElement('div');wrap.style.marginBottom='12px';
-    hdr.addEventListener('click',function(){
-      var isOpen=wrap.style.display!=='none';
-      wrap.style.display=isOpen?'none':'';
-      hdr.querySelector('.cg-arrow').classList.toggle('open',!isOpen);
-    });
-    container.appendChild(hdr);
-    groups[carrier].forEach(function(c){wrap.appendChild(c);});
-    container.appendChild(wrap);
-  });
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #15 EXPORT PLANNING MURAL A3 ──────────────────────────────────────
@@ -7501,7 +7444,6 @@ renderAll=function(){
   try{applyTruckStatusBorders();}catch(e){console.warn('statusBorders:',e);}
   try{addQuickStampButtons();}catch(e){console.warn('quickStamp:',e);}
   try{addETABadges();}catch(e){console.warn('etaBadges:',e);}
-  try{applyCarrierGrouping();}catch(e){console.warn('carrierGroup:',e);}
   try{renderHealthScore();}catch(e){console.warn('healthScore:',e);}
   try{renderAvgWaitBadge();}catch(e){console.warn('avgWait:',e);}
   try{renderGoals();}catch(e){console.warn('goals:',e);}
@@ -7530,9 +7472,6 @@ trucks.forEach(function(t){
   _prevTruckComplete[t.id]=!!(ts.arr&&ts.quai&&ts.chg&&ts.dep);
 });
 
-// Init groupBy btn state
-var _gbBtn=document.getElementById('groupByBtn');
-if(_gbBtn&&_groupByCarrier)_gbBtn.style.background='rgba(255,159,10,.25)';
 
 init();
 patchRenderAllForSynView();
