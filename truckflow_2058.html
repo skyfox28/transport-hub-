@@ -1191,7 +1191,7 @@ html.tv-mode body{overflow:auto}
     <div class="hdr-group">
       <button class="btn-imp" style="color:var(--purple);border-color:rgba(155,109,255,.3)" onclick="exportSession()" title="Exporter session JSON">&#x2193; Partager</button>
       <button class="btn-imp" style="color:var(--green);border-color:rgba(45,202,114,.3)" onclick="exportExcel()" title="Exporter Excel">&#128196; Excel</button>
-      <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="window.print()" title="Imprimer en PDF">&#128424; PDF</button>
+      <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="generatePDFReport()" title="Rapport PDF journée">&#128203; Rapport</button>
       <button class="btn-imp" style="color:var(--orange);border-color:rgba(255,107,53,.3)" onclick="exportPlanningMural()" title="Planning mural A3">&#128200; Mural</button>
     </div>
     <div class="hdr-sep"></div>
@@ -1201,7 +1201,6 @@ html.tv-mode body{overflow:auto}
       <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="toggleTVMode()" id="tvBtn" title="Mode grand &eacute;cran">&#128250;</button>
       <button class="btn-imp" style="color:var(--t2);border-color:rgba(118,118,128,.3)" onclick="toggleHdrMore()" id="hdrMoreBtn" title="Plus d'outils">&#x22EF;</button>
       <div class="hdr-more-menu" id="hdrMoreMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:6px;min-width:180px;z-index:150;box-shadow:var(--sh)">
-        <button class="hdr-more-item" onclick="generatePDFReport();toggleHdrMore()">&#128203; Rapport PDF</button>
         <button class="hdr-more-item" onclick="openActivityLog();toggleHdrMore()">&#128221; Journal d'activit&eacute;</button>
         <button class="hdr-more-item" onclick="openAlertConfig();toggleHdrMore()">&#9881; R&eacute;glages alertes</button>
         <div style="height:1px;background:var(--bd2);margin:4px 0"></div>
@@ -5627,207 +5626,220 @@ function generatePDFReport(){
   setTimeout(function(){ _buildPDFReport(); },100);
 }
 function _buildPDFReport(){
-  var today=new Date();var dateStr=today.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var today=new Date();
+  var dateStr=today.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var heureGen=today.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   var todayISO=today.toISOString().slice(0,10);
+  // Include archived completed trucks for today too
   var dayTrucks=trucks.filter(function(t){return t.date===todayISO;});
-  if(!dayTrucks.length){showToast('Aucun camion pour aujourd\u2019hui ('+todayISO+')');return;}
-  // Compute today-only stats
+  var dayCompleted=(_completedTrucks||[]).filter(function(c){return c.date===todayISO;});
+  var allDay=dayTrucks.concat(dayCompleted.map(function(c){
+    return {id:c.id,transporteur:c.transporteur,itin:c.itin,creneau:c.creneau,date:c.date,deliveries:c.deliveries,_ts:c.timestamps,_ponct:c.ponctualite,_archived:true};
+  }));
+  if(!allDay.length){showToast('Aucun camion pour aujourd\u2019hui ('+todayISO+')');return;}
   var now=Date.now();
-  var pH=0,pA=0,pR=0,pW=0;
-  dayTrucks.forEach(function(t){
-    var ts=timestamps[t.id]||{};var p=getPonctualite(t,ts,now);
+  function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+  // Séparation : partis / en cours / en attente
+  var trucksPartis=[],trucksEnCours=[],trucksAttente=[];
+  allDay.forEach(function(t){
+    var ts=t._ts||(timestamps[t.id]||{});
+    if(ts.dep) trucksPartis.push({t:t,ts:ts});
+    else if(ts.arr||ts.quai||ts.chg) trucksEnCours.push({t:t,ts:ts});
+    else trucksAttente.push({t:t,ts:ts});
+  });
+  // Ponctualité (partis uniquement — réels)
+  var pH=0,pA=0,pR=0;
+  trucksPartis.forEach(function(x){
+    var p=x.t._ponct||getPonctualite(x.t,x.ts,now);
     if(p.status==='heure')pH++;else if(p.status==='avance')pA++;
     else if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
-    else pW++;
   });
-  var nComp=0,nAct=0,nPend=0;
-  dayTrucks.forEach(function(t){
-    var ts=timestamps[t.id]||{};
-    if(ts.arr&&ts.quai&&ts.chg&&ts.dep)nComp++;else if(ts.arr||ts.quai||ts.chg)nAct++;else nPend++;
+  // Volumes : livraisons liées aux camions partis
+  var depLivIds=new Set();
+  trucksPartis.forEach(function(x){(x.t.deliveries||[]).forEach(function(id){depLivIds.add(id);});});
+  var allLivIds=new Set();
+  allDay.forEach(function(t){(t.deliveries||[]).forEach(function(id){allLivIds.add(id);});});
+  var volDep={pal:0,cs:0,cp:0},volTotal={pal:0,cs:0,cp:0},volRest={pal:0,cs:0,cp:0};
+  (APP.deliveries||[]).forEach(function(d){
+    if(!allLivIds.has(d.id))return;
+    volTotal.pal+=(d.palSilo||0);volTotal.cs+=(d.colisSilo||0);volTotal.cp+=(d.colisPick||0);
+    if(depLivIds.has(d.id)){volDep.pal+=(d.palSilo||0);volDep.cs+=(d.colisSilo||0);volDep.cp+=(d.colisPick||0);}
   });
-  // Today-only timing intervals
-  var stepsDef=[
-    {key:'wait',from:'arr',to:'quai',label:'Arriv\u00e9e \u2192 Mise \u00e0 quai'},
-    {key:'prep',from:'quai',to:'chg',label:'Mise \u00e0 quai \u2192 Chargement'},
-    {key:'load',from:'chg',to:'dep',label:'Chargement \u2192 D\u00e9part'},
-    {key:'total',from:'arr',to:'dep',label:'Arriv\u00e9e \u2192 D\u00e9part'}
-  ];
-  var rIntervals={};
-  stepsDef.forEach(function(sd){
-    var vals=[];
-    dayTrucks.forEach(function(t){
-      var ts=timestamps[t.id]||{};
-      if(ts[sd.from]&&ts[sd.to]){
-        var m=Math.round((new Date(ts[sd.to]).getTime()-new Date(ts[sd.from]).getTime())/60000);
-        if(m>=0)vals.push(m);
+  (APP.articles||[]).forEach(function(a){
+    if(!allLivIds.has(a.liv))return;
+    if((a.swm||a.wm||'')!=='C'){volRest.pal+=(a.pal||0);volRest.cs+=(a.silo||0);}
+    if(a.vp!=='C')volRest.cp+=(a.pick||0);
+  });
+  var nTotal=allDay.length,nPart=trucksPartis.length,nCours=trucksEnCours.length,nAtt=trucksAttente.length;
+  // Open window
+  var w=window.open('','_blank','width=900,height=750');
+  if(!w){showToast('Popup bloqu\u00e9 \u2014 autorisez les popups');return;}
+  var S='<style>'+
+    'body{font-family:Arial,sans-serif;color:#222;padding:20px;max-width:820px;margin:0 auto;font-size:12px}'+
+    'h1{font-size:20px;margin:0 0 2px}h2{font-size:13px;font-weight:700;margin:18px 0 6px;padding:4px 8px;background:#f0f0f0;border-left:4px solid #333}'+
+    'table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}'+
+    'th{background:#e0e0e0;padding:5px 7px;text-align:left;font-weight:700;border:1px solid #bbb}'+
+    'td{padding:4px 7px;border:1px solid #ddd;vertical-align:middle}'+
+    'tr:nth-child(even) td{background:#fafafa}'+
+    '.krow{display:grid;gap:8px;margin:8px 0}'+
+    '.kbox{text-align:center;padding:10px 8px;border:2px solid #ddd;border-radius:8px}'+
+    '.kv{font-size:26px;font-weight:900;line-height:1}.kl{font-size:10px;color:#666;margin-top:2px}'+
+    '.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700}'+
+    '.green{color:#2a9d5c}.red{color:#d32f2f}.blue{color:#1565c0}.amber{color:#e65100}.grey{color:#666}'+
+    '.bg-green{background:#e8f5e9;color:#1b5e20}.bg-red{background:#ffebee;color:#b71c1c}'+
+    '.bg-amber{background:#fff3e0;color:#e65100}.bg-blue{background:#e3f2fd;color:#0d47a1}'+
+    '.bar-wrap{background:#eee;border-radius:4px;height:10px;overflow:hidden;margin-top:3px}'+
+    '.bar-fill{height:100%;border-radius:4px}'+
+    '@media print{body{padding:10px}button{display:none!important}.no-print{display:none!important}}'+
+    '</style>';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport TruckFlow \u2014 '+todayISO+'</title>'+S+'</head><body>';
+  // En-tête
+  html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'+
+    '<div><h1>\uD83D\uDE9B Rapport de journ\u00e9e \u2014 TruckFlow</h1>'+
+    '<div style="color:#666;font-size:12px">'+dateStr.charAt(0).toUpperCase()+dateStr.slice(1)+'</div></div>'+
+    '<div style="text-align:right;font-size:11px;color:#888">G\u00e9n\u00e9r\u00e9 \u00e0 '+heureGen+'</div></div>';
+  // KPIs résumé
+  html+='<div class="krow" style="grid-template-columns:repeat(5,1fr)">'+
+    '<div class="kbox" style="border-color:#1565c0"><div class="kv blue">'+nTotal+'</div><div class="kl">Total camions</div></div>'+
+    '<div class="kbox" style="border-color:#2a9d5c"><div class="kv green">'+nPart+'</div><div class="kl">\uD83D\uDE80 Partis</div></div>'+
+    '<div class="kbox" style="border-color:#e65100"><div class="kv amber">'+nCours+'</div><div class="kl">\u23F3 En cours</div></div>'+
+    '<div class="kbox" style="border-color:#999"><div class="kv grey">'+nAtt+'</div><div class="kl">\uD83D\uDD52 En attente</div></div>'+
+    '<div class="kbox" style="border-color:'+(nPart?'#1565c0':'#bbb')+'"><div class="kv blue">'+(nPart?Math.round(nPart/nTotal*100):0)+'%</div><div class="kl">Avanc.</div></div>'+
+  '</div>';
+  // Ponctualité (basée sur les partis)
+  if(nPart){
+    html+='<h2>\u23F0 Ponctualit\u00e9 \u2014 camions partis ('+nPart+')</h2>';
+    html+='<div class="krow" style="grid-template-columns:repeat(3,1fr)">'+
+      '<div class="kbox" style="border-color:#2a9d5c"><div class="kv green">'+pH+'</div><div class="kl">\uD83D\uDFE2 \u00c0 l\'heure</div></div>'+
+      '<div class="kbox" style="border-color:#1565c0"><div class="kv blue">'+pA+'</div><div class="kl">\uD83D\uDD35 En avance</div></div>'+
+      '<div class="kbox" style="border-color:#d32f2f"><div class="kv red">'+pR+'</div><div class="kl">\uD83D\uDD34 En retard</div></div>'+
+    '</div>';
+    html+='<table><tr><th>Statut</th><th>Nb</th><th>% partis</th></tr>'+
+      '<tr><td>\uD83D\uDFE2 \u00c0 l\'heure</td><td>'+pH+'</td><td class="green"><b>'+Math.round(pH/nPart*100)+'%</b></td></tr>'+
+      '<tr><td>\uD83D\uDD35 En avance</td><td>'+pA+'</td><td class="blue"><b>'+Math.round(pA/nPart*100)+'%</b></td></tr>'+
+      '<tr><td>\uD83D\uDD34 En retard</td><td>'+pR+'</td><td class="red"><b>'+Math.round(pR/nPart*100)+'%</b></td></tr>'+
+    '</table>';
+  }
+  // Créneaux en cours
+  if(nCours){
+    html+='<h2>\uD83D\uDEA7 Cr\u00e9neaux en cours \u2014 sur site ('+nCours+')</h2>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>Chgt d\u00e9but</th><th>Statut</th><th>Livraisons</th></tr>';
+    trucksEnCours.sort(function(a,b){return creToMinutes(a.t.creneau||'')-creToMinutes(b.t.creneau||'');});
+    trucksEnCours.forEach(function(x){
+      var p=getPonctualite(x.t,x.ts,now);
+      var pColor=p.status==='retard_reel'||p.status==='retard_auto'?'red':p.status==='avance'?'blue':'green';
+      var stat=x.ts.chg?'<span class="tag bg-amber">En chgt</span>':x.ts.quai?'<span class="tag bg-blue">À quai</span>':'<span class="tag bg-green">Arriv\u00e9</span>';
+      var livIdsCours=x.t.deliveries||[];
+      html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
+        '<td>'+(x.t.creneau||'—')+'</td>'+
+        '<td>'+ft(x.ts.arr)+'</td>'+
+        '<td>'+ft(x.ts.quai)+'</td>'+
+        '<td>'+ft(x.ts.chg)+'</td>'+
+        '<td>'+stat+' <span class="'+pColor+'">'+p.label+'</span></td>'+
+        '<td style="text-align:center">'+livIdsCours.length+'</td></tr>';
+      if(livIdsCours.length){
+        html+='<tr><td colspan="7" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
+          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Pick.</th></tr>';
+        livIdsCours.forEach(function(lid){
+          var d=(APP.deliveries||[]).find(function(dv){return dv.id===lid;});
+          if(!d)return;
+          var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
+          html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
+            '<td style="border:none">'+(d.dest||'—')+'</td>'+
+            '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
+            '<td style="border:none;font-weight:700;color:'+spCol+'">'+(d.sp||'—')+'</td>'+
+            '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
+            '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
+        });
+        html+='</table></td></tr>';
       }
     });
-    var sum=0;vals.forEach(function(v){sum+=v;});
-    rIntervals[sd.key]={label:sd.label,avg:vals.length?Math.round(sum/vals.length):0,min:vals.length?Math.min.apply(null,vals):0,max:vals.length?Math.max.apply(null,vals):0};
-  });
-  // Today-only carrier stats
-  var cMap={};
-  dayTrucks.forEach(function(t){
-    var name=t.transporteur||t.itin||'Inconnu';
-    if(!cMap[name])cMap[name]={name:name,count:0,heure:0,avance:0,retard:0,loadCount:0,totalLoadMin:0};
-    var c=cMap[name];c.count++;
-    var ts=timestamps[t.id]||{};var p=getPonctualite(t,ts,now);
-    if(p.status==='heure')c.heure++;else if(p.status==='avance')c.avance++;
-    else if(p.status==='retard_reel'||p.status==='retard_auto')c.retard++;
-    if(ts.chg&&ts.dep){var lm=Math.round((new Date(ts.dep)-new Date(ts.chg))/60000);if(lm>=0){c.loadCount++;c.totalLoadMin+=lm;}}
-  });
-  var rCarriers=Object.values(cMap).sort(function(a,b){return b.count-a.count;});
-  // Today-only deliveries / volumes
-  var dayLivIds=new Set();
-  dayTrucks.forEach(function(t){(t.livs||[]).forEach(function(lid){dayLivIds.add(lid);});});
-  var dayLivs=APP.deliveries.filter(function(d){return dayLivIds.has(d.id);});
-  var vol={palSilo:0,colisSilo:0,colisPick:0,palSiloR:0,colisSiloR:0,colisPickR:0};
-  dayLivs.forEach(function(d){vol.palSilo+=(d.palSilo||0);vol.colisSilo+=(d.colisSilo||0);vol.colisPick+=(d.colisPick||0);});
-  (APP.articles||[]).forEach(function(a){
-    if(!dayLivIds.has(a.liv))return;
-    if((a.swm||a.wm||'')!=='C'){vol.palSiloR+=(a.pal||0);vol.colisSiloR+=(a.silo||0);}
-    if(a.vp!=='C'){vol.colisPickR+=(a.pick||0);}
-  });
-  // Per-delivery volume detail
-  var livDetail=[];
-  dayLivs.forEach(function(d){
-    var palR=0,csR=0,cpR=0,palT=(d.palSilo||0),csT=(d.colisSilo||0),cpT=(d.colisPick||0);
-    (APP.articles||[]).forEach(function(a){
-      if(a.liv!==d.id)return;
-      if((a.swm||a.wm||'')!=='C'){palR+=(a.pal||0);csR+=(a.silo||0);}
-      if(a.vp!=='C'){cpR+=(a.pick||0);}
+    html+='</table>';
+  }
+  // Camions en attente
+  if(nAtt){
+    html+='<h2>\uD83D\uDD52 En attente d\'arriv\u00e9e ('+nAtt+')</h2>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Ponctualit\u00e9</th><th>Livraisons</th></tr>';
+    trucksAttente.sort(function(a,b){return creToMinutes(a.t.creneau||'')-creToMinutes(b.t.creneau||'');});
+    trucksAttente.forEach(function(x){
+      var p=getPonctualite(x.t,x.ts,now);
+      var pColor=p.status==='retard_reel'||p.status==='retard_auto'?'red':p.status==='avance'?'blue':'grey';
+      html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
+        '<td>'+(x.t.creneau||'—')+'</td>'+
+        '<td class="'+pColor+'"><b>'+p.label+'</b></td>'+
+        '<td style="text-align:center">'+(x.t.deliveries||[]).length+'</td></tr>';
     });
-    var done=palR===0&&csR===0&&cpR===0;
-    livDetail.push({id:d.id,dest:d.dest||'',palT:palT,palR:palR,csT:csT,csR:csR,cpT:cpT,cpR:cpR,done:done});
-  });
-  var livDone=livDetail.filter(function(l){return l.done;}).length;
-  var livInProg=livDetail.filter(function(l){return !l.done&&(l.palR<l.palT||l.csR<l.csT||l.cpR<l.cpT);}).length;
-  var livTodo=livDetail.length-livDone-livInProg;
-  // Cadence estimation
-  var hrSilo=CADENCE_SILO>0?vol.palSiloR/CADENCE_SILO:0;
-  var hrPick=CADENCE_PICK>0?vol.colisPickR/CADENCE_PICK:0;
-  // Build HTML
-  var nTotal=dayTrucks.length;
-  var w=window.open('','_blank','width=900,height=700');
-  if(!w){showToast('Popup bloqu\u00e9 \u2014 autorisez les popups');return;}
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport TruckFlow '+todayISO+'</title>'+
-    '<style>body{font-family:Arial,sans-serif;color:#222;padding:24px;max-width:800px;margin:0 auto}'+
-    'h1{font-size:22px;margin-bottom:2px}h2{font-size:15px;margin-top:22px;border-bottom:2px solid #333;padding-bottom:4px}'+
-    'table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}th{background:#e8e8e8;padding:6px 8px;text-align:left;font-weight:700;border:1px solid #ccc}td{padding:5px 8px;border:1px solid #ddd}'+
-    '.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.kpi-box{text-align:center;padding:12px;border:1px solid #ddd;border-radius:8px}.kpi-val{font-size:28px;font-weight:900}.kpi-lbl{font-size:10px;color:#666;margin-top:4px}'+
-    '.green{color:#2dca72}.blue{color:#0a84ff}.red{color:#ff453a}.amber{color:#ff9f0a}'+
-    '.truck-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee;font-size:11px}'+
-    '.truck-row:nth-child(even){background:#f9f9f9}'+
-    '@media print{body{padding:12px}}</style></head><body>';
-  html+='<h1>\uD83D\uDE9B Rapport TruckFlow</h1><div style="color:#666;font-size:12px;margin-bottom:16px">'+dateStr+' \u2014 G\u00e9n\u00e9r\u00e9 automatiquement</div>';
-  // KPIs
-  html+='<div class="kpi-grid">';
-  html+='<div class="kpi-box"><div class="kpi-val blue">'+dayLivs.length+'</div><div class="kpi-lbl">Livraisons</div></div>';
-  html+='<div class="kpi-box"><div class="kpi-val">'+nTotal+'</div><div class="kpi-lbl">Camions</div></div>';
-  html+='<div class="kpi-box"><div class="kpi-val green">'+Math.round(pH/nTotal*100)+'%</div><div class="kpi-lbl">Ponctualit\u00e9</div></div>';
-  html+='<div class="kpi-box"><div class="kpi-val green">'+nComp+'</div><div class="kpi-lbl">Termin\u00e9s</div></div>';
-  html+='</div>';
-  // Ponctualit\u00e9
-  html+='<h2>\u23F0 Ponctualit\u00e9</h2><table><tr><th>Statut</th><th>Nombre</th><th>%</th></tr>';
-  html+='<tr><td>\uD83D\uDFE2 \u00c0 l\'heure</td><td>'+pH+'</td><td>'+Math.round(pH/nTotal*100)+'%</td></tr>';
-  html+='<tr><td>\uD83D\uDD35 En avance</td><td>'+pA+'</td><td>'+Math.round(pA/nTotal*100)+'%</td></tr>';
-  html+='<tr><td>\uD83D\uDD34 En retard</td><td>'+pR+'</td><td>'+Math.round(pR/nTotal*100)+'%</td></tr>';
-  html+='<tr><td>\uD83D\uDFE1 En attente</td><td>'+pW+'</td><td>'+Math.round(pW/nTotal*100)+'%</td></tr>';
+    html+='</table>';
+  }
+  // Volumes partis
+  html+='<h2>\uD83D\uDCE6 Volumes partis / restants</h2>';
+  var pctPal=volTotal.pal?Math.round(volDep.pal/volTotal.pal*100):0;
+  var pctCs=volTotal.cs?Math.round(volDep.cs/volTotal.cs*100):0;
+  var pctCp=volTotal.cp?Math.round(volDep.cp/volTotal.cp*100):0;
+  function volRow(icon,label,dep,total,rest,pct){
+    var col=pct>=80?'#2a9d5c':pct>=50?'#e65100':'#d32f2f';
+    return '<tr><td>'+icon+' '+label+'</td>'+
+      '<td style="text-align:center;font-weight:700;color:#2a9d5c">'+Math.round(dep).toLocaleString('fr')+'</td>'+
+      '<td style="text-align:center">'+Math.round(total).toLocaleString('fr')+'</td>'+
+      '<td style="text-align:center;font-weight:700;color:'+(rest>0?'#d32f2f':'#2a9d5c')+'">'+Math.round(rest).toLocaleString('fr')+'</td>'+
+      '<td><div class="bar-wrap"><div class="bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div>'+
+      '<span style="font-size:10px;font-weight:700;color:'+col+'">'+pct+'%</span></td></tr>';
+  }
+  html+='<table><tr><th>Indicateur</th><th style="color:#2a9d5c">\uD83D\uDE80 Parti</th><th>Total pr\u00e9vu</th><th style="color:#d32f2f">Restant</th><th>Avancement</th></tr>';
+  if(volTotal.pal)html+=volRow('\uD83C\uDFED','Palettes SILO',volDep.pal,volTotal.pal,volRest.pal,pctPal);
+  if(volTotal.cs)html+=volRow('\uD83D\uDCE6','Colis Silo',volDep.cs,volTotal.cs,volRest.cs,pctCs);
+  if(volTotal.cp)html+=volRow('\u270b','Colis Picking',volDep.cp,volTotal.cp,volRest.cp,pctCp);
+  if(!volTotal.pal&&!volTotal.cs&&!volTotal.cp)html+='<tr><td colspan="5" style="color:#999;text-align:center">Aucun volume renseign\u00e9</td></tr>';
   html+='</table>';
-  // D\u00e9tail camions du jour
-  html+='<h2>\uD83D\uDE9A D\u00e9tail camions ('+nTotal+')</h2>';
-  dayTrucks.forEach(function(t){
-    var ts=timestamps[t.id]||{};var p=getPonctualite(t,ts,now);
-    var pColor=p.status==='heure'?'#2dca72':p.status==='avance'?'#0a84ff':(p.status==='retard_reel'||p.status==='retard_auto')?'#ff453a':'#999';
-    var arrStr=ts.arr?new Date(ts.arr).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'\u2014';
-    var depStr=ts.dep?new Date(ts.dep).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'\u2014';
-    var livIds=t.deliveries||[];
-    html+='<div style="border:1px solid #ddd;border-radius:8px;margin-bottom:10px;overflow:hidden">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f5f5f5;border-bottom:1px solid #ddd">';
-    html+='<div><b style="font-size:13px">\uD83D\uDE9B '+(t.transporteur||t.itin||'?')+'</b> <span style="color:#666;font-size:11px">'+(t.itin||'')+'</span></div>';
-    html+='<div style="display:flex;align-items:center;gap:10px;font-size:11px">';
-    html+='<span>\u23f0 '+(t.creneau||'\u2014')+'</span>';
-    html+='<span>Arr. '+arrStr+'</span>';
-    html+='<span>D\u00e9p. '+depStr+'</span>';
-    html+='<span style="color:'+pColor+';font-weight:700">'+p.label+'</span>';
-    html+='</div></div>';
-    if(livIds.length){
-      html+='<table style="margin:0;font-size:10px"><tr><th>Livraison</th><th>Destination</th><th>Ville</th><th>Pr\u00e9l\u00e8v.</th><th>Pal. Silo</th><th>Colis Pick.</th></tr>';
+  // Camions partis — tableau récapitulatif
+  if(nPart){
+    html+='<h2>\uD83D\uDE80 Camions partis ('+nPart+')</h2>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>D\u00e9part</th><th>Dur\u00e9e</th><th>Ponctualit\u00e9</th><th>Pal. SILO</th><th>Colis Pick.</th></tr>';
+    trucksPartis.sort(function(a,b){return (a.ts.dep||'').localeCompare(b.ts.dep||'');});
+    trucksPartis.forEach(function(x){
+      var p=x.t._ponct||getPonctualite(x.t,x.ts,now);
+      var pColor=p.status==='heure'?'green':p.status==='avance'?'blue':p.status==='retard_reel'||p.status==='retard_auto'?'red':'grey';
+      var dur='—';
+      if(x.ts.arr&&x.ts.dep){var m=Math.round((new Date(x.ts.dep)-new Date(x.ts.arr))/60000);dur=fmtMinutes(m);}
+      var livIds=x.t.deliveries||[];
+      var palT=0,cpT=0;
       livIds.forEach(function(lid){
-        var d=APP.deliveries.find(function(x){return x.id===lid;});
-        if(!d) return;
-        var spLbl=d.sp==='C'?'\u2714 C':d.sp==='B'?'B':'A';
-        var spCol=d.sp==='C'?'#2dca72':d.sp==='B'?'#ff9f0a':'#999';
-        html+='<tr><td><b>'+d.id+'</b></td><td>'+(d.dest||'\u2014')+'</td><td>'+(d.ville||'')+'</td><td style="color:'+spCol+';font-weight:700">'+spLbl+'</td><td style="text-align:center">'+(d.palSilo||0)+'</td><td style="text-align:center">'+(d.colisPick||0)+'</td></tr>';
+        var d=(APP.deliveries||[]).find(function(dv){return dv.id===lid;});
+        if(d){palT+=(d.palSilo||0);cpT+=(d.colisPick||0);}
       });
-      html+='</table>';
-    } else {
-      html+='<div style="padding:6px 12px;font-size:11px;color:#999">Aucune livraison</div>';
-    }
-    html+='</div>';
-  });
-  // Temps entre \u00e9tapes
-  html+='<h2>\u23F1 Temps entre \u00e9tapes (moyennes du jour)</h2><table><tr><th>\u00c9tape</th><th>Moyenne</th><th>Min</th><th>Max</th></tr>';
-  ['wait','prep','load','total'].forEach(function(k){
-    var iv=rIntervals[k];
-    html+='<tr><td>'+iv.label+'</td><td><b>'+fmtMinutes(iv.avg)+'</b></td><td>'+fmtMinutes(iv.min)+'</td><td>'+fmtMinutes(iv.max)+'</td></tr>';
-  });
-  html+='</table>';
-  // Transporteurs du jour
-  if(rCarriers.length>1){
-    html+='<h2>\uD83C\uDFC6 Transporteurs du jour</h2><table><tr><th>Transporteur</th><th>Camions</th><th>% Ponct.</th><th>Moy. chg.</th></tr>';
-    rCarriers.forEach(function(c){
-      var pct=c.count?Math.round((c.heure+c.avance)/c.count*100):0;
-      var avgL=c.loadCount?fmtMinutes(Math.round(c.totalLoadMin/c.loadCount)):'\u2014';
-      html+='<tr><td><b>'+c.name+'</b></td><td>'+c.count+'</td><td style="color:'+(pct>=80?'green':pct>=50?'orange':'red')+'"><b>'+pct+'%</b></td><td>'+avgL+'</td></tr>';
+      html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
+        '<td>'+(x.t.creneau||'—')+'</td>'+
+        '<td>'+ft(x.ts.arr)+'</td>'+
+        '<td>'+ft(x.ts.dep)+'</td>'+
+        '<td style="text-align:center">'+dur+'</td>'+
+        '<td class="'+pColor+'"><b>'+p.label+'</b></td>'+
+        '<td style="text-align:center">'+(palT||'—')+'</td>'+
+        '<td style="text-align:center">'+(cpT||'—')+'</td></tr>';
+      // Livraisons du camion
+      if(livIds.length){
+        html+='<tr><td colspan="8" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
+          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
+        livIds.forEach(function(lid){
+          var d=(APP.deliveries||[]).find(function(dv){return dv.id===lid;});
+          if(!d)return;
+          var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
+          html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
+            '<td style="border:none">'+(d.dest||'—')+'</td>'+
+            '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
+            '<td style="border:none;font-weight:700;color:'+spCol+'">'+(d.sp||'—')+'</td>'+
+            '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
+            '<td style="border:none;text-align:center">'+(d.colisSilo||0)+'</td>'+
+            '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
+        });
+        html+='</table></td></tr>';
+      }
     });
     html+='</table>';
   }
-  // Volumes du jour — Vue d'ensemble
-  var palDone=Math.round(vol.palSilo)-Math.round(vol.palSiloR);
-  var csDone=Math.round(vol.colisSilo)-Math.round(vol.colisSiloR);
-  var cpDone=Math.round(vol.colisPick)-Math.round(vol.colisPickR);
-  var pctPal=Math.round((1-vol.palSiloR/Math.max(vol.palSilo,1))*100);
-  var pctCs=Math.round((1-vol.colisSiloR/Math.max(vol.colisSilo,1))*100);
-  var pctCp=Math.round((1-vol.colisPickR/Math.max(vol.colisPick,1))*100);
-  html+='<h2>\uD83D\uDCE6 Volumes du jour</h2>';
-  // KPI boxes volumes
-  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0">';
-  html+='<div style="text-align:center;padding:12px;border:1px solid #ddd;border-radius:8px"><div style="font-size:24px;font-weight:900;color:#5e5ce6">'+Math.round(vol.palSilo)+'</div><div style="font-size:10px;color:#666">\uD83C\uDFED Palettes SILO</div></div>';
-  html+='<div style="text-align:center;padding:12px;border:1px solid #ddd;border-radius:8px"><div style="font-size:24px;font-weight:900;color:#0a84ff">'+Math.round(vol.colisSilo).toLocaleString('fr')+'</div><div style="font-size:10px;color:#666">\uD83D\uDCE6 Colis Silo</div></div>';
-  html+='<div style="text-align:center;padding:12px;border:1px solid #ddd;border-radius:8px"><div style="font-size:24px;font-weight:900;color:#bf5af2">'+Math.round(vol.colisPick).toLocaleString('fr')+'</div><div style="font-size:10px;color:#666">\u270b Colis Picking</div></div>';
-  html+='</div>';
-  // Tableau détaillé avancement
-  html+='<table><tr><th>Indicateur</th><th>Pr\u00e9vu</th><th>Fait</th><th>Restant</th><th>Avancement</th><th>Temps estim\u00e9</th></tr>';
-  html+='<tr><td>\uD83C\uDFED Palettes SILO</td><td style="text-align:center">'+Math.round(vol.palSilo)+'</td><td style="text-align:center;color:green;font-weight:700">'+palDone+'</td><td style="text-align:center;color:'+(vol.palSiloR>0?'#ff453a':'green')+';font-weight:700">'+Math.round(vol.palSiloR)+'</td><td style="text-align:center"><div style="background:#eee;border-radius:4px;height:14px;overflow:hidden"><div style="height:100%;background:'+(pctPal>=80?'#2dca72':pctPal>=50?'#ff9f0a':'#ff453a')+';width:'+pctPal+'%;border-radius:4px"></div></div><span style="font-size:10px;font-weight:700">'+pctPal+'%</span></td><td style="text-align:center;font-size:11px">'+(hrSilo>0?fmtMinutes(Math.round(hrSilo*60))+' ('+CADENCE_SILO+' pal/h)':'\u2714 Termin\u00e9')+'</td></tr>';
-  html+='<tr><td>\uD83D\uDCE6 Colis Silo</td><td style="text-align:center">'+Math.round(vol.colisSilo).toLocaleString('fr')+'</td><td style="text-align:center;color:green;font-weight:700">'+csDone.toLocaleString('fr')+'</td><td style="text-align:center;color:'+(vol.colisSiloR>0?'#ff453a':'green')+';font-weight:700">'+Math.round(vol.colisSiloR).toLocaleString('fr')+'</td><td style="text-align:center"><div style="background:#eee;border-radius:4px;height:14px;overflow:hidden"><div style="height:100%;background:'+(pctCs>=80?'#2dca72':pctCs>=50?'#ff9f0a':'#ff453a')+';width:'+pctCs+'%;border-radius:4px"></div></div><span style="font-size:10px;font-weight:700">'+pctCs+'%</span></td><td style="text-align:center;font-size:11px">\u2014</td></tr>';
-  html+='<tr><td>\u270b Colis Picking</td><td style="text-align:center">'+Math.round(vol.colisPick).toLocaleString('fr')+'</td><td style="text-align:center;color:green;font-weight:700">'+cpDone.toLocaleString('fr')+'</td><td style="text-align:center;color:'+(vol.colisPickR>0?'#ff453a':'green')+';font-weight:700">'+Math.round(vol.colisPickR).toLocaleString('fr')+'</td><td style="text-align:center"><div style="background:#eee;border-radius:4px;height:14px;overflow:hidden"><div style="height:100%;background:'+(pctCp>=80?'#2dca72':pctCp>=50?'#ff9f0a':'#ff453a')+';width:'+pctCp+'%;border-radius:4px"></div></div><span style="font-size:10px;font-weight:700">'+pctCp+'%</span></td><td style="text-align:center;font-size:11px">'+(hrPick>0?fmtMinutes(Math.round(hrPick*60))+' ('+CADENCE_PICK+' col/h)':'\u2714 Termin\u00e9')+'</td></tr>';
-  html+='</table>';
-  // Suivi livraisons
-  html+='<h2>\uD83D\uDCCB Suivi livraisons ('+dayLivs.length+')</h2>';
-  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0">';
-  html+='<div style="text-align:center;padding:10px;border:1px solid #ddd;border-radius:8px"><div style="font-size:22px;font-weight:900;color:#0a84ff">'+dayLivs.length+'</div><div style="font-size:10px;color:#666">Total</div></div>';
-  html+='<div style="text-align:center;padding:10px;border:1px solid #ddd;border-radius:8px"><div style="font-size:22px;font-weight:900;color:#2dca72">'+livDone+'</div><div style="font-size:10px;color:#666">\u2714 Termin\u00e9es</div></div>';
-  html+='<div style="text-align:center;padding:10px;border:1px solid #ddd;border-radius:8px"><div style="font-size:22px;font-weight:900;color:#ff9f0a">'+livInProg+'</div><div style="font-size:10px;color:#666">\u23F3 En cours</div></div>';
-  html+='<div style="text-align:center;padding:10px;border:1px solid #ddd;border-radius:8px"><div style="font-size:22px;font-weight:900;color:#ff453a">'+livTodo+'</div><div style="font-size:10px;color:#666">\u23F0 \u00c0 faire</div></div>';
-  html+='</div>';
-  // Détail par livraison
-  if(livDetail.length){
-    html+='<table><tr><th>Livraison</th><th>Destination</th><th style="color:#5e5ce6">Pal. SILO</th><th style="color:#0a84ff">Colis Silo</th><th style="color:#bf5af2">Colis Pick.</th><th>Statut</th></tr>';
-    livDetail.sort(function(a,b){return a.done===b.done?0:a.done?1:-1;});
-    livDetail.forEach(function(l){
-      var statut=l.done?'<span style="color:#2dca72;font-weight:700">\u2714 Termin\u00e9e</span>':'<span style="color:#ff9f0a;font-weight:700">\u23F3 Restant</span>';
-      var palStr=l.palT?Math.round(l.palT-l.palR)+'/'+Math.round(l.palT):'\u2014';
-      var csStr=l.csT?Math.round(l.csT-l.csR)+'/'+Math.round(l.csT):'\u2014';
-      var cpStr=l.cpT?Math.round(l.cpT-l.cpR)+'/'+Math.round(l.cpT):'\u2014';
-      html+='<tr'+(l.done?' style="color:#999"':'')+'><td><b>'+l.id+'</b></td><td>'+l.dest+'</td><td style="text-align:center">'+palStr+'</td><td style="text-align:center">'+csStr+'</td><td style="text-align:center">'+cpStr+'</td><td>'+statut+'</td></tr>';
-    });
-    html+='</table>';
-  }
-  html+='<div style="text-align:center;margin-top:24px">'+
-    '<button onclick="window.print()" style="background:#0a84ff;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">\uD83D\uDDA8 Imprimer / PDF</button>'+
-    '<div style="color:#999;font-size:10px;margin-top:6px">G\u00e9n\u00e9r\u00e9 par TruckFlow \u2014 '+new Date().toLocaleTimeString('fr-FR')+'</div></div>';
-  html+='<style>@media print{button{display:none!important}}</style></body></html>';
+  html+='<div class="no-print" style="text-align:center;margin-top:20px">'+
+    '<button onclick="window.print()" style="background:#0a84ff;color:#fff;border:none;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">\uD83D\uDDA8 Imprimer / Enregistrer PDF</button>'+
+    '</div>';
+  html+='</body></html>';
   w.document.write(html);w.document.close();
   logActivity('\uD83D\uDCC3','Rapport PDF g\u00e9n\u00e9r\u00e9');
 }
