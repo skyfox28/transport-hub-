@@ -410,6 +410,11 @@ html,body{
     <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;line-height:1.5;padding:0 4px">
       Charge un fichier JSON exporté depuis TruckFlow desktop<br>via le bouton <strong style="color:var(--t2)">↓ Partager</strong>
     </div>
+
+    <button class="btn-refresh" style="background:rgba(255,69,58,.08);border-color:rgba(255,69,58,.25);color:var(--red);margin-top:16px"
+      onclick="purgeAll()">
+      🗑 Vider l'application
+    </button>
     <div style="height:8px"></div>
   </div>
 
@@ -1025,6 +1030,18 @@ function tick(){
 }
 
 // ─── Import session JSON from desktop ─────────────────────────────────────
+// ─── Purge ─────────────────────────────────────────────────────────────────
+function purgeAll(){
+  if(!confirm('Vider toutes les données ?\n\nCamions, livraisons et timestamps seront effacés.')) return;
+  ['th10_trucks','th10_ts','th10_deliveries','th10_articles','tf_completed'].forEach(function(k){
+    localStorage.removeItem(k);
+  });
+  trucks = []; timestamps = {}; deliveries = []; completed = [];
+  _selectedDate = today();
+  renderAll();
+  showToast('Application vidée 🗑');
+}
+
 function importSessionJSON(event){
   var file = event.target.files[0];
   event.target.value = '';
