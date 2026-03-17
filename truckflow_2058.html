@@ -3109,8 +3109,9 @@ function cleanCompletedTrucks(){
       var delivDetails=(t.deliveries||[]).map(function(id){
         var d=livMap[id];
         return d?{id:d.id,dest:d.dest||'',ville:d.ville||'',sp:d.sp||'',wm:d.wm||'',
-          pkg:d.pkg||0,palSilo:d.palSilo||0,colisSilo:d.colisSilo||0,colisPick:d.colisPick||0}:null;
-      }).filter(Boolean);
+          pkg:d.pkg||0,palSilo:d.palSilo||0,colisSilo:d.colisSilo||0,colisPick:d.colisPick||0}
+          :{id:id,dest:'\u2014',ville:'\u2014',sp:'\u2014',wm:'\u2014',pkg:0,palSilo:0,colisSilo:0,colisPick:0};
+      });
       var quaiNum=null;
       Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)quaiNum=Number(q);});
       _completedTrucks.push({
@@ -7338,16 +7339,20 @@ function renderArchive(){
       html+='<td>'+(ct.deliveries||[]).length+'</td>';
       html+='<td><span style="cursor:pointer;color:var(--blue);font-size:11px" onclick="toggleArchiveDetail(\''+ct.id+'\')">'+(_archiveExpandedIds[ct.id]?'\u25B2 Masquer':'\u25BC D\u00e9tail')+'</span></td>';
       html+='</tr>';
-      if(_archiveExpandedIds[ct.id]&&ct.deliveryDetails&&ct.deliveryDetails.length){
-        html+='<tr><td colspan="10" style="padding:8px 20px;background:rgba(160,210,255,.03)">';
-        html+='<table style="width:100%;font-size:11px"><thead><tr style="color:var(--t3)">';
-        html+='<th>Livraison</th><th>Destinataire</th><th>Ville</th><th>Colis</th><th>Pal SILO</th><th>Col. SILO</th><th>Col. Pick.</th><th>SP</th><th>WM</th></tr></thead><tbody>';
-        ct.deliveryDetails.forEach(function(d){
-          html+='<tr><td>'+d.id+'</td><td>'+d.dest+'</td><td>'+d.ville+'</td>';
-          html+='<td>'+d.pkg+'</td><td>'+d.palSilo+'</td><td>'+d.colisSilo+'</td><td>'+d.colisPick+'</td>';
-          html+='<td>'+d.sp+'</td><td>'+d.wm+'</td></tr>';
-        });
-        html+='</tbody></table></td></tr>';
+      if(_archiveExpandedIds[ct.id]){
+        var rows=ct.deliveryDetails&&ct.deliveryDetails.length?ct.deliveryDetails
+          :(ct.deliveries||[]).map(function(id){return{id:id,dest:'\u2014',ville:'\u2014',sp:'\u2014',wm:'\u2014',pkg:0,palSilo:0,colisSilo:0,colisPick:0};});
+        if(rows.length){
+          html+='<tr><td colspan="10" style="padding:8px 20px;background:rgba(160,210,255,.03)">';
+          html+='<table style="width:100%;font-size:11px"><thead><tr style="color:var(--t3)">';
+          html+='<th>Livraison</th><th>Destinataire</th><th>Ville</th><th>Colis</th><th>Pal SILO</th><th>Col. SILO</th><th>Col. Pick.</th><th>SP</th><th>WM</th></tr></thead><tbody>';
+          rows.forEach(function(d){
+            html+='<tr><td>'+d.id+'</td><td>'+d.dest+'</td><td>'+d.ville+'</td>';
+            html+='<td>'+d.pkg+'</td><td>'+d.palSilo+'</td><td>'+d.colisSilo+'</td><td>'+d.colisPick+'</td>';
+            html+='<td>'+d.sp+'</td><td>'+d.wm+'</td></tr>';
+          });
+          html+='</tbody></table></td></tr>';
+        }
       }
     });
     html+='</tbody></table></div></div>';
