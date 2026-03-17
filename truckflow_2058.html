@@ -2989,13 +2989,15 @@ function renderTrucks(){
     }
     hdr.innerHTML='<span class="tc-del-toggle"><span class="tc-del-toggle-ico">\u25b6</span>Livraisons ('+delivs.length+')</span><span style="display:flex;gap:6px;align-items:center">'+summaryHtml+'</span>';
     dDiv.appendChild(hdr);
-    var body=document.createElement('div');body.className='tc-del-body collapsed';body.style.maxHeight='0';
+    var body=document.createElement('div');body.className='tc-del-body';body.style.maxHeight='none';
     var rowsDiv=document.createElement('div');rowsDiv.className='tc-del-rows';rowsDiv.style.padding='0 0 8px 0';
+    // Toggle : ouvert par défaut, clic pour replier
+    hdr.querySelector('.tc-del-toggle-ico').textContent='\u25bc';
     hdr.querySelector('.tc-del-toggle').addEventListener('click',function(){
       var ico=hdr.querySelector('.tc-del-toggle-ico');
       var isOpen=!body.classList.contains('collapsed');
       if(isOpen){body.classList.add('collapsed');body.style.maxHeight='0';ico.textContent='\u25b6';}
-      else{body.classList.remove('collapsed');body.style.maxHeight=body.scrollHeight+200+'px';ico.textContent='\u25bc';}
+      else{body.classList.remove('collapsed');body.style.maxHeight='none';ico.textContent='\u25bc';}
     });
     var otherTrucks=trucks.filter(function(ot,i){return i!==ti;});
     delivs.forEach(function(d){
@@ -6753,50 +6755,14 @@ function renderKanban(){
       var t=item._t, ts=item._ts, archived=item._archived;
       var prio=(_truckPriorities&&_truckPriorities[t.id])||'';
       var prioBadge=prio?'<span class="prio-badge '+prio+'">'+(prio==='urgent'?'\uD83D\uDD34':prio==='normal'?'\uD83D\uDFE1':'\uD83D\uDFE2')+' '+prio.charAt(0).toUpperCase()+prio.slice(1)+'</span>':'';
-
-      // Livraisons : depuis deliveryDetails (archivé) ou APP.deliveries (actif)
-      var livIds=t.deliveries||[];
-      var livObjs=[];
-      if(archived && t.deliveryDetails){
-        livObjs=t.deliveryDetails;
-      } else {
-        livObjs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
-      }
-      var totPal=0,totPick=0,totCs=0,spC=0,spB=0,spA=0;
-      livObjs.forEach(function(d){
-        totPal+=(d.palSilo||0); totPick+=(d.colisPick||0); totCs+=(d.colisSilo||0);
-        if(d.sp==='C')spC++;else if(d.sp==='B')spB++;else if(d.sp==='A')spA++;
-      });
-
-      // Timestamps résumé
+      var archBadge=archived?'<span style="font-size:9px;color:var(--orange);background:rgba(255,140,66,.1);padding:1px 5px;border-radius:4px;font-weight:700">Archive</span>':'';
       var arrStr=ts.arr?'\uD83D\uDD50 '+new Date(ts.arr).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
       var depStr=ts.dep?'\uD83D\uDE80 '+new Date(ts.dep).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-
-      // Volumes
-      var volHtml='';
-      if(totPal)  volHtml+='<span style="background:rgba(94,92,230,.12);color:var(--indigo);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">\uD83C\uDFED '+Math.round(totPal)+'pal</span> ';
-      if(totCs)   volHtml+='<span style="background:rgba(10,132,255,.1);color:var(--blue);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">\uD83D\uDCE6 '+Math.round(totCs).toLocaleString('fr')+'cs</span> ';
-      if(totPick) volHtml+='<span style="background:rgba(191,90,242,.1);color:var(--purple);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">\u270b '+Math.round(totPick).toLocaleString('fr')+'pk</span> ';
-
-      // SGP chips
-      var sgpHtml='';
-      if(spC) sgpHtml+='<span style="background:rgba(45,202,114,.1);color:var(--green);padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">'+spC+'C</span> ';
-      if(spB) sgpHtml+='<span style="background:rgba(255,159,10,.1);color:var(--amber);padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">'+spB+'B</span> ';
-      if(spA) sgpHtml+='<span style="background:rgba(255,77,106,.1);color:var(--red);padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">'+spA+'A</span>';
-
-      // Liste destinations (3 premières max)
-      var dests=livObjs.slice(0,3).map(function(d){return d.dest||d.id;});
-      var destHtml=dests.join(', ')+(livObjs.length>3?' +&hellip;':'');
-
-      // Badge archivé
-      var archBadge=archived?'<span style="font-size:9px;color:var(--orange);background:rgba(255,140,66,.1);padding:1px 5px;border-radius:4px;font-weight:700">Archive</span>':'';
-
+      var nbLivs=(t.deliveries||[]).length;
       html+='<div class="kanban-card" onclick="openTimelineKanban(\''+t.id+'\','+archived+')">'+
         '<div class="kc-name">'+(t.transporteur||t.itin||'?')+' '+prioBadge+archBadge+'</div>'+
         '<div class="kc-sub" style="margin-top:2px">\u23F0 '+(t.creneau||'\u2014')+(arrStr?' \u2502 '+arrStr:'')+(depStr?' \u2192 '+depStr:'')+'</div>'+
-        (livObjs.length?'<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:3px">'+volHtml+'</div>':'') +
-        (sgpHtml?'<div style="margin-top:3px">'+sgpHtml+'</div>':'')+
-        (destHtml?'<div class="kc-sub" style="margin-top:3px;font-size:9px;opacity:.7">'+livObjs.length+' liv. \u2014 '+destHtml+'</div>':'')+
+        (nbLivs?'<div class="kc-sub" style="margin-top:3px;font-size:9px;opacity:.7">\uD83D\uDCE6 '+nbLivs+' liv.</div>':'')+
       '</div>';
     });
     html+='</div>';
