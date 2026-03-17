@@ -6713,15 +6713,28 @@ function renderKanban(){
   var todayISO=new Date().toISOString().slice(0,10);
   var dayTrucks=trucks.filter(function(t){return t.date===todayISO;});
   if(!dayTrucks.length) dayTrucks=trucks;
+  // Inclure les camions archivés (terminés) du même jour
+  var dayCompleted=(_completedTrucks||[]).filter(function(c){return c.date===todayISO;});
+
   var cols={pending:[],arrived:[],quai:[],loading:[],departed:[]};
+
   dayTrucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
-    if(ts.dep) cols.departed.push(t);
-    else if(ts.chg) cols.loading.push(t);
-    else if(ts.quai) cols.quai.push(t);
-    else if(ts.arr) cols.arrived.push(t);
-    else cols.pending.push(t);
+    var item={_t:t,_ts:ts,_archived:false};
+    if(ts.dep) cols.departed.push(item);
+    else if(ts.chg) cols.loading.push(item);
+    else if(ts.quai) cols.quai.push(item);
+    else if(ts.arr) cols.arrived.push(item);
+    else cols.pending.push(item);
   });
+  // Archivés → toujours "Partis", triés par heure de départ
+  dayCompleted.forEach(function(ct){
+    cols.departed.push({_t:ct,_ts:ct.timestamps||{},_archived:true,_ct:ct});
+  });
+  cols.departed.sort(function(a,b){
+    return ((a._ts.dep||'')>(b._ts.dep||''))?1:-1;
+  });
+
   var colDefs=[
     {key:'pending',label:'En attente',color:'var(--t3)',bg:'rgba(118,118,128,.08)',ico:'\u23F3'},
     {key:'arrived',label:'Arriv\u00e9',color:'var(--blue)',bg:'rgba(10,132,255,.06)',ico:'\uD83D\uDD50'},
@@ -6729,18 +6742,62 @@ function renderKanban(){
     {key:'loading',label:'En chargement',color:'var(--purple)',bg:'rgba(191,90,242,.06)',ico:'\uD83D\uDCE6'},
     {key:'departed',label:'Parti',color:'var(--green)',bg:'rgba(48,209,88,.06)',ico:'\uD83D\uDE80'}
   ];
+
   var html='';
   colDefs.forEach(function(cd){
     var items=cols[cd.key];
     html+='<div class="kanban-col">'+
       '<div class="kanban-col-hdr" style="background:'+cd.bg+';color:'+cd.color+'">'+cd.ico+' '+cd.label+' ('+items.length+')</div>';
-    items.forEach(function(t){
-      var ts=timestamps[t.id]||{};
+
+    items.forEach(function(item){
+      var t=item._t, ts=item._ts, archived=item._archived;
       var prio=(_truckPriorities&&_truckPriorities[t.id])||'';
       var prioBadge=prio?'<span class="prio-badge '+prio+'">'+(prio==='urgent'?'\uD83D\uDD34':prio==='normal'?'\uD83D\uDFE1':'\uD83D\uDFE2')+' '+prio.charAt(0).toUpperCase()+prio.slice(1)+'</span>':'';
-      html+='<div class="kanban-card" onclick="openTimeline(\''+t.id+'\')">'+
-        '<div class="kc-name">'+(t.itin||'?')+prioBadge+'</div>'+
-        '<div class="kc-sub">'+(t.dest||'\u2014')+' \u2502 '+(t.transporteur||'')+' \u2502 '+(t.creneau||'\u2014')+'</div></div>';
+
+      // Livraisons : depuis deliveryDetails (archivé) ou APP.deliveries (actif)
+      var livIds=t.deliveries||[];
+      var livObjs=[];
+      if(archived && t.deliveryDetails){
+        livObjs=t.deliveryDetails;
+      } else {
+        livObjs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
+      }
+      var totPal=0,totPick=0,totCs=0,spC=0,spB=0,spA=0;
+      livObjs.forEach(function(d){
+        totPal+=(d.palSilo||0); totPick+=(d.colisPick||0); totCs+=(d.colisSilo||0);
+        if(d.sp==='C')spC++;else if(d.sp==='B')spB++;else if(d.sp==='A')spA++;
+      });
+
+      // Timestamps résumé
+      var arrStr=ts.arr?'\uD83D\uDD50 '+new Date(ts.arr).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+      var depStr=ts.dep?'\uD83D\uDE80 '+new Date(ts.dep).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+
+      // Volumes
+      var volHtml='';
+      if(totPal)  volHtml+='<span style="background:rgba(94,92,230,.12);color:var(--indigo);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">\uD83C\uDFED '+Math.round(totPal)+'pal</span> ';
+      if(totCs)   volHtml+='<span style="background:rgba(10,132,255,.1);color:var(--blue);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">\uD83D\uDCE6 '+Math.round(totCs).toLocaleString('fr')+'cs</span> ';
+      if(totPick) volHtml+='<span style="background:rgba(191,90,242,.1);color:var(--purple);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700">\u270b '+Math.round(totPick).toLocaleString('fr')+'pk</span> ';
+
+      // SGP chips
+      var sgpHtml='';
+      if(spC) sgpHtml+='<span style="background:rgba(45,202,114,.1);color:var(--green);padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">'+spC+'C</span> ';
+      if(spB) sgpHtml+='<span style="background:rgba(255,159,10,.1);color:var(--amber);padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">'+spB+'B</span> ';
+      if(spA) sgpHtml+='<span style="background:rgba(255,77,106,.1);color:var(--red);padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700">'+spA+'A</span>';
+
+      // Liste destinations (3 premières max)
+      var dests=livObjs.slice(0,3).map(function(d){return d.dest||d.id;});
+      var destHtml=dests.join(', ')+(livObjs.length>3?' +&hellip;':'');
+
+      // Badge archivé
+      var archBadge=archived?'<span style="font-size:9px;color:var(--orange);background:rgba(255,140,66,.1);padding:1px 5px;border-radius:4px;font-weight:700">Archive</span>':'';
+
+      html+='<div class="kanban-card" onclick="openTimelineKanban(\''+t.id+'\','+archived+')">'+
+        '<div class="kc-name">'+(t.transporteur||t.itin||'?')+' '+prioBadge+archBadge+'</div>'+
+        '<div class="kc-sub" style="margin-top:2px">\u23F0 '+(t.creneau||'\u2014')+(arrStr?' \u2502 '+arrStr:'')+(depStr?' \u2192 '+depStr:'')+'</div>'+
+        (livObjs.length?'<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:3px">'+volHtml+'</div>':'') +
+        (sgpHtml?'<div style="margin-top:3px">'+sgpHtml+'</div>':'')+
+        (destHtml?'<div class="kc-sub" style="margin-top:3px;font-size:9px;opacity:.7">'+livObjs.length+' liv. \u2014 '+destHtml+'</div>':'')+
+      '</div>';
     });
     html+='</div>';
   });
@@ -6795,6 +6852,66 @@ function openTimeline(truckId){
     if(eta) html+='<div style="margin-top:8px;padding:8px 12px;background:rgba(10,132,255,.08);border-radius:8px;font-size:11px;color:var(--blue)"><b>\u23F0 ETA d\u00e9part :</b> '+eta.label+'</div>';
   }
   html+='</div>';
+  document.getElementById('vtlContent').innerHTML=html;
+}
+
+function openTimelineKanban(truckId,archived){
+  if(!archived){openTimeline(truckId);return;}
+  var ct=(_completedTrucks||[]).find(function(c){return c.id===truckId;});
+  if(!ct){showToast('Camion archivé introuvable');return;}
+  var ts=ct.timestamps||{};
+  var bg=document.getElementById('vtlBg');bg.classList.add('open');
+  var steps=[
+    {key:'arr',ico:'\uD83D\uDD50',label:'Arriv\u00e9e sur site'},
+    {key:'quai',ico:'\uD83D\uDD04',label:'Mise \u00e0 quai'},
+    {key:'chg',ico:'\uD83D\uDCE6',label:'D\u00e9but chargement'},
+    {key:'dep',ico:'\uD83D\uDE80',label:'D\u00e9part'}
+  ];
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
+    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+(ct.itin||'?')+
+    ' <span style="font-size:11px;color:var(--orange);background:rgba(255,140,66,.12);padding:2px 7px;border-radius:5px;font-weight:600">Archive</span></div>'+
+    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(ct.dest||'\u2014')+' \u2502 '+(ct.transporteur||'')+' \u2502 Cr\u00e9neau : '+(ct.creneau||'\u2014')+'</div></div>'+
+    '<div style="cursor:pointer;font-size:18px;color:var(--t3);padding:4px 8px" onclick="document.getElementById(\'vtlBg\').classList.remove(\'open\')">\u2715</div></div>';
+  html+='<div style="margin-top:12px">';
+  var lastTime=null;
+  steps.forEach(function(s,i){
+    var done=!!ts[s.key];
+    var timeStr=done?new Date(ts[s.key]).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'\u2014';
+    var cls=done?'done':'';
+    html+='<div class="vtl-step '+cls+'"><div class="vtl-dot">'+(done?'\u2713':'')+'</div>';
+    html+='<div class="vtl-time">'+s.ico+' '+timeStr+'</div>';
+    html+='<div class="vtl-lbl">'+s.label+'</div>';
+    if(done&&lastTime){
+      var dur=Math.round((new Date(ts[s.key])-lastTime)/60000);
+      html+='<div class="vtl-dur">\u23F1 '+fmtMinutes(dur)+'</div>';
+    }
+    if(done) lastTime=new Date(ts[s.key]);
+    html+='</div>';
+  });
+  html+='</div>';
+  // Livraisons archivées
+  var livs=ct.deliveryDetails||[];
+  if(livs.length){
+    var totPal=0,totCs=0,totPick=0;
+    livs.forEach(function(d){totPal+=(d.palSilo||0);totCs+=(d.colisSilo||0);totPick+=(d.colisPick||0);});
+    html+='<div style="margin-top:14px;border-top:1px solid var(--bd2);padding-top:12px">'+
+      '<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px">'+
+      '\uD83D\uDCE6 Livraisons ('+livs.length+')'+
+      (totPal?' \u2502 \uD83C\uDFED '+Math.round(totPal)+'pal':'')+
+      (totCs?' \u2502 '+Math.round(totCs).toLocaleString('fr')+'cs':'')+
+      (totPick?' \u2502 \u270b '+Math.round(totPick).toLocaleString('fr')+'pk':'')+
+      '</div>';
+    livs.forEach(function(d){
+      html+='<div style="padding:5px 8px;margin-bottom:3px;background:var(--sf1);border-radius:6px;font-size:11px">'+
+        '<span style="font-weight:600;color:var(--t1)">'+d.id+'</span>'+
+        ' \u2014 <span style="color:var(--t2)">'+(d.dest||d.ville||'\u2014')+'</span>'+
+        (d.palSilo?' <span style="color:var(--indigo)">\uD83C\uDFED '+Math.round(d.palSilo)+'pal</span>':'')+
+        (d.colisSilo?' <span style="color:var(--blue)">'+Math.round(d.colisSilo).toLocaleString('fr')+'cs</span>':'')+
+        (d.colisPick?' <span style="color:var(--purple)">\u270b '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>':'')+
+        '</div>';
+    });
+    html+='</div>';
+  }
   document.getElementById('vtlContent').innerHTML=html;
 }
 
