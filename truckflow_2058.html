@@ -36,6 +36,9 @@ html.light .kpi,html.light .card{background:rgba(255,255,255,.72);backdrop-filte
 html.light .kpi:hover,html.light .card:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 6px 20px rgba(0,0,0,.1)}
 html.light .kpi::before{opacity:.8}
 html.light .kpi::after{background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%)}
+html.light .spc::before{opacity:.8}
+html.light .card::before{opacity:.7}
+html.light .card::after{background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%)}
 html.light .kpi-ico-circle{box-shadow:0 1px 4px rgba(0,0,0,.06);background:var(--kpi-ico-bg)}
 html.light .kpi-l{color:var(--t2)}
 html.light .kpi-v{color:var(--t1)}
@@ -159,7 +162,7 @@ body::after{width:900px;height:900px;bottom:-15%;right:-12%;background:radial-gr
 /* Noise texture overlay */
 .main::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px 200px}
 /* Ensure content stays above orbs */
-.hdr,.tabs-bar,.panel,.card,.kpi,.tc,.tbl-wrap,.modal,.overlay,.welcome-overlay,.notif-container,.toast,.filter-bar,.goal-card,.rt-counter,.stats-section,.quai-section,.planning-timeline{position:relative;z-index:1}
+.hdr,.tabs-bar,.panel,.card,.kpi,.tc,.tbl-wrap,.modal,.overlay,.welcome-overlay,.notif-container,.toast,.filter-bar,.goal-card,.rt-counter,.stats-section,.quai-section,.planning-timeline,.syn-ponct,.spc{position:relative;z-index:1}
 /* Light theme: softer orbs */
 html.light body::before{background:radial-gradient(circle,rgba(10,132,255,.08) 0%,rgba(10,132,255,.02) 40%,transparent 65%)}
 html.light body::after{background:radial-gradient(circle,rgba(191,90,242,.06) 0%,rgba(94,92,230,.02) 40%,transparent 65%)}
@@ -215,6 +218,8 @@ html.light .main::before{opacity:.02}
 .kpi{background:linear-gradient(165deg,rgba(160,210,255,.07) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.04) 100%);backdrop-filter:saturate(200%) blur(32px);-webkit-backdrop-filter:saturate(200%) blur(32px);border-radius:var(--r);padding:18px 16px;border:1px solid rgba(160,210,255,.2);position:relative;overflow:hidden;min-width:0;transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s;box-shadow:var(--glass-glow),var(--glass-sh)}
 .kpi:hover{transform:translateY(-4px) scale(1.01);box-shadow:var(--glass-glow-s),var(--glass-sh-h),0 0 30px rgba(100,200,255,.08)}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(100,200,255,.15),rgba(160,210,255,.7),rgba(100,200,255,.15));opacity:1}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(100,200,255,.1),rgba(160,210,255,.55),rgba(100,200,255,.1));pointer-events:none;z-index:2}
+.spc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(100,200,255,.12),rgba(160,210,255,.65),rgba(100,200,255,.12));pointer-events:none;z-index:2}
 .kpi-l{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;line-height:1.3}
 .kpi-v{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1}
 .kpi-s{font-size:11px;color:var(--t3);margin-top:6px;line-height:1.4}
@@ -233,7 +238,7 @@ html.light .main::before{opacity:.02}
 .toggle-btn.on{background:rgba(255,159,10,.15);color:var(--orange);border-color:rgba(255,159,10,.3)}
 
 /* ── Cards ─────────────────────────────────────────────────────── */
-.card{background:linear-gradient(165deg,rgba(160,210,255,.06) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.03) 100%);backdrop-filter:saturate(200%) blur(28px);-webkit-backdrop-filter:saturate(200%) blur(28px);border-radius:var(--r);padding:24px 26px;border:1px solid rgba(160,210,255,.18);margin-bottom:20px;box-shadow:var(--glass-glow),var(--glass-sh);transition:box-shadow .3s,transform .3s}
+.card{background:linear-gradient(165deg,rgba(160,210,255,.06) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.03) 100%);backdrop-filter:saturate(200%) blur(28px);-webkit-backdrop-filter:saturate(200%) blur(28px);border-radius:var(--r);padding:24px 26px;border:1px solid rgba(160,210,255,.18);margin-bottom:20px;box-shadow:var(--glass-glow),var(--glass-sh);transition:box-shadow .3s,transform .3s;overflow:hidden}
 .card:hover{box-shadow:var(--glass-glow-s),var(--glass-sh-h);transform:translateY(-2px)}
 .card-ttl{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
@@ -427,14 +432,15 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .tc-date-inp:hover,.tc-date-inp:focus{border-color:var(--indigo)}
 
 /* ── Ponctualité (Synthèse) ────────────────────────────────────── */
-.syn-ponct{background:linear-gradient(165deg,rgba(160,210,255,.05) 0%,rgba(140,180,220,.02) 100%);backdrop-filter:saturate(200%) blur(28px);-webkit-backdrop-filter:saturate(200%) blur(28px);border-radius:var(--r);border:1px solid rgba(160,210,255,.18);padding:20px 22px;margin-bottom:18px;box-shadow:var(--glass-glow),var(--glass-sh)}
+.syn-ponct{background:linear-gradient(165deg,rgba(160,210,255,.05) 0%,rgba(140,180,220,.02) 100%);backdrop-filter:saturate(200%) blur(28px);-webkit-backdrop-filter:saturate(200%) blur(28px);border-radius:var(--r);border:1px solid rgba(160,210,255,.18);padding:20px 22px;margin-bottom:18px;box-shadow:var(--glass-glow),var(--glass-sh);position:relative;overflow:hidden}
+.syn-ponct::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(100,200,255,.1),rgba(160,210,255,.6),rgba(100,200,255,.1));pointer-events:none}
 .syn-ponct-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .syn-ponct-title{font-size:16px;font-weight:800;color:var(--t1)}
 .syn-ponct-sub{font-size:12px;color:var(--t3)}
 .syn-ponct-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:700px){.syn-ponct-cards{grid-template-columns:repeat(2,1fr)}}
-.spc{padding:16px 18px;border-radius:18px;border:1px solid rgba(160,210,255,.2);text-align:center;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;background:linear-gradient(165deg,rgba(160,210,255,.06) 0%,rgba(140,180,220,.02) 100%);backdrop-filter:saturate(200%) blur(24px);-webkit-backdrop-filter:saturate(200%) blur(24px);box-shadow:var(--glass-glow),var(--glass-sh)}
-.spc:hover{transform:translateY(-3px);box-shadow:var(--glass-glow-s),var(--glass-sh-h)}
+.spc{padding:16px 18px;border-radius:18px;border:1px solid rgba(160,210,255,.2);text-align:center;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;background:linear-gradient(165deg,rgba(160,210,255,.07) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.04) 100%);backdrop-filter:saturate(200%) blur(32px);-webkit-backdrop-filter:saturate(200%) blur(32px);box-shadow:var(--glass-glow),var(--glass-sh);overflow:hidden}
+.spc:hover{transform:translateY(-4px) scale(1.01);box-shadow:var(--glass-glow-s),var(--glass-sh-h),0 0 30px rgba(100,200,255,.08)}
 .spc.green:hover{border-color:var(--green);box-shadow:var(--glass-glow-s),0 8px 28px rgba(48,209,88,.18)}
 .spc.teal:hover{border-color:var(--teal);box-shadow:var(--glass-glow-s),0 8px 28px rgba(90,200,250,.18)}
 .spc.amber:hover{border-color:var(--amber);box-shadow:var(--glass-glow-s),0 8px 28px rgba(255,159,10,.18)}
@@ -491,7 +497,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 #weekCard{border:1px solid rgba(160,210,255,.18);background:linear-gradient(165deg,rgba(160,210,255,.05) 0%,rgba(140,180,220,.02) 100%);backdrop-filter:saturate(200%) blur(24px);-webkit-backdrop-filter:saturate(200%) blur(24px);border-radius:var(--r);overflow:hidden;box-shadow:var(--glass-glow),var(--glass-sh)}
 #weekCard .card-ttl{padding:12px 16px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--bd);font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
 .week-collapsed #weekCard .card-ttl{border-bottom:none}
-#dayDetail:not(:empty){background:var(--sf);border-radius:var(--r);border:1px solid var(--bd2);border-left:3px solid var(--blue);overflow:hidden;box-shadow:0 2px 20px rgba(77,124,254,.1)}
+#dayDetail:not(:empty){background:none;border:none;overflow:visible;box-shadow:none}
 
 /* ── Split modal ───────────────────────────────────────────────── */
 .split-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:saturate(180%) blur(20px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -1145,6 +1151,7 @@ html.tv-mode body{overflow:auto}
 /* ── #7 Glassmorphism shimmer (KPI — always active, slow loop) ── */
 @keyframes shimmer{0%{background-position:-200% 0}8%{background-position:200% 0}100%{background-position:200% 0}}
 .kpi::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(130deg,rgba(160,210,255,.12) 0%,transparent 25%,transparent 40%,rgba(160,210,255,.05) 50%,transparent 60%,transparent 80%,rgba(160,210,255,.06) 100%);background-size:200% 100%;animation:shimmer 12s ease-in-out infinite;pointer-events:none;z-index:0}
+.card::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(130deg,rgba(160,210,255,.08) 0%,transparent 30%,transparent 45%,rgba(160,210,255,.04) 55%,transparent 65%,transparent 82%,rgba(160,210,255,.05) 100%);background-size:200% 100%;animation:shimmer 18s ease-in-out infinite;pointer-events:none;z-index:0}
 
 /* ── Header More Menu ──────────────────────────────────────────── */
 .hdr-more-item{display:block;width:100%;text-align:left;background:none;border:none;padding:10px 14px;font-size:13px;color:var(--t1);border-radius:8px;cursor:pointer;font-family:inherit;transition:background .15s}
@@ -1523,6 +1530,8 @@ var _splitTruckIdx = null;
 var _splitSelected = new Set();
 var _ponctOpen = null;
 var _ponctTruckOpen = null;
+var _dayPonctOpen = null;
+var _dayPonctTruckOpen = null;
 var _importTs = null;
 var _tickerInterval = null;
 var QUAIS = [2,3,4,5,6,7,8,9,10,11];
@@ -2094,311 +2103,283 @@ function renderDayDetail(date){
   livs.forEach(function(d){
     if(d.sp==='C')spC++;else if(d.sp==='B')spB++;else spA++;
     if(d.wm==='C')wC++;
-    totPalSilo +=(d.palSilo||0);
-    totColSilo +=(d.colisSilo||0);
-    totColPick +=(d.colisPick||0);
+    totPalSilo+=(d.palSilo||0);
+    totColSilo+=(d.colisSilo||0);
+    totColPick+=(d.colisPick||0);
   });
   var restPalSilo=0,restColSilo=0,restColPick=0;
   var livRestMap={};
-  livIds.forEach(function(id){ livRestMap[id]={pal:0,silo:0,pick:0}; });
+  livIds.forEach(function(id){livRestMap[id]={pal:0,silo:0,pick:0};});
   (APP.articles||[]).forEach(function(a){
-    if(!livIds.has(a.liv)) return;
-    if((a.swm||a.wm||'')!=='C'){
-      restPalSilo  +=(a.pal||0);
-      restColSilo  +=(a.silo||0);
-    }
-    if(a.vp!=='C'){
-      restColPick  +=(a.pick||0);
-      livRestMap[a.liv].pal  +=(a.pal||0);
-      livRestMap[a.liv].silo +=(a.silo||0);
-      livRestMap[a.liv].pick +=(a.pick||0);
-    }
+    if(!livIds.has(a.liv))return;
+    if((a.swm||a.wm||'')!=='C'){restPalSilo+=(a.pal||0);restColSilo+=(a.silo||0);}
+    if(a.vp!=='C'){restColPick+=(a.pick||0);livRestMap[a.liv].pal+=(a.pal||0);livRestMap[a.liv].silo+=(a.silo||0);livRestMap[a.liv].pick+=(a.pick||0);}
   });
-  var restHrSilo = CADENCE_SILO>0 ? restPalSilo/CADENCE_SILO : 0;
-  var restHrPick = CADENCE_PICK>0 ? restColPick/CADENCE_PICK : 0;
+  var restHrSilo=CADENCE_SILO>0?restPalSilo/CADENCE_SILO:0;
+  var restHrPick=CADENCE_PICK>0?restColPick/CADENCE_PICK:0;
 
-  // ── Truck indicators for the day ──
+  // ── Truck indicators ──
   var now=Date.now();
   var tAheure=0,tAvance=0,tRetard=0,tAttente=0,tArrive=0,tAquai=0,tEnChg=0,tParti=0;
+  var dAheure=[],dAvance=[],dRetard=[],dAttente=[];
   trucksOfDay.forEach(function(t){
     var ts2=timestamps[t.id]||{};
     var p=getPonctualite(t,ts2,now);
-    if(p.status==='heure')tAheure++;
-    else if(p.status==='avance')tAvance++;
-    else if(p.status==='retard_reel'||p.status==='retard_auto')tRetard++;
-    else if(p.status==='attente')tAttente++;
+    if(p.status==='heure'){tAheure++;dAheure.push({t:t,p:p});}
+    else if(p.status==='avance'){tAvance++;dAvance.push({t:t,p:p});}
+    else if(p.status==='retard_reel'||p.status==='retard_auto'){tRetard++;dRetard.push({t:t,p:p});}
+    else if(p.status==='attente'){tAttente++;dAttente.push({t:t,p:p});}
     if(ts2.dep)tParti++;
     else if(ts2.chg)tEnChg++;
     else if(ts2.quai)tAquai++;
     else if(ts2.arr)tArrive++;
   });
   var onSite=tArrive+tAquai+tEnChg;
-  // ── SPC card helper (same pattern as Vue Semaine) ──
-  function spcCard(val,lbl,color,cls){
-    return '<div class="spc '+(cls||'')+'" style="cursor:default"><div class="spc-val" style="color:'+color+'">'+val+'</div><div class="spc-lbl">'+lbl+'</div></div>';
-  }
-  function spcCardRing(pct,lbl,color){
-    return '<div class="spc" style="cursor:default;padding:14px 12px">'+progressRingSVG(pct,color,48)+'<div class="spc-lbl" style="margin-top:6px">'+lbl+'</div></div>';
-  }
-  function spcCardVolume(label,rest,prev,color,unit,heures){
-    if(prev<=0) return '<div class="spc" style="cursor:default"><div class="spc-lbl" style="margin-bottom:6px">'+label+'</div><div class="spc-val" style="color:var(--t3)">\u2014</div></div>';
-    var done=Math.max(0,prev-rest);
-    var pct=Math.round(done/prev*100);
-    var barCol=pct>=100?'var(--green)':pct>=50?color:'var(--amber)';
-    return '<div class="spc" style="cursor:default;text-align:left;padding:16px 18px">'+
-      '<div class="spc-lbl" style="margin-bottom:6px;text-align:left">'+label+'</div>'+
-      '<div style="display:flex;align-items:flex-end;gap:5px;margin-bottom:4px">'+
-        '<span style="font-size:22px;font-weight:900;line-height:1;color:var(--t1)">'+Math.round(rest).toLocaleString('fr')+'</span>'+
-        '<span style="font-size:10px;color:var(--t3);padding-bottom:2px">rest.</span>'+
-      '</div>'+
-      '<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);margin:4px 0;overflow:hidden">'+
-        '<div style="height:100%;width:'+pct+'%;background:'+barCol+';transition:width .4s;border-radius:3px"></div>'+
-      '</div>'+
-      '<div style="display:flex;justify-content:space-between">'+
-        '<span style="font-size:10px;color:var(--t3)"><b style="color:var(--t2)">'+pct+'%</b> \u00b7 '+Math.round(done).toLocaleString('fr')+'/'+Math.round(prev).toLocaleString('fr')+' '+unit+'</span>'+
-        (heures>0?'<span style="font-size:10px;color:var(--orange);font-weight:700">\u23f1 '+heures.toFixed(1)+'h</span>':'')+
-      '</div>'+
-    '</div>';
-  }
-
-  function deltaKpi(label, rest, prev, color, unit, heures){
-    if(prev<=0) return '<div class="day-kpi" style="--acc:'+color+'"><div class="day-kpi-l">'+label+'</div><div style="font-size:20px;color:var(--t3)">\u2014</div></div>';
-    var done=Math.max(0,prev-rest);
-    var pct=Math.round(done/prev*100);
-    var barColor=pct>=100?'var(--green)':pct>=50?color:'var(--amber)';
-    return '<div class="day-kpi" style="--acc:'+color+'">'+
-      '<div class="day-kpi-l">'+label+'</div>'+
-      '<div style="display:flex;align-items:flex-end;gap:5px;margin-bottom:2px">'+
-        '<span style="font-size:24px;font-weight:900;line-height:1;color:var(--t1)">'+Math.round(rest).toLocaleString('fr')+'</span>'+
-        '<span style="font-size:10px;color:var(--t3);padding-bottom:2px">restant</span>'+
-      '</div>'+
-      '<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);margin:4px 0 4px;overflow:hidden">'+
-        '<div style="height:100%;width:'+pct+'%;background:'+barColor+';transition:width .4s;border-radius:3px"></div>'+
-      '</div>'+
-      '<div style="display:flex;justify-content:space-between">'+
-        '<span style="font-size:10px;color:var(--t3)"><b style="color:var(--t2)">'+pct+'%</b> \u00b7 '+Math.round(done).toLocaleString('fr')+'/'+Math.round(prev).toLocaleString('fr')+' '+unit+'</span>'+
-        (heures>0?'<span style="font-size:10px;color:var(--orange);font-weight:700">\u23f1 '+heures.toFixed(1)+'h</span>':'')+
-      '</div>'+
-    '</div>';
-  }
-
-  var dayLabel=new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  var nExport=livs.filter(function(d){return isExport(d);}).length;
+  var tPctDone=nbTrucks?Math.round(tParti/nbTrucks*100):0;
   var pct=total?Math.round(spC/total*100):0;
+  var dayLabel=new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 
-  // ── Day picker: build date tabs ──
-  var allDates=[];var seenDt={};
+  // ── Day picker ──
+  var allDates=[],seenDt={};
   (APP.deliveries||[]).forEach(function(d){if(d.date&&!seenDt[d.date]){seenDt[d.date]=true;allDates.push(d.date);}});
   trucks.forEach(function(t){if(t.date&&!seenDt[t.date]){seenDt[t.date]=true;allDates.push(t.date);}});
   var todayISO=new Date().toISOString().slice(0,10);
-  if(!seenDt[todayISO]){allDates.push(todayISO);}
+  if(!seenDt[todayISO])allDates.push(todayISO);
   allDates.sort();
-  var dayPickerHtml='<div class="glass-panel" style="display:flex;gap:6px;flex-wrap:wrap;padding:12px 20px">';
-  allDates.forEach(function(dt){
-    var dtObj=new Date(dt+'T12:00:00');
-    var shortLabel=dtObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  var pickerBtns=allDates.map(function(dt){
+    var lbl=new Date(dt+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
     var isActive=(dt===date);
-    dayPickerHtml+='<button onclick="changeDayView(\''+dt+'\')" style="padding:6px 14px;font-size:12px;font-weight:'+(isActive?'800':'600')+';border-radius:10px;border:1px solid '+(isActive?'rgba(10,132,255,.4)':'rgba(160,210,255,.12)')+';background:'+(isActive?'rgba(10,132,255,.15)':'rgba(160,210,255,.05)')+';color:'+(isActive?'var(--blue)':'var(--t2)')+';cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:'+(isActive?'0 0 12px rgba(10,132,255,.15)':'none')+'">'+(dt===todayISO?'\uD83D\uDFE2 ':'')+shortLabel+'</button>';
-  });
-  dayPickerHtml+='</div>';
+    return '<button onclick="changeDayView(\''+dt+'\')" style="padding:6px 14px;font-size:12px;font-weight:'+(isActive?'800':'600')+';border-radius:10px;border:1px solid '+(isActive?'rgba(10,132,255,.4)':'rgba(160,210,255,.12)')+';background:'+(isActive?'rgba(10,132,255,.15)':'rgba(160,210,255,.05)')+';color:'+(isActive?'var(--blue)':'var(--t2)')+';cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:'+(isActive?'0 0 12px rgba(10,132,255,.15)':'none')+'">'+(dt===todayISO?'\uD83D\uDFE2 ':'')+lbl+'</button>';
+  }).join('');
+  // Chips statut SGP/WM pour l'en-tête intégré
+  var sgpChips2=''
+    +(spC?'<span class="tc-chip green">\u2705 C \u2014 '+spC+'</span>':'')
+    +(spB?'<span class="tc-chip amber">B \u2014 '+spB+'</span>':'')
+    +(spA?'<span class="tc-chip" style="background:rgba(96,104,128,.2);border-color:rgba(96,104,128,.3);color:var(--t3)">A \u2014 '+spA+'</span>':'')
+    +(wC?'<span class="tc-chip" style="background:rgba(38,201,211,.12);border-color:rgba(38,201,211,.3);color:var(--teal);margin-left:4px">WM C \u2014 '+wC+'</span>':'');
+  // En-tête jour : glass panel flottant indépendant (backdrop-filter + border + glow)
+  var dayPickerHtml='<div class="syn-ponct">'+
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
+      '<div>'+
+        '<div style="font-size:22px;font-weight:800;color:var(--t1);line-height:1.2">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
+        '<div class="syn-ponct-sub" style="margin-top:3px">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% pr\u00e9pa'+(nbTrucks?' \u00b7 '+nbTrucks+' camion'+(nbTrucks>1?'s':''):'')+( nExport?' \u00b7 '+nExport+' export':'')+(tPctDone>0?' \u00b7 '+tPctDone+'% partis':'')+'</div>'+
+      '</div>'+
+      (sgpChips2?'<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+sgpChips2+'</div>':'')+
+    '</div>'+
+    (nbTrucks>0?'<div style="height:4px;border-radius:3px;background:rgba(160,210,255,.08);overflow:hidden;margin-bottom:12px"><div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div></div>':'')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+pickerBtns+'</div>'+
+  '</div>';
 
   // ── Empty state ──
-  if(!total && !nbTrucks){
-    dd.innerHTML=
-      '<div class="day-detail">'+
-        dayPickerHtml+
-        '<div class="day-header">'+
-          '<div>'+
-            '<div class="day-title">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
-            '<div class="day-sub">Aucune donn\u00e9e pour ce jour</div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="day-kpi-row" style="grid-template-columns:repeat(4,1fr);margin-top:12px">'+
-          '<div class="day-kpi" style="--acc:var(--orange)"><div class="day-kpi-l">\uD83D\uDE9A Camions</div><div class="day-kpi-v">0</div></div>'+
-          '<div class="day-kpi" style="--acc:var(--blue)"><div class="day-kpi-l">\uD83D\uDCE6 Livraisons</div><div class="day-kpi-v">0</div></div>'+
-          '<div class="day-kpi" style="--acc:var(--green)"><div class="day-kpi-l">\u2705 C Termin\u00e9es</div><div class="day-kpi-v">0</div></div>'+
-          '<div class="day-kpi" style="--acc:var(--t3)"><div class="day-kpi-l">\u23F3 En attente</div><div class="day-kpi-v">\u2014</div></div>'+
-        '</div>'+
-        '<div style="text-align:center;padding:40px 20px;color:var(--t3)">'+
-          '<div style="font-size:40px;margin-bottom:12px">\uD83D\uDCC5</div>'+
-          '<div style="font-size:15px;font-weight:600">Aucune livraison ni camion pour ce jour</div>'+
-          '<div style="font-size:12px;margin-top:6px">Importez un fichier VL06O ou s\u00e9lectionnez un autre jour</div>'+
-        '</div>'+
+  if(!total&&!nbTrucks){
+    dd.innerHTML=dayPickerHtml+
+      '<div class="card" style="text-align:center;padding:40px 20px">'+
+        '<div style="font-size:40px;margin-bottom:12px">\uD83D\uDCC5</div>'+
+        '<div style="font-size:15px;font-weight:700;color:var(--t1)">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
+        '<div style="font-size:12px;color:var(--t3);margin-top:8px">Aucune livraison ni camion pour ce jour</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:4px">Importez un fichier VL06O ou s\u00e9lectionnez un autre jour</div>'+
       '</div>';
     return;
   }
 
-  var statusBar='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
-    +'<span style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">SGP</span>'
-    +(spC?'<span class="tc-chip green">C \u2014 '+spC+'</span>':'')
-    +(spB?'<span class="tc-chip amber">B \u2014 '+spB+'</span>':'')
-    +(spA?'<span class="tc-chip" style="background:rgba(96,104,128,.2);border-color:rgba(96,104,128,.3);color:var(--t3)">A \u2014 '+spA+'</span>':'')
-    +'<span style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-left:6px">SWM</span>'
-    +(wC?'<span class="tc-chip" style="background:rgba(38,201,211,.12);border-color:rgba(38,201,211,.3);color:var(--teal)">C \u2014 '+wC+'</span>':'')
-    +'</div>';
+  // (En-tête fusionné dans dayPickerHtml ci-dessus)
 
-  // ── Truck status section ──
-  var truckStatusHtml='';
-  if(nbTrucks>0){
-    var tPctDone=nbTrucks?Math.round(tParti/nbTrucks*100):0;
-    truckStatusHtml=
-      '<div class="glass-panel" style="padding:18px 20px">'+
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
-          '<span style="font-size:13px;font-weight:800;color:var(--t1)">\uD83D\uDE9A Camions du jour</span>'+
-          '<span style="font-size:11px;color:var(--t3)">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+' \u00b7 '+tPctDone+'% partis</span>'+
-        '</div>'+
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
-          (tAheure?'<span class="tc-chip green">\u2705 \u00c0 l\u2019heure \u2014 '+tAheure+'</span>':'')+
-          (tAvance?'<span class="tc-chip" style="background:rgba(38,201,211,.12);border-color:rgba(38,201,211,.3);color:var(--teal)">\u23E9 Avance \u2014 '+tAvance+'</span>':'')+
-          (tAttente?'<span class="tc-chip amber">\u23F3 Cr\u00e9neau en cours \u2014 '+tAttente+'</span>':'')+
-          (tRetard?'<span class="tc-chip" style="background:rgba(255,69,58,.12);border-color:rgba(255,69,58,.3);color:var(--red)">\u26A0 Retard \u2014 '+tRetard+'</span>':'')+
-        '</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+
-          '<div style="text-align:center;padding:12px 8px;border-radius:16px;border:1px solid rgba(160,210,255,.15);background:rgba(160,210,255,.06)"><div style="font-size:18px;font-weight:900;color:var(--blue)">'+tArrive+'</div><div style="font-size:10px;color:var(--t3)">Arriv\u00e9s</div></div>'+
-          '<div style="text-align:center;padding:12px 8px;border-radius:16px;border:1px solid rgba(160,210,255,.15);background:rgba(160,210,255,.06)"><div style="font-size:18px;font-weight:900;color:var(--indigo)">'+tAquai+'</div><div style="font-size:10px;color:var(--t3)">\u00c0 quai</div></div>'+
-          '<div style="text-align:center;padding:12px 8px;border-radius:16px;border:1px solid rgba(160,210,255,.15);background:rgba(160,210,255,.06)"><div style="font-size:18px;font-weight:900;color:var(--orange)">'+tEnChg+'</div><div style="font-size:10px;color:var(--t3)">En charg.</div></div>'+
-          '<div style="text-align:center;padding:12px 8px;border-radius:16px;border:1px solid rgba(160,210,255,.15);background:rgba(160,210,255,.06)"><div style="font-size:18px;font-weight:900;color:var(--green)">'+tParti+'</div><div style="font-size:10px;color:var(--t3)">Partis</div></div>'+
-        '</div>'+
-        '<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);margin-top:10px;overflow:hidden">'+
-          '<div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div>'+
-        '</div>'+
-      '</div>';
+  // ── Bloc 1 : KPIs principaux (style .kpi identique Vue Semaine) ──
+  function kpiDeltaDay(prev,rest,color,heures){
+    if(prev<=0)return '<div style="font-size:22px;font-weight:900;color:var(--t3)">\u2014</div>';
+    var done=Math.max(0,prev-rest),dpct=Math.round(done/prev*100);
+    var barCol=dpct>=100?'var(--green)':dpct>=50?color:'var(--amber)';
+    var hStr=heures>0?'<span style="color:var(--orange);font-weight:700">\u23f1 '+heures.toFixed(1)+'h</span>':'';
+    return '<div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:2px"><span style="font-size:22px;font-weight:900;line-height:1;color:var(--t1)">'+Math.round(rest).toLocaleString('fr')+'</span><span style="font-size:10px;color:var(--t3);padding-bottom:2px"> rest.</span></div>'+
+      '<div style="height:5px;border-radius:3px;background:var(--bd2);margin:5px 0 4px;overflow:hidden"><div style="height:100%;width:'+dpct+'%;background:'+barCol+';border-radius:3px;transition:width .5s ease"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2px"><span style="font-size:10px;color:var(--t3)"><span style="color:var(--t2);font-weight:700">'+dpct+'%</span> \u00b7 '+Math.round(done).toLocaleString('fr')+'/'+Math.round(prev).toLocaleString('fr')+'</span>'+(hStr?'<span style="font-size:10px">'+hStr+'</span>':'')+'</div>';
   }
-
-  var rows=livs.map(function(d){
-    var exp=isExport(d)?'<span class="exp-badge">EXPORT</span>':'';
-    var rm=livRestMap[d.id]||{pal:0,silo:0,pick:0};
-    var colisHtml='';
-    if(d.palSilo)  colisHtml+='<span style="color:var(--indigo);font-size:11px;font-weight:700">\uD83C\uDFED\u00a0'+Math.round(d.palSilo)+'pal</span> ';
-    if(d.colisSilo)colisHtml+='<span style="color:var(--blue);font-size:11px">\u00a0'+Math.round(d.colisSilo).toLocaleString('fr')+'cs</span> ';
-    if(d.colisPick)colisHtml+='<span style="color:var(--purple);font-size:11px;font-weight:700">\u270b\u00a0'+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>';
-    if(!colisHtml)colisHtml='<span style="color:var(--t3)">\u2014</span>';
-    var restHtml='';
-    var isDone=(d.sp==='C');
-    if(isDone){
-      restHtml='<span style="color:var(--green);font-size:11px;font-weight:700">\u2713 Termin\u00e9</span>';
-    } else {
-      if(rm.pal>0)  restHtml+='<span style="color:var(--indigo);font-size:11px;font-weight:900">\uD83C\uDFED\u00a0'+rm.pal+'pal</span> ';
-      if(rm.silo>0) restHtml+='<span style="color:var(--blue);font-size:11px">'+Math.round(rm.silo).toLocaleString('fr')+'cs</span> ';
-      if(rm.pick>0) restHtml+='<span style="color:var(--purple);font-size:11px;font-weight:900">\u270b\u00a0'+Math.round(rm.pick).toLocaleString('fr')+'pk</span>';
-      if(!restHtml) restHtml='<span style="color:var(--green);font-size:11px">\u2713 OK</span>';
-    }
-    return '<tr>'+
-      '<td><b style="color:var(--t1)">'+d.id+'</b></td>'+
-      '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)">'+(d.dest||'\u2014')+exp+'</td>'+
-      '<td style="color:var(--t3)">'+(d.ville||'\u2014')+'</td>'+
-      '<td>'+badge(d.sp)+'</td><td>'+badge(d.wm)+'</td>'+
-      '<td>'+colisHtml+'</td>'+
-      '<td style="border-left:1px solid var(--bd2);padding-left:8px">'+restHtml+'</td>'+
-    '</tr>';
+  var kpiRow1=[
+    {l:'Livraisons',v:total,acc:'var(--blue)',sub:(nExport?'dont '+nExport+' export':'total du jour'),ico:'\uD83D\uDCE6',ibg:'rgba(10,132,255,.12)'},
+    {l:'SGP \u2014 Pr\u00e9pa termin\u00e9e',v:spC,acc:'var(--green)',sub:pct+'% \u00b7 '+spA+' en cours \u00b7 '+spB+' commenc.',ico:'\u2705',ibg:'rgba(48,209,88,.12)'},
+    {l:'SWM \u2014 WM termin\u00e9e',v:wC,acc:'var(--teal)',sub:(total?Math.round(wC/total*100):0)+'% du jour',ico:'\uD83D\uDD04',ibg:'rgba(90,200,250,.12)'},
+    {l:'Camions',v:nbTrucks,acc:'var(--orange)',sub:tPctDone+'% partis \u00b7 '+tParti+'/'+nbTrucks,ico:'\uD83D\uDE9A',ibg:'rgba(255,159,10,.12)'},
+  ].map(function(k){
+    return '<div class="kpi" style="--acc:'+k.acc+'"><div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div><div class="kpi-body"><div class="kpi-l">'+k.l+'</div><div class="kpi-v">'+k.v+'</div><div class="kpi-s">'+k.sub+'</div></div></div>';
   }).join('');
+  var kpiRow2=
+    '<div class="kpi" style="--acc:var(--indigo)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(94,92,230,.12)">\uD83C\uDFED</div><div class="kpi-body"><div class="kpi-l">Palettes SILO</div>'+kpiDeltaDay(totPalSilo,restPalSilo,'var(--indigo)',restHrSilo)+'</div></div>'+
+    '<div class="kpi" style="--acc:var(--blue)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(10,132,255,.12)">\uD83D\uDCE6</div><div class="kpi-body"><div class="kpi-l">Colis Total</div>'+kpiDeltaDay(totColSilo,restColSilo,'var(--blue)',0)+'</div></div>'+
+    '<div class="kpi" style="--acc:var(--purple)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(191,90,242,.12)">\u270b</div><div class="kpi-body"><div class="kpi-l">Colis Picking</div>'+kpiDeltaDay(totColPick,restColPick,'var(--purple)',restHrPick)+'</div></div>';
+  // ── Compteurs temps réel → kpi-row identique Vue Semaine ──
+  var kpiRealtime='';
+  if(nbTrucks>0){
+    kpiRealtime=[
+      {l:'Sur site',      v:onSite,  acc:'var(--blue)',  sub:tAquai+' \u00e0 quai \u00b7 '+tEnChg+' en chg.',ico:'\uD83C\uDFED',ibg:'rgba(10,132,255,.12)'},
+      {l:'Arriv\u00e9s',  v:tArrive, acc:'var(--amber)', sub:'en attente de quai',              ico:'\u23F3',        ibg:'rgba(255,159,10,.12)'},
+      {l:'\u00c0 quai',   v:tAquai,  acc:'var(--indigo)',sub:'dock assign\u00e9',                ico:'\uD83D\uDEA7',  ibg:'rgba(94,92,230,.12)'},
+      {l:'En chargement', v:tEnChg,  acc:'var(--purple)',sub:'op\u00e9ration en cours',         ico:'\uD83D\uDCE6',  ibg:'rgba(191,90,242,.12)'},
+      {l:'Partis',        v:tParti,  acc:'var(--green)', sub:tPctDone+'% termin\u00e9s',        ico:'\uD83D\uDE80',  ibg:'rgba(48,209,88,.12)'},
+    ].map(function(k){return '<div class="kpi" style="--acc:'+k.acc+'"><div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div><div class="kpi-body"><div class="kpi-l">'+k.l+'</div><div class="kpi-v">'+k.v+'</div><div class="kpi-s">'+k.sub+'</div></div></div>';}).join('');
+  }
+  var blocKpi=
+    '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'+kpiRow1+'</div>'+
+    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'')+
+    (kpiRealtime?'<div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">'+kpiRealtime+'</div>':'');
 
-  var dayHeaderHtml='<div class="day-header">'+
-    '<div>'+
-      '<div class="day-title">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
-      '<div class="day-sub">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% pr\u00e9pa termin\u00e9e \u00b7 '+nbTrucks+' camion'+(nbTrucks>1?'s':'')+'</div>'+
-    '</div>'+
-    statusBar+
+  // ── Bloc 3 : Ponctualité cliquable (identique Vue Semaine) ──
+  var blocPonct='';
+  if(nbTrucks>0){
+    function buildDayPonctPanel(arr){
+      return arr.map(function(item){
+        var t=item.t,p=item.p,ts2=timestamps[t.id]||{};
+        var nm=t.transporteur||t.itin||'?';
+        var livIds2=t.deliveries||[];
+        var cr=t.creneau?('<span style="background:rgba(77,124,254,.12);color:var(--blue);padding:1px 7px;border-radius:5px;font-size:10px;font-weight:700">'+t.creneau+'</span>'):'';
+        var ar=ts2.arr?('<span style="color:var(--green);font-size:10px">\u2192 Arr. '+fmtTime(ts2.arr)+'</span>'):'';
+        var dp=ts2.dep?('<span style="color:var(--amber);font-size:10px">\u2192 D\u00e9p. '+fmtTime(ts2.dep)+'</span>'):'';
+        var dl=p.delta?('<span style="font-size:10px;color:var(--t3)">'+p.delta+'</span>'):'';
+        var nb2=livIds2.length?('<span style="font-size:10px;color:var(--t3)">'+livIds2.length+' liv.</span>'):'';
+        var isT=(_dayPonctTruckOpen===t.id);
+        var chev='<span style="font-size:9px;color:var(--t3);margin-left:auto">'+(isT?'&#9652;':'&#9662;')+'</span>';
+        var livPanel2='';
+        if(isT&&livIds2.length){
+          livPanel2='<div style="margin-top:6px;display:flex;flex-direction:column;gap:2px">'+
+            livIds2.map(function(id){
+              var d=APP.deliveries.find(function(x){return x.id===id;});
+              if(!d)return '<div style="font-size:10px;color:var(--t3);padding:3px 6px">'+id+'</div>';
+              var sp2=d.sp==='C'?'<span style="color:var(--green);font-size:10px;font-weight:700">\u2713 C</span>':d.sp==='B'?'<span style="color:var(--amber);font-size:10px;font-weight:700">B</span>':'<span style="color:var(--t3);font-size:10px">A</span>';
+              var vi2=d.ville?('<span style="color:var(--t3);font-size:10px;white-space:nowrap">'+d.ville+'</span>'):'';
+              return '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;background:var(--sf3)"><span style="font-size:10px;font-weight:700;color:var(--blue);font-family:monospace">'+d.id+'</span><span style="font-size:11px;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</span>'+vi2+' '+sp2+'</div>';
+            }).join('')+
+          '</div>';
+        }
+        return '<div class="ponct-truck" data-daytrk="'+t.id+'" style="display:flex;flex-direction:column;gap:4px;padding:8px 12px;background:var(--sf2);border-radius:8px;border:1px solid var(--bd2);cursor:pointer">'+
+          '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;pointer-events:none"><span style="font-weight:800;font-size:13px;color:var(--t1)">'+nm+'</span>'+cr+nb2+chev+'</div>'+
+          ((ar||dp||dl)?'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;pointer-events:none">'+ar+' '+dp+' '+dl+'</div>':'')+
+          livPanel2+
+        '</div>';
+      }).join('');
+    }
+    function ponctCard(key,cls,val,icon,lbl){
+      var hasItems=val>0,isOpen=(_dayPonctOpen===key);
+      var chev=hasItems?(' <span style="font-size:9px;opacity:.6">'+(isOpen?'&#9652;':'&#9662;')+'</span>'):'';
+      return '<div class="spc '+cls+(isOpen?' spc-open':'')+(hasItems?' spc-click':'')+'" data-daypct="'+key+'" style="'+(hasItems?'cursor:pointer':'')+'"><div class="spc-val">'+val+'</div><div class="spc-lbl">'+icon+' '+lbl+chev+'</div></div>';
+    }
+    var openArr2=_dayPonctOpen==='heure'?dAheure:_dayPonctOpen==='avance'?dAvance:_dayPonctOpen==='attente'?dAttente:_dayPonctOpen==='retard'?dRetard:[];
+    var panelExpand='';
+    if(_dayPonctOpen&&openArr2.length){
+      panelExpand='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:6px">'+buildDayPonctPanel(openArr2)+'</div>';
+    }
+    blocPonct='<div class="syn-ponct" id="dayPonct">'+
+      '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83D\uDD34 Ponctualit\u00e9 camions</span><span class="syn-ponct-sub">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+' \u00b7 '+tPctDone+'% partis</span></div>'+
+      '<div class="syn-ponct-cards">'+
+        ponctCard('heure','green',tAheure,'\uD83D\uDFE2','\u00c0 l\u2019heure')+
+        ponctCard('avance','teal',tAvance,'\u23E9','En avance')+
+        ponctCard('attente','amber',tAttente,'\uD83D\uDFE1','Cr\u00e9neau')+
+        ponctCard('retard','red',tRetard,'\uD83D\uDD34','En retard')+
+      '</div>'+
+      panelExpand+
     '</div>';
-
-  var tableHtml='';
-  if(total>0){
-    tableHtml=
-      '<div class="glass-panel" style="overflow-x:auto;padding:16px 20px">'+
-      '<div class="glass-panel-title">\uD83D\uDCCB D\u00e9tail livraisons</div>'+
-      '<table class="dd-table" style="width:100%">'+
-        '<thead><tr>'+
-          '<th>Livraison</th><th>Destinataire</th><th>Ville</th><th>Pr\u00e9l.</th><th>WM</th>'+
-          '<th>Pr\u00e9vu</th>'+
-          '<th style="border-left:1px solid var(--bd2);color:var(--amber)">Restant</th>'+
-        '</tr></thead>'+
-        '<tbody>'+rows+'</tbody>'+
-      '</table></div>';
   }
 
-  // #7 Progress rings for day KPIs
+  // ── Bloc 4 : Avancement (syn-ponct + progress rings) ──
   var prepPct=total?Math.round(spC/total*100):0;
   var palPct=totPalSilo?Math.round(Math.max(0,totPalSilo-restPalSilo)/totPalSilo*100):0;
   var colPct=totColSilo?Math.round(Math.max(0,totColSilo-restColSilo)/totColSilo*100):0;
   var trkPct=nbTrucks?Math.round(tParti/nbTrucks*100):0;
-
-  // ── Row 1: RT counters (5 spc cards) ──
-  var row1='';
-  if(nbTrucks>0){
-    row1='<div class="syn-ponct"><div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83C\uDFED Temps r\u00e9el</span><span class="syn-ponct-sub">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+'</span></div>'+
-      '<div class="syn-ponct-cards" style="grid-template-columns:repeat(5,1fr)">'+
-        spcCard(onSite,'\uD83C\uDFED Sur site','var(--blue)','teal')+
-        spcCard(tArrive,'\u23F3 En attente','var(--amber)','amber')+
-        spcCard(tEnChg,'\uD83D\uDCE6 En chargement','var(--purple)','')+
-        spcCard(tParti,'\uD83D\uDE80 Partis','var(--green)','green')+
-        spcCard(nbTrucks,'\uD83D\uDE9A Total','var(--t1)','')+
-      '</div></div>';
-  }
-
-  // ── Row 2: Main KPIs (4 spc cards) ──
-  var nExport=livs.filter(function(d){return isExport(d);}).length;
-  var row2='<div class="syn-ponct"><div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83D\uDCCA Indicateurs du jour</span></div>'+
-    '<div class="syn-ponct-cards" style="grid-template-columns:repeat(4,1fr)">'+
-      '<div class="spc" style="cursor:default"><div class="spc-val" style="color:var(--blue)">'+total+'</div><div class="spc-lbl">\uD83D\uDCE6 Livraisons</div>'+(nExport?'<div style="font-size:10px;color:var(--t3);margin-top:2px">('+nExport+' export incl.)</div>':'')+'</div>'+
-      '<div class="spc green" style="cursor:default"><div class="spc-val">'+spC+'</div><div class="spc-lbl">\u2705 SGP \u2014 Pr\u00e9pa termin\u00e9e</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pct+'%'+(spB?' \u00b7 '+spB+' commenc\u00e9es':'')+'</div></div>'+
-      '<div class="spc teal" style="cursor:default"><div class="spc-val">'+wC+'</div><div class="spc-lbl">\u2705 SWM \u2014 WM termin\u00e9e</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+(total?Math.round(wC/total*100):0)+'%</div></div>'+
-      '<div class="spc" style="cursor:default"><div class="spc-val" style="color:var(--orange)">'+nbTrucks+'</div><div class="spc-lbl">\uD83D\uDE9A Camions</div><div style="font-size:10px;color:var(--t3);margin-top:2px">auto SAP</div></div>'+
-    '</div></div>';
-
-  // ── Row 3: Volumes (3 spc cards) ──
-  var row3='';
-  if(totPalSilo||totColSilo||totColPick){
-    row3='<div class="syn-ponct"><div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83C\uDFED Volumes restants</span></div>'+
-      '<div class="syn-ponct-cards" style="grid-template-columns:repeat(3,1fr)">'+
-        spcCardVolume('\uD83C\uDFED Palettes SILO',restPalSilo,totPalSilo,'var(--indigo)','pal.',restHrSilo)+
-        spcCardVolume('\uD83D\uDCE6 Colis Total',restColSilo,totColSilo,'var(--blue)','col.',0)+
-        spcCardVolume('\u270b Colis Picking',restColPick,totColPick,'var(--purple)','col.',restHrPick)+
-      '</div></div>';
-  }
-
-  // ── Row 4: Progress rings (4-5 spc cards) ──
-  var row4='';
+  var advGlobal=Math.round((prepPct+trkPct+(totPalSilo?palPct:prepPct))/3);
+  var blocAvancement='';
   if(nbTrucks>0||total>0){
-    var advPct=nbTrucks?Math.round(tParti/nbTrucks*100):0;
-    row4='<div class="syn-ponct"><div class="syn-ponct-hdr"><span class="syn-ponct-title">\u2B55 Avancement</span></div>'+
-      '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+(totPalSilo?5:4)+',1fr)">'+
-        spcCardRing(prepPct,'Pr\u00e9pa SGP','var(--green)')+
-        (totPalSilo?spcCardRing(palPct,'SILO Pal.','var(--indigo)'):'')+
-        spcCardRing(colPct,'Colis','var(--blue)')+
-        spcCardRing(trkPct,'Camions','var(--orange)')+
-        '<div class="spc" style="cursor:default;padding:14px 12px"><div class="spc-val" style="font-size:36px;color:'+(advPct>=80?'var(--green)':advPct>=40?'var(--amber)':'var(--red)')+'">'+advPct+'%</div><div class="spc-lbl" style="margin-top:6px">Avanc. global</div></div>'+
+    function spcRing(pct2,lbl,col){return '<div class="spc" style="cursor:default;padding:14px 12px">'+progressRingSVG(pct2,col,48)+'<div class="spc-lbl" style="margin-top:6px">'+lbl+'</div></div>';}
+    var nRings=3+(totPalSilo?1:0);
+    blocAvancement='<div class="syn-ponct">'+
+      '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\u2B55 Avancement global</span><span class="syn-ponct-sub">'+advGlobal+'% moyen</span></div>'+
+      '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+(nRings+1)+',1fr)">'+
+        spcRing(prepPct,'Pr\u00e9pa SGP','var(--green)')+
+        (totPalSilo?spcRing(palPct,'SILO Pal.','var(--indigo)'):'')+
+        spcRing(colPct,'Colis','var(--blue)')+
+        spcRing(trkPct,'Camions','var(--orange)')+
+        '<div class="spc" style="cursor:default;padding:14px 12px"><div class="spc-val" style="font-size:36px;color:'+(advGlobal>=80?'var(--green)':advGlobal>=40?'var(--amber)':'var(--red)')+'">'+advGlobal+'%</div><div class="spc-lbl" style="margin-top:6px">Avanc. global</div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // ── Bloc 5 : Activité & Cadences (syn-ponct) ──
+  var blocActivite='';
+  if((CADENCE_SILO>0&&totPalSilo>0)||(CADENCE_PICK>0&&totColPick>0)){
+    function spcCadence(icon,label,rest,total2,cadence,unit,color){
+      if(!total2)return '';
+      var done2=Math.max(0,total2-rest),pctC=Math.round(done2/total2*100);
+      var barCol=pctC>=100?'var(--green)':pctC>=50?color:'var(--amber)';
+      var hrRest=cadence>0?rest/cadence:0,hrTotal=cadence>0?total2/cadence:0;
+      return '<div class="spc" style="cursor:default;text-align:left;padding:16px 18px">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:18px">'+icon+'</span><span class="spc-lbl" style="text-align:left;margin:0;font-size:12px">'+label+'</span></div>'+
+        '<div style="display:flex;align-items:flex-end;gap:5px;margin-bottom:4px"><span style="font-size:24px;font-weight:900;line-height:1;color:var(--t1)">'+Math.round(rest).toLocaleString('fr')+'</span><span style="font-size:10px;color:var(--t3);padding-bottom:3px">'+unit+' rest.</span></div>'+
+        '<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);margin:4px 0;overflow:hidden"><div style="height:100%;width:'+pctC+'%;background:'+barCol+';transition:width .4s;border-radius:3px"></div></div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">'+
+          '<span style="font-size:10px;color:var(--t3)"><b style="color:var(--t2)">'+pctC+'%</b> \u00b7 '+Math.round(done2).toLocaleString('fr')+'/'+Math.round(total2).toLocaleString('fr')+'</span>'+
+          (hrRest>0?'<span style="font-size:10px;color:var(--orange);font-weight:700">\u23f1 '+hrRest.toFixed(1)+'h rest.</span>':'')+
+        '</div>'+
+        (cadence>0?'<div style="margin-top:6px;font-size:10px;color:var(--t3)">Cadence: <b style="color:var(--t2)">'+cadence+'</b> '+unit+'/h'+(hrTotal>0?' \u00b7 <b style="color:var(--t2)">'+hrTotal.toFixed(1)+'h</b> total est.':'')+'</div>':'')+
+      '</div>';
+    }
+    var cadCards=''
+      +spcCadence('\uD83C\uDFED','Palettes SILO',restPalSilo,totPalSilo,CADENCE_SILO,'pal.','var(--indigo)')
+      +spcCadence('\uD83D\uDCE6','Colis SILO',restColSilo,totColSilo,0,'col.','var(--blue)')
+      +spcCadence('\u270b','Colis Picking',restColPick,totColPick,CADENCE_PICK,'col.','var(--purple)');
+    var ncad=(CADENCE_SILO>0&&totPalSilo?1:0)+(totColSilo?1:0)+(CADENCE_PICK>0&&totColPick?1:0);
+    if(ncad>0){
+      blocActivite='<div class="syn-ponct">'+
+        '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\u26a1 Activit\u00e9 &amp; Cadences</span><span class="syn-ponct-sub">SILO '+CADENCE_SILO+' pal/h \u00b7 Picking '+CADENCE_PICK+' col/h</span></div>'+
+        '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+ncad+',1fr)">'+cadCards+'</div>'+
+      '</div>';
+    }
+  }
+
+  // ── Timeline (aujourd'hui uniquement) ──
+  var timelineHtml=(date===todayISO)?buildDayTimeline(date,trucksOfDay):'';
+
+  // ── Bloc 6 : Livraisons du jour (syn-ponct + table) ──
+  var blocLivraisons='';
+  if(total>0){
+    var rowsLiv=livs.map(function(d){
+      var exp=isExport(d)?'<span class="exp-badge">EXPORT</span>':'';
+      var rm=livRestMap[d.id]||{pal:0,silo:0,pick:0};
+      var colisHtml='';
+      if(d.palSilo)  colisHtml+='<span style="color:var(--indigo);font-size:11px;font-weight:700">\uD83C\uDFED\u00a0'+Math.round(d.palSilo)+'pal</span> ';
+      if(d.colisSilo)colisHtml+='<span style="color:var(--blue);font-size:11px">\u00a0'+Math.round(d.colisSilo).toLocaleString('fr')+'cs</span> ';
+      if(d.colisPick)colisHtml+='<span style="color:var(--purple);font-size:11px;font-weight:700">\u270b\u00a0'+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>';
+      if(!colisHtml)colisHtml='<span style="color:var(--t3)">\u2014</span>';
+      var restHtml='';
+      if(d.sp==='C'){restHtml='<span style="color:var(--green);font-size:11px;font-weight:700">\u2713 Termin\u00e9</span>';}
+      else{
+        if(rm.pal>0)  restHtml+='<span style="color:var(--indigo);font-size:11px;font-weight:900">\uD83C\uDFED\u00a0'+rm.pal+'pal</span> ';
+        if(rm.silo>0) restHtml+='<span style="color:var(--blue);font-size:11px">'+Math.round(rm.silo).toLocaleString('fr')+'cs</span> ';
+        if(rm.pick>0) restHtml+='<span style="color:var(--purple);font-size:11px;font-weight:900">\u270b\u00a0'+Math.round(rm.pick).toLocaleString('fr')+'pk</span>';
+        if(!restHtml) restHtml='<span style="color:var(--green);font-size:11px">\u2713 OK</span>';
+      }
+      return '<tr><td><b style="color:var(--t1)">'+d.id+'</b></td>'+
+        '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)">'+(d.dest||'\u2014')+exp+'</td>'+
+        '<td style="color:var(--t3)">'+(d.ville||'\u2014')+'</td>'+
+        '<td>'+badge(d.sp)+'</td><td>'+badge(d.wm)+'</td>'+
+        '<td>'+colisHtml+'</td>'+
+        '<td style="border-left:1px solid var(--bd2);padding-left:8px">'+restHtml+'</td></tr>';
+    }).join('');
+    // Livraisons en .card (type différent du syn-ponct → casse le liseré en bas)
+    blocLivraisons='<div class="card">'+
+      '<div class="card-ttl">\uD83D\uDCCB Livraisons du jour <span style="font-weight:400;color:var(--t3);font-size:11px;margin-left:6px">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% SGP-C</span></div>'+
+      '<div style="overflow-x:auto;padding:12px 16px">'+
+      '<table class="dd-table" style="width:100%"><thead><tr>'+
+        '<th>Livraison</th><th>Destinataire</th><th>Ville</th><th>Pr\u00e9l.</th><th>WM</th>'+
+        '<th>Pr\u00e9vu</th><th style="border-left:1px solid var(--bd2);color:var(--amber)">Restant</th>'+
+      '</tr></thead><tbody>'+rowsLiv+'</tbody></table>'+
       '</div></div>';
   }
 
-  // ── Row 5: Ponctualité camions (full width panel) ──
-  var row5='';
-  if(nbTrucks>0){
-    var tPctDone=nbTrucks?Math.round(tParti/nbTrucks*100):0;
-    row5='<div class="syn-ponct"><div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83D\uDE9A Ponctualit\u00e9 camions</span><span class="syn-ponct-sub">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+' \u00b7 '+tPctDone+'% partis</span></div>'+
-      '<div class="syn-ponct-cards">'+
-        (tAheure?'<div class="spc green" style="cursor:default"><div class="spc-val">'+tAheure+'</div><div class="spc-lbl">\u2705 \u00c0 l\u2019heure</div></div>':'')+
-        (tAvance?'<div class="spc teal" style="cursor:default"><div class="spc-val">'+tAvance+'</div><div class="spc-lbl">\u23E9 Avance</div></div>':'')+
-        (tAttente?'<div class="spc amber" style="cursor:default"><div class="spc-val">'+tAttente+'</div><div class="spc-lbl">\u23F3 Cr\u00e9neau</div></div>':'')+
-        (tRetard?'<div class="spc red" style="cursor:default"><div class="spc-val">'+tRetard+'</div><div class="spc-lbl">\u26A0 Retard</div></div>':'')+
-        '<div class="spc" style="cursor:default"><div class="spc-val" style="color:var(--green)">'+tParti+'</div><div class="spc-lbl">\uD83D\uDE80 Partis</div></div>'+
-      '</div>'+
-      '<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);margin-top:12px;overflow:hidden">'+
-        '<div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div>'+
-      '</div>'+
-    '</div>';
-  }
-
+  // Même structure que Vue Semaine : card picker + kpi-rows + syn-ponct ponct + card table
   dd.innerHTML=
-    '<div class="day-detail">'+
-      dayPickerHtml+
-      dayHeaderHtml+
-      (date===todayISO?buildDayTimeline(date,trucksOfDay):'')+
-      row1+
-      row2+
-      row3+
-      row4+
-      row5+
-      tableHtml+
-    '</div>';
+    dayPickerHtml+
+    timelineHtml+
+    blocKpi+
+    blocPonct+
+    blocLivraisons;
 }
 function changeDayView(date){
   _activeDay=date;
@@ -4768,8 +4749,25 @@ document.addEventListener('click', function(e){
   if(truck){
     var tid = truck.getAttribute('data-truck');
     if(tid){
-      _ponctTruckOpen = (_ponctTruckOpen===tid) ? null : tid;
-      renderSynPonct();
+      // Vue Jour ponct panel
+      if(truck.closest('#dayPonct')){
+        _dayPonctTruckOpen=(_dayPonctTruckOpen===tid)?null:tid;
+        if(_activeDay)try{renderDayDetail(_activeDay);}catch(e2){}
+      } else {
+        _ponctTruckOpen = (_ponctTruckOpen===tid) ? null : tid;
+        renderSynPonct();
+      }
+      return;
+    }
+  }
+  // Vue Jour ponct cards click
+  var dayCard = e.target.closest ? e.target.closest('[data-daypct]') : null;
+  if(dayCard && dayCard.closest('#dayPonct')){
+    var dkey = dayCard.getAttribute('data-daypct');
+    if(dkey){
+      _dayPonctOpen=(_dayPonctOpen===dkey)?null:dkey;
+      _dayPonctTruckOpen=null;
+      if(_activeDay)try{renderDayDetail(_activeDay);}catch(e2){}
       return;
     }
   }
