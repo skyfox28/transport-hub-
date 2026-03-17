@@ -1547,11 +1547,13 @@ var QUAIS = [2,3,4,5,6,7,8,9,10,11];
 var quaiAssign = {};
 
 var TS_DEFS = [
-  {key:'arr',  ico:'\uD83D\uDD50', lbl:'Arriv\u00e9e'},
-  {key:'quai', ico:'\uD83D\uDD04', lbl:'Mise \u00e0 quai'},
-  {key:'chg',  ico:'\uD83D\uDCE6', lbl:'Chargement'},
-  {key:'dep',  ico:'\uD83D\uDE80', lbl:'D\u00e9part'}
+  {key:'arr',     ico:'\uD83D\uDD50', lbl:'Arriv\u00e9e'},
+  {key:'quai',    ico:'\uD83D\uDD04', lbl:'Mise \u00e0 quai'},
+  {key:'chg',     ico:'\uD83D\uDCE6', lbl:'D\u00e9but chgt'},
+  {key:'fin_chg', ico:'\u2705',       lbl:'Fin chgt'},
+  {key:'dep',     ico:'\uD83D\uDE80', lbl:'D\u00e9part'}
 ];
+// fin_chg est optionnel : dep est accessible dès chg pointé même sans fin_chg
 
 // ─── Cadences ─────────────────────────────────────────────────────────────
 var CADENCE_SILO = 18;
@@ -1891,7 +1893,7 @@ function updatePonctStats(){
   var enCoursCount=0;
   visible.forEach(function(i){
     var tsC=0;TS_DEFS.forEach(function(def){if((timestamps[trucks[i].id]||{})[def.key])tsC++;});
-    if(tsC>0 && tsC<4) enCoursCount++;
+    var tsI2=timestamps[trucks[i].id]||{};if((tsI2.arr||tsI2.quai||tsI2.chg)&&!tsI2.dep)enCoursCount++;
   });
   if(enCoursCount){
     html+='<span style="color:var(--bd2)">|</span>';
@@ -1903,35 +1905,30 @@ function updatePonctStats(){
   }
   html+='</div>';
 
-  // ── 2ème ligne : KPIs opérationnels (actifs + archivés du jour) ──────────
+  // ── 2ème ligne : KPIs opérationnels — toujours par date de journée ──────
   var filterDate=fTruckDate||new Date().toISOString().slice(0,10);
-  var onSite=[],waitingQuai=[],inLoading=[],departed=[];
-  var palOnSite=0,pickOnSite=0,palDep=0;
-  visible.forEach(function(i){
-    var t=trucks[i],tsv=timestamps[t.id]||{};
-    if(tsv.dep){ departed.push({src:'active',t:t}); }
+  // Camions actifs de la journée (indépendant des filtres ponct/période/status)
+  var dayActifs=trucks.filter(function(t){return t.date===filterDate;});
+  var onSite=[],waitingQuai=[],inLoading=[],nActiveDep=0;
+  var palOnSite=0,palDep=0;
+  dayActifs.forEach(function(t){
+    var tsv=timestamps[t.id]||{};
+    if(tsv.dep){ nActiveDep++; }
     else if(tsv.arr){
-      onSite.push(i);
-      if(!tsv.quai) waitingQuai.push(i);
-      if(tsv.chg) inLoading.push(i);
-      (t.deliveries||[]).forEach(function(id){
-        var d=getDeliv(id);if(!d)return;
-        palOnSite+=(d.palSilo||0);pickOnSite+=(d.colisPick||0);
-      });
+      onSite.push(t);
+      if(!tsv.quai) waitingQuai.push(t);
+      if(tsv.chg&&!tsv.fin_chg) inLoading.push(t);
+      (t.deliveries||[]).forEach(function(id){var d=getDeliv(id);if(d)palOnSite+=(d.palSilo||0);});
     }
   });
-  // Ajouter les archivés du jour dans "partis"
+  // Archivés du jour (partis et retirés de trucks[])
   var archiveDuJour=(_completedTrucks||[]).filter(function(c){return c.date===filterDate;});
-  archiveDuJour.forEach(function(ct){departed.push({src:'archive',t:ct});});
-  departed.forEach(function(entry){
-    (entry.t.deliveryDetails||entry.t.deliveries||[]).forEach(function(item){
-      var d=typeof item==='object'?item:getDeliv(item);if(!d)return;
-      palDep+=(d.palSilo||0);
-    });
+  archiveDuJour.forEach(function(ct){
+    (ct.deliveryDetails||[]).forEach(function(d){palDep+=(d.palSilo||0);});
   });
-  var totalDuJour=visible.length+archiveDuJour.length;
-  var nDeparted=departed.length;
-  var nPending=visible.filter(function(i){return !timestamps[trucks[i].id]||!timestamps[trucks[i].id].arr;}).length;
+  var nDeparted=nActiveDep+archiveDuJour.length;
+  var totalDuJour=dayActifs.length+archiveDuJour.length;
+  var nPending=dayActifs.filter(function(t){var tv=timestamps[t.id]||{};return !tv.arr;}).length;
 
   if(totalDuJour>0){
     function kpi(ico,val,lbl,col,bg){
@@ -2818,8 +2815,8 @@ function renderTrucks(){
     return fTruckPeriod==='matin' ? w.start<720 : w.start>=720;
   });
   if(fTruckStatus==='encours') indices=indices.filter(function(i){
-    var tsC=0;TS_DEFS.forEach(function(def){if((timestamps[trucks[i].id]||{})[def.key])tsC++;});
-    return tsC>0 && tsC<4;
+    var tsI=timestamps[trucks[i].id]||{};
+    return (tsI.arr||tsI.quai||tsI.chg) && !tsI.dep;
   });
   if(!indices.length){container.innerHTML='<div class="empty"><div class="empty-ico">\uD83D\uDE9B</div><p>Aucun camion'+(fTruckDate?' pour cette date.'
     :' \u2014 reimportez le VL06O pour les reg\u00e9n\u00e9rer.')+'</p></div>';return;}
@@ -2872,7 +2869,7 @@ function renderTrucks(){
     else if(ts.arr) bandCls=' tc-status-arrived';
     else if(t.creneau) bandCls=' tc-status-waiting';
     else bandCls=' tc-status-idle';
-    tc.className='tc'+(isExport({itin:t.itin,dest:''})?' export-tc':'')+(tsCount>=4?' tc-complete':tsCount>0?' tc-has-ts':'')+bandCls;
+    tc.className='tc'+(isExport({itin:t.itin,dest:''})?' export-tc':'')+(ts.dep?' tc-complete':tsCount>0?' tc-has-ts':'')+bandCls;
     tc.dataset.truckId=t.id;
     var pnow=Date.now();
     var ponct=getPonctualite(t,ts,pnow);
@@ -2950,30 +2947,41 @@ function renderTrucks(){
     // Live loading chrono + durée restante estimée
     if(ts.chg && !ts.dep){
       var chgMs=new Date(ts.chg).getTime();
-      var elapsedMin=Math.round((Date.now()-chgMs)/60000);
-      var cH=Math.floor(elapsedMin/60),cM=elapsedMin%60;
-      var chronoEl=document.createElement('span');
-      chronoEl.className='tc-chrono';
-      chronoEl.innerHTML='<span class="chrono-dot"></span>\u23f1 '+
-        (cH>0?cH+'h'+String(cM).padStart(2,'0'):cM+'min');
-      if(elapsedMin>60) chronoEl.style.cssText='background:rgba(255,69,58,.12);border-color:rgba(255,69,58,.35);color:var(--red)';
-      head.appendChild(chronoEl);
-      // Durée restante si moyenne dispo (≥2 camions terminés aujourd'hui)
-      if(_avgLoadMin>0){
-        var remaining=_avgLoadMin-elapsedMin;
-        var remEl=document.createElement('span');
-        remEl.className='tc-remaining'+(remaining<=0?' overdue':'');
-        if(remaining>0){
-          var rH=Math.floor(remaining/60),rM=remaining%60;
-          remEl.textContent='~'+(rH>0?rH+'h'+String(rM).padStart(2,'0'):rM+'min')+' restantes';
-          remEl.title='Moy. chargement : '+_avgLoadMin+'min';
-        } else {
-          var over=-remaining;
-          remEl.textContent='\u26a0 +'+(over<60?over+'min':Math.floor(over/60)+'h'+String(over%60).padStart(2,'0'))+' d\u00e9pass\u00e9';
-          remEl.title='Moy. chargement : '+_avgLoadMin+'min';
+      var chronoEl=document.createElement('span');chronoEl.className='tc-chrono';
+      if(ts.fin_chg){
+        // Chargement terminé, camion attend le départ
+        var loadDur=Math.round((new Date(ts.fin_chg)-chgMs)/60000);
+        var ldH=Math.floor(loadDur/60),ldM=loadDur%60;
+        var waitMs=Date.now()-new Date(ts.fin_chg).getTime();
+        var waitMin=Math.round(waitMs/60000);
+        chronoEl.innerHTML='\u2705 Chg\u00e9 en '+(ldH>0?ldH+'h'+String(ldM).padStart(2,'0'):ldM+'min')+
+          ' \u2014 \u23f3 '+(waitMin>0?waitMin+'min':'')+' en attente d\u00e9part';
+        chronoEl.style.cssText='background:rgba(45,202,114,.1);border-color:rgba(45,202,114,.3);color:var(--green)';
+      } else {
+        // Chargement en cours
+        var elapsedMin=Math.round((Date.now()-chgMs)/60000);
+        var cH=Math.floor(elapsedMin/60),cM=elapsedMin%60;
+        chronoEl.innerHTML='<span class="chrono-dot"></span>\u23f1 '+
+          (cH>0?cH+'h'+String(cM).padStart(2,'0'):cM+'min');
+        if(elapsedMin>60) chronoEl.style.cssText='background:rgba(255,69,58,.12);border-color:rgba(255,69,58,.35);color:var(--red)';
+        // Durée restante si moyenne dispo (≥2 camions terminés aujourd'hui)
+        if(_avgLoadMin>0){
+          var remaining=_avgLoadMin-elapsedMin;
+          var remEl=document.createElement('span');
+          remEl.className='tc-remaining'+(remaining<=0?' overdue':'');
+          if(remaining>0){
+            var rH=Math.floor(remaining/60),rM=remaining%60;
+            remEl.textContent='~'+(rH>0?rH+'h'+String(rM).padStart(2,'0'):rM+'min')+' restantes';
+            remEl.title='Moy. chargement : '+_avgLoadMin+'min';
+          } else {
+            var over=-remaining;
+            remEl.textContent='\u26a0 +'+(over<60?over+'min':Math.floor(over/60)+'h'+String(over%60).padStart(2,'0'))+' d\u00e9pass\u00e9';
+            remEl.title='Moy. chargement : '+_avgLoadMin+'min';
+          }
+          head.appendChild(remEl);
         }
-        head.appendChild(remEl);
       }
+      head.appendChild(chronoEl);
     }
 
     // Spacer + action buttons
@@ -3029,7 +3037,15 @@ function renderTrucks(){
     /* ── TIMESTAMPS (grid layout) ── */
     var tsRow=document.createElement('div');tsRow.className='ts-row';
     TS_DEFS.forEach(function(def,si){
-      var isNext=!ts[def.key]&&(si===0||!!ts[TS_DEFS[si-1].key]);
+      var prevOk;
+      if(si===0){ prevOk=true; }
+      else if(def.key==='dep'){
+        // dep accessible si fin_chg pointé OU si chg pointé (fin_chg optionnel)
+        prevOk=!!(ts.fin_chg||ts.chg);
+      } else {
+        prevOk=!!ts[TS_DEFS[si-1].key];
+      }
+      var isNext=!ts[def.key]&&prevOk;
       tsRow.appendChild(makeTsChip(def,ts[def.key],t.creneau?t.creneau.split(/[-\/]/)[0]+':00':null,ti,isNext));
     });
     tc.appendChild(tsRow);
