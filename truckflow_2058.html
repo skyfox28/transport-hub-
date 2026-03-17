@@ -85,9 +85,10 @@ html.light .cam-actions-bar .btn-sm{background:rgba(0,0,0,.04);border-color:rgba
 html.light .cam-actions-bar .btn-sm:hover{background:rgba(0,0,0,.07)}
 html.light .btn-new{background:rgba(0,113,227,.06)!important;border-color:rgba(0,113,227,.18)!important;color:var(--blue)!important}
 /* ── Timestamps chips ── */
-html.light .ts-chip{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08);color:var(--t2)}
-html.light .ts-chip.ts-done{background:rgba(26,141,62,.07);border-color:rgba(26,141,62,.14);color:var(--green)}
-html.light .ts-chip.ts-late{background:rgba(197,0,26,.06);border-color:rgba(197,0,26,.12);color:var(--red)}
+html.light .ts-chip{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.07);color:var(--t2)}
+html.light .ts-chip.ts-done{background:rgba(26,141,62,.06)}
+html.light .ts-chip.ts-late{background:rgba(197,0,26,.05)}
+html.light .ts-chip.ts-next{background:rgba(0,84,254,.05);border-top-color:rgba(0,84,254,.45)}
 /* ── Notifs ── */
 html.light .notif-panel{background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(28px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 32px rgba(0,0,0,.1);border-color:rgba(255,255,255,.5)}
 html.light .notif{background:rgba(255,255,255,.75);backdrop-filter:blur(16px);border-color:rgba(255,255,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 4px 16px rgba(0,0,0,.06)}
@@ -334,27 +335,43 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 
 /* ── Timestamps ────────────────────────────────────────────────── */
 .ts-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(255,255,255,.04)}
+/* ── Timestamps redesign ─────────────────────────────── */
 .ts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid rgba(255,255,255,.04)}
-.ts-chip{display:flex;align-items:center;gap:5px;padding:8px 14px;font-size:11px;position:relative;cursor:default;transition:all .12s;border-right:1px solid rgba(255,255,255,.04)}
+.ts-chip{display:flex;flex-direction:column;align-items:flex-start;padding:10px 14px;font-size:11px;position:relative;cursor:default;transition:background .12s;border-right:1px solid rgba(255,255,255,.04);min-height:72px}
 .ts-chip:last-child{border-right:none}
-.ts-chip.ts-done{background:rgba(45,202,114,.04)}
-.ts-chip.ts-late{background:rgba(255,77,106,.04)}
-.ts-chip-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.3px}
-.ts-chip-time{font-size:13px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
-.ts-chip-empty{color:var(--t3);font-size:11px}
+.ts-chip.ts-done{background:rgba(45,202,114,.05)}
+.ts-chip.ts-late{background:rgba(255,77,106,.05)}
+.ts-chip.ts-next{background:rgba(77,124,254,.05);border-top:2px solid rgba(77,124,254,.55)}
+.ts-chip-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.ts-chip-time{font-size:17px;font-weight:900;color:var(--t1);letter-spacing:-.03em;line-height:1}
+.ts-chip.ts-done .ts-chip-time{color:var(--green)}
+.ts-chip.ts-late .ts-chip-time{color:var(--red)}
+.ts-chip-empty{color:var(--t3);font-size:15px;font-weight:300;line-height:1}
+.ts-chip-meta{display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap}
 .ts-chip-delta{font-size:9px;font-weight:700;padding:1px 6px;border-radius:980px}
 .ts-chip-delta.late{background:rgba(255,77,106,.12);color:var(--red)}
 .ts-chip-delta.ok{background:rgba(45,202,114,.12);color:var(--green)}
-.ts-chip-acts{display:none;gap:3px;margin-left:auto}
+.ts-chip-elapsed{font-size:9px;color:var(--t3)}
+.ts-chip-acts{display:none;gap:2px;position:absolute;top:6px;right:6px}
 .ts-chip:hover .ts-chip-acts{display:inline-flex}
-.ts-chip-acts button{border:none;background:none;cursor:pointer;font-size:10px;padding:2px 4px;border-radius:6px;color:var(--t3);transition:all .1s}
-.ts-chip-acts button:hover{color:var(--blue);background:rgba(77,124,254,.1)}
-.ts-chip-acts button.go-btn{color:#fff;background:var(--blue);border-radius:980px;padding:2px 8px;font-weight:700;font-size:9px}
-.ts-chip-acts button.go-btn:hover{background:var(--blue2)}
-.ts-chip-acts button.clr-btn:hover{color:var(--red);background:rgba(255,77,106,.1)}
-.ts-chip-edit-row{display:none;align-items:center;gap:4px;margin-left:auto;padding-left:8px}
-.ts-chip-edit-row.open{display:inline-flex}
+.ts-chip-acts button{border:none;background:none;cursor:pointer;font-size:11px;padding:2px 5px;border-radius:6px;color:var(--t3);transition:all .1s;line-height:1}
+.ts-chip-acts button:hover{color:var(--blue);background:rgba(77,124,254,.12)}
+.ts-chip-acts button.clr-btn:hover{color:var(--red);background:rgba(255,77,106,.12)}
+.ts-chip-cta{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:5px 13px;border-radius:980px;background:var(--blue);color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;transition:all .15s;box-shadow:0 2px 10px rgba(77,124,254,.35);animation:ts-cta-pulse 2.5s ease-in-out infinite}
+@keyframes ts-cta-pulse{0%,100%{box-shadow:0 2px 10px rgba(77,124,254,.35)}50%{box-shadow:0 2px 18px rgba(77,124,254,.6)}}
+.ts-chip-cta:hover{background:var(--blue2);transform:scale(1.04);animation:none}
+.ts-chip-cta2{display:inline-flex;align-items:center;gap:3px;margin-top:3px;font-size:10px;color:var(--t3);cursor:pointer;border:none;background:none;padding:0;transition:color .1s}
+.ts-chip-cta2:hover{color:var(--blue);text-decoration:underline}
+.ts-chip-edit-row{display:none;align-items:center;gap:4px;margin-top:5px}
+.ts-chip-edit-row.open{display:flex}
 .ts-chip-edit-row input[type=time]{background:var(--sf3);border:1px solid var(--blue);border-radius:8px;padding:3px 7px;font-size:11px;font-weight:700;color:var(--t1);outline:none;width:75px;color-scheme:dark}
+.ts-chip-edit-row button.go-btn{color:#fff;background:var(--blue);border:none;border-radius:980px;padding:2px 9px;font-weight:700;font-size:10px;cursor:pointer}
+.ts-chip-edit-row button.clr-btn{background:none;border:none;cursor:pointer;font-size:11px;padding:2px 4px;border-radius:6px;color:var(--t3)}
+/* Queue badge */
+.tc-queue-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:980px;background:rgba(155,109,255,.15);border:1px solid rgba(155,109,255,.35);color:var(--purple);white-space:nowrap}
+/* Durée restante */
+.tc-remaining{font-size:10px;font-weight:700;padding:2px 8px;border-radius:980px;background:rgba(45,202,114,.12);border:1px solid rgba(45,202,114,.3);color:var(--green)}
+.tc-remaining.overdue{background:rgba(255,77,106,.12);border-color:rgba(255,77,106,.3);color:var(--red)}
 @media(max-width:700px){.ts-grid{grid-template-columns:1fr 1fr}.ts-row{grid-template-columns:1fr 1fr}}
 .ts-cell{padding:12px 15px;border-right:1px solid var(--bd)}
 .ts-cell:last-child{border-right:none}
@@ -773,10 +790,12 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 /* ── Compact mode ────────────────────────────────────────────── */
 .tc.compact-mode .tc-delivs{display:none}
 .tc.compact-mode .ts-row{grid-template-columns:repeat(4,1fr);gap:0;padding:0}
-.tc.compact-mode .ts-chip{padding:4px 8px}
-.tc.compact-mode .ts-chip-lbl{font-size:8px}
-.tc.compact-mode .ts-chip-time{font-size:11px}
-.tc.compact-mode .ts-chip .ts-elapsed{display:none}
+.tc.compact-mode .ts-chip{padding:5px 10px;min-height:auto}
+.tc.compact-mode .ts-chip-lbl{font-size:8px;margin-bottom:2px}
+.tc.compact-mode .ts-chip-time{font-size:12px}
+.tc.compact-mode .ts-chip-elapsed{display:none}
+.tc.compact-mode .ts-chip-cta{padding:3px 9px;font-size:10px;margin-top:3px;animation:none}
+.tc.compact-mode .ts-chip-cta2{display:none}
 .tc.compact-mode .tc-head{flex-wrap:nowrap}
 .tc.compact-mode{padding:8px 14px}
 
@@ -1661,6 +1680,14 @@ function creWindow(cren){
   return null;
 }
 
+// Formate un delta en minutes → "45min" ou "1h30" (toujours positif, signe passé en dehors)
+function fmtDelta(m){
+  if(!m&&m!==0) return '';
+  var abs=Math.abs(Math.round(m));
+  if(abs<60) return abs+'min';
+  var h=Math.floor(abs/60),mn=abs%60;
+  return h+'h'+(mn>0?String(mn).padStart(2,'0'):'');
+}
 function getPonctualite(t, ts, nowMs){
   var win=creWindow(t.creneau||'');
   if(!win) return {status:'inconnu',label:'Cr\u00e9neau libre',color:'var(--t3)',delta:null};
@@ -1671,29 +1698,28 @@ function getPonctualite(t, ts, nowMs){
     var arrMs=new Date(ts.arr).getTime();
     var diffMin=Math.round((arrMs-startMs)/60000);
     if(arrMs < startMs){
+      var avMin=Math.round((startMs-arrMs)/60000);
       return {status:'avance',label:'En avance',color:'var(--teal)',
-              delta:Math.round((startMs-arrMs)/60000)+' min avant cr\u00e9neau'};
+              delta:fmtDelta(avMin)+' avant cr\u00e9neau'};
     } else if(arrMs <= endMs){
       return {status:'heure',label:'\u00c0 l\'heure',color:'var(--green)',
-              delta:diffMin===0?'Pile':'+'+diffMin+' min'};
+              delta:diffMin===0?'Pile':'+'+fmtDelta(diffMin)};
     } else {
       var retMin=Math.round((arrMs-endMs)/60000);
       return {status:'retard_reel',label:'En retard',color:'var(--red)',
-              delta:'+'+retMin+' min apr\u00e8s cr\u00e9neau'};
+              delta:'+'+fmtDelta(retMin)+' apr\u00e8s cr\u00e9neau'};
     }
   } else {
     if(nowMs > endMs){
       var autoMin=Math.round((nowMs-endMs)/60000);
       return {status:'retard_auto',label:'En retard',color:'var(--red)',
-              delta:'Cr\u00e9neau d\u00e9pass\u00e9 de '+autoMin+' min'};
+              delta:'D\u00e9pass\u00e9 de '+fmtDelta(autoMin)};
     }
     if(nowMs >= startMs){
       return {status:'attente',label:'Cr\u00e9neau en cours',color:'var(--amber)',delta:null};
     }
     var waitMin=Math.round((startMs-nowMs)/60000);
-    return {status:'attente',label:'Attendu dans '+
-      (waitMin>=60?Math.floor(waitMin/60)+'h'+(waitMin%60?String(waitMin%60).padStart(2,'0'):'')
-                  :waitMin+' min'),
+    return {status:'attente',label:'Dans '+fmtDelta(waitMin),
       color:'var(--t2)',delta:null};
   }
 }
@@ -1874,6 +1900,46 @@ function updatePonctStats(){
     html+='<span style="cursor:pointer;font-size:11px;color:var(--t3);padding:2px 8px;border:1px solid var(--bd2);border-radius:10px" onclick="fTruckPonct=\'\';fTruckPeriod=\'\';fTruckStatus=\'\';renderTrucks()">\u00d7 R\u00e9init</span>';
   }
   html+='</div>';
+
+  // ── 2ème ligne : KPIs opérationnels ──────────────────────────────────────
+  var onSite=[],waitingQuai=[],inLoading=[],departed=[];
+  var palOnSite=0,pickOnSite=0,palDep=0,pickDep=0;
+  visible.forEach(function(i){
+    var t=trucks[i],tsv=timestamps[t.id]||{};
+    if(tsv.dep){ departed.push(i); }
+    else if(tsv.arr){
+      onSite.push(i);
+      if(!tsv.quai) waitingQuai.push(i);
+      if(tsv.chg) inLoading.push(i);
+      (t.deliveries||[]).forEach(function(id){
+        var d=getDeliv(id);if(!d)return;
+        palOnSite+=(d.palSilo||0);pickOnSite+=(d.colisPick||0);
+      });
+    }
+  });
+  departed.forEach(function(i){
+    var t=trucks[i];
+    (t.deliveries||[]).forEach(function(id){
+      var d=getDeliv(id);if(!d)return;
+      palDep+=(d.palSilo||0);pickDep+=(d.colisPick||0);
+    });
+  });
+  if(onSite.length||departed.length){
+    function kpi(ico,val,lbl,col,bg){
+      return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+bg+';color:'+col+'">'+ico+'&nbsp;'+val+'<span style="font-weight:400;font-size:10px;color:inherit;opacity:.8">&nbsp;'+lbl+'</span></span>';
+    }
+    html+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:7px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;margin-bottom:12px">';
+    html+='<span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Op\u00e9rationnel</span>';
+    if(onSite.length) html+=kpi('\uD83D\uDE9B',onSite.length,'sur site','var(--blue)','rgba(77,124,254,.12)');
+    if(waitingQuai.length) html+=kpi('\u26a0',waitingQuai.length,'sans quai','var(--orange)','rgba(255,140,66,.15)');
+    if(inLoading.length) html+=kpi('\uD83D\uDCE6',inLoading.length,'en chgt','var(--purple)','rgba(155,109,255,.12)');
+    if(departed.length) html+=kpi('\uD83D\uDE80',departed.length,'partis','var(--green)','rgba(45,202,114,.12)');
+    html+='<span style="color:var(--bd2)">|</span>';
+    if(palOnSite) html+=kpi('\uD83C\uDFED',Math.round(palOnSite),'pal sur site','var(--t2)','var(--sf2)');
+    if(pickOnSite) html+=kpi('\u270b',Math.round(pickOnSite).toLocaleString('fr'),'pick sur site','var(--t2)','var(--sf2)');
+    if(palDep) html+=kpi('\u2714',Math.round(palDep),'pal partis','var(--green)','rgba(45,202,114,.08)');
+    html+='</div>';
+  }
   el.innerHTML=html;
 }
 
@@ -2601,58 +2667,80 @@ function makeTsCell(def,real,deb,ti){
   return el;
 }
 
-function makeTsChip(def,real,deb,ti){
+function makeTsChip(def,real,deb,ti,isNext){
   var delta=computeDelta(deb,real),isLate=delta!==null&&delta>5;
   var el=document.createElement('span');
-  el.className='ts-chip'+(real?(isLate?' ts-late':' ts-done'):'');
+  el.className='ts-chip'+(real?(isLate?' ts-late':' ts-done'):isNext?' ts-next':'');
+
+  // Label
   var html='<span class="ts-chip-lbl">'+def.ico+' '+def.lbl+'</span>';
+
   if(real){
+    // Heure pointée
     html+='<span class="ts-chip-time">'+fmtTime(real)+'</span>';
+    html+='<span class="ts-chip-meta">';
     if(delta!==null) html+='<span class="ts-chip-delta '+(isLate?'late':'ok')+'">'+(delta>0?'+':'')+delta+'\'</span>';
-    // Elapsed time since this timestamp
     var elapsedMs=Date.now()-new Date(real).getTime();
     if(elapsedMs>0){
-      var elM=Math.floor(elapsedMs/60000);
-      var elH=Math.floor(elM/60);var elMn=elM%60;
-      html+='<span class="ts-elapsed" data-ts="'+real+'" style="font-size:9px;color:var(--t3);margin-left:2px">'+
-        (elH>0?elH+'h'+String(elMn).padStart(2,'0'):elMn+'min')+
-      '</span>';
+      var elM=Math.floor(elapsedMs/60000);var elH=Math.floor(elM/60);var elMn=elM%60;
+      html+='<span class="ts-chip-elapsed" data-ts="'+real+'">\u23f1 '+(elH>0?elH+'h'+String(elMn).padStart(2,'0'):elMn+'min')+'</span>';
     }
+    html+='</span>';
+    html+='<span class="ts-chip-acts"></span>';
+    html+='<span class="ts-chip-edit-row"></span>';
+  } else if(isNext){
+    // Étape suivante : CTA bien visible
+    html+='<button class="ts-chip-cta">\u25b6 Pointer</button>';
+    html+='<button class="ts-chip-cta2">\u270e Heure manuelle</button>';
+    html+='<span class="ts-chip-edit-row"></span>';
   } else {
+    // Étape non encore accessible
     html+='<span class="ts-chip-empty">\u2014</span>';
   }
-  html+='<span class="ts-chip-acts"></span>';
-  html+='<span class="ts-chip-edit-row"></span>';
   el.innerHTML=html;
-  var acts=el.querySelector('.ts-chip-acts');
-  var editArea=el.querySelector('.ts-chip-edit-row');
-  var goBtn=document.createElement('button');goBtn.className='go-btn';goBtn.textContent=real?'\u21bb':'Pointer';
-  goBtn.addEventListener('click',function(e){e.stopPropagation();stampNow(ti,def.key);});acts.appendChild(goBtn);
-  var eBtn=document.createElement('button');eBtn.textContent='\u270e';eBtn.title='Saisir';
-  eBtn.addEventListener('click',function(e){
-    e.stopPropagation();
-    var isOpen=editArea.classList.contains('open');
-    if(isOpen){editArea.classList.remove('open');return;}
-    editArea.innerHTML='';editArea.classList.add('open');
+
+  function _buildEditRow(editArea,currentReal){
+    editArea.innerHTML='';
     var inp=document.createElement('input');inp.type='time';
-    if(real){var d=new Date(real);inp.value=(d.getHours()<10?'0':'')+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();}
+    if(currentReal){var rd=new Date(currentReal);inp.value=(rd.getHours()<10?'0':'')+rd.getHours()+':'+(rd.getMinutes()<10?'0':'')+rd.getMinutes();}
     var okB=document.createElement('button');okB.className='go-btn';okB.textContent='\u2713';
     okB.addEventListener('click',function(ev){
       ev.stopPropagation();if(!inp.value)return;
-      var parts=inp.value.split(':');var now=new Date();
-      now.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
+      var parts=inp.value.split(':');var nd=new Date();
+      nd.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
-      timestamps[trucks[ti].id][def.key]=now.toISOString();
+      timestamps[trucks[ti].id][def.key]=nd.toISOString();
       save();renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
     });
     var cxB=document.createElement('button');cxB.className='clr-btn';cxB.textContent='\u2715';
     cxB.addEventListener('click',function(ev){ev.stopPropagation();editArea.classList.remove('open');});
     editArea.appendChild(inp);editArea.appendChild(okB);editArea.appendChild(cxB);
-    inp.focus();
-  });
-  acts.appendChild(eBtn);
-  if(real){var clr=document.createElement('button');clr.className='clr-btn';clr.textContent='\uD83D\uDDD1';
-    clr.addEventListener('click',function(e){e.stopPropagation();clearTS(ti,def.key);});acts.appendChild(clr);}
+    editArea.classList.add('open');inp.focus();
+  }
+
+  if(real){
+    var acts=el.querySelector('.ts-chip-acts');
+    var editArea=el.querySelector('.ts-chip-edit-row');
+    var eBtn=document.createElement('button');eBtn.textContent='\u270e';eBtn.title='Modifier heure';
+    eBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(editArea.classList.contains('open')){editArea.classList.remove('open');return;}
+      _buildEditRow(editArea,real);
+    });
+    var clr=document.createElement('button');clr.className='clr-btn';clr.textContent='\uD83D\uDDD1';clr.title='Effacer';
+    clr.addEventListener('click',function(e){e.stopPropagation();clearTS(ti,def.key);});
+    acts.appendChild(eBtn);acts.appendChild(clr);
+  } else if(isNext){
+    var ctaBtn=el.querySelector('.ts-chip-cta');
+    var cta2Btn=el.querySelector('.ts-chip-cta2');
+    var editArea=el.querySelector('.ts-chip-edit-row');
+    ctaBtn.addEventListener('click',function(e){e.stopPropagation();stampNow(ti,def.key);});
+    cta2Btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(editArea.classList.contains('open')){editArea.classList.remove('open');return;}
+      _buildEditRow(editArea,null);
+    });
+  }
   return el;
 }
 
@@ -2711,6 +2799,18 @@ function renderTrucks(){
   if(!indices.length){container.innerHTML='<div class="empty"><div class="empty-ico">\uD83D\uDE9B</div><p>Aucun camion'+(fTruckDate?' pour cette date.'
     :' \u2014 reimportez le VL06O pour les reg\u00e9n\u00e9rer.')+'</p></div>';return;}
   container.innerHTML='';
+  // ── File d'attente par créneau ────────────────────────────────────────────
+  var _creneauQueues={};
+  indices.forEach(function(i){
+    var c=trucks[i].creneau||'';if(!c)return;
+    if(!_creneauQueues[c])_creneauQueues[c]=[];_creneauQueues[c].push(i);
+  });
+  // ── Moyenne temps de chargement du jour (pour durée restante) ─────────────
+  var _todayISO=new Date().toISOString().slice(0,10);
+  var _loadTimes=[];
+  trucks.forEach(function(ot){var ots=timestamps[ot.id]||{};if(ot.date===_todayISO&&ots.chg&&ots.dep){var lm=Math.round((new Date(ots.dep)-new Date(ots.chg))/60000);if(lm>0&&lm<300)_loadTimes.push(lm);}});
+  var _avgLoadMin=0;if(_loadTimes.length>=2){var s=0;_loadTimes.forEach(function(v){s+=v;});_avgLoadMin=Math.round(s/_loadTimes.length);}
+
   indices.forEach(function(ti){
     var t=trucks[ti],ts=timestamps[t.id]||{};
     var delivs=(t.deliveries||[]).map(function(id){return getDeliv(id);}).filter(Boolean);
@@ -2748,6 +2848,16 @@ function renderTrucks(){
     (function(idx,el){el.addEventListener('click',function(){editCreneau(idx,el);});})(ti,creSpan);
     head.appendChild(creSpan);
 
+    // File d'attente badge (si 2+ camions sur le même créneau)
+    var _queue=cren?_creneauQueues[cren]:null;
+    if(_queue&&_queue.length>1){
+      var qPos=_queue.indexOf(ti)+1;
+      var qBadge=document.createElement('span');qBadge.className='tc-queue-badge';
+      qBadge.textContent=qPos+'/'+_queue.length;
+      qBadge.title='Position '+qPos+' sur '+_queue.length+' camions pour le cr\u00e9neau '+cren;
+      head.appendChild(qBadge);
+    }
+
     // Date input
     var dateInp=document.createElement('input');
     dateInp.type='date';dateInp.value=t.date||'';dateInp.className='tc-date-inp';dateInp.title='Modifier la date';
@@ -2781,7 +2891,7 @@ function renderTrucks(){
       lBadge.innerHTML='\u26a0 Chg: '+loadAlert.label+' (+'+loadAlert.overBy+'min)';
       head.appendChild(lBadge);
     }
-    // Live loading chrono
+    // Live loading chrono + durée restante estimée
     if(ts.chg && !ts.dep){
       var chgMs=new Date(ts.chg).getTime();
       var elapsedMin=Math.round((Date.now()-chgMs)/60000);
@@ -2792,6 +2902,22 @@ function renderTrucks(){
         (cH>0?cH+'h'+String(cM).padStart(2,'0'):cM+'min');
       if(elapsedMin>60) chronoEl.style.cssText='background:rgba(255,69,58,.12);border-color:rgba(255,69,58,.35);color:var(--red)';
       head.appendChild(chronoEl);
+      // Durée restante si moyenne dispo (≥2 camions terminés aujourd'hui)
+      if(_avgLoadMin>0){
+        var remaining=_avgLoadMin-elapsedMin;
+        var remEl=document.createElement('span');
+        remEl.className='tc-remaining'+(remaining<=0?' overdue':'');
+        if(remaining>0){
+          var rH=Math.floor(remaining/60),rM=remaining%60;
+          remEl.textContent='~'+(rH>0?rH+'h'+String(rM).padStart(2,'0'):rM+'min')+' restantes';
+          remEl.title='Moy. chargement : '+_avgLoadMin+'min';
+        } else {
+          var over=-remaining;
+          remEl.textContent='\u26a0 +'+(over<60?over+'min':Math.floor(over/60)+'h'+String(over%60).padStart(2,'0'))+' d\u00e9pass\u00e9';
+          remEl.title='Moy. chargement : '+_avgLoadMin+'min';
+        }
+        head.appendChild(remEl);
+      }
     }
 
     // Spacer + action buttons
@@ -2844,7 +2970,10 @@ function renderTrucks(){
 
     /* ── TIMESTAMPS (grid layout) ── */
     var tsRow=document.createElement('div');tsRow.className='ts-row';
-    TS_DEFS.forEach(function(def){tsRow.appendChild(makeTsChip(def,ts[def.key],t.creneau?t.creneau.split(/[-\/]/)[0]+':00':null,ti));});
+    TS_DEFS.forEach(function(def,si){
+      var isNext=!ts[def.key]&&(si===0||!!ts[TS_DEFS[si-1].key]);
+      tsRow.appendChild(makeTsChip(def,ts[def.key],t.creneau?t.creneau.split(/[-\/]/)[0]+':00':null,ti,isNext));
+    });
     tc.appendChild(tsRow);
 
     /* LIVRAISONS */
