@@ -2127,6 +2127,7 @@ function renderDayDetail(date){
     else if(ts2.quai)tAquai++;
     else if(ts2.arr)tArrive++;
   });
+  var onSite=tArrive+tAquai+tEnChg;
   var nExport=livs.filter(function(d){return isExport(d);}).length;
   var tPctDone=nbTrucks?Math.round(tParti/nbTrucks*100):0;
   var pct=total?Math.round(spC/total*100):0;
