@@ -1499,7 +1499,7 @@ html.tv-mode body{overflow:auto}
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
-  var d=getDeliv(id);
+  var d=(APP.deliveries||[]).find(function(x){return x.id===id;});
   return d||(APP.deliveryCache||{})[id]||null;
 }
 var trucks = [];
