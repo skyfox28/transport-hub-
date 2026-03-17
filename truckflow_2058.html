@@ -6981,11 +6981,6 @@ function showWelcomeScreen(){
   overlay.innerHTML='<div class="welcome-card">'+
     '<div class="welcome-time">'+timeStr+'</div>'+
     '<div class="welcome-date">'+dateStr+'</div>'+
-    '<div class="welcome-stats">'+
-      '<div class="welcome-stat"><div class="welcome-stat-val" style="color:var(--blue)">'+dayT.length+'</div><div class="welcome-stat-lbl">\uD83D\uDE9A Camions du jour</div></div>'+
-      '<div class="welcome-stat"><div class="welcome-stat-val" style="color:var(--green)">'+nComp+'</div><div class="welcome-stat-lbl">\u2714 Termin\u00e9s</div></div>'+
-      '<div class="welcome-stat"><div class="welcome-stat-val" style="color:'+(nLate?'var(--red)':'var(--t3)')+'">'+nLate+'</div><div class="welcome-stat-lbl">\u26a0 En retard</div></div>'+
-    '</div>'+alertHtml+
     '<div class="welcome-actions">'+
       '<button class="welcome-btn primary" onclick="closeWelcome()">Commencer \u2192</button>'+
       '<button class="welcome-btn secondary" onclick="closeWelcome();triggerVL06O()">\u2191 Importer VL06O</button>'+
