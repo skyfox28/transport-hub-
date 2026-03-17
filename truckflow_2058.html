@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TruckFlow</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a84ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TruckFlow">
+<link rel="apple-touch-icon" href="icons/icon.svg">
 <style>
 /* ═══════════════════════════════════════════════════════════════════
    TRUCKFLOW — Apple-Style Dark Theme
@@ -5190,13 +5197,19 @@ function broadcastSync(){
 }
 if(_tfChannel){
   _tfChannel.onmessage=function(ev){
-    if(!ev.data||ev.data.type!=='sync')return;
-    var s=ev.data.data;
-    APP.deliveries=s.deliveries||[];APP.articles=s.articles||[];
-    trucks=s.trucks||[];timestamps=s.timestamps||{};
-    quaiAssign=s.quai||{};quaiManual=s.manual||[];
-    renderAll();
-    showToast('\uD83D\uDD04 Sync re\u00e7ue d\u2019un autre onglet');
+    if(!ev.data)return;
+    if(ev.data.type==='sync'){
+      var s=ev.data.data;
+      APP.deliveries=s.deliveries||[];APP.articles=s.articles||[];
+      trucks=s.trucks||[];timestamps=s.timestamps||{};
+      quaiAssign=s.quai||{};quaiManual=s.manual||[];
+      renderAll();
+      showToast('\uD83D\uDD04 Sync re\u00e7ue d\u2019un autre onglet');
+    } else if(ev.data.type==='ts'){
+      // Timestamps saisis depuis le Mode Monitor → recharger depuis localStorage
+      try{var raw=localStorage.getItem('th10_ts');if(raw)timestamps=JSON.parse(raw);}catch(e){}
+      save();renderAll();
+    }
   };
 }
 // Hook broadcastSync into save
@@ -8067,6 +8080,10 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .blo{background:rgba(42,157,92,.2);color:#4ade80}.bp{background:rgba(255,255,255,.07);color:#6b7280}
 .bq{background:rgba(99,102,241,.2);color:#a5b4fc}.bc{background:rgba(255,255,255,.07);color:var(--t2)}
 .bpu{background:rgba(211,47,47,.2);color:#f87171}.bpn{background:rgba(245,158,11,.18);color:#fbbf24}.bpf{background:rgba(42,157,92,.18);color:#4ade80}
+.bpt{background:rgba(251,191,36,.22);color:#fbbf24;animation:blink 2s infinite}
+.bpok{background:rgba(42,157,92,.2);color:#4ade80}
+.bpav{background:rgba(10,132,255,.2);color:#60a5fa}
+.bprt{background:rgba(211,47,47,.2);color:#f87171;font-weight:800}
 .tc-name{font-size:15px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .tc-sub{font-size:10px;color:var(--t2);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prog{display:flex;align-items:flex-start;gap:0;margin-bottom:10px}
@@ -8147,6 +8164,32 @@ function updateKPIs(trucks,tsm){
     kbox(nLo,'✅ Chargé','#4ade80')+
     kbox(nP,'🚀 Partis','#34d399');
 }
+function parseCren(c){
+  if(!c)return null;
+  var m=c.match(/(\d{1,2})[h:](\d{0,2})\s*[-–]\s*(\d{1,2})[h:](\d{0,2})/i);
+  if(m)return{s:parseInt(m[1])*60+(parseInt(m[2])||0),e:parseInt(m[3])*60+(parseInt(m[4])||0)};
+  var m2=c.match(/^(\d{1,2})[h:](\d{0,2})$/i);
+  if(m2){var st=parseInt(m2[1])*60+(parseInt(m2[2])||0);return{s:st,e:st+120};}
+  return null;
+}
+function nowMin(){var n=new Date();return n.getHours()*60+n.getMinutes();}
+function ponctBadge(t,ts){
+  var cr=parseCren(t.creneau);
+  if(!cr)return '';
+  var now=nowMin();
+  var ongoing=now>=cr.s&&now<=cr.e?'<span class="b bpt">⏰ En cours</span>':'';
+  if(!ts||!ts.arr){
+    if(now>cr.e+5)return ongoing+'<span class="b bprt">⚠️ Retard '+fm(now-cr.s)+'</span>';
+    if(now>=cr.s)return ongoing;
+    return ongoing;
+  }
+  var arrT=new Date(ts.arr);
+  var arrMin=arrT.getHours()*60+arrT.getMinutes();
+  var diff=arrMin-cr.s;
+  if(diff<=-10)return ongoing+'<span class="b bpav">⚡ En avance '+fm(-diff)+'</span>';
+  if(diff<=15)return ongoing+'<span class="b bpok">✅ À l\'heure</span>';
+  return ongoing+'<span class="b bprt">⚠️ Retard '+fm(diff)+'</span>';
+}
 function makeCard(t,ts,quai,prio){
   var s=getStatus(ts);
   var keys=['arr','quai','chg','fin_chg','dep'];
@@ -8177,6 +8220,7 @@ function makeCard(t,ts,quai,prio){
   var tid=t.id;
   var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
   var prB=prio==='urgent'?'<span class="b bpu">🔴 Urgent</span>':prio==='normal'?'<span class="b bpn">🟡 Normal</span>':prio==='flexible'?'<span class="b bpf">🟢 Flexible</span>':'';
+  var ptB=ponctBadge(t,ts);
   var ab=nk
     ?'<button class="act '+ac+'" onclick="stamp(\''+tid+'\',\''+nk+'\')">'+al+'</button>'
      +'<div style="text-align:right;margin-top:2px"><button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer" onclick="togM(\''+tid+'\')">✎ Heure manuelle</button></div>'
@@ -8191,7 +8235,7 @@ function makeCard(t,ts,quai,prio){
     +'<span class="b '+scls(s)+'">'+slbl(s)+'</span>'
     +(quai?'<span class="b bq">Q'+quai+'</span>':'')
     +(t.creneau?'<span class="b bc">'+t.creneau+'</span>':'')
-    +prB
+    +prB+ptB
     +'<span style="margin-left:auto;font-size:10px;color:var(--t3)">📦 '+nDel+'</span>'
     +'</div>'
     +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
@@ -8264,6 +8308,15 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
   w.document.write(_src);
   w.document.close();
   logActivity('\uD83D\uDDA5','Mode Monitor ouvert dans un nouvel onglet');
+}
+
+// ─── PWA — Service Worker registration ────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(r){console.log('[TruckFlow SW] Enregistré :',r.scope);})
+      .catch(function(e){console.warn('[TruckFlow SW] Échec enregistrement :',e);});
+  });
 }
 </script>
 </body>
