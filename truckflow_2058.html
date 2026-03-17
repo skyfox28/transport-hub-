@@ -7547,6 +7547,42 @@ function clearCompletedArchive(){
   if(!confirm('Vider l\u2019archive des camions termin\u00e9s ?')) return;
   _completedTrucks=[];saveCompleted();renderArchive();showToast('Archive vid\u00e9e');
 }
+function restoreTruckFromArchive(ctId){
+  var idx=_completedTrucks.findIndex(function(c){return c.id===ctId;});
+  if(idx<0){showToast('Camion introuvable dans l\'archive');return;}
+  var ct=_completedTrucks[idx];
+  // Vérifier qu'il n'existe pas déjà dans trucks actifs
+  if(trucks.find(function(t){return t.id===ctId;})){
+    showToast('Ce camion est déjà dans l\'onglet Camions');return;
+  }
+  // Reconstruire le camion dans trucks[]
+  trucks.push({
+    id:ct.id,
+    transporteur:ct.transporteur||'',
+    itin:ct.itin||'',
+    creneau:ct.creneau||'',
+    date:ct.date||'',
+    dest:ct.dest||'',
+    deliveries:(ct.deliveries||[]).slice(),
+    _restoredFromArchive:true
+  });
+  // Restaurer les timestamps
+  timestamps[ct.id]={};
+  if(ct.timestamps){
+    if(ct.timestamps.arr)  timestamps[ct.id].arr  = ct.timestamps.arr;
+    if(ct.timestamps.quai) timestamps[ct.id].quai = ct.timestamps.quai;
+    if(ct.timestamps.chg)  timestamps[ct.id].chg  = ct.timestamps.chg;
+    if(ct.timestamps.dep)  timestamps[ct.id].dep  = ct.timestamps.dep;
+  }
+  // Retirer de l'archive
+  _completedTrucks.splice(idx,1);
+  saveCompleted();
+  save();
+  renderArchive();
+  showToast('\u21A9 '+(ct.transporteur||ct.itin||'?')+' restaur\u00e9 dans l\u2019onglet Camions');
+  logActivity('\u21A9','Camion '+(ct.transporteur||ct.itin||'?')+' restaur\u00e9 depuis l\u2019archive');
+}
+
 function renderArchive(){
   var el=document.getElementById('archiveContent');
   if(!el) return;
@@ -7575,7 +7611,7 @@ function renderArchive(){
     html+='<div class="tbl-wrap"><table><thead><tr style="border-bottom:2px solid rgba(160,210,255,.12);background:rgba(160,210,255,.04)">';
     html+='<th>Transporteur</th><th>Cr\u00e9neau</th><th>Quai</th><th>Ponctualit\u00e9</th>';
     html+='<th>Arriv\u00e9e</th><th>Mise \u00e0 quai</th><th>Chargement</th><th>D\u00e9part</th>';
-    html+='<th>Livraisons</th><th>D\u00e9tail</th>';
+    html+='<th>Livraisons</th><th>D\u00e9tail</th><th>Action</th>';
     html+='</tr></thead><tbody>';
     list.forEach(function(ct){
       var ts=ct.timestamps||{};
@@ -7590,6 +7626,7 @@ function renderArchive(){
       html+='<td>'+ft(ts.arr)+'</td><td>'+ft(ts.quai)+'</td><td>'+ft(ts.chg)+'</td><td>'+ft(ts.dep)+'</td>';
       html+='<td>'+(ct.deliveries||[]).length+'</td>';
       html+='<td><span style="cursor:pointer;color:var(--blue);font-size:11px" onclick="toggleArchiveDetail(\''+ct.id+'\')">'+(_archiveExpandedIds[ct.id]?'\u25B2 Masquer':'\u25BC D\u00e9tail')+'</span></td>';
+      html+='<td><button class="btn-sm" style="font-size:10px;padding:3px 8px;color:var(--amber);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08)" onclick="restoreTruckFromArchive(\''+ct.id+'\')">\u21A9 Restaurer</button></td>';
       html+='</tr>';
       if(_archiveExpandedIds[ct.id]){
         var rows=ct.deliveryDetails&&ct.deliveryDetails.length?ct.deliveryDetails
