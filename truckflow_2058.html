@@ -2127,9 +2127,8 @@ function renderDayDetail(date){
     else if(ts2.quai)tAquai++;
     else if(ts2.arr)tArrive++;
   });
-  var onSite=tArrive+tAquai+tEnChg;
-  var tPctDone=nbTrucks?Math.round(tParti/nbTrucks*100):0;
   var nExport=livs.filter(function(d){return isExport(d);}).length;
+  var tPctDone=nbTrucks?Math.round(tParti/nbTrucks*100):0;
   var pct=total?Math.round(spC/total*100):0;
   var dayLabel=new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 
@@ -2145,7 +2144,24 @@ function renderDayDetail(date){
     var isActive=(dt===date);
     return '<button onclick="changeDayView(\''+dt+'\')" style="padding:6px 14px;font-size:12px;font-weight:'+(isActive?'800':'600')+';border-radius:10px;border:1px solid '+(isActive?'rgba(10,132,255,.4)':'rgba(160,210,255,.12)')+';background:'+(isActive?'rgba(10,132,255,.15)':'rgba(160,210,255,.05)')+';color:'+(isActive?'var(--blue)':'var(--t2)')+';cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:'+(isActive?'0 0 12px rgba(10,132,255,.15)':'none')+'">'+(dt===todayISO?'\uD83D\uDFE2 ':'')+lbl+'</button>';
   }).join('');
-  var dayPickerHtml='<div class="syn-ponct" style="margin-bottom:14px"><div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83D\uDCC5 S\u00e9lection du jour</span><span class="syn-ponct-sub">'+allDates.length+' jour'+(allDates.length>1?'s':'')+' disponible'+(allDates.length>1?'s':'')+'</span></div><div style="display:flex;gap:8px;flex-wrap:wrap">'+pickerBtns+'</div></div>';
+  // Chips statut SGP/WM pour l'en-tête intégré
+  var sgpChips2=''
+    +(spC?'<span class="tc-chip green">\u2705 C \u2014 '+spC+'</span>':'')
+    +(spB?'<span class="tc-chip amber">B \u2014 '+spB+'</span>':'')
+    +(spA?'<span class="tc-chip" style="background:rgba(96,104,128,.2);border-color:rgba(96,104,128,.3);color:var(--t3)">A \u2014 '+spA+'</span>':'')
+    +(wC?'<span class="tc-chip" style="background:rgba(38,201,211,.12);border-color:rgba(38,201,211,.3);color:var(--teal);margin-left:4px">WM C \u2014 '+wC+'</span>':'');
+  // Bloc sélecteur + en-tête fusionnés en un seul bloc syn-ponct
+  var dayPickerHtml='<div class="syn-ponct">'+
+    '<div class="syn-ponct-hdr">'+
+      '<div>'+
+        '<div style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:3px">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
+        '<div class="syn-ponct-sub">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% pr\u00e9pa'+(nbTrucks?' \u00b7 '+nbTrucks+' camion'+(nbTrucks>1?'s':''):'')+( nExport?' \u00b7 '+nExport+' export':'')+(tPctDone>0?' \u00b7 '+tPctDone+'% partis':'')+'</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+sgpChips2+'</div>'+
+    '</div>'+
+    (nbTrucks>0?'<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);overflow:hidden;margin-bottom:12px"><div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div></div>':'')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+pickerBtns+'</div>'+
+  '</div>';
 
   // ── Empty state ──
   if(!total&&!nbTrucks){
@@ -2159,22 +2175,7 @@ function renderDayDetail(date){
     return;
   }
 
-  // ── Bloc 0 : En-tête du jour ──
-  var sgpChips=''
-    +(spC?'<span class="tc-chip green">\u2705 C \u2014 '+spC+'</span>':'')
-    +(spB?'<span class="tc-chip amber">B \u2014 '+spB+'</span>':'')
-    +(spA?'<span class="tc-chip" style="background:rgba(96,104,128,.2);border-color:rgba(96,104,128,.3);color:var(--t3)">A \u2014 '+spA+'</span>':'')
-    +(wC?'<span class="tc-chip" style="background:rgba(38,201,211,.12);border-color:rgba(38,201,211,.3);color:var(--teal);margin-left:6px">WM C \u2014 '+wC+'</span>':'');
-  var dayHeaderHtml='<div class="syn-ponct" style="margin-bottom:14px">'+
-    '<div class="syn-ponct-hdr">'+
-      '<div>'+
-        '<div style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:3px">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
-        '<div style="font-size:12px;color:var(--t2)">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% pr\u00e9pa termin\u00e9e'+(nbTrucks?' \u00b7 '+nbTrucks+' camion'+(nbTrucks>1?'s':''):'')+( nExport?' \u00b7 '+nExport+' export':'')+(tPctDone>0?' \u00b7 '+tPctDone+'% partis':'')+'</div>'+
-      '</div>'+
-      '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+sgpChips+'</div>'+
-    '</div>'+
-    (nbTrucks>0?'<div style="height:5px;border-radius:3px;background:rgba(160,210,255,.1);overflow:hidden;margin-top:8px"><div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div></div>':'')+
-  '</div>';
+  // (En-tête fusionné dans dayPickerHtml ci-dessus)
 
   // ── Bloc 1 : KPIs principaux (style .kpi identique Vue Semaine) ──
   function kpiDeltaDay(prev,rest,color,heures){
@@ -2198,16 +2199,16 @@ function renderDayDetail(date){
     '<div class="kpi" style="--acc:var(--indigo)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(94,92,230,.12)">\uD83C\uDFED</div><div class="kpi-body"><div class="kpi-l">Palettes SILO</div>'+kpiDeltaDay(totPalSilo,restPalSilo,'var(--indigo)',restHrSilo)+'</div></div>'+
     '<div class="kpi" style="--acc:var(--blue)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(10,132,255,.12)">\uD83D\uDCE6</div><div class="kpi-body"><div class="kpi-l">Colis Total</div>'+kpiDeltaDay(totColSilo,restColSilo,'var(--blue)',0)+'</div></div>'+
     '<div class="kpi" style="--acc:var(--purple)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(191,90,242,.12)">\u270b</div><div class="kpi-body"><div class="kpi-l">Colis Picking</div>'+kpiDeltaDay(totColPick,restColPick,'var(--purple)',restHrPick)+'</div></div>';
-  var blocKpi='<div style="margin-bottom:14px">'+
+  // KPI bruts sans wrapper verre — casse le liseré continu comme en Vue Semaine
+  var blocKpi=
     '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'+kpiRow1+'</div>'+
-    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'')+
-  '</div>';
+    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'');
 
   // ── Bloc 2 : Situation temps réel (syn-ponct + 5 spc) ──
   var blocRealtime='';
   if(nbTrucks>0){
     function spcC(val,lbl,color,cls){return '<div class="spc '+(cls||'')+'" style="cursor:default"><div class="spc-val" style="color:'+color+'">'+val+'</div><div class="spc-lbl">'+lbl+'</div></div>';}
-    blocRealtime='<div class="syn-ponct" style="margin-bottom:14px">'+
+    blocRealtime='<div class="syn-ponct">'+
       '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83C\uDFED Situation en temps r\u00e9el</span><span class="syn-ponct-sub">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+' \u00b7 mis \u00e0 jour en continu</span></div>'+
       '<div class="syn-ponct-cards" style="grid-template-columns:repeat(5,1fr)">'+
         spcC(onSite,'\uD83C\uDFED Sur site','var(--blue)','teal')+
@@ -2263,7 +2264,7 @@ function renderDayDetail(date){
     if(_dayPonctOpen&&openArr2.length){
       panelExpand='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:6px">'+buildDayPonctPanel(openArr2)+'</div>';
     }
-    blocPonct='<div class="syn-ponct" id="dayPonct" style="margin-bottom:14px">'+
+    blocPonct='<div class="syn-ponct" id="dayPonct">'+
       '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83D\uDD34 Ponctualit\u00e9 camions</span><span class="syn-ponct-sub">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+' \u00b7 '+tPctDone+'% partis</span></div>'+
       '<div class="syn-ponct-cards">'+
         ponctCard('heure','green',tAheure,'\uD83D\uDFE2','\u00c0 l\u2019heure')+
@@ -2285,7 +2286,7 @@ function renderDayDetail(date){
   if(nbTrucks>0||total>0){
     function spcRing(pct2,lbl,col){return '<div class="spc" style="cursor:default;padding:14px 12px">'+progressRingSVG(pct2,col,48)+'<div class="spc-lbl" style="margin-top:6px">'+lbl+'</div></div>';}
     var nRings=3+(totPalSilo?1:0);
-    blocAvancement='<div class="syn-ponct" style="margin-bottom:14px">'+
+    blocAvancement='<div class="syn-ponct">'+
       '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\u2B55 Avancement global</span><span class="syn-ponct-sub">'+advGlobal+'% moyen</span></div>'+
       '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+(nRings+1)+',1fr)">'+
         spcRing(prepPct,'Pr\u00e9pa SGP','var(--green)')+
@@ -2322,7 +2323,7 @@ function renderDayDetail(date){
       +spcCadence('\u270b','Colis Picking',restColPick,totColPick,CADENCE_PICK,'col.','var(--purple)');
     var ncad=(CADENCE_SILO>0&&totPalSilo?1:0)+(totColSilo?1:0)+(CADENCE_PICK>0&&totColPick?1:0);
     if(ncad>0){
-      blocActivite='<div class="syn-ponct" style="margin-bottom:14px">'+
+      blocActivite='<div class="syn-ponct">'+
         '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\u26a1 Activit\u00e9 &amp; Cadences</span><span class="syn-ponct-sub">SILO '+CADENCE_SILO+' pal/h \u00b7 Picking '+CADENCE_PICK+' col/h</span></div>'+
         '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+ncad+',1fr)">'+cadCards+'</div>'+
       '</div>';
@@ -2358,9 +2359,10 @@ function renderDayDetail(date){
         '<td>'+colisHtml+'</td>'+
         '<td style="border-left:1px solid var(--bd2);padding-left:8px">'+restHtml+'</td></tr>';
     }).join('');
-    blocLivraisons='<div class="syn-ponct" style="margin-bottom:14px">'+
-      '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\uD83D\uDCCB Livraisons du jour</span><span class="syn-ponct-sub">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% SGP-C</span></div>'+
-      '<div style="overflow-x:auto">'+
+    // Livraisons en .card (type différent du syn-ponct → casse le liseré en bas)
+    blocLivraisons='<div class="card">'+
+      '<div class="card-ttl">\uD83D\uDCCB Livraisons du jour <span style="font-weight:400;color:var(--t3);font-size:11px;margin-left:6px">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% SGP-C</span></div>'+
+      '<div style="overflow-x:auto;padding:12px 16px">'+
       '<table class="dd-table" style="width:100%"><thead><tr>'+
         '<th>Livraison</th><th>Destinataire</th><th>Ville</th><th>Pr\u00e9l.</th><th>WM</th>'+
         '<th>Pr\u00e9vu</th><th style="border-left:1px solid var(--bd2);color:var(--amber)">Restant</th>'+
@@ -2368,13 +2370,18 @@ function renderDayDetail(date){
       '</div></div>';
   }
 
+  // Temps réel + Ponctualité en 2 colonnes côte à côte → blocs indépendants visuellement
+  var blocDuo=(blocRealtime||blocPonct)?
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">'+blocRealtime+blocPonct+'</div>':'';
+  // Si seulement l'un des deux existe, fallback plein écran
+  if(blocRealtime&&!blocPonct) blocDuo=blocRealtime;
+  if(!blocRealtime&&blocPonct) blocDuo=blocPonct;
+
   dd.innerHTML=
     dayPickerHtml+
-    dayHeaderHtml+
     timelineHtml+
     blocKpi+
-    blocRealtime+
-    blocPonct+
+    blocDuo+
     blocAvancement+
     blocActivite+
     blocLivraisons;
