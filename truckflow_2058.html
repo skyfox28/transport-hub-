@@ -1222,6 +1222,7 @@ html.tv-mode body{overflow:auto}
       <div class="hdr-more-menu" id="hdrMoreMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:6px;min-width:180px;z-index:150;box-shadow:var(--sh)">
         <button class="hdr-more-item" onclick="openActivityLog();toggleHdrMore()">&#128221; Journal d'activit&eacute;</button>
         <button class="hdr-more-item" onclick="openAlertConfig();toggleHdrMore()">&#9881; R&eacute;glages alertes</button>
+        <button class="hdr-more-item" style="color:var(--cyan)" onclick="openTruckMonitor();toggleHdrMore()">&#x1F5A5; Mode Monitor (nouvel onglet)</button>
         <div style="height:1px;background:var(--bd2);margin:4px 0"></div>
         <button class="hdr-more-item" style="color:var(--red)" onclick="resetAll();toggleHdrMore()">&#x1f5d1; Purger les donn&eacute;es</button>
       </div>
@@ -8016,6 +8017,254 @@ window.addEventListener('beforeunload', function(e){
     e.returnValue = '';
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ─── MODE MONITOR — Vue secondaire écran ────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+function openTruckMonitor(){
+  var w=window.open('','_blank','width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no');
+  if(!w){showToast('Pop-up bloqué — autorisez les pop-ups pour ce site');return;}
+
+  // CSS embedded via comment extraction (no string-escaping issues)
+  var _css=(function(){/*
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--sf1:rgba(255,255,255,.05);--sf2:rgba(255,255,255,.08);--bd1:rgba(160,210,255,.12);--bd2:rgba(160,210,255,.18);--t1:#f0f6fc;--t2:#8b949e;--t3:#484f57;--blue:#0a84ff;--green:#2a9d5c;--orange:#e65100;--red:#d32f2f;--indigo:#4c6ef5;--cyan:#00bcd4}
+body{background:#0d1117;color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.o1{width:700px;height:700px;background:rgba(10,132,255,.14);top:-280px;left:-80px}
+.o2{width:600px;height:600px;background:rgba(147,51,234,.1);bottom:-200px;right:-150px}
+.o3{width:450px;height:450px;background:rgba(0,188,212,.07);top:40%;left:45%}
+header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1.5px solid var(--bd2);padding:10px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+.brand{font-size:17px;font-weight:800;white-space:nowrap;letter-spacing:-.3px}
+.brand span{color:var(--blue)}
+.clock{font-size:24px;font-weight:300;font-variant-numeric:tabular-nums;min-width:84px}
+.dtlbl{font-size:10px;color:var(--t2);white-space:nowrap;margin-top:1px}
+.kpis{display:flex;gap:8px;flex:1;justify-content:center;flex-wrap:wrap}
+.kpi{background:var(--sf1);border:1px solid var(--bd2);border-radius:10px;padding:6px 12px;text-align:center;min-width:75px;backdrop-filter:blur(8px)}
+.kv{font-size:20px;font-weight:800}.kl{font-size:8px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+.hbtns{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.hbtn{padding:5px 11px;border-radius:8px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:11px;cursor:pointer}
+.hbtn:hover{background:rgba(255,255,255,.12)}
+.rdot{width:7px;height:7px;border-radius:50%;background:#2a9d5c;display:inline-block;animation:blink 2s infinite}
+#main{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 20px;position:relative;z-index:5}
+#main::-webkit-scrollbar{width:5px}
+#main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.sec{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px;padding:5px 0;margin:12px 0 8px;border-bottom:1px solid var(--bd1);display:flex;align-items:center;gap:8px}
+.sc{background:var(--sf2);padding:1px 8px;border-radius:10px}
+.tc{background:rgba(255,255,255,.04);border:1.5px solid var(--bd2);border-radius:16px;padding:14px 15px;backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:border-color .3s,background .3s}
+.tc::before{content:'';position:absolute;inset:0;border-radius:15px;background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 55%);pointer-events:none}
+.tc.sw{border-color:rgba(139,148,158,.3)}
+.tc.sa{border-color:rgba(10,132,255,.55);background:rgba(10,132,255,.06)}
+.tc.sd{border-color:rgba(76,110,245,.55);background:rgba(76,110,245,.07)}
+.tc.sl{border-color:rgba(230,81,0,.55);background:rgba(230,81,0,.07)}
+.tc.slo{border-color:rgba(42,157,92,.55);background:rgba(42,157,92,.08)}
+.tc.sp{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.02);opacity:.6}
+.tc-top{display:flex;align-items:center;gap:5px;margin-bottom:9px;flex-wrap:wrap}
+.b{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.bw{background:rgba(139,148,158,.18);color:#8b949e}.ba{background:rgba(10,132,255,.2);color:#60a5fa}
+.bd{background:rgba(76,110,245,.2);color:#818cf8}.bl{background:rgba(230,81,0,.2);color:#fb923c}
+.blo{background:rgba(42,157,92,.2);color:#4ade80}.bp{background:rgba(255,255,255,.07);color:#6b7280}
+.bq{background:rgba(99,102,241,.2);color:#a5b4fc}.bc{background:rgba(255,255,255,.07);color:var(--t2)}
+.bpu{background:rgba(211,47,47,.2);color:#f87171}.bpn{background:rgba(245,158,11,.18);color:#fbbf24}.bpf{background:rgba(42,157,92,.18);color:#4ade80}
+.tc-name{font-size:15px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.tc-sub{font-size:10px;color:var(--t2);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{display:flex;align-items:flex-start;gap:0;margin-bottom:10px}
+.ps{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0}
+.pd{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid;transition:all .3s;flex-shrink:0}
+.pd.done{background:#2a9d5c;border-color:#2a9d5c;color:#fff}
+.pd.active{background:var(--blue);border-color:var(--blue);color:#fff;animation:pulse 1.5s infinite}
+.pd.pend{background:transparent;border-color:rgba(255,255,255,.18);color:var(--t3)}
+.pl{height:2px;flex:1;margin-top:12px;background:rgba(255,255,255,.1);transition:background .3s}
+.pl.done{background:#2a9d5c}
+.plbl{font-size:8px;color:var(--t2);margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;width:100%}
+.ptm{font-size:8px;color:var(--t1);font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums;text-align:center}
+.act{width:100%;padding:9px 12px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:4px}
+.act:active{transform:scale(.97)}
+.act-arr{background:rgba(10,132,255,.22);color:#60a5fa;border:1px solid rgba(10,132,255,.4)}
+.act-quai{background:rgba(76,110,245,.22);color:#818cf8;border:1px solid rgba(76,110,245,.4)}
+.act-chg{background:rgba(230,81,0,.22);color:#fb923c;border:1px solid rgba(230,81,0,.4)}
+.act-fin{background:rgba(42,157,92,.22);color:#4ade80;border:1px solid rgba(42,157,92,.4)}
+.act-dep{background:rgba(10,132,255,.22);color:#60a5fa;border:1px solid rgba(10,132,255,.4)}
+.act-done{background:rgba(255,255,255,.04);color:var(--t3);border:1px solid rgba(255,255,255,.08);cursor:default}
+.man{display:none;margin-top:6px;gap:6px;align-items:center}.man.show{display:flex}
+.man input[type=time]{flex:1;background:rgba(255,255,255,.08);border:1px solid var(--bd2);border-radius:8px;color:var(--t1);padding:5px 9px;font-size:13px;outline:none;color-scheme:dark}
+.mok{padding:5px 10px;border-radius:8px;background:#0a84ff;color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer}
+.mcan{padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--t2);border:none;font-size:12px;cursor:pointer}
+.chr{font-size:10px;color:var(--t2);text-align:center;margin-top:5px}
+.chr.hot{color:#fb923c;font-weight:700}.chr.ok{color:#4ade80;font-weight:600}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(40px);background:rgba(22,35,48,.96);border:1px solid var(--bd2);border-radius:10px;padding:9px 18px;font-size:13px;color:var(--t1);z-index:9999;transition:transform .25s,opacity .25s;opacity:0;pointer-events:none;backdrop-filter:blur(20px)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;color:var(--t2);text-align:center}
+.empty .ico{font-size:52px;margin-bottom:14px}.empty .ttl{font-size:18px;font-weight:700;margin-bottom:6px}.empty .sub{font-size:12px;color:var(--t3)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.95)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
+
+  // JS embedded via comment extraction
+  var _js=(function(){/*
+var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities';
+var showDep=false,_bc;
+try{_bc=new BroadcastChannel('truckflow_sync');}catch(e){}
+if(_bc){_bc.onmessage=function(){setTimeout(render,300);};}
+function getData(){try{return JSON.parse(localStorage.getItem(LT)||'[]');}catch(e){return[];}}
+function getTs(){try{return JSON.parse(localStorage.getItem(LTS)||'{}');}catch(e){return{};}}
+function getQ(){try{return JSON.parse(localStorage.getItem(LQ)||'{}');}catch(e){return{};}}
+function getPrio(){try{return JSON.parse(localStorage.getItem(LP)||'{}');}catch(e){return{};}}
+function saveTs(m){localStorage.setItem(LTS,JSON.stringify(m));if(_bc)_bc.postMessage({type:'ts'});}
+function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+function fm(m){if(m<1)return '<1min';if(m<60)return m+'min';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
+function kl(k){return k==='arr'?'Arrivée':k==='quai'?'Mise à quai':k==='chg'?'Début chgt':k==='fin_chg'?'Fin chgt':'Départ';}
+function getStatus(ts){
+  if(!ts||!ts.arr)return 'w';
+  if(!ts.quai)return 'a';
+  if(!ts.chg)return 'd';
+  if(!ts.fin_chg&&!ts.dep)return 'l';
+  if(ts.fin_chg&&!ts.dep)return 'lo';
+  return 'p';
+}
+function slbl(s){return s==='w'?'⏳ En attente':s==='a'?'🚛 Sur site':s==='d'?'🔄 À quai':s==='l'?'📦 En chargement':s==='lo'?'✅ Chargé':'🚀 Parti';}
+function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s==='lo'?'blo':'bp';}
+function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
+function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);toast('⏱ '+kl(k)+' enregistré');render();}
+function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);toast('✎ '+kl(k)+' modifié');render();}
+function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
+function apM(tid,k){var inp=document.getElementById('ti_'+tid);if(inp&&inp.value){stampM(tid,k,inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');}}
+function togDep(){showDep=!showDep;document.getElementById('dtgl').textContent=showDep?'Masquer partis':'Afficher partis';render();}
+function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2500);}
+function kbox(v,l,c){return '<div class="kpi"><div class="kv" style="color:'+c+'">'+v+'</div><div class="kl">'+l+'</div></div>';}
+function updateKPIs(trucks,tsm){
+  var td=new Date().toISOString().slice(0,10);
+  var day=trucks.filter(function(t){return t.date===td;});
+  var nW=0,nA=0,nD=0,nL=0,nLo=0,nP=0;
+  day.forEach(function(t){var s=getStatus(tsm[t.id]||{});if(s==='w')nW++;else if(s==='a')nA++;else if(s==='d')nD++;else if(s==='l')nL++;else if(s==='lo')nLo++;else nP++;});
+  document.getElementById('kpis').innerHTML=
+    kbox(day.length,'🚛 Total','var(--t1)')+
+    kbox(nW,'⏳ Attente','#8b949e')+
+    kbox(nA,'🛬 Sur site','#60a5fa')+
+    kbox(nD,'🔄 À quai','#818cf8')+
+    kbox(nL,'📦 Chargement','#fb923c')+
+    kbox(nLo,'✅ Chargé','#4ade80')+
+    kbox(nP,'🚀 Partis','#34d399');
+}
+function makeCard(t,ts,quai,prio){
+  var s=getStatus(ts);
+  var keys=['arr','quai','chg','fin_chg','dep'];
+  var icos=['🕐','🔄','📦','✅','🚀'];
+  var lbls=['Arr.','Quai','Chgt','Fin','Dép.'];
+  var prog='<div class="prog">';
+  keys.forEach(function(k,i){
+    var done=!!ts[k];
+    var act=!done&&(i===0||!!ts[keys[i-1]]);
+    var dc=done?'done':act?'active':'pend';
+    if(i>0)prog+='<div class="pl'+(ts[keys[i-1]]?' done':'')+'"></div>';
+    prog+='<div class="ps"><div class="pd '+dc+'">'+(done?'✓':icos[i])+'</div><div class="plbl">'+lbls[i]+'</div><div class="ptm">'+ft(ts[k])+'</div></div>';
+  });
+  prog+='</div>';
+  var nk=null,ac='act-done',al='✅ Parti';
+  if(!ts.arr){nk='arr';ac='act-arr';al='🕐 Enregistrer arrivée';}
+  else if(!ts.quai){nk='quai';ac='act-quai';al='🔄 Mettre à quai';}
+  else if(!ts.chg){nk='chg';ac='act-chg';al='📦 Début chargement';}
+  else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin chargement';}
+  else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Enregistrer départ';}
+  var now=Date.now();
+  var chr='';
+  if(s==='l'&&ts.chg){var el=Math.round((now-new Date(ts.chg))/60000);chr='<div class="chr'+(el>60?' hot':'')+'">'+( el>60?'⚠️ ':'⏱ ')+'Chargement '+fm(el)+(el>60?' — Dépassement !':'')+'</div>';}
+  else if(s==='lo'&&ts.chg&&ts.fin_chg){var ld=Math.round((new Date(ts.fin_chg)-new Date(ts.chg))/60000);var wa=Math.round((now-new Date(ts.fin_chg))/60000);chr='<div class="chr ok">✅ Chargé en '+fm(ld)+' · ⏳ Att. départ '+fm(wa)+'</div>';}
+  else if(s==='d'&&ts.quai){var wa2=Math.round((now-new Date(ts.quai))/60000);chr='<div class="chr">🔄 À quai depuis '+fm(wa2)+'</div>';}
+  else if(s==='a'&&ts.arr){var wa3=Math.round((now-new Date(ts.arr))/60000);chr='<div class="chr">🚛 Sur site depuis '+fm(wa3)+'</div>';}
+  var nDel=(t.deliveries||[]).length;
+  var tid=t.id;
+  var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
+  var prB=prio==='urgent'?'<span class="b bpu">🔴 Urgent</span>':prio==='normal'?'<span class="b bpn">🟡 Normal</span>':prio==='flexible'?'<span class="b bpf">🟢 Flexible</span>':'';
+  var ab=nk
+    ?'<button class="act '+ac+'" onclick="stamp(\''+tid+'\',\''+nk+'\')">'+al+'</button>'
+     +'<div style="text-align:right;margin-top:2px"><button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer" onclick="togM(\''+tid+'\')">✎ Heure manuelle</button></div>'
+     +'<div class="man" id="m_'+tid+'">'
+     +'<input type="time" id="ti_'+tid+'" value="'+nowT+'">'
+     +'<button class="mok" onclick="apM(\''+tid+'\',\''+nk+'\')">✓</button>'
+     +'<button class="mcan" onclick="togM(\''+tid+'\')">✕</button>'
+     +'</div>'
+    :'<button class="act act-done" disabled>✅ Parti</button>';
+  return '<div class="tc '+tcls(s)+'">'
+    +'<div class="tc-top">'
+    +'<span class="b '+scls(s)+'">'+slbl(s)+'</span>'
+    +(quai?'<span class="b bq">Q'+quai+'</span>':'')
+    +(t.creneau?'<span class="b bc">'+t.creneau+'</span>':'')
+    +prB
+    +'<span style="margin-left:auto;font-size:10px;color:var(--t3)">📦 '+nDel+'</span>'
+    +'</div>'
+    +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="tc-sub">'+(t.dest||t.itin||'—')+'</div>'
+    +prog+ab+chr
+    +'</div>';
+}
+function render(){
+  var trucks=getData(),tsm=getTs(),qa=getQ(),prios=getPrio();
+  var rq={};Object.keys(qa).forEach(function(q){if(qa[q])rq[qa[q]]=q;});
+  var td=new Date().toISOString().slice(0,10);
+  var day=trucks.filter(function(t){return t.date===td;});
+  updateKPIs(trucks,tsm);
+  day.sort(function(a,b){
+    var sa=getStatus(tsm[a.id]||{}),sb=getStatus(tsm[b.id]||{});
+    if(sa!=='p'&&sb==='p')return -1;
+    if(sa==='p'&&sb!=='p')return 1;
+    return (a.creneau||'99:99').localeCompare(b.creneau||'99:99');
+  });
+  var active=day.filter(function(t){return getStatus(tsm[t.id]||{})!=='p';});
+  var dep=day.filter(function(t){return getStatus(tsm[t.id]||{})==='p';});
+  var html='';
+  if(active.length){
+    html+='<div class="sec">🚛 Camions actifs <span class="sc">'+active.length+'</span></div><div class="grid">';
+    active.forEach(function(t){html+=makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
+    html+='</div>';
+  }
+  if(dep.length&&showDep){
+    html+='<div class="sec">🚀 Partis <span class="sc">'+dep.length+'</span></div><div class="grid">';
+    dep.forEach(function(t){html+=makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
+    html+='</div>';
+  } else if(dep.length){
+    html+='<div style="margin-top:10px;text-align:center;font-size:11px;color:var(--t3)">'+dep.length+' camion(s) parti(s) &mdash; <button onclick="togDep()" style="background:none;border:none;color:#0a84ff;cursor:pointer;font-size:11px">Afficher</button></div>';
+  }
+  if(!day.length){
+    html='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div><div class="sub">Les camions importés dans TruckFlow apparaîtront ici automatiquement</div></div>';
+  }
+  document.getElementById('main').innerHTML=html;
+}
+function tick(){
+  var n=new Date();
+  document.getElementById('clk').textContent=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('dtlbl').textContent=n.toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+tick();render();
+setInterval(tick,1000);
+setInterval(render,15000);
+window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key===LQ)render();});
+  */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
+
+  var _body=
+    '<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>'+
+    '<header>'+
+      '<div style="display:flex;flex-direction:column;gap:1px">'+
+        '<div class="brand">\uD83D\uDE9A Truck<span>Flow</span> Monitor</div>'+
+        '<div class="dtlbl" id="dtlbl">\u2014</div>'+
+      '</div>'+
+      '<div class="clock" id="clk">--:--:--</div>'+
+      '<div class="kpis" id="kpis"></div>'+
+      '<div class="hbtns">'+
+        '<span class="rdot"></span>'+
+        '<button class="hbtn" onclick="render()">\u21BB Actualiser</button>'+
+        '<button class="hbtn" id="dtgl" onclick="togDep()">Afficher partis</button>'+
+      '</div>'+
+    '</header>'+
+    '<div id="main"></div>'+
+    '<div id="toast"></div>';
+
+  var _src='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>\uD83D\uDE9A TruckFlow Monitor</title><style>'+_css+'</style></head><body>'+_body+'<script>'+_js+'<\/script></body></html>';
+  w.document.write(_src);
+  w.document.close();
+  logActivity('\uD83D\uDDA5','Mode Monitor ouvert dans un nouvel onglet');
+}
 </script>
 </body>
 </html>
