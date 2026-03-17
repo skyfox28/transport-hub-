@@ -350,6 +350,16 @@ html,body{
     </div>
 
     <button class="btn-refresh" onclick="loadData();showToast('Données actualisées ✓')">↻ Actualiser</button>
+
+    <!-- Import session JSON -->
+    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importSessionJSON(event)">
+    <button class="btn-refresh" style="background:rgba(191,90,242,.1);border-color:rgba(191,90,242,.25);color:var(--purple);margin-top:8px"
+      onclick="document.getElementById('importInput').click()">
+      📥 Importer session desktop
+    </button>
+    <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:6px;line-height:1.5;padding:0 4px">
+      Charge un fichier JSON exporté depuis TruckFlow desktop<br>via le bouton <strong style="color:var(--t2)">↓ Partager</strong>
+    </div>
     <div style="height:8px"></div>
   </div>
 
@@ -809,6 +819,37 @@ function tick(){
   var now = new Date();
   document.getElementById('hdrTime').textContent =
     fmt2(now.getHours())+':'+fmt2(now.getMinutes());
+}
+
+// ─── Import session JSON from desktop ─────────────────────────────────────
+function importSessionJSON(event){
+  var file = event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var s = JSON.parse(ev.target.result);
+      // Validate basic structure
+      if(!s.trucks && !s.deliveries) throw new Error('Format non reconnu');
+      // Populate in-memory state
+      if(s.trucks)     trucks     = s.trucks;
+      if(s.timestamps) timestamps = s.timestamps;
+      if(s.deliveries) deliveries = s.deliveries;
+      if(s.completed)  completed  = s.completed;
+      // Persist to localStorage so data survives refresh
+      if(s.trucks)     localStorage.setItem('th10_trucks',     JSON.stringify(s.trucks));
+      if(s.timestamps) localStorage.setItem('th10_ts',         JSON.stringify(s.timestamps));
+      if(s.deliveries) localStorage.setItem('th10_deliveries', JSON.stringify(s.deliveries));
+      if(s.articles)   localStorage.setItem('th10_articles',   JSON.stringify(s.articles));
+      if(s.completed)  localStorage.setItem('tf_completed',    JSON.stringify(s.completed));
+      renderAll();
+      showToast('✅ Session chargée — '+trucks.length+' camions, '+deliveries.length+' livraisons');
+    } catch(e){
+      showToast('❌ Erreur : '+e.message);
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ─── Listen for storage changes from main app ─────────────────────────────
