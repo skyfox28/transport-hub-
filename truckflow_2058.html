@@ -2531,6 +2531,7 @@ function stampNow(ti,key){
     saveQuaiAssign();
   }
   timestamps[trucks[ti].id][key]=new Date().toISOString();
+  if(key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}return;}}
   save(); renderTrucks(); renderQuai();
   if(_activeDay) try{renderDayDetail(_activeDay);}catch(e){}
   var lbl=(TS_DEFS.find(function(t){return t.key===key;})||{lbl:key}).lbl;
@@ -3108,11 +3109,8 @@ function cleanCompletedTrucks(){
   var before = trucks.length;
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
-    if(!(ts.arr && ts.quai && ts.chg && ts.dep)) return true;
-    var allDone = (t.deliveries||[]).every(function(id){
-      var d = livMap[id]; return d && d.sp==='C';
-    });
-    if(allDone){
+    if(!ts.dep) return true;
+    {
       // Archive completed truck before removal
       var ponct=getPonctualite(t,ts,Date.now());
       var delivDetails=(t.deliveries||[]).map(function(id){
