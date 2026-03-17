@@ -5206,8 +5206,10 @@ if(_tfChannel){
       renderAll();
       showToast('\uD83D\uDD04 Sync re\u00e7ue d\u2019un autre onglet');
     } else if(ev.data.type==='ts'){
-      // Timestamps saisis depuis le Mode Monitor → recharger depuis localStorage
+      // Timestamps / quai saisis depuis le Mode Monitor → recharger depuis localStorage
       try{var raw=localStorage.getItem('th10_ts');if(raw)timestamps=JSON.parse(raw);}catch(e){}
+      try{var rawQ=localStorage.getItem('th10_quai');if(rawQ)quaiAssign=JSON.parse(rawQ);}catch(e){}
+      cleanCompletedTrucks(); // archive les camions avec dep timestamp
       save();renderAll();
     }
   };
@@ -8164,6 +8166,51 @@ function updateKPIs(trucks,tsm){
     kbox(nLo,'✅ Chargé','#4ade80')+
     kbox(nP,'🚀 Partis','#34d399');
 }
+function saveQ(truckId,quaiNum){
+  var qa=getQ();
+  Object.keys(qa).forEach(function(q){if(qa[q]===truckId)delete qa[q];});
+  if(quaiNum)qa[String(quaiNum)]=truckId;
+  localStorage.setItem(LQ,JSON.stringify(qa));
+  if(_bc)_bc.postMessage({type:'ts'});
+}
+function pickQuai(tid){
+  var existing=getQ();
+  var curQ=null;
+  Object.keys(existing).forEach(function(q){if(existing[q]===tid)curQ=q;});
+  var el=document.getElementById('qpick');if(el)el.remove();
+  var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
+  var btns=[2,3,4,5,6,7,8,9,10,11].map(function(q){
+    var occ=existing[q]&&existing[q]!==tid;
+    var isCur=String(q)===String(curQ);
+    var bdCol=occ?'rgba(255,255,255,.07)':isCur?'rgba(76,110,245,.5)':'rgba(10,132,255,.35)';
+    var bgCol=occ?'rgba(255,255,255,.03)':isCur?'rgba(76,110,245,.28)':'rgba(10,132,255,.14)';
+    var txCol=occ?'#484f57':isCur?'#818cf8':'#60a5fa';
+    return '<button onclick="'+(occ?'':'assignQuai(\''+tid+'\','+q+')')+'" style="padding:11px 0;border-radius:10px;border:1px solid '+bdCol+';background:'+bgCol+';color:'+txCol+';font-size:15px;font-weight:800;cursor:'+(occ?'default':'pointer')+';width:100%">'+(occ?'<span style="font-size:8px;display:block;color:#484f57;margin-bottom:1px">Occupé</span>':'')+'Q'+q+(isCur?' ✓':'')+'</button>';
+  }).join('');
+  var ov=document.createElement('div');
+  ov.id='qpick';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)';
+  ov.innerHTML='<div style="background:rgba(13,17,23,.96);border:1.5px solid rgba(160,210,255,.2);border-radius:20px;padding:24px;max-width:400px;width:92%;backdrop-filter:blur(24px)">'
+    +'<div style="font-size:15px;font-weight:800;margin-bottom:3px;color:#f0f6fc">🔄 Assignation quai</div>'
+    +'<div style="font-size:11px;color:#8b949e;margin-bottom:16px">Sélectionner le quai — l\'heure sera enregistrée automatiquement</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'+btns+'</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+    +'<span style="font-size:11px;color:#8b949e;white-space:nowrap">Heure :</span>'
+    +'<input type="time" id="qtime_'+tid+'" value="'+nowT+'" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(160,210,255,.18);border-radius:8px;color:#f0f6fc;padding:6px 10px;font-size:13px;outline:none;color-scheme:dark">'
+    +'</div>'
+    +'<button onclick="document.getElementById(\'qpick\').remove()" style="width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#8b949e;font-size:12px;cursor:pointer">Annuler</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+}
+function assignQuai(tid,quaiNum){
+  var el=document.getElementById('qpick');
+  var tinp=document.getElementById('qtime_'+tid);
+  var tval=tinp?tinp.value:null;
+  if(el)el.remove();
+  saveQ(tid,quaiNum);
+  if(tval){stampM(tid,'quai',tval);}else{stamp(tid,'quai');}
+}
 function parseCren(c){
   if(!c)return null;
   var m=c.match(/(\d{1,2})[h:](\d{0,2})\s*[-–]\s*(\d{1,2})[h:](\d{0,2})/i);
@@ -8221,8 +8268,9 @@ function makeCard(t,ts,quai,prio){
   var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
   var prB=prio==='urgent'?'<span class="b bpu">🔴 Urgent</span>':prio==='normal'?'<span class="b bpn">🟡 Normal</span>':prio==='flexible'?'<span class="b bpf">🟢 Flexible</span>':'';
   var ptB=ponctBadge(t,ts);
+  var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
   var ab=nk
-    ?'<button class="act '+ac+'" onclick="stamp(\''+tid+'\',\''+nk+'\')">'+al+'</button>'
+    ?'<button class="act '+ac+'" onclick="'+actOnclick+'">'+al+'</button>'
      +'<div style="text-align:right;margin-top:2px"><button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer" onclick="togM(\''+tid+'\')">✎ Heure manuelle</button></div>'
      +'<div class="man" id="m_'+tid+'">'
      +'<input type="time" id="ti_'+tid+'" value="'+nowT+'">'
