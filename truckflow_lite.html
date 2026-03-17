@@ -308,6 +308,25 @@ html,body{
 }
 .btn-export-ts:active{background:rgba(48,209,88,.2);transform:scale(.98)}
 
+/* ── Date selector ──────────────────────── */
+.date-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px;scrollbar-width:none}
+.date-chips::-webkit-scrollbar{display:none}
+.date-chip{
+  flex-shrink:0;padding:6px 14px;border-radius:99px;
+  font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.2px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+  color:var(--t3);transition:all .15s;white-space:nowrap;
+}
+.date-chip.on{background:rgba(10,132,255,.18);border-color:rgba(10,132,255,.35);color:var(--blue)}
+.date-chip:active{transform:scale(.95)}
+
+/* ── Truck syntax line ───────────────────── */
+.truck-syntax{display:flex;align-items:center;gap:4px;margin-top:3px;flex-wrap:wrap}
+.syn-carrier{font-size:12px;font-weight:600;color:var(--t2)}
+.syn-sep{font-size:10px;color:var(--t3);opacity:.45;line-height:1;margin:0 1px}
+.syn-cren{font-size:12px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.syn-n{font-size:12px;font-weight:700;color:var(--purple)}
+
 /* ── Toast ─────────────────────────────── */
 .toast{
   position:fixed;bottom:calc(var(--safe-bot) + 80px);left:50%;transform:translateX(-50%) translateY(20px);
@@ -396,6 +415,7 @@ html,body{
 
   <!-- ── TAB: Camions ── -->
   <div class="panel" id="tab-cam">
+    <div class="date-chips" id="dateChips"></div>
     <div class="sec-lbl" id="camLabel">Camions</div>
     <!-- Filter chips -->
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="camFilters">
@@ -473,6 +493,7 @@ var deliveries = [];
 var completed = [];
 var camFilter = '';
 var _currentTab = 'dash';
+var _selectedDate = '';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 function fmt2(n){ return String(n).padStart(2,'0'); }
@@ -545,6 +566,16 @@ function loadData(){
     completed = _c ? JSON.parse(_c) : [];
   }catch(e){ completed = []; }
 
+  // Init selected date : today if trucks exist for today, else most recent date
+  var tod = today();
+  var hasToday = trucks.some(function(t){ return t.date === tod; });
+  if(hasToday || !trucks.length){
+    _selectedDate = tod;
+  } else {
+    var dates = trucks.map(function(t){ return t.date||''; }).filter(Boolean).sort();
+    _selectedDate = dates[dates.length-1];
+  }
+
   renderAll();
 }
 
@@ -574,9 +605,8 @@ function renderHeader(){
 
 // ─── Dashboard ─────────────────────────────────────────────────────────────
 function renderDash(){
-  var tod = today();
+  var tod = _selectedDate || today();
   var todTrucks = trucks.filter(function(t){ return t.date === tod; });
-  if(!todTrucks.length) todTrucks = trucks; // fallback: all
 
   var totalLivs = deliveries.length;
   var totalCam = todTrucks.length;
@@ -659,8 +689,34 @@ function renderDash(){
     '<div class="empty-state" style="padding:20px"><div class="empty-sub">Aucune livraison</div></div>';
 }
 
+// ─── Date chips ────────────────────────────────────────────────────────────
+var DAYS_SHORT = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+function renderDateChips(){
+  var el = document.getElementById('dateChips');
+  if(!el) return;
+  var datesSet = {};
+  trucks.forEach(function(t){ if(t.date) datesSet[t.date] = true; });
+  var sorted = Object.keys(datesSet).sort();
+  if(!sorted.length){ el.innerHTML = ''; return; }
+  el.innerHTML = sorted.map(function(d){
+    var dd = new Date(d+'T12:00:00');
+    var parts = d.split('-');
+    var lbl = DAYS_SHORT[dd.getDay()]+' '+parts[2]+'/'+parts[1];
+    var on = d === _selectedDate;
+    return '<button class="date-chip'+(on?' on':'')+'" onclick="setSelectedDate(\''+d+'\')">'+lbl+'</button>';
+  }).join('');
+  // Scroll active chip into view
+  var active = el.querySelector('.date-chip.on');
+  if(active) active.scrollIntoView({inline:'center',block:'nearest'});
+}
+
+function setSelectedDate(d){
+  _selectedDate = d;
+  renderAll();
+}
+
 // ─── Trucks ────────────────────────────────────────────────────────────────
-var camFilter = '';
 function setCamFilter(f){
   camFilter = f;
   ['all','arr','quai','chg','dep'].forEach(function(k){
@@ -671,55 +727,65 @@ function setCamFilter(f){
 }
 
 function renderTrucks(){
-  var tod = today();
-  var list = trucks.filter(function(t){ return t.date === tod; });
-  if(!list.length) list = trucks;
+  renderDateChips();
 
-  // sort by creneau
-  list = list.slice().sort(function(a,b){ return creToMin(a.creneau) - creToMin(b.creneau); });
+  var tod = _selectedDate || today();
+  var byDay = trucks.filter(function(t){ return t.date === tod; });
 
-  // filter by status
-  if(camFilter){
-    list = list.filter(function(t){
-      return getTruckStatus(t, timestamps[t.id]||{}) === camFilter;
-    });
-  }
+  // Sort by creneau
+  var list = byDay.slice().sort(function(a,b){ return creToMin(a.creneau) - creToMin(b.creneau); });
 
-  document.getElementById('camLabel').textContent = 'Camions ('+list.length+')';
+  // Filter by status
+  var filtered = camFilter
+    ? list.filter(function(t){ return getTruckStatus(t, timestamps[t.id]||{}) === camFilter; })
+    : list;
 
-  if(!list.length){
+  document.getElementById('camLabel').textContent = 'Camions — '+filtered.length+' / '+byDay.length;
+
+  if(!filtered.length){
+    var msg = !trucks.length
+      ? 'Importez une session desktop pour commencer'
+      : !byDay.length
+        ? 'Aucun camion pour cette date'
+        : 'Aucun camion dans ce statut';
     document.getElementById('truckList').innerHTML =
       '<div class="empty-state"><div class="empty-ico">🚛</div>'+
       '<div class="empty-title">Aucun camion</div>'+
-      '<div class="empty-sub">'+(trucks.length?'Aucun résultat pour ce filtre':'Importez le VL06O pour commencer')+'</div></div>';
+      '<div class="empty-sub">'+msg+'</div></div>';
     return;
   }
 
-  var html = list.map(function(t){
+  var html = filtered.map(function(t){
     var ts = timestamps[t.id]||{};
     var status = getTruckStatus(t, ts);
     var dotColor = {wait:'var(--t3)',arr:'var(--amber)',quai:'var(--blue)',chg:'var(--teal)',dep:'var(--green)'}[status];
     var badgeCls = {wait:'bg-wait',arr:'bg-arr',quai:'bg-quai',chg:'bg-chg',dep:'bg-dep'}[status];
-    var time = ts.dep ? fmtTime(ts.dep) : ts.chg ? fmtTime(ts.chg) : ts.quai ? fmtTime(ts.quai) : ts.arr ? fmtTime(ts.arr) : '';
-    var timeLabel = ts.dep ? 'Départ '+time : ts.chg ? 'Chgt '+time : ts.quai ? 'Quai '+time : ts.arr ? 'Arr. '+time : '';
-    var transLabel = [t.transporteur||'', t.quai ? 'Q'+t.quai : ''].filter(Boolean).join(' · ');
-    var nDelivs = (t.deliveries||[]).length;
-
-    // Check if late
     var pb = getPonctBadge(t, ts);
-    var isLate = pb && pb.diff > 15;
-    if(isLate) badgeCls = 'bg-late';
+    if(pb && pb.diff > 15) badgeCls = 'bg-late';
+
+    var time = ts.dep||ts.chg||ts.quai||ts.arr;
+    var timePrefix = ts.dep?'Départ ':ts.chg?'Chgt ':ts.quai?'Quai ':ts.arr?'Arr. ':'';
+    var timeLabel = time ? timePrefix+fmtTime(time) : '';
+
+    var nDelivs = (t.deliveries||[]).length;
+    var carrier = t.transporteur || '—';
+    var synHtml = '<div class="truck-syntax">'+
+      '<span class="syn-carrier">'+carrier+'</span>'+
+      (t.creneau ? '<span class="syn-sep">×</span><span class="syn-cren">'+t.creneau+'</span>' : '')+
+      '<span class="syn-sep">×</span>'+
+      '<span class="syn-n">'+nDelivs+' livr.</span>'+
+      (t.quai ? '<span class="syn-sep">·</span><span style="font-size:11px;color:var(--t3);font-weight:600">Q'+t.quai+'</span>' : '')+
+      '</div>';
 
     return '<div class="truck-item">'+
       '<div class="truck-status-dot" style="color:'+dotColor+';background:'+dotColor+'"></div>'+
       '<div class="truck-main">'+
-        '<div class="truck-id">'+(t.id||'?')+' <span style="font-size:11px;font-weight:500;color:var(--t3)">'+nDelivs+' liv.</span></div>'+
-        '<div class="truck-meta">'+(transLabel||'—')+'</div>'+
+        '<div class="truck-id">'+(t.id||'?')+'</div>'+
+        synHtml+
       '</div>'+
       '<div class="truck-right">'+
         '<span class="truck-badge '+badgeCls+'">'+getStatusLabel(status)+'</span>'+
-        (timeLabel?'<div class="truck-time">'+timeLabel+'</div>':'')+
-        (t.creneau?'<div class="truck-creneau">⏰ '+t.creneau+'</div>':'')+
+        (timeLabel ? '<div class="truck-time">'+timeLabel+'</div>' : '')+
       '</div>'+
       '</div>';
   }).join('');
@@ -729,9 +795,8 @@ function renderTrucks(){
 
 // ─── Planning ──────────────────────────────────────────────────────────────
 function renderPlanning(){
-  var tod = today();
+  var tod = _selectedDate || today();
   var list = trucks.filter(function(t){ return t.date === tod; });
-  if(!list.length) list = trucks;
 
   // Group by creneau hour slot
   var slots = {};
@@ -784,9 +849,8 @@ function renderPlanning(){
 
 // ─── Stats ─────────────────────────────────────────────────────────────────
 function renderStats(){
-  var tod = today();
+  var tod = _selectedDate || today();
   var list = trucks.filter(function(t){ return t.date === tod; });
-  if(!list.length) list = trucks;
 
   // Carriers
   var carriers = {};
@@ -853,9 +917,8 @@ var TS_STEPS = [
 ];
 
 function renderTimestamps(){
-  var tod = today();
+  var tod = _selectedDate || today();
   var list = trucks.filter(function(t){ return t.date === tod; });
-  if(!list.length) list = trucks;
   list = list.slice().sort(function(a,b){ return creToMin(a.creneau) - creToMin(b.creneau); });
 
   document.getElementById('tsLabel').textContent = 'Timestamps camions ('+list.length+')';
@@ -882,12 +945,19 @@ function renderTimestamps(){
         '<span class="ts-step-time">'+(isSet?fmtTime(val):'—')+'</span>'+
         '</button>';
     }).join('');
+    var nDelivs = (t.deliveries||[]).length;
+    var carrier = t.transporteur||'—';
+    var synHtml = '<div class="truck-syntax">'+
+      '<span class="syn-carrier">'+carrier+'</span>'+
+      (t.creneau?'<span class="syn-sep">×</span><span class="syn-cren">'+t.creneau+'</span>':'')+
+      '<span class="syn-sep">×</span><span class="syn-n">'+nDelivs+' livr.</span>'+
+      '</div>';
     return '<div class="ts-card gc">'+
       '<div class="ts-truck-hdr">'+
         '<div class="truck-status-dot" style="color:'+dotCol+';background:'+dotCol+'"></div>'+
         '<div style="flex:1;min-width:0">'+
           '<div class="truck-id" style="font-size:13px">'+(t.id||'?')+'</div>'+
-          '<div class="truck-meta">'+(t.transporteur||'—')+(t.creneau?' · '+t.creneau:'')+'</div>'+
+          synHtml+
         '</div>'+
       '</div>'+
       '<div class="ts-steps-row">'+stepsHtml+'</div>'+
@@ -918,9 +988,8 @@ function setTS(truckId, step){
 }
 
 function exportTSJson(){
-  var tod = today();
+  var tod = _selectedDate || today();
   var list = trucks.filter(function(t){ return t.date === tod; });
-  if(!list.length) list = trucks;
   var ts = {};
   list.forEach(function(t){ if(timestamps[t.id]) ts[t.id] = timestamps[t.id]; });
   var n = Object.keys(ts).length;
