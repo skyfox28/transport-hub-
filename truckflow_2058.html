@@ -1496,7 +1496,12 @@ html.tv-mode body{overflow:auto}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP = {"deliveries":[],"articles":[],"horaires":[]};
+var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
+// Lookup livraison dans les données actives OU dans le cache persistant
+function getDeliv(id){
+  var d=getDeliv(id);
+  return d||(APP.deliveryCache||{})[id]||null;
+}
 var trucks = [];
 var timestamps = {};
 var quaiManual = [];
@@ -1565,6 +1570,7 @@ function save(){
     localStorage.setItem('th10_ts', JSON.stringify(timestamps));
     localStorage.setItem('th10_deliveries', JSON.stringify(APP.deliveries||[]));
     localStorage.setItem('th10_articles', JSON.stringify(APP.articles||[]));
+    localStorage.setItem('th10_delcache', JSON.stringify(APP.deliveryCache||{}));
   }catch(e){ console.warn('save() error:', e); }
 }
 function saveAll(){
@@ -1737,7 +1743,7 @@ function renderSynPonct(){
       if(isT&&livIds.length){
         livPanel='<div style="margin-top:6px;display:flex;flex-direction:column;gap:2px">'+
           livIds.map(function(id){
-            var d=APP.deliveries.find(function(x){return x.id===id;});
+            var d=getDeliv(id);
             if(!d) return '<div style="font-size:10px;color:var(--t3);padding:3px 6px">'+id+'</div>';
             var sp=d.sp==='C'?'<span style="color:var(--green);font-size:10px;font-weight:700">\u2713 C</span>':
                    d.sp==='B'?'<span style="color:var(--amber);font-size:10px;font-weight:700">B</span>':
@@ -2225,7 +2231,7 @@ function renderDayDetail(date){
         if(isT&&livIds2.length){
           livPanel2='<div style="margin-top:6px;display:flex;flex-direction:column;gap:2px">'+
             livIds2.map(function(id){
-              var d=APP.deliveries.find(function(x){return x.id===id;});
+              var d=getDeliv(id);
               if(!d)return '<div style="font-size:10px;color:var(--t3);padding:3px 6px">'+id+'</div>';
               var sp2=d.sp==='C'?'<span style="color:var(--green);font-size:10px;font-weight:700">\u2713 C</span>':d.sp==='B'?'<span style="color:var(--amber);font-size:10px;font-weight:700">B</span>':'<span style="color:var(--t3);font-size:10px">A</span>';
               var vi2=d.ville?('<span style="color:var(--t3);font-size:10px;white-space:nowrap">'+d.ville+'</span>'):'';
@@ -2533,8 +2539,15 @@ function clearTS(ti,key){
 function delTruck(idx){if(!confirm('Supprimer ce camion ?'))return;delete timestamps[trucks[idx].id];trucks.splice(idx,1);save();renderAll();}
 function moveLivToTruck(fromIdx,lid,toIdx){
   trucks[fromIdx].deliveries=trucks[fromIdx].deliveries.filter(function(x){return x!==lid;});
+  // Si le camion source est verrouillé, mettre à jour le snapshot pour ne pas restaurer au prochain import
+  if(trucks[fromIdx].locked && trucks[fromIdx].lockedDeliveries){
+    trucks[fromIdx].lockedDeliveries=trucks[fromIdx].lockedDeliveries.filter(function(x){return x!==lid;});
+  }
   if(!trucks[toIdx].deliveries)trucks[toIdx].deliveries=[];
   if(trucks[toIdx].deliveries.indexOf(lid)<0)trucks[toIdx].deliveries.push(lid);
+  // Enregistrer le déplacement manuel pour survivre aux reimports
+  if(!trucks[toIdx]._movedIn) trucks[toIdx]._movedIn={};
+  trucks[toIdx]._movedIn[lid]=true;
   save();renderTrucks();showToast('Livraison d\u00e9plac\u00e9e');
 }
 
@@ -2700,7 +2713,7 @@ function renderTrucks(){
   container.innerHTML='';
   indices.forEach(function(ti){
     var t=trucks[ti],ts=timestamps[t.id]||{};
-    var delivs=(t.deliveries||[]).map(function(id){return APP.deliveries.find(function(d){return d.id===id;});}).filter(Boolean);
+    var delivs=(t.deliveries||[]).map(function(id){return getDeliv(id);}).filter(Boolean);
     var spC=0,spB=0,spA=0;
     delivs.forEach(function(d){if(d.sp==='C')spC++;else if(d.sp==='B')spB++;else spA++;});
     var cren=t.creneau||'';
@@ -2925,7 +2938,7 @@ function editCreneau(ti, spanEl){
 function openSplitModal(ti){
   _splitTruckIdx=ti;_splitSelected.clear();
   var t=trucks[ti];
-  var delivs=(t.deliveries||[]).map(function(id){return APP.deliveries.find(function(d){return d.id===id;});}).filter(Boolean);
+  var delivs=(t.deliveries||[]).map(function(id){return getDeliv(id);}).filter(Boolean);
   document.getElementById('splitTtl').textContent='Splitter '+( t.transporteur||t.itin||'?')+' ('+t.date+')';
   document.getElementById('splitInfo').textContent='S\u00e9lectionne les livraisons \u00e0 d\u00e9placer dans un nouveau camion '+( t.transporteur||t.itin||'?');
   var ul=document.getElementById('splitLivs');ul.innerHTML='';
@@ -3028,6 +3041,7 @@ function exportSession(){
   var session = {
     v: 3, ts: new Date().toISOString(),
     deliveries: APP.deliveries||[], articles: APP.articles||[],
+    deliveryCache: APP.deliveryCache||{},
     trucks: trucks, timestamps: timestamps,
     quai: quaiAssign, manual: quaiManual,
     archive: _dailyArchive||[],
@@ -3050,6 +3064,9 @@ function importSession(event){
     try{
       var s = JSON.parse(ev.target.result);
       if(!s.deliveries) throw new Error('Format invalide');
+      // Alimenter le cache avec les livraisons importées
+      (s.deliveries||[]).forEach(function(d){ APP.deliveryCache[d.id]=d; });
+      if(s.deliveryCache) Object.assign(APP.deliveryCache, s.deliveryCache);
       APP.deliveries = s.deliveries||[];
       APP.articles   = s.articles||[];
       trucks         = s.trucks||[];
@@ -3592,6 +3609,9 @@ function autoGenTrucks(){
   var allLivIds = new Set(APP.deliveries.map(function(d){return d.id;}));
   var reserved = new Set();
   var assigned  = new Set();
+  // Index des livraisons déplacées manuellement vers un autre camion
+  var movedIn = {};
+  trucks.forEach(function(t){ Object.keys(t._movedIn||{}).forEach(function(lid){ movedIn[lid]=t.id; }); });
   trucks.forEach(function(t){
     var hasTS = Object.keys(timestamps[t.id]||{}).length > 0;
     if(t.locked){
@@ -3625,7 +3645,8 @@ function autoGenTrucks(){
     var key = (t.itin||'SANS')+':'+(t.date||'');
     var sapLivs = sapMap[key] || [];
     sapLivs.forEach(function(id){
-      if(!assigned.has(id) && !reserved.has(id)){
+      // Ne pas remettre une livraison déplacée manuellement vers un autre camion
+      if(!assigned.has(id) && !reserved.has(id) && !(movedIn[id] && movedIn[id]!==t.id)){
         t.deliveries.push(id);
         assigned.add(id);
       }
@@ -4140,7 +4161,7 @@ function exportExcel(){
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti];
     (t.deliveries||[]).forEach(function(id){
-      var d = APP.deliveries.find(function(x){return x.id===id;});
+      var d = getDeliv(id);
       if(!d) return;
       livRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
         d.id, d.dest||'', d.ville||'',d.sp||'', d.wm||'',
@@ -4616,6 +4637,8 @@ function doImportVL06O(event){
         return Object.assign({},d,{pkg:Math.round(d.pkg),palSilo:Math.round(d.palSilo),colisSilo:Math.round(d.colisSilo),colisPick:Math.round(d.colisPick),hrSilo:Math.round(d.hrSilo*100)/100,hrPick:Math.round(d.hrPick*100)/100});
       });
       if(!deliveries.length){showToast('Aucune livraison valide');return;}
+      // Alimenter le cache persistant AVANT remplacement (données conservées même après disparition SAP)
+      deliveries.forEach(function(d){ APP.deliveryCache[d.id]=d; });
       APP.deliveries=deliveries;
       APP.articles=artLines;
       save();
@@ -4658,10 +4681,10 @@ function renderWelcome(){
 }
 function resetAll(){
   if(!confirm('Purger toutes les donn\u00e9es ?')) return;
-  ['th10_trucks','th10_ts','th10_quai','th10_deliveries','th10_articles','th10_manual'].forEach(function(k){localStorage.removeItem(k);});
+  ['th10_trucks','th10_ts','th10_quai','th10_deliveries','th10_articles','th10_manual','th10_delcache'].forEach(function(k){localStorage.removeItem(k);});
   localStorage.removeItem('tf_completed');
   trucks=[];timestamps={};quaiAssign={};quaiManual=[];_completedTrucks=[];
-  APP.deliveries=[];APP.articles=[];APP.horaires=[];
+  APP.deliveries=[];APP.articles=[];APP.horaires=[];APP.deliveryCache={};
   location.reload();
 }
 function init(){
@@ -4671,6 +4694,7 @@ function init(){
     var _ts=localStorage.getItem('th10_ts'); if(_ts) timestamps=JSON.parse(_ts);
     var _d=localStorage.getItem('th10_deliveries'); if(_d) APP.deliveries=JSON.parse(_d);
     var _a=localStorage.getItem('th10_articles'); if(_a) APP.articles=JSON.parse(_a);
+    var _dc=localStorage.getItem('th10_delcache'); if(_dc) APP.deliveryCache=JSON.parse(_dc);
   }catch(e){ console.warn('init() load error:', e); }
   loadQuaiAssign();
   loadCompleted();
@@ -4969,7 +4993,7 @@ function resetAllDetailed(){
 }
 function doResetAll(){
   logActivity('\uD83D\uDDD1','Purge compl\u00e8te: '+trucks.length+' camions, '+(APP.deliveries||[]).length+' livraisons');
-  ['th10_trucks','th10_ts','th10_quai','th10_deliveries','th10_articles','th10_manual'].forEach(function(k){localStorage.removeItem(k);});
+  ['th10_trucks','th10_ts','th10_quai','th10_deliveries','th10_articles','th10_manual','th10_delcache'].forEach(function(k){localStorage.removeItem(k);});
   location.reload();
 }
 
@@ -5660,10 +5684,11 @@ function _buildPDFReport(){
   var allLivIds=new Set();
   allDay.forEach(function(t){(t.deliveries||[]).forEach(function(id){allLivIds.add(id);});});
   var volDep={pal:0,cs:0,cp:0},volTotal={pal:0,cs:0,cp:0},volRest={pal:0,cs:0,cp:0};
-  (APP.deliveries||[]).forEach(function(d){
-    if(!allLivIds.has(d.id))return;
+  // Utiliser le cache pour récupérer les données même après disparition du VL06O
+  allLivIds.forEach(function(lid){
+    var d=getDeliv(lid);if(!d)return;
     volTotal.pal+=(d.palSilo||0);volTotal.cs+=(d.colisSilo||0);volTotal.cp+=(d.colisPick||0);
-    if(depLivIds.has(d.id)){volDep.pal+=(d.palSilo||0);volDep.cs+=(d.colisSilo||0);volDep.cp+=(d.colisPick||0);}
+    if(depLivIds.has(lid)){volDep.pal+=(d.palSilo||0);volDep.cs+=(d.colisSilo||0);volDep.cp+=(d.colisPick||0);}
   });
   (APP.articles||[]).forEach(function(a){
     if(!allLivIds.has(a.liv))return;
@@ -5741,7 +5766,7 @@ function _buildPDFReport(){
         html+='<tr><td colspan="7" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
           '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Pick.</th></tr>';
         livIdsCours.forEach(function(lid){
-          var d=(APP.deliveries||[]).find(function(dv){return dv.id===lid;});
+          var d=getDeliv(lid);
           if(!d)return;
           var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
           html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
@@ -5804,7 +5829,7 @@ function _buildPDFReport(){
       var livIds=x.t.deliveries||[];
       var palT=0,cpT=0;
       livIds.forEach(function(lid){
-        var d=(APP.deliveries||[]).find(function(dv){return dv.id===lid;});
+        var d=getDeliv(lid);
         if(d){palT+=(d.palSilo||0);cpT+=(d.colisPick||0);}
       });
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
@@ -5820,7 +5845,7 @@ function _buildPDFReport(){
         html+='<tr><td colspan="8" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
           '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
         livIds.forEach(function(lid){
-          var d=(APP.deliveries||[]).find(function(dv){return dv.id===lid;});
+          var d=getDeliv(lid);
           if(!d)return;
           var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
           html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
