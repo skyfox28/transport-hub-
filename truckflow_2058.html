@@ -925,10 +925,6 @@ html.tv-mode body{overflow:auto}
 .vtl-lbl{font-size:10px;color:var(--t2);margin-top:2px}
 .vtl-dur{font-size:10px;color:var(--teal);font-weight:600;margin-top:2px}
 
-/* ── Checklist clôture ───────────────────────────────────────── */
-.checklist-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center}
-.checklist-bg.open{display:flex}
-.checklist-wrap{background:var(--glass-s);backdrop-filter:saturate(200%) blur(28px);-webkit-backdrop-filter:saturate(200%) blur(28px);border:1px solid var(--glass-bd);border-radius:24px;padding:24px;width:92%;max-width:440px;box-shadow:var(--glass-glow),0 16px 48px rgba(0,0,0,.3)}
 .cl-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);margin-bottom:6px;background:var(--sf2);border:1px solid var(--bd);cursor:pointer;transition:all .2s}
 .cl-item:hover{border-color:var(--blue)}
 .cl-item.checked{border-color:var(--green);background:rgba(48,209,88,.06)}
@@ -1311,7 +1307,7 @@ html.tv-mode body{overflow:auto}
       <button class="btn-sm" style="background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.25);color:var(--blue)" onclick="openAdvFilter()">&#128270; Filtres</button>
       <button class="btn-sm" style="background:rgba(94,92,230,.1);border-color:rgba(94,92,230,.25);color:var(--indigo)" onclick="openKanban()">&#128203; Kanban</button>
       <button class="btn-sm" id="groupByBtn" style="background:rgba(255,159,10,.08);border-color:rgba(255,159,10,.2);color:var(--amber)" onclick="toggleGroupByCarrier()">&#128666; Grouper</button>
-      <button class="btn-sm" style="background:rgba(48,209,88,.08);border-color:rgba(48,209,88,.2);color:var(--green)" onclick="openChecklist()">&#9989; Cl&ocirc;ture</button>
+
       <button class="btn-new" onclick="regenTrucks()">&#x21BB; Regenerer VL06O</button>
       <button class="btn-sm" onclick="var r=cleanCompletedTrucks();showToast(r?r+' camion(s) nettoye(s)':'Aucun camion termine')">&#128465; Nettoyer termines</button>
     </div>
@@ -1493,9 +1489,6 @@ html.tv-mode body{overflow:auto}
 </div>
 
 <!-- ═══ CHECKLIST CLÔTURE ═══ -->
-<div class="checklist-bg" id="checklistBg" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="checklist-wrap" id="checklistContent"></div>
-</div>
 
 <!-- ═══ TOAST ═══ -->
 <div class="toast" id="toastEl"></div>
@@ -6681,44 +6674,6 @@ function copyReportToClipboard(){
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #10 CHECKLIST DE CLÔTURE ────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-var _checklistState={};
-function openChecklist(){
-  var bg=document.getElementById('checklistBg');bg.classList.add('open');
-  renderChecklist();
-}
-function renderChecklist(){
-  var todayISO=new Date().toISOString().slice(0,10);
-  var dayTrucks=trucks.filter(function(t){return t.date===todayISO;});
-  if(!dayTrucks.length) dayTrucks=trucks;
-  var now=Date.now();
-  var allDeparted=dayTrucks.every(function(t){var ts=timestamps[t.id]||{};return!!ts.dep;});
-  var allDelivered=(APP.deliveries||[]).filter(function(d){return dayTrucks.some(function(t){return(t.livs||[]).indexOf(d.id)>=0;});}).every(function(d){return d.sp==='C';});
-  var items=[
-    {id:'allDept',label:'Tous les camions sont partis',auto:allDeparted},
-    {id:'allLiv',label:'Toutes les livraisons sont termin\u00e9es (statut C)',auto:allDelivered},
-    {id:'export',label:'Session export\u00e9e (fichier JSON)',auto:false},
-    {id:'archive',label:'Archive export\u00e9e (historique)',auto:false},
-    {id:'notes',label:'Notes v\u00e9rifi\u00e9es / transmises',auto:false},
-    {id:'clean',label:'Camions termin\u00e9s nettoy\u00e9s',auto:false}
-  ];
-  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<h3 style="font-size:16px;font-weight:800;color:var(--t1);margin:0">\u2705 Checklist de cl\u00f4ture</h3>'+
-    '<div style="cursor:pointer;font-size:18px;color:var(--t3);padding:4px 8px" onclick="document.getElementById(\'checklistBg\').classList.remove(\'open\')">\u2715</div></div>';
-  var done=0;
-  items.forEach(function(item){
-    var checked=item.auto||_checklistState[item.id];
-    if(checked) done++;
-    html+='<div class="cl-item'+(checked?' checked':'')+'" onclick="'+(item.auto?'':'toggleCheckItem(\''+item.id+'\');renderChecklist()')+'">'+
-      '<div class="cl-check">'+(checked?'\u2713':'')+'</div>'+
-      '<div class="cl-text">'+(item.auto?'\u2728 ':'')+''+item.label+'</div></div>';
-  });
-  var pct=Math.round(done/items.length*100);
-  html+='<div style="margin-top:14px;text-align:center">'+
-    '<div style="background:var(--sf2);border-radius:8px;height:6px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:'+pct+'%;background:'+(pct>=100?'var(--green)':'var(--blue)')+';border-radius:8px;transition:width .3s"></div></div>'+
-    '<span style="font-size:11px;font-weight:700;color:'+(pct>=100?'var(--green)':'var(--t2)')+'">'+done+'/'+items.length+' \u2014 '+pct+'%'+(pct>=100?' \uD83C\uDF89':'')+'</span></div>';
-  document.getElementById('checklistContent').innerHTML=html;
-}
-function toggleCheckItem(id){_checklistState[id]=!_checklistState[id];}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #11 MARQUEUR PRIORITÉ CAMION ────────────────────────────────────────
