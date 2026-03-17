@@ -2158,16 +2158,16 @@ function renderDayDetail(date){
     +(spB?'<span class="tc-chip amber">B \u2014 '+spB+'</span>':'')
     +(spA?'<span class="tc-chip" style="background:rgba(96,104,128,.2);border-color:rgba(96,104,128,.3);color:var(--t3)">A \u2014 '+spA+'</span>':'')
     +(wC?'<span class="tc-chip" style="background:rgba(38,201,211,.12);border-color:rgba(38,201,211,.3);color:var(--teal);margin-left:4px">WM C \u2014 '+wC+'</span>':'');
-  // Bloc sélecteur + en-tête fusionnés en une card glass (même look que Vue Semaine)
-  var dayPickerHtml='<div style="margin-bottom:20px">'+
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">'+
+  // En-tête jour : glass panel flottant indépendant (backdrop-filter + border + glow)
+  var dayPickerHtml='<div class="syn-ponct">'+
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
       '<div>'+
         '<div style="font-size:22px;font-weight:800;color:var(--t1);line-height:1.2">'+dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1)+'</div>'+
         '<div class="syn-ponct-sub" style="margin-top:3px">'+total+' livraison'+(total>1?'s':'')+' \u00b7 '+pct+'% pr\u00e9pa'+(nbTrucks?' \u00b7 '+nbTrucks+' camion'+(nbTrucks>1?'s':''):'')+( nExport?' \u00b7 '+nExport+' export':'')+(tPctDone>0?' \u00b7 '+tPctDone+'% partis':'')+'</div>'+
       '</div>'+
       (sgpChips2?'<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+sgpChips2+'</div>':'')+
     '</div>'+
-    (nbTrucks>0?'<div style="height:4px;border-radius:3px;background:rgba(160,210,255,.08);overflow:hidden;margin-bottom:10px"><div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div></div>':'')+
+    (nbTrucks>0?'<div style="height:4px;border-radius:3px;background:rgba(160,210,255,.08);overflow:hidden;margin-bottom:12px"><div style="height:100%;width:'+tPctDone+'%;background:var(--green);transition:width .4s;border-radius:3px"></div></div>':'')+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+pickerBtns+'</div>'+
   '</div>';
 
