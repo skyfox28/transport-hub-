@@ -3072,6 +3072,8 @@ function importSession(event){
         purgeOldCompleted();
         saveCompleted();
       }
+      // Archive any trucks with dep timestamp that weren't archived yet
+      cleanCompletedTrucks();
       document.querySelectorAll('.panel').forEach(function(p){p.style.display='';});
       document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
       document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
