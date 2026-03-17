@@ -2976,72 +2976,76 @@ function renderTrucks(){
     });
     tc.appendChild(tsRow);
 
-    /* LIVRAISONS */
-    var dDiv=document.createElement('div');dDiv.className='tc-delivs';
-    var totPal=0,totColSilo=0,totColPick=0,totHrS=0,totHrP=0;
-    delivs.forEach(function(d){totPal+=(d.palSilo||0);totColSilo+=(d.colisSilo||0);totColPick+=(d.colisPick||0);totHrS+=(d.hrSilo||0);totHrP+=(d.hrPick||0);});
-    var hdr=document.createElement('div');hdr.className='tc-del-hdr';
-    var summaryHtml='';
-    if(delivs.length){
-      summaryHtml='<span class="di-silo" style="font-size:10px">\uD83C\uDFED '+Math.round(totPal)+'pal '+Math.round(totColSilo).toLocaleString('fr')+'cs</span>'+
-        (totColPick?'<span class="di-pick" style="font-size:10px"> \u270b '+Math.round(totColPick).toLocaleString('fr')+'pk</span>':'')+
-        '<span class="di-hr" style="font-size:10px"> \u23f1 '+(totHrS+totHrP).toFixed(1)+'h</span>';
-    }
-    hdr.innerHTML='<span class="tc-del-toggle"><span class="tc-del-toggle-ico">\u25b6</span>Livraisons ('+delivs.length+')</span><span style="display:flex;gap:6px;align-items:center">'+summaryHtml+'</span>';
-    dDiv.appendChild(hdr);
-    var body=document.createElement('div');body.className='tc-del-body';
-    var rowsDiv=document.createElement('div');rowsDiv.className='tc-del-rows';rowsDiv.style.padding='0 0 8px 0';
-    // Toggle : ouvert par défaut, clic pour replier
-    hdr.querySelector('.tc-del-toggle-ico').textContent='\u25bc';
-    hdr.querySelector('.tc-del-toggle').addEventListener('click',function(){
-      var ico=hdr.querySelector('.tc-del-toggle-ico');
-      var isOpen=!body.classList.contains('collapsed');
-      if(isOpen){body.classList.add('collapsed');ico.textContent='\u25b6';}
-      else{body.classList.remove('collapsed');ico.textContent='\u25bc';}
-    });
+    /* ── SECTION LIVRAISONS ── */
     var isLocked=!!t.locked;
-    var otherTrucks=trucks.filter(function(ot,i){return i!==ti;});
-    // Badge figé sur l'en-tête livraisons
-    if(isLocked){
-      var lockNote=document.createElement('span');
-      lockNote.style.cssText='font-size:10px;color:var(--amber);background:rgba(245,158,11,.1);padding:1px 6px;border-radius:4px;font-weight:600';
-      lockNote.textContent='\uD83D\uDD12 Fig\u00e9 \u2014 livraisons verrouill\u00e9es';
-      hdr.appendChild(lockNote);
-    }
-    delivs.forEach(function(d){
-      var row=document.createElement('div');row.className='tc-del-row'+(isExport(d)?' export-row':'');
-      if(!isLocked){row.draggable=true;row.dataset.livId=d.id;row.dataset.truckIdx=ti;row.style.cursor='grab';}
-      var iDiv=document.createElement('div');iDiv.style.flex='1';
-      var detailHtml='';
-      if(d.palSilo)detailHtml+='<span class="di-silo">\uD83C\uDFED '+Math.round(d.palSilo)+'pal '+Math.round(d.colisSilo||0).toLocaleString('fr')+'cs</span>';
-      if(d.colisPick)detailHtml+='<span class="di-pick"> \u270b '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>';
-      if(d.hrSilo||d.hrPick)detailHtml+='<span class="di-hr"> \u23f1 '+((d.hrSilo||0)+(d.hrPick||0)).toFixed(1)+'h</span>';
-      iDiv.innerHTML='<div class="di-main">'+d.id+' \u2014 '+(d.dest||'\u2014')+'</div>'+
-        '<div class="di-sub">'+(d.ville||'')+(d.date?' \u00b7 '+d.date:'')+' \u00b7 '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>'+
-        (detailHtml?'<div class="di-detail">'+detailHtml+'</div>':'');
-      makeArtToggle(d.id, iDiv);
-      var acts=document.createElement('div');acts.className='di-actions';
-      if(!isLocked && otherTrucks.length){
-        var sel=document.createElement('select');sel.className='fsel';sel.style.cssText='font-size:11px;padding:3px 6px';
-        var opt0=document.createElement('option');opt0.value='';opt0.textContent='\u2192 D\u00e9placer\u2026';sel.appendChild(opt0);
-        otherTrucks.forEach(function(ot){
-          var realIdx=trucks.indexOf(ot);
-          var o=document.createElement('option');o.value=realIdx;
-          o.textContent=(ot.transporteur||ot.itin||'?')+(ot.date?' ('+ot.date+')':'');
-          sel.appendChild(o);
-        });
-        (function(lid,fromIdx){sel.addEventListener('change',function(){
-          if(sel.value==='')return;
-          moveLivToTruck(fromIdx,lid,parseInt(sel.value));
-          sel.value='';
-        });})(d.id,ti);
-        acts.appendChild(sel);
-      }
-      row.appendChild(iDiv);row.appendChild(acts);rowsDiv.appendChild(row);
+    var otherTrucks=trucks.filter(function(ot,oi){return oi!==ti;});
+    var totPal=0,totColSilo=0,totColPick=0;
+    delivs.forEach(function(d){totPal+=(d.palSilo||0);totColSilo+=(d.colisSilo||0);totColPick+=(d.colisPick||0);});
+    var secDiv=document.createElement('div');
+    secDiv.style.cssText='margin:0 12px 12px;border:1px solid rgba(10,132,255,.25);border-radius:12px;overflow:hidden;background:rgba(10,132,255,.04)';
+    // En-tête section
+    var secHdr=document.createElement('div');
+    secHdr.style.cssText='padding:8px 14px;background:rgba(10,132,255,.08);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none';
+    var hdrLeft='<span style="font-size:12px;font-weight:700;color:var(--blue)">\uD83D\uDCE6 Livraisons ('+delivs.length+')</span>';
+    var hdrRight='';
+    if(totPal) hdrRight+='<span style="font-size:11px;font-weight:600;color:var(--t2);margin-left:8px">\uD83C\uDFED '+Math.round(totPal)+'pal</span>';
+    if(totColSilo) hdrRight+='<span style="font-size:11px;font-weight:600;color:var(--t2);margin-left:6px">'+Math.round(totColSilo).toLocaleString('fr')+'cs</span>';
+    if(totColPick) hdrRight+='<span style="font-size:11px;font-weight:600;color:var(--purple);margin-left:6px">\u270b '+Math.round(totColPick).toLocaleString('fr')+'pk</span>';
+    if(isLocked) hdrRight+='<span style="font-size:10px;color:var(--amber);margin-left:8px">\uD83D\uDD12 Fig\u00e9</span>';
+    hdrRight+='<span class="tc-del-toggle-ico" style="font-size:11px;color:var(--t3);margin-left:10px">\u25bc</span>';
+    secHdr.innerHTML=hdrLeft+'<span style="display:flex;align-items:center">'+hdrRight+'</span>';
+    secDiv.appendChild(secHdr);
+    // Corps livraisons
+    var secBody=document.createElement('div');
+    secBody.style.cssText='padding:8px 10px;display:flex;flex-direction:column;gap:6px';
+    // Toggle collapse
+    secHdr.addEventListener('click',function(){
+      var ico=secHdr.querySelector('.tc-del-toggle-ico');
+      if(secBody.style.display==='none'){secBody.style.display='flex';ico.textContent='\u25bc';}
+      else{secBody.style.display='none';ico.textContent='\u25b6';}
     });
-    if(!delivs.length){var emp=document.createElement('p');emp.style.cssText='color:var(--t3);font-size:12px;padding:4px 0';
-      emp.textContent=t.archived?'Camion archiv\u00e9 (hors VL06O actuel)':'Aucune livraison';rowsDiv.appendChild(emp);}
-    body.appendChild(rowsDiv);dDiv.appendChild(body);tc.appendChild(dDiv);
+    if(delivs.length){
+      delivs.forEach(function(d){
+        var row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid rgba(255,255,255,.06)';
+        if(!isLocked){row.draggable=true;row.dataset.livId=d.id;row.dataset.truckIdx=ti;row.style.cursor='grab';}
+        if(isExport(d)) row.style.background='rgba(255,140,66,.06)';
+        var iDiv=document.createElement('div');iDiv.style.flex='1';
+        var detailHtml='';
+        if(d.palSilo)detailHtml+='<span class="di-silo">\uD83C\uDFED '+Math.round(d.palSilo)+'pal '+Math.round(d.colisSilo||0).toLocaleString('fr')+'cs</span> ';
+        if(d.colisPick)detailHtml+='<span class="di-pick">\u270b '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span> ';
+        if(d.hrSilo||d.hrPick)detailHtml+='<span class="di-hr">\u23f1 '+((d.hrSilo||0)+(d.hrPick||0)).toFixed(1)+'h</span>';
+        iDiv.innerHTML=
+          '<div style="font-size:12px;font-weight:700;color:var(--t1)">'+d.id+' \u2014 '+(d.dest||'\u2014')+'</div>'+
+          '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(d.ville||'')+(d.date?' \u00b7 '+d.date:'')+' \u00b7 '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>'+
+          (detailHtml?'<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">'+detailHtml+'</div>':'');
+        makeArtToggle(d.id, iDiv);
+        var acts=document.createElement('div');acts.style.cssText='display:flex;align-items:center;flex-shrink:0';
+        if(!isLocked && otherTrucks.length){
+          var sel=document.createElement('select');sel.className='fsel';sel.style.cssText='font-size:11px;padding:3px 6px';
+          var opt0=document.createElement('option');opt0.value='';opt0.textContent='\u2192 D\u00e9placer\u2026';sel.appendChild(opt0);
+          otherTrucks.forEach(function(ot){
+            var realIdx=trucks.indexOf(ot);
+            var o=document.createElement('option');o.value=realIdx;
+            o.textContent=(ot.transporteur||ot.itin||'?')+(ot.date?' ('+ot.date+')':'');
+            sel.appendChild(o);
+          });
+          (function(lid,fromIdx){sel.addEventListener('change',function(){
+            if(sel.value==='')return;
+            moveLivToTruck(fromIdx,lid,parseInt(sel.value));
+            sel.value='';
+          });})(d.id,ti);
+          acts.appendChild(sel);
+        }
+        row.appendChild(iDiv);row.appendChild(acts);secBody.appendChild(row);
+      });
+    } else {
+      var emp=document.createElement('div');
+      emp.style.cssText='font-size:12px;color:var(--t3);padding:4px 0;text-align:center';
+      emp.textContent=t.archived?'Camion archiv\u00e9 (hors VL06O actuel)':'Aucune livraison assign\u00e9e';
+      secBody.appendChild(emp);
+    }
+    secDiv.appendChild(secBody);tc.appendChild(secDiv);
     if(t.archived){
       var archBadge=document.createElement('div');
       archBadge.style.cssText='font-size:10px;color:var(--orange);padding:4px 16px 8px;display:flex;align-items:center;gap:6px';
