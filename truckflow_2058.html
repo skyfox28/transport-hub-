@@ -1547,13 +1547,12 @@ var QUAIS = [2,3,4,5,6,7,8,9,10,11];
 var quaiAssign = {};
 
 var TS_DEFS = [
-  {key:'arr',     ico:'\uD83D\uDD50', lbl:'Arriv\u00e9e'},
-  {key:'quai',    ico:'\uD83D\uDD04', lbl:'Mise \u00e0 quai'},
-  {key:'chg',     ico:'\uD83D\uDCE6', lbl:'D\u00e9but chgt'},
-  {key:'fin_chg', ico:'\u2705',       lbl:'Fin chgt'},
-  {key:'dep',     ico:'\uD83D\uDE80', lbl:'D\u00e9part'}
+  {key:'arr',  ico:'\uD83D\uDD50', lbl:'Arriv\u00e9e'},
+  {key:'quai', ico:'\uD83D\uDD04', lbl:'Mise \u00e0 quai'},
+  {key:'chg',  ico:'\uD83D\uDCE6', lbl:'Chargement'},
+  {key:'dep',  ico:'\uD83D\uDE80', lbl:'D\u00e9part'}
 ];
-// fin_chg est optionnel : dep est accessible dès chg pointé même sans fin_chg
+// fin_chg est stocké dans timestamps mais n'est pas un chip séparé (intégré dans chip chg)
 
 // ─── Cadences ─────────────────────────────────────────────────────────────
 var CADENCE_SILO = 18;
@@ -2689,7 +2688,7 @@ function makeTsCell(def,real,deb,ti){
   return el;
 }
 
-function makeTsChip(def,real,deb,ti,isNext){
+function makeTsChip(def,real,deb,ti,isNext,fullTs){
   var delta=computeDelta(deb,real),isLate=delta!==null&&delta>5;
   var el=document.createElement('span');
   el.className='ts-chip'+(real?(isLate?' ts-late':' ts-done'):isNext?' ts-next':'');
@@ -2719,7 +2718,58 @@ function makeTsChip(def,real,deb,ti,isNext){
     // Étape non encore accessible
     html+='<span class="ts-chip-empty">\u2014</span>';
   }
+  // Pour le chip Chargement : afficher fin_chg intégré
+  if(def.key==='chg' && real){
+    var finReal=(fullTs||{}).fin_chg;
+    if(finReal){
+      var finTime=new Date(finReal);
+      var loadDur=Math.round((new Date(finReal)-new Date(real))/60000);
+      html+='<span style="display:block;margin-top:5px;padding:3px 6px;background:rgba(45,202,114,.12);border:1px solid rgba(45,202,114,.3);border-radius:6px;font-size:10px;color:var(--green);font-weight:600">'+
+        '\u2705 Fin '+finTime.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+
+        ' \u2014 '+loadDur+'min'+
+        '<button data-clr-fin style="margin-left:6px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:10px;padding:0">\uD83D\uDDD1</button></span>';
+    } else {
+      html+='<span data-fin-area style="display:block;margin-top:5px"><button data-fin-btn style="font-size:10px;padding:3px 8px;border-radius:6px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.3);color:var(--green);cursor:pointer;font-weight:600;width:100%">\u23F9 Arr\u00eater chargement</button>'+
+        '<button data-fin-manual style="font-size:9px;padding:2px 6px;border-radius:5px;background:none;border:1px solid var(--bd2);color:var(--t3);cursor:pointer;margin-top:2px;width:100%">\u270e Heure manuelle</button>'+
+        '<span data-fin-edit style="display:none;margin-top:3px"></span></span>';
+    }
+  }
   el.innerHTML=html;
+
+  // Wiring fin_chg buttons
+  if(def.key==='chg' && real){
+    var finBtnEl=el.querySelector('[data-fin-btn]');
+    var finManEl=el.querySelector('[data-fin-manual]');
+    var finEditEl=el.querySelector('[data-fin-edit]');
+    var finClrEl=el.querySelector('[data-clr-fin]');
+    if(finBtnEl){
+      finBtnEl.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
+        timestamps[trucks[ti].id].fin_chg=new Date().toISOString();
+        save();renderTrucks();showToast('\u2705 Chargement termin\u00e9');
+      });
+    }
+    if(finManEl&&finEditEl){
+      finManEl.addEventListener('click',function(e){
+        e.stopPropagation();
+        finEditEl.style.display=finEditEl.style.display==='none'?'block':'none';
+        if(finEditEl.style.display==='block'&&!finEditEl.innerHTML){
+          var inp=document.createElement('input');inp.type='time';inp.style.cssText='font-size:11px;width:80px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;padding:2px 5px;color:var(--t1)';
+          var okB=document.createElement('button');okB.textContent='\u2713';okB.style.cssText='font-size:10px;padding:2px 6px;border-radius:5px;background:rgba(45,202,114,.2);border:1px solid rgba(45,202,114,.4);color:var(--green);cursor:pointer;margin-left:3px';
+          okB.addEventListener('click',function(ev){ev.stopPropagation();if(!inp.value)return;var p=inp.value.split(':');var nd=new Date();nd.setHours(+p[0],+p[1],0,0);if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};timestamps[trucks[ti].id].fin_chg=nd.toISOString();save();renderTrucks();showToast('Fin chgt \u2192 '+inp.value);});
+          finEditEl.appendChild(inp);finEditEl.appendChild(okB);
+        }
+      });
+    }
+    if(finClrEl){
+      finClrEl.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(timestamps[trucks[ti].id])delete timestamps[trucks[ti].id].fin_chg;
+        save();renderTrucks();showToast('Fin chgt effac\u00e9e');
+      });
+    }
+  }
 
   function _buildEditRow(editArea,currentReal){
     editArea.innerHTML='';
@@ -3037,16 +3087,8 @@ function renderTrucks(){
     /* ── TIMESTAMPS (grid layout) ── */
     var tsRow=document.createElement('div');tsRow.className='ts-row';
     TS_DEFS.forEach(function(def,si){
-      var prevOk;
-      if(si===0){ prevOk=true; }
-      else if(def.key==='dep'){
-        // dep accessible si fin_chg pointé OU si chg pointé (fin_chg optionnel)
-        prevOk=!!(ts.fin_chg||ts.chg);
-      } else {
-        prevOk=!!ts[TS_DEFS[si-1].key];
-      }
-      var isNext=!ts[def.key]&&prevOk;
-      tsRow.appendChild(makeTsChip(def,ts[def.key],t.creneau?t.creneau.split(/[-\/]/)[0]+':00':null,ti,isNext));
+      var isNext=!ts[def.key]&&(si===0||!!ts[TS_DEFS[si-1].key]);
+      tsRow.appendChild(makeTsChip(def,ts[def.key],t.creneau?t.creneau.split(/[-\/]/)[0]+':00':null,ti,isNext,ts));
     });
     tc.appendChild(tsRow);
 
