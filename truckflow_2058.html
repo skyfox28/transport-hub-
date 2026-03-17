@@ -3218,7 +3218,7 @@ function printTruckSheet(truckId){
     '.sub{font-size:12px;color:#555;margin-bottom:14px}'+
     '.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}'+
     '.badge{padding:3px 10px;border-radius:12px;font-weight:700;font-size:12px;border:1.5px solid #aaa}'+
-    '.ts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}'+
+    '.ts-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}'+
     '.ts-cell{border:1.5px solid #ccc;border-radius:8px;padding:8px 10px;text-align:center}'+
     '.ts-lbl{font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}'+
     '.ts-val{font-size:16px;font-weight:800}'+
@@ -3242,8 +3242,8 @@ function printTruckSheet(truckId){
     (totPick?'<span class="badge">✋ '+Math.round(totPick).toLocaleString('fr')+' pk</span>':'')+
     '</div>'+
     '<div class="ts-row">'+
-    ['Arrivée','Mise à quai','Chargement','Départ'].map(function(lbl,i){
-      var keys=['arr','quai','chg','dep'];var v=ts[keys[i]];
+    ['Arrivée','Mise à quai','Début chgt','Fin chgt','Départ'].map(function(lbl,i){
+      var keys=['arr','quai','chg','fin_chg','dep'];var v=ts[keys[i]];
       return '<div class="ts-cell"><div class="ts-lbl">'+lbl+'</div>'+(v?'<div class="ts-val">'+ft(v)+'</div>':'<div class="ts-blank">— : —</div>')+'</div>';
     }).join('')+'</div>'+
     '<table><thead><tr><th>#</th><th>N° Livraison</th><th>Destinataire</th><th>Ville</th><th>SP</th><th>WM</th><th>Pal</th><th>Cs Silo</th><th>Picking</th><th>✓</th></tr></thead><tbody>';
@@ -3477,7 +3477,7 @@ function cleanCompletedTrucks(){
         id:t.id,transporteur:t.transporteur||'',itin:t.itin||'',creneau:t.creneau||'',date:t.date||'',
         completedAt:new Date().toISOString(),
         deliveries:(t.deliveries||[]).slice(),deliveryDetails:delivDetails,
-        timestamps:{arr:ts.arr,quai:ts.quai,chg:ts.chg,dep:ts.dep},
+        timestamps:{arr:ts.arr,quai:ts.quai,chg:ts.chg,fin_chg:ts.fin_chg,dep:ts.dep},
         quai:quaiNum,
         ponctualite:{status:ponct.status,label:ponct.label,delta:ponct.delta}
       });
@@ -4276,10 +4276,12 @@ function computeTimingStats(){
   });
   // Timing intervals
   var steps=[
-    {key:'wait',  from:'arr', to:'quai', label:'Arriv\u00e9e \u2192 Mise \u00e0 quai', desc:'Temps d\u2019attente'},
-    {key:'prep',  from:'quai',to:'chg',  label:'Mise \u00e0 quai \u2192 Chargement', desc:'Temps de pr\u00e9paration'},
-    {key:'load',  from:'chg', to:'dep',  label:'Chargement \u2192 D\u00e9part', desc:'Temps de chargement'},
-    {key:'total', from:'arr', to:'dep',  label:'Arriv\u00e9e \u2192 D\u00e9part', desc:'Temps total'}
+    {key:'wait',    from:'arr',     to:'quai',    label:'Arriv\u00e9e \u2192 Mise \u00e0 quai',   desc:'Temps d\u2019attente'},
+    {key:'prep',    from:'quai',    to:'chg',     label:'Mise \u00e0 quai \u2192 D\u00e9but chgt', desc:'Temps de pr\u00e9paration'},
+    {key:'load',    from:'chg',     to:'fin_chg', label:'D\u00e9but chgt \u2192 Fin chgt',        desc:'Dur\u00e9e chargement effectif'},
+    {key:'wait_dep',from:'fin_chg', to:'dep',     label:'Fin chgt \u2192 D\u00e9part',            desc:'Attente d\u00e9part apr\u00e8s chargement'},
+    {key:'load_dep',from:'chg',     to:'dep',     label:'D\u00e9but chgt \u2192 D\u00e9part',     desc:'Dur\u00e9e chargement (si sans Fin chgt)'},
+    {key:'total',   from:'arr',     to:'dep',     label:'Arriv\u00e9e \u2192 D\u00e9part',        desc:'Temps total'}
   ];
   var intervals={};
   steps.forEach(function(st){
@@ -4319,7 +4321,9 @@ function computeTimingStats(){
     else if(p.status==='attente') dayMap[dt].ponct_w++;
     if(ts.arr&&ts.quai){var m=Math.round((new Date(ts.quai).getTime()-new Date(ts.arr).getTime())/60000); if(m>=0){dayMap[dt].waitSum+=m;dayMap[dt].waitN++;}}
     if(ts.quai&&ts.chg){var m2=Math.round((new Date(ts.chg).getTime()-new Date(ts.quai).getTime())/60000); if(m2>=0){dayMap[dt].prepSum+=m2;dayMap[dt].prepN++;}}
-    if(ts.chg&&ts.dep){var m3=Math.round((new Date(ts.dep).getTime()-new Date(ts.chg).getTime())/60000); if(m3>=0){dayMap[dt].loadSum+=m3;dayMap[dt].loadN++;}}
+    // Chargement effectif (début→fin) prioritaire, sinon début→départ
+    if(ts.chg&&ts.fin_chg){var m3=Math.round((new Date(ts.fin_chg).getTime()-new Date(ts.chg).getTime())/60000); if(m3>=0){dayMap[dt].loadSum+=m3;dayMap[dt].loadN++;}}
+    else if(ts.chg&&ts.dep){var m3b=Math.round((new Date(ts.dep).getTime()-new Date(ts.chg).getTime())/60000); if(m3b>=0){dayMap[dt].loadSum+=m3b;dayMap[dt].loadN++;}}
     if(ts.arr&&ts.dep){var m4=Math.round((new Date(ts.dep).getTime()-new Date(ts.arr).getTime())/60000); if(m4>=0){dayMap[dt].totalSum+=m4;dayMap[dt].totalN++;}}
   });
   var perDay=Object.values(dayMap).sort(function(a,b){return a.date<b.date?-1:1;});
@@ -4487,7 +4491,7 @@ function exportExcel(){
     return ts.arr && ts.quai && ts.chg && ts.dep;
   });
 
-  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','Chargement','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9']];
+  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti]; var ts = timestamps[t.id]||{};
     function fmtTs(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
@@ -4501,10 +4505,10 @@ function exportExcel(){
     }
     var ponctX=getPonctualite(t,ts,Date.now());
     camRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',(t.deliveries||[]).length,
-      fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'']);
+      fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'']);
   });
   var wsCam = XLSX.utils.aoa_to_sheet(camRows);
-  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25}];
+  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25}];
   XLSX.utils.book_append_sheet(wb, wsCam, 'Camions');
 
   var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.']];
@@ -4534,7 +4538,7 @@ function exportExcel(){
   XLSX.utils.book_append_sheet(wb, wsDay, 'R\u00e9cap journalier');
 
   if(archivedTruckIdxs.length){
-    var archRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','Chargement','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau']];
+    var archRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau']];
     archivedTruckIdxs.forEach(function(ti){
       var t = trucks[ti]; var ts = timestamps[t.id]||{};
       function fmtA(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
@@ -4547,10 +4551,10 @@ function exportExcel(){
         deltaA = (diff2>=0?'+':'')+diff2+' min';
       }
       archRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
-        (t.deliveries||[]).length, fmtA('arr'), fmtA('quai'), fmtA('chg'), fmtA('dep'), deltaA]);
+        (t.deliveries||[]).length, fmtA('arr'), fmtA('quai'), fmtA('chg'), fmtA('fin_chg'), fmtA('dep'), deltaA]);
     });
     var wsArch = XLSX.utils.aoa_to_sheet(archRows);
-    wsArch['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16}];
+    wsArch['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16}];
     XLSX.utils.book_append_sheet(wb, wsArch, 'Camions archiv\u00e9s');
   }
 
@@ -6100,18 +6104,19 @@ function _buildPDFReport(){
   // Créneaux en cours
   if(nCours){
     html+='<h2>\uD83D\uDEA7 Cr\u00e9neaux en cours \u2014 sur site ('+nCours+')</h2>';
-    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>Chgt d\u00e9but</th><th>Statut</th><th>Livraisons</th></tr>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>D\u00e9but chgt</th><th>Fin chgt</th><th>Statut</th><th>Livraisons</th></tr>';
     trucksEnCours.sort(function(a,b){return creToMinutes(a.t.creneau||'')-creToMinutes(b.t.creneau||'');});
     trucksEnCours.forEach(function(x){
       var p=getPonctualite(x.t,x.ts,now);
-      var pColor=p.status==='retard_reel'||p.status==='retard_auto'?'red':p.status==='avance'?'blue':'green';
-      var stat=x.ts.chg?'<span class="tag bg-amber">En chgt</span>':x.ts.quai?'<span class="tag bg-blue">À quai</span>':'<span class="tag bg-green">Arriv\u00e9</span>';
+      var pColor=x.ts.fin_chg?'green':x.ts.chg?'amber':'blue';
+      var stat=x.ts.fin_chg?'<span class="tag bg-green">Charg\u00e9</span>':x.ts.chg?'<span class="tag bg-amber">En chgt</span>':x.ts.quai?'<span class="tag bg-blue">\u00c0 quai</span>':'<span class="tag bg-green">Arriv\u00e9</span>';
       var livIdsCours=x.t.deliveries||[];
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
         '<td>'+(x.t.creneau||'—')+'</td>'+
         '<td>'+ft(x.ts.arr)+'</td>'+
         '<td>'+ft(x.ts.quai)+'</td>'+
         '<td>'+ft(x.ts.chg)+'</td>'+
+        '<td>'+(x.ts.fin_chg?ft(x.ts.fin_chg):'—')+'</td>'+
         '<td>'+stat+' <span class="'+pColor+'">'+p.label+'</span></td>'+
         '<td style="text-align:center">'+livIdsCours.length+'</td></tr>';
       if(livIdsCours.length){
@@ -6171,13 +6176,15 @@ function _buildPDFReport(){
   // Camions partis — tableau récapitulatif
   if(nPart){
     html+='<h2>\uD83D\uDE80 Camions partis ('+nPart+')</h2>';
-    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>D\u00e9part</th><th>Dur\u00e9e</th><th>Ponctualit\u00e9</th><th>Pal. SILO</th><th>Colis Pick.</th></tr>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>D\u00e9but chgt</th><th>Fin chgt</th><th>D\u00e9part</th><th>Dur\u00e9e</th><th>Ponctualit\u00e9</th><th>Pal. SILO</th><th>Colis Pick.</th></tr>';
     trucksPartis.sort(function(a,b){return (a.ts.dep||'').localeCompare(b.ts.dep||'');});
     trucksPartis.forEach(function(x){
       var p=x.t._ponct||getPonctualite(x.t,x.ts,now);
       var pColor=p.status==='heure'?'green':p.status==='avance'?'blue':p.status==='retard_reel'||p.status==='retard_auto'?'red':'grey';
       var dur='—';
       if(x.ts.arr&&x.ts.dep){var m=Math.round((new Date(x.ts.dep)-new Date(x.ts.arr))/60000);dur=fmtMinutes(m);}
+      var finChgCell=ft(x.ts.fin_chg);
+      if(x.ts.fin_chg&&x.ts.chg){var loadM=Math.round((new Date(x.ts.fin_chg)-new Date(x.ts.chg))/60000);finChgCell+=' <span style="color:green">('+loadM+'min)</span>';}
       var livIds=x.t.deliveries||[];
       var palT=0,cpT=0;
       livIds.forEach(function(lid){
@@ -6187,6 +6194,8 @@ function _buildPDFReport(){
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
         '<td>'+(x.t.creneau||'—')+'</td>'+
         '<td>'+ft(x.ts.arr)+'</td>'+
+        '<td>'+ft(x.ts.chg)+'</td>'+
+        '<td>'+finChgCell+'</td>'+
         '<td>'+ft(x.ts.dep)+'</td>'+
         '<td style="text-align:center">'+dur+'</td>'+
         '<td class="'+pColor+'"><b>'+p.label+'</b></td>'+
@@ -6194,7 +6203,7 @@ function _buildPDFReport(){
         '<td style="text-align:center">'+(cpT||'—')+'</td></tr>';
       // Livraisons du camion
       if(livIds.length){
-        html+='<tr><td colspan="8" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
+        html+='<tr><td colspan="10" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
           '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
         livIds.forEach(function(lid){
           var d=getDeliv(lid);
@@ -7002,7 +7011,8 @@ function openTimeline(truckId){
   var steps=[
     {key:'arr',ico:'\uD83D\uDD50',label:'Arriv\u00e9e sur site',nextKey:'quai'},
     {key:'quai',ico:'\uD83D\uDD04',label:'Mise \u00e0 quai',nextKey:'chg'},
-    {key:'chg',ico:'\uD83D\uDCE6',label:'D\u00e9but chargement',nextKey:'dep'},
+    {key:'chg',ico:'\uD83D\uDCE6',label:'D\u00e9but chargement',nextKey:'fin_chg'},
+    {key:'fin_chg',ico:'\u2705',label:'Fin chargement',nextKey:'dep'},
     {key:'dep',ico:'\uD83D\uDE80',label:'D\u00e9part',nextKey:null}
   ];
   var prio=(_truckPriorities&&_truckPriorities[truckId])||'';
@@ -7052,6 +7062,7 @@ function openTimelineKanban(truckId,archived){
     {key:'arr',ico:'\uD83D\uDD50',label:'Arriv\u00e9e sur site'},
     {key:'quai',ico:'\uD83D\uDD04',label:'Mise \u00e0 quai'},
     {key:'chg',ico:'\uD83D\uDCE6',label:'D\u00e9but chargement'},
+    {key:'fin_chg',ico:'\u2705',label:'Fin chargement'},
     {key:'dep',ico:'\uD83D\uDE80',label:'D\u00e9part'}
   ];
   var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
@@ -7817,7 +7828,7 @@ function renderArchive(){
     html+='<div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:8px;padding:6px 12px;background:rgba(77,124,254,.08);border-radius:10px;display:inline-block">\uD83D\uDCC5 '+date+' \u2014 '+list.length+' camion'+(list.length>1?'s':'')+'</div>';
     html+='<div class="tbl-wrap"><table><thead><tr style="border-bottom:2px solid rgba(160,210,255,.12);background:rgba(160,210,255,.04)">';
     html+='<th>Transporteur</th><th>Cr\u00e9neau</th><th>Quai</th><th>Ponctualit\u00e9</th>';
-    html+='<th>Arriv\u00e9e</th><th>Mise \u00e0 quai</th><th>Chargement</th><th>D\u00e9part</th>';
+    html+='<th>Arriv\u00e9e</th><th>Mise \u00e0 quai</th><th>D\u00e9but chgt</th><th>Fin chgt</th><th>D\u00e9part</th>';
     html+='<th>Livraisons</th><th>D\u00e9tail</th><th>Action</th>';
     html+='</tr></thead><tbody>';
     list.forEach(function(ct){
@@ -7825,12 +7836,15 @@ function renderArchive(){
       var p=ct.ponctualite||{};
       var pColor=p.status==='heure'?'var(--green)':p.status==='avance'?'var(--teal)':(p.status==='retard_reel'||p.status==='retard_auto')?'var(--red)':'var(--t3)';
       function ft(v){return v?v.replace('T',' ').slice(11,16):'\u2014';}
+      // Durée chargement effectif si fin_chg disponible
+      var finChgCell=ts.fin_chg?ft(ts.fin_chg)+(ts.chg?' <span style="font-size:10px;color:var(--green)">('
+        +Math.round((new Date(ts.fin_chg)-new Date(ts.chg))/60000)+'min)</span>':''): '\u2014';
       html+='<tr>';
       html+='<td style="font-weight:700">\uD83D\uDE9B '+(ct.transporteur||ct.itin||'?')+'</td>';
       html+='<td>'+(ct.creneau||'\u2014')+'</td>';
       html+='<td>'+(ct.quai!=null?'Q'+ct.quai:'\u2014')+'</td>';
       html+='<td style="color:'+pColor+';font-weight:700">'+(p.label||'\u2014')+(p.delta?' <span style="color:var(--t3);font-weight:400;font-size:10px">'+p.delta+'</span>':'')+'</td>';
-      html+='<td>'+ft(ts.arr)+'</td><td>'+ft(ts.quai)+'</td><td>'+ft(ts.chg)+'</td><td>'+ft(ts.dep)+'</td>';
+      html+='<td>'+ft(ts.arr)+'</td><td>'+ft(ts.quai)+'</td><td>'+ft(ts.chg)+'</td><td>'+finChgCell+'</td><td>'+ft(ts.dep)+'</td>';
       html+='<td>'+(ct.deliveries||[]).length+'</td>';
       html+='<td><span style="cursor:pointer;color:var(--blue);font-size:11px" onclick="toggleArchiveDetail(\''+ct.id+'\')">'+(_archiveExpandedIds[ct.id]?'\u25B2 Masquer':'\u25BC D\u00e9tail')+'</span></td>';
       html+='<td><button class="btn-sm" style="font-size:10px;padding:3px 8px;color:var(--amber);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08)" onclick="restoreTruckFromArchive(\''+ct.id+'\')">\u21A9 Restaurer</button></td>';
