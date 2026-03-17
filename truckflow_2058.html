@@ -407,8 +407,8 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .tc-del-toggle:hover{color:var(--t1)}
 .tc-del-toggle-ico{font-size:10px;transition:transform .2s;display:inline-block}
 .tc-del-toggle-ico.open{transform:rotate(90deg)}
-.tc-del-body{overflow:hidden;transition:max-height .25s ease}
-.tc-del-body.collapsed{max-height:0!important}
+.tc-del-body{display:block}
+.tc-del-body.collapsed{display:none}
 .tc-delivs{padding:8px 16px 10px}
 .tc-del-hdr{font-size:11px;font-weight:600;color:var(--t3);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .tc-del-rows{display:flex;flex-direction:column;gap:6px}
@@ -2989,20 +2989,28 @@ function renderTrucks(){
     }
     hdr.innerHTML='<span class="tc-del-toggle"><span class="tc-del-toggle-ico">\u25b6</span>Livraisons ('+delivs.length+')</span><span style="display:flex;gap:6px;align-items:center">'+summaryHtml+'</span>';
     dDiv.appendChild(hdr);
-    var body=document.createElement('div');body.className='tc-del-body';body.style.maxHeight='none';
+    var body=document.createElement('div');body.className='tc-del-body';
     var rowsDiv=document.createElement('div');rowsDiv.className='tc-del-rows';rowsDiv.style.padding='0 0 8px 0';
     // Toggle : ouvert par défaut, clic pour replier
     hdr.querySelector('.tc-del-toggle-ico').textContent='\u25bc';
     hdr.querySelector('.tc-del-toggle').addEventListener('click',function(){
       var ico=hdr.querySelector('.tc-del-toggle-ico');
       var isOpen=!body.classList.contains('collapsed');
-      if(isOpen){body.classList.add('collapsed');body.style.maxHeight='0';ico.textContent='\u25b6';}
-      else{body.classList.remove('collapsed');body.style.maxHeight='none';ico.textContent='\u25bc';}
+      if(isOpen){body.classList.add('collapsed');ico.textContent='\u25b6';}
+      else{body.classList.remove('collapsed');ico.textContent='\u25bc';}
     });
+    var isLocked=!!t.locked;
     var otherTrucks=trucks.filter(function(ot,i){return i!==ti;});
+    // Badge figé sur l'en-tête livraisons
+    if(isLocked){
+      var lockNote=document.createElement('span');
+      lockNote.style.cssText='font-size:10px;color:var(--amber);background:rgba(245,158,11,.1);padding:1px 6px;border-radius:4px;font-weight:600';
+      lockNote.textContent='\uD83D\uDD12 Fig\u00e9 \u2014 livraisons verrouill\u00e9es';
+      hdr.appendChild(lockNote);
+    }
     delivs.forEach(function(d){
       var row=document.createElement('div');row.className='tc-del-row'+(isExport(d)?' export-row':'');
-      row.draggable=true;row.dataset.livId=d.id;row.dataset.truckIdx=ti;row.style.cursor='grab';
+      if(!isLocked){row.draggable=true;row.dataset.livId=d.id;row.dataset.truckIdx=ti;row.style.cursor='grab';}
       var iDiv=document.createElement('div');iDiv.style.flex='1';
       var detailHtml='';
       if(d.palSilo)detailHtml+='<span class="di-silo">\uD83C\uDFED '+Math.round(d.palSilo)+'pal '+Math.round(d.colisSilo||0).toLocaleString('fr')+'cs</span>';
@@ -3013,7 +3021,7 @@ function renderTrucks(){
         (detailHtml?'<div class="di-detail">'+detailHtml+'</div>':'');
       makeArtToggle(d.id, iDiv);
       var acts=document.createElement('div');acts.className='di-actions';
-      if(otherTrucks.length){
+      if(!isLocked && otherTrucks.length){
         var sel=document.createElement('select');sel.className='fsel';sel.style.cssText='font-size:11px;padding:3px 6px';
         var opt0=document.createElement('option');opt0.value='';opt0.textContent='\u2192 D\u00e9placer\u2026';sel.appendChild(opt0);
         otherTrucks.forEach(function(ot){
@@ -5356,6 +5364,8 @@ function setupDragDrop(){
     var toTI=indices[targetIdx];
     var fromTI=parseInt(_dragFromTruck);
     if(isNaN(fromTI)||isNaN(toTI)||fromTI===toTI)return;
+    if(trucks[toTI]&&trucks[toTI].locked){showToast('\uD83D\uDD12 Camion fig\u00e9 \u2014 impossible de d\u00e9placer une livraison ici');return;}
+    if(trucks[fromTI]&&trucks[fromTI].locked){showToast('\uD83D\uDD12 Camion fig\u00e9 \u2014 impossible de retirer une livraison');return;}
     moveLivToTruck(fromTI,_dragLiv,toTI);
     logActivity('\uD83D\uDCE6','Livraison '+_dragLiv+' d\u00e9plac\u00e9e vers '+(trucks[toTI].transporteur||trucks[toTI].itin||'?'));
     _dragLiv=null;_dragFromTruck=null;
