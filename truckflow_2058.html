@@ -8118,6 +8118,35 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .empty .ico{font-size:52px;margin-bottom:14px}.empty .ttl{font-size:18px;font-weight:700;margin-bottom:6px}.empty .sub{font-size:12px;color:var(--t3)}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.95)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:640px){
+  header{flex-wrap:wrap;padding:8px 14px;gap:8px}
+  .brand{font-size:13px}
+  .clock{font-size:20px;min-width:66px}
+  .dtlbl{font-size:9px}
+  .kpis{flex:0 0 100%;order:4;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .kpi{min-width:62px;padding:5px 9px;flex-shrink:0}
+  .kv{font-size:17px}
+  .kl{font-size:7px}
+  .hbtns{margin-left:auto}
+  #main{padding:10px 12px}
+  .grid{grid-template-columns:1fr}
+  .tc{padding:14px 14px}
+  .tc-name{font-size:17px}
+  .act{padding:15px 12px;font-size:14px;border-radius:12px}
+  .pd{width:28px;height:28px;font-size:12px}
+  .plbl{font-size:7px}
+  .ptm{font-size:8px}
+  .man input[type=time]{font-size:15px;padding:8px 10px}
+  .mok,.mcan{padding:9px 14px;font-size:13px}
+  .sec{font-size:9px}
+  .b{font-size:9px;padding:2px 7px}
+}
+@media(max-width:640px) and (orientation:landscape){
+  header{flex-wrap:nowrap}
+  .kpis{flex:1;flex-wrap:nowrap;overflow-x:auto}
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
   */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
 
   // JS embedded via comment extraction
@@ -8388,7 +8417,7 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
     '<div id="main"></div>'+
     '<div id="toast"></div>';
 
-  var _src='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>\uD83D\uDE9A TruckFlow Monitor</title><style>'+_css+'</style></head><body>'+_body+'<script>'+_js+'<\/script></body></html>';
+  var _src='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>\uD83D\uDE9A TruckFlow Monitor</title><style>'+_css+'</style></head><body>'+_body+'<script>'+_js+'<\/script></body></html>';
   w.document.write(_src);
   w.document.close();
   logActivity('\uD83D\uDDA5','Mode Monitor ouvert dans un nouvel onglet');
