@@ -6169,15 +6169,13 @@ function _buildPDFReport(){
         '<td style="text-align:center">'+livIdsCours.length+'</td></tr>';
       if(livIdsCours.length){
         html+='<tr><td colspan="7" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
-          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Pick.</th></tr>';
+          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Pick.</th></tr>';
         livIdsCours.forEach(function(lid){
           var d=getDeliv(lid);
           if(!d)return;
-          var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
           html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
             '<td style="border:none">'+(d.dest||'—')+'</td>'+
             '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
-            '<td style="border:none;font-weight:700;color:'+spCol+'">'+(d.sp||'—')+'</td>'+
             '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
         });
@@ -6252,15 +6250,13 @@ function _buildPDFReport(){
       // Livraisons du camion
       if(livIds.length){
         html+='<tr><td colspan="10" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
-          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
+          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
         livIds.forEach(function(lid){
           var d=getDeliv(lid);
           if(!d)return;
-          var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
           html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
             '<td style="border:none">'+(d.dest||'—')+'</td>'+
             '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
-            '<td style="border:none;font-weight:700;color:'+spCol+'">'+(d.sp||'—')+'</td>'+
             '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
@@ -8183,7 +8179,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
   // JS embedded via comment extraction
   var _js=(function(){/*
-var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities';
+var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities',LD='th10_deliveries',LDC='th10_delcache';
 var showDep=false,_bc;
 try{_bc=new BroadcastChannel('truckflow_sync');}catch(e){}
 if(_bc){_bc.onmessage=function(){setTimeout(render,300);};}
@@ -8191,6 +8187,8 @@ function getData(){try{return JSON.parse(localStorage.getItem(LT)||'[]');}catch(
 function getTs(){try{return JSON.parse(localStorage.getItem(LTS)||'{}');}catch(e){return{};}}
 function getQ(){try{return JSON.parse(localStorage.getItem(LQ)||'{}');}catch(e){return{};}}
 function getPrio(){try{return JSON.parse(localStorage.getItem(LP)||'{}');}catch(e){return{};}}
+function getDels(){try{return JSON.parse(localStorage.getItem(LD)||'[]');}catch(e){return[];}}
+function getDCache(){try{return JSON.parse(localStorage.getItem(LDC)||'{}');}catch(e){return{};}}
 function saveTs(m){localStorage.setItem(LTS,JSON.stringify(m));if(_bc)_bc.postMessage({type:'ts'});}
 function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
 function fm(m){if(m<1)return '<1min';if(m<60)return m+'min';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
@@ -8361,6 +8359,16 @@ function makeCard(t,ts,quai,prio){
   var now=Date.now();
   var twg=timeWidget(t,ts);
   var nDel=(t.deliveries||[]).length;
+  var delHtml='';
+  if(nDel>0){
+    var _dels=getDels(),_dcache=getDCache();
+    var _delivs=(t.deliveries||[]).map(function(id){return _dels.find(function(x){return x.id===id;})||_dcache[id]||null;}).filter(Boolean);
+    if(_delivs.length){
+      delHtml='<div style="margin:5px 0 2px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07)">'+
+        _delivs.map(function(d){return '<div style="font-size:9px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u21b3 '+(d.dest||d.id)+(d.ville?' \u00b7 '+d.ville:'')+'</div>';}).join('')+
+      '</div>';
+    }
+  }
   var tid=t.id;
   var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
   var prB=prio==='urgent'?'<span class="b bpu">🔴 Urgent</span>':prio==='normal'?'<span class="b bpn">🟡 Normal</span>':prio==='flexible'?'<span class="b bpf">🟢 Flexible</span>':'';
@@ -8385,7 +8393,7 @@ function makeCard(t,ts,quai,prio){
     +'</div>'
     +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="tc-sub">'+(t.dest||t.itin||'—')+'</div>'
-    +prog+twg+ab
+    +delHtml+prog+twg+ab
     +'</div>';
 }
 function render(){
