@@ -3007,8 +3007,12 @@ function renderTrucks(){
       var dColor=decMotifs[t.decalage.motif]||'#888';
       var dBadge=document.createElement('span');
       dBadge.style.cssText='font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(255,100,0,.12);border:1px solid rgba(255,100,0,.35);color:'+dColor+';cursor:pointer;white-space:nowrap';
-      dBadge.innerHTML='\u23F1 '+t.decalage.label+(t.decalage.note?' \u2014 '+t.decalage.note.slice(0,30):'');
-      dBadge.title='D\u00e9calage : '+t.decalage.label+(t.decalage.note?' \u2014 '+t.decalage.note:'')+(t.decalage.heure?' ('+t.decalage.heure+')':'');
+      var dNewStr=t.decalage.dateNew?(t.decalage.dateNew+(t.decalage.heureNew?' '+t.decalage.heureNew:'')):'';
+      dBadge.innerHTML='\u23F1 '+t.decalage.label+(dNewStr?' \u2192 '+dNewStr:'')+(t.decalage.note?' \u00b7 '+t.decalage.note.slice(0,25):'');
+      dBadge.title='D\u00e9calage : '+t.decalage.label+
+        (t.decalage.dateOrig?'\nOrig. : '+t.decalage.dateOrig+(t.decalage.creneauOrig?' '+t.decalage.creneauOrig:''):'')+
+        (dNewStr?'\nNouveau\u00a0: '+dNewStr:'')+
+        (t.decalage.note?'\nNote\u00a0: '+t.decalage.note:'')+(t.decalage.heure?' (enreg. '+t.decalage.heure+')':'');
       (function(id){dBadge.addEventListener('click',function(){openDecalageModal(id);});})(t.id);
       head.appendChild(dBadge);
     }
@@ -4544,7 +4548,7 @@ function exportExcel(){
     return ts.arr && ts.quai && ts.chg && ts.dep;
   });
 
-  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','D\u00e9calage','Note d\u00e9calage']];
+  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouvelle date pr\u00e9vue','Note d\u00e9calage']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti]; var ts = timestamps[t.id]||{};
     function fmtTs(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
@@ -4563,10 +4567,13 @@ function exportExcel(){
     camRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',(t.deliveries||[]).length,
       fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'',
       t.decalage?(t.decalage.label+(t.decalage.heure?' ('+t.decalage.heure+')':'')):'',
+      t.decalage?(t.decalage.dateOrig||t.date||''):'',
+      t.decalage?(t.decalage.creneauOrig||t.creneau||''):'',
+      t.decalage?(t.decalage.dateNew||'')+(t.decalage&&t.decalage.heureNew?' '+t.decalage.heureNew:''):'',
       t.decalage?(t.decalage.note||''):'']);
   });
   var wsCam = XLSX.utils.aoa_to_sheet(camRows);
-  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:20},{wch:30}];
+  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsCam, 'Camions');
 
   var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.']];
@@ -4666,11 +4673,12 @@ function exportExcel(){
     });
   }
   // ═══ Section Décalages ═══
-  var decRows=[['Date','Transporteur','Cr\u00e9neau','Motif d\u00e9calage','Note','Heure enreg.']];
+  var decRows=[['Date orig.','Cr\u00e9neau orig.','Transporteur','Motif d\u00e9calage','Nouvelle date pr\u00e9vue','Heure pr\u00e9vue','Note','Enregistr\u00e9 le']];
   var hasDecalage=false;
-  trucks.forEach(function(t){if(t.decalage){hasDecalage=true;decRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',t.decalage.label||'',t.decalage.note||'',t.decalage.heure||'']);}});
-  (_completedTrucks||[]).forEach(function(ct){if(ct.decalage){hasDecalage=true;decRows.push([ct.date||'',ct.transporteur||ct.itin||'',ct.creneau||'',ct.decalage.label||'',ct.decalage.note||'',ct.decalage.heure||'']);}});
-  if(hasDecalage){var wsDecal=XLSX.utils.aoa_to_sheet(decRows);wsDecal['!cols']=[{wch:12},{wch:18},{wch:10},{wch:16},{wch:35},{wch:14}];XLSX.utils.book_append_sheet(wb,wsDecal,'D\u00e9calages');}
+  function pushDecRow(t,dc){hasDecalage=true;decRows.push([dc.dateOrig||t.date||'',dc.creneauOrig||t.creneau||'',t.transporteur||t.itin||'',dc.label||'',dc.dateNew||'',dc.heureNew||'',dc.note||'',(dc.date||'')+(dc.heure?' '+dc.heure:'')]);}
+  trucks.forEach(function(t){if(t.decalage)pushDecRow(t,t.decalage);});
+  (_completedTrucks||[]).forEach(function(ct){if(ct.decalage)pushDecRow(ct,ct.decalage);});
+  if(hasDecalage){var wsDecal=XLSX.utils.aoa_to_sheet(decRows);wsDecal['!cols']=[{wch:12},{wch:14},{wch:18},{wch:16},{wch:14},{wch:12},{wch:35},{wch:16}];XLSX.utils.book_append_sheet(wb,wsDecal,'D\u00e9calages');}
   // Mise à jour header transporteurs avec colonnes décalage
   if(carriers.length){
     var idxCarr=statRows.findIndex(function(r){return r[0]==='=== COMPARATIF TRANSPORTEURS ===';});
@@ -6250,12 +6258,15 @@ function _buildPDFReport(){
       '<div class="kbox" style="border-color:#1565c0"><div class="kv blue">'+dCounts.transporteur+'</div><div class="kl">Transporteur</div></div>'+
       '<div class="kbox" style="border-color:#b71c1c"><div class="kv red">'+dCounts.pas_venu+'</div><div class="kl">Pas venu</div></div>'+
     '</div>';
-    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Motif</th><th>Note</th><th>Enregistr\u00e9</th></tr>';
+    html+='<table><tr><th>Transporteur</th><th>Date orig.</th><th>Cr\u00e9neau orig.</th><th>Motif</th><th>Nouvelle date pr\u00e9vue</th><th>Note</th><th>Enregistr\u00e9</th></tr>';
     decalages.forEach(function(t){
       var dc=t.decalage;var dCol=dColorMap[dc.motif]||'#666';
+      var dNewFull=(dc.dateNew||'')+(dc.heureNew?' '+dc.heureNew:'');
       html+='<tr><td><b>'+(t.transporteur||t.itin||'?')+'</b></td>'+
-        '<td>'+(t.creneau||'\u2014')+'</td>'+
+        '<td>'+(dc.dateOrig||t.date||'\u2014')+'</td>'+
+        '<td>'+(dc.creneauOrig||t.creneau||'\u2014')+'</td>'+
         '<td><span style="color:'+dCol+';font-weight:700">'+dc.label+'</span></td>'+
+        '<td style="color:#e65100;font-weight:700">'+(dNewFull||'\u2014')+'</td>'+
         '<td style="color:#666">'+(dc.note||'\u2014')+'</td>'+
         '<td style="color:#999;font-size:10px">'+(dc.heure||'\u2014')+'</td></tr>';
     });
@@ -8549,14 +8560,26 @@ function openDecalageModal(truckId){
       '<input type="radio" name="decalMotif" value="'+m.key+'"'+(sel?' checked':'')+' style="accent-color:'+m.color+';width:16px;height:16px">'+
       '<span><b style="color:'+m.color+'">'+m.label+'</b><span style="font-size:11px;color:var(--t3);margin-left:8px">'+m.desc+'</span></span></label>';
   }).join('');
-  modal.innerHTML='<div style="background:var(--surface);border:1.5px solid rgba(160,210,255,.18);border-radius:18px;padding:24px;min-width:380px;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.6)">'+
+  modal.innerHTML='<div style="background:var(--surface);border:1.5px solid rgba(160,210,255,.18);border-radius:18px;padding:24px;min-width:400px;max-width:500px;box-shadow:0 24px 80px rgba(0,0,0,.6)">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
       '<div style="font-size:15px;font-weight:800">\u23F1 D\u00e9clarer un d\u00e9calage</div>'+
       '<button onclick="closeDecalageModal()" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer">\u2715</button></div>'+
     '<div style="font-size:12px;color:var(--t2);margin-bottom:14px">Camion\u00a0: <b>'+(t.transporteur||t.itin||'?')+'</b> \u2014 Cr\u00e9neau\u00a0: '+(t.creneau||'\u2014')+'</div>'+
     '<div style="margin-bottom:14px">'+motifHtml+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+      '<div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Date d\u2019origine</div>'+
+        '<input id="decalDateOrig" type="date" value="'+(cur.dateOrig||t.date||'')+'" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+      '<div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Cr\u00e9neau d\u2019origine</div>'+
+        '<input id="decalCreneauOrig" type="text" value="'+(cur.creneauOrig||t.creneau||'')+'" placeholder="ex: 08h00-09h00" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+      '<div><div style="font-size:11px;color:var(--amber);margin-bottom:4px">Nouvelle date pr\u00e9vue</div>'+
+        '<input id="decalDateNew" type="date" value="'+(cur.dateNew||'')+'" style="width:100%;box-sizing:border-box;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+      '<div><div style="font-size:11px;color:var(--amber);margin-bottom:4px">Heure pr\u00e9vue</div>'+
+        '<input id="decalHeureNew" type="time" value="'+(cur.heureNew||'')+'" style="width:100%;box-sizing:border-box;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+    '</div>'+
     '<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--t3);margin-bottom:5px">Note (optionnel)</div>'+
-      '<textarea id="decalageNote" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:8px;font-size:12px;resize:vertical;min-height:60px;font-family:inherit" placeholder="Contexte, heure pr\u00e9vue du passage...">'+(cur.note||'')+'</textarea></div>'+
+      '<textarea id="decalageNote" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:8px;font-size:12px;resize:vertical;min-height:50px;font-family:inherit" placeholder="Contexte, information compl\u00e9mentaire...">'+(cur.note||'')+'</textarea></div>'+
     '<div style="display:flex;gap:8px;justify-content:flex-end">'+
       (cur.motif?'<button onclick="clearDecalage(\''+truckId+'\')" style="background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.3);color:var(--red);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px">Supprimer</button>':'')+
       '<button onclick="closeDecalageModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--t1);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px">Annuler</button>'+
@@ -8570,9 +8593,16 @@ function applyDecalage(truckId){
   var motif=(document.querySelector('input[name="decalMotif"]:checked')||{}).value;
   if(!motif){showToast('\u26a0 S\u00e9lectionnez un motif');return;}
   var note=(document.getElementById('decalageNote')||{}).value||'';
+  var dateOrig=(document.getElementById('decalDateOrig')||{}).value||t.date||'';
+  var creneauOrig=(document.getElementById('decalCreneauOrig')||{}).value||t.creneau||'';
+  var dateNew=(document.getElementById('decalDateNew')||{}).value||'';
+  var heureNew=(document.getElementById('decalHeureNew')||{}).value||'';
   var now=new Date();
   var mObj=_decalageMotifs.find(function(m){return m.key===motif;});
-  t.decalage={motif:motif,label:mObj?mObj.label:motif,note:note,date:now.toISOString().slice(0,10),heure:now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})};
+  t.decalage={motif:motif,label:mObj?mObj.label:motif,note:note,
+    dateOrig:dateOrig,creneauOrig:creneauOrig,
+    dateNew:dateNew,heureNew:heureNew,
+    date:now.toISOString().slice(0,10),heure:now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})};
   save();closeDecalageModal();renderTrucks();
   logActivity('\u23F1','D\u00e9calage '+t.decalage.label+' d\u00e9clar\u00e9 sur '+(t.transporteur||t.itin||'?'));
   showToast('\u23F1 D\u00e9calage enregistr\u00e9 \u2014 '+t.decalage.label);
