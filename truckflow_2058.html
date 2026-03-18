@@ -3557,9 +3557,11 @@ function cleanCompletedTrucks(){
   var before = trucks.length;
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
-    // Camion figé ou décalé → reste actif même si ts.dep présent
-    if(t.locked || t._dateManuallyChanged || t._creneauManuallyChanged || t.decalage) return true;
-    if(!ts.dep) return true;
+    // Seul le verrouillage explicite bloque l'archivage définitif
+    // _dateManuallyChanged/_creneauManuallyChanged/decalage = conserve les données entre reimports,
+    // mais si le camion a un ts.dep il est parti → on l'archive quand même
+    if(t.locked) return true;
+    if(!ts.dep) return true; // pas encore parti → on garde (avec ou sans flags)
     {
       // Archive completed truck before removal
       var ponct=getPonctualite(t,ts,Date.now());
@@ -3577,6 +3579,7 @@ function cleanCompletedTrucks(){
         deliveries:(t.deliveries||[]).slice(),deliveryDetails:delivDetails,
         timestamps:{arr:ts.arr,quai:ts.quai,chg:ts.chg,fin_chg:ts.fin_chg,dep:ts.dep},
         quai:quaiNum,
+        decalage:t.decalage||null,locked:false,
         ponctualite:{status:ponct.status,label:ponct.label,delta:ponct.delta}
       });
       Object.keys(quaiAssign).forEach(function(q){
