@@ -3560,7 +3560,7 @@ function cleanCompletedTrucks(){
     // Seul le verrouillage explicite bloque l'archivage définitif
     // _dateManuallyChanged/_creneauManuallyChanged/decalage = conserve les données entre reimports,
     // mais si le camion a un ts.dep il est parti → on l'archive quand même
-    if(t.locked) return true;
+    if(t.locked){ console.warn('[archive] camion '+t.id+' ignoré : verrouillé'); return true; }
     if(!ts.dep) return true; // pas encore parti → on garde (avec ou sans flags)
     {
       // Archive completed truck before removal (try/catch : erreur interne ne bloque pas)
@@ -4062,6 +4062,10 @@ function autoGenTrucks(){
   var allLivIds = new Set(APP.deliveries.map(function(d){return d.id;}));
   var reserved = new Set();
   var assigned  = new Set();
+  // Réserver les livraisons des camions déjà archivés pour éviter de les recréer au reimport
+  (_completedTrucks||[]).forEach(function(ct){
+    (ct.deliveries||[]).forEach(function(id){ reserved.add(id); });
+  });
   // Index des livraisons déplacées manuellement vers un autre camion
   var movedIn = {};
   trucks.forEach(function(t){ Object.keys(t._movedIn||{}).forEach(function(lid){ movedIn[lid]=t.id; }); });
