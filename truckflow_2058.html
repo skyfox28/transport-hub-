@@ -1182,75 +1182,6 @@ html.tv-mode body{overflow:auto}
   .kpi-v,.tc-name,.ts-chip-time{color:#000!important}
 }
 </style>
-<style>
-/* ═══ MONITOR TAB ═══════════════════════════════════════════════════════════ */
-#tab-mon{padding:0;background:#0a0e17;min-height:100vh;display:none;flex-direction:column;}
-#tab-mon.on{display:flex;}
-.mon-header{display:flex;align-items:center;justify-content:space-between;padding:18px 32px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
-.mon-clock{font-size:52px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
-.mon-clock-sec{font-size:32px;font-weight:400;color:rgba(255,255,255,.45);margin-left:4px}
-.mon-date{font-size:18px;font-weight:600;color:rgba(255,255,255,.7);margin-top:4px;text-transform:capitalize}
-.mon-kpis{display:flex;gap:24px;align-items:center}
-.mon-kpi{text-align:center;padding:10px 20px;border-radius:12px;min-width:90px}
-.mon-kpi-v{font-size:36px;font-weight:900;line-height:1}
-.mon-kpi-l{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;opacity:.7;margin-top:3px}
-.mon-ticker{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.35);padding:6px 14px;border:1px solid rgba(255,255,255,.08);border-radius:20px}
-.mon-ticker-dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:mon-pulse 2s ease-in-out infinite}
-
-.mon-body{display:grid;grid-template-columns:1fr 2fr 1fr;gap:0;flex:1;overflow:hidden}
-.mon-col{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.06)}
-.mon-col:last-child{border-right:none}
-.mon-col-head{padding:14px 20px 10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
-.mon-col-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;opacity:.5;color:#fff}
-.mon-col-count{font-size:28px;font-weight:900;color:#fff;line-height:1;margin-top:2px}
-.mon-col-body{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px}
-.mon-col-body::-webkit-scrollbar{width:4px}.mon-col-body::-webkit-scrollbar-track{background:transparent}.mon-col-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
-
-/* Cards En attente */
-.mon-card-wait{border-radius:14px;padding:14px 16px;border:1.5px solid rgba(120,120,140,.25);background:rgba(255,255,255,.03);transition:border-color .3s}
-.mon-card-wait.late{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.05)}
-.mon-card-wait .mc-name{font-size:16px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mon-card-wait .mc-cren{font-size:13px;color:rgba(255,255,255,.5);margin-top:3px}
-.mon-card-wait .mc-late{font-size:12px;color:#f87171;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:5px}
-
-/* Cards Sur site */
-.mon-card-site{border-radius:16px;padding:18px 20px;border:2px solid;transition:all .3s}
-.mon-card-site.status-arr{border-color:rgba(59,130,246,.6);background:rgba(59,130,246,.08)}
-.mon-card-site.status-quai{border-color:rgba(245,158,11,.6);background:rgba(245,158,11,.06)}
-.mon-card-site.status-chg{border-color:rgba(251,146,60,.8);background:rgba(251,146,60,.08);box-shadow:0 0 20px rgba(251,146,60,.12)}
-.mon-card-site.status-fin{border-color:rgba(16,185,129,.7);background:rgba(16,185,129,.06)}
-.mon-card-site .mc-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0}
-.mon-card-site.status-arr .mc-dot{background:#3b82f6}
-.mon-card-site.status-quai .mc-dot{background:#f59e0b;animation:mon-pulse 1.8s ease-in-out infinite}
-.mon-card-site.status-chg .mc-dot{background:#fb923c;animation:mon-pulse .9s ease-in-out infinite}
-.mon-card-site.status-fin .mc-dot{background:#10b981}
-.mon-card-site .mc-name{font-size:20px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mon-card-site .mc-status{font-size:13px;font-weight:700;margin-top:8px;text-transform:uppercase;letter-spacing:.06em;opacity:.85}
-.mon-card-site.status-arr .mc-status{color:#60a5fa}
-.mon-card-site.status-quai .mc-status{color:#fbbf24}
-.mon-card-site.status-chg .mc-status{color:#fb923c}
-.mon-card-site.status-fin .mc-status{color:#34d399}
-.mon-card-site .mc-meta{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap}
-.mon-card-site .mc-quai{font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;display:inline-block;margin-top:8px}
-.mon-card-site.status-arr .mc-quai{background:rgba(59,130,246,.2);color:#93c5fd}
-.mon-card-site.status-quai .mc-quai{background:rgba(245,158,11,.2);color:#fcd34d}
-.mon-card-site.status-chg .mc-quai{background:rgba(251,146,60,.2);color:#fdba74}
-.mon-card-site.status-fin .mc-quai{background:rgba(16,185,129,.2);color:#6ee7b7}
-.mon-card-site .mc-elapsed{font-size:14px;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px}
-.mon-card-site .mc-ponct{font-size:12px;font-weight:700;margin-top:6px}
-.mc-ponct-h{color:#34d399}.mc-ponct-a{color:#60a5fa}.mc-ponct-r{color:#f87171}
-
-/* Cards Partis */
-.mon-card-dep{padding:10px 14px;border-radius:12px;border-left:3px solid;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.02)}
-.mon-card-dep.ph{border-color:#34d399}.mon-card-dep.pa{border-color:#60a5fa}.mon-card-dep.pr{border-color:#f87171}
-.mon-card-dep .mc-dep-name{font-size:14px;font-weight:800;color:#fff;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mon-card-dep .mc-dep-time{font-size:13px;color:rgba(255,255,255,.5);flex-shrink:0}
-.mon-card-dep .mc-dep-ponct{font-size:11px;font-weight:700;flex-shrink:0}
-
-.mon-empty{color:rgba(255,255,255,.2);font-size:14px;font-weight:600;text-align:center;margin-top:40px}
-
-@keyframes mon-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
-</style>
 </head>
 <body>
 <!-- ═══ HEADER ═══ -->
@@ -1356,7 +1287,6 @@ html.tv-mode body{overflow:auto}
   <button class="tab" onclick="switchTab('quai',this)" style="--tab-glow:rgba(191,90,242,.2)"><span class="tab-ico">&#x1F3D7;</span>Plan de quai</button>
   <button class="tab" onclick="switchTab('stat',this)" style="--tab-glow:rgba(90,200,250,.2)"><span class="tab-ico">&#x1F4C8;</span>Statistiques</button>
   <button class="tab" onclick="switchTab('arch',this)" style="--tab-glow:rgba(255,159,10,.2)"><span class="tab-ico">&#x1F4C1;</span>Archive</button>
-  <button class="tab" onclick="switchTab('mon',this)" style="--tab-glow:rgba(16,185,129,.2)"><span class="tab-ico">&#x1F5B5;</span>Monitor</button>
 </div></div>
 
 <!-- ═══ MAIN ═══ -->
@@ -1552,35 +1482,6 @@ html.tv-mode body{overflow:auto}
 
 <div class="panel" id="tab-arch">
   <div id="archiveContent"></div>
-</div>
-
-<!-- ── Panel: Monitor ── -->
-<div class="panel" id="tab-mon">
-  <div class="mon-header">
-    <div>
-      <div class="mon-clock"><span id="monH">--</span><span style="opacity:.4">:</span><span id="monM">--</span><span class="mon-clock-sec"><span style="opacity:.4">:</span><span id="monS">--</span></span></div>
-      <div class="mon-date" id="monDate"></div>
-    </div>
-    <div class="mon-kpis" id="monKpis"></div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      <div class="mon-ticker"><div class="mon-ticker-dot"></div><span id="monTicker">En direct</span></div>
-      <button onclick="switchTab('cam',document.querySelector('.tab[onclick*=cam]'))" style="padding:4px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);font-size:11px;cursor:pointer">&#8592; Retour</button>
-    </div>
-  </div>
-  <div class="mon-body">
-    <div class="mon-col" id="monColWait">
-      <div class="mon-col-head"><div class="mon-col-title">En attente</div><div class="mon-col-count" id="monCntWait">0</div></div>
-      <div class="mon-col-body" id="monListWait"></div>
-    </div>
-    <div class="mon-col" id="monColSite">
-      <div class="mon-col-head"><div class="mon-col-title">Sur site</div><div class="mon-col-count" id="monCntSite" style="color:#fb923c">0</div></div>
-      <div class="mon-col-body" id="monListSite"></div>
-    </div>
-    <div class="mon-col" id="monColDep">
-      <div class="mon-col-head"><div class="mon-col-title">Partis (8 derniers)</div><div class="mon-col-count" id="monCntDep" style="color:#34d399">0</div></div>
-      <div class="mon-col-body" id="monListDep"></div>
-    </div>
-  </div>
 </div>
 
 <!-- ═══ ACTIVITY LOG MODAL ═══ -->
@@ -1780,14 +1681,6 @@ function switchTab(id,btn){
   if(id==='plan') renderPlanning();
   if(id==='stat') renderStats();
   if(id==='arch') renderArchive();
-  if(id==='mon'){
-    renderMonitor();
-    if(_monTimer) clearInterval(_monTimer);
-    _monTimer=setInterval(function(){_monRenderData();},20000);
-  } else {
-    if(_monTimer){clearInterval(_monTimer);_monTimer=null;}
-    if(_monClockTimer){clearInterval(_monClockTimer);_monClockTimer=null;}
-  }
   // #5 Stagger animation on panel children
   applyStagger('tab-'+id);
 }
@@ -8411,8 +8304,8 @@ body{background:#0d1117;color:var(--t1);font-family:-apple-system,BlinkMacSystem
 header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1.5px solid var(--bd2);padding:10px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}
 .brand{font-size:17px;font-weight:800;white-space:nowrap;letter-spacing:-.3px}
 .brand span{color:var(--blue)}
-.clock{font-size:24px;font-weight:300;font-variant-numeric:tabular-nums;min-width:84px}
-.dtlbl{font-size:10px;color:var(--t2);white-space:nowrap;margin-top:1px}
+.clock{font-size:44px;font-weight:200;font-variant-numeric:tabular-nums;min-width:140px;letter-spacing:-1px;line-height:1}
+.dtlbl{font-size:13px;color:var(--t2);white-space:nowrap;margin-top:4px;text-transform:capitalize}
 .kpis{display:flex;gap:8px;flex:1;justify-content:center;flex-wrap:wrap}
 .kpi{background:var(--sf1);border:1px solid var(--bd2);border-radius:10px;padding:6px 12px;text-align:center;min-width:75px;backdrop-filter:blur(8px)}
 .kv{font-size:20px;font-weight:800}.kl{font-size:8px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
@@ -8420,10 +8313,23 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .hbtn{padding:5px 11px;border-radius:8px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:11px;cursor:pointer}
 .hbtn:hover{background:rgba(255,255,255,.12)}
 .rdot{width:7px;height:7px;border-radius:50%;background:#2a9d5c;display:inline-block;animation:blink 2s infinite}
-#main{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 20px;position:relative;z-index:5}
-#main::-webkit-scrollbar{width:5px}
-#main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+#main{flex:1;overflow:hidden;display:grid;grid-template-columns:1fr 2fr 1fr;position:relative;z-index:5}
+.col{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(160,210,255,.07)}
+.col:last-child{border-right:none}
+.col-h{padding:14px 18px 10px;flex-shrink:0;border-bottom:1px solid rgba(160,210,255,.08);display:flex;align-items:baseline;gap:10px}
+.col-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--t2)}
+.col-cnt{font-size:26px;font-weight:900;color:var(--t1);line-height:1}
+.col-b{flex:1;overflow-y:auto;padding:12px 12px;display:flex;flex-direction:column;gap:10px}
+.col-b::-webkit-scrollbar{width:4px}.col-b::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
+.col-b .tc{margin:0}
+.col-s .tc-name{font-size:19px}
+.col-s .act{font-size:13px;padding:11px 12px}
+.tc-compact{background:rgba(255,255,255,.03);border:1px solid var(--bd1);border-radius:12px;padding:11px 13px;border-left-width:3px}
+.tc-compact.ph{border-left-color:#4ade80}.tc-compact.pa{border-left-color:#60a5fa}.tc-compact.pr{border-left-color:#f87171}
+.tc-compact .tcn{font-size:14px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-compact .tcd{font-size:11px;color:var(--t2);margin-top:3px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
+.dep-total{text-align:center;font-size:11px;color:var(--t3);padding:8px 0;border-top:1px solid rgba(255,255,255,.06);margin-top:4px}
+.empty-col{color:var(--t3);font-size:13px;text-align:center;margin-top:32px}
 .sec{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px;padding:5px 0;margin:12px 0 8px;border-bottom:1px solid var(--bd1);display:flex;align-items:center;gap:8px}
 .sc{background:var(--sf2);padding:1px 8px;border-radius:10px}
 .tc{background:rgba(255,255,255,.04);border:1.5px solid var(--bd2);border-radius:16px;padding:14px 15px;backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:border-color .3s,background .3s}
@@ -8726,37 +8632,60 @@ function makeCard(t,ts,quai,prio){
     +delHtml+prog+twg+ab
     +'</div>';
 }
+function makeCompact(t,ts){
+  var s=getStatus(ts);
+  var cls=s==='p'?(ponctBadge(t,ts).indexOf('bpav')>-1?'pa':ponctBadge(t,ts).indexOf('bprt')>-1?'pr':'ph'):'';
+  var pb=ponctBadge(t,ts);
+  return '<div class="tc-compact '+cls+'">'
+    +'<div class="tcn">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="tcd">'
+    +(t.creneau?'<span class="b bc">'+t.creneau+'</span>':'')
+    +'<span style="font-size:12px;font-weight:700;color:var(--t2)">'+ft(ts.dep)+'</span>'
+    +pb
+    +'</div>'
+    +'</div>';
+}
 function render(){
   var trucks=getData(),tsm=getTs(),qa=getQ(),prios=getPrio();
   var rq={};Object.keys(qa).forEach(function(q){if(qa[q])rq[qa[q]]=q;});
   var td=new Date().toISOString().slice(0,10);
   var day=trucks.filter(function(t){return t.date===td;});
   updateKPIs(trucks,tsm);
-  day.sort(function(a,b){
-    var sa=getStatus(tsm[a.id]||{}),sb=getStatus(tsm[b.id]||{});
-    if(sa!=='p'&&sb==='p')return -1;
-    if(sa==='p'&&sb!=='p')return 1;
-    return (a.creneau||'99:99').localeCompare(b.creneau||'99:99');
+  var waiting=[],onsite=[],departed=[];
+  day.forEach(function(t){
+    var s=getStatus(tsm[t.id]||{});
+    if(s==='p')departed.push(t);
+    else if(s==='w')waiting.push(t);
+    else onsite.push(t);
   });
-  var active=day.filter(function(t){return getStatus(tsm[t.id]||{})!=='p';});
-  var dep=day.filter(function(t){return getStatus(tsm[t.id]||{})==='p';});
-  var html='';
-  if(active.length){
-    html+='<div class="sec">🚛 Camions actifs <span class="sc">'+active.length+'</span></div><div class="grid">';
-    active.forEach(function(t){html+=makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-    html+='</div>';
-  }
-  if(dep.length&&showDep){
-    html+='<div class="sec">🚀 Partis <span class="sc">'+dep.length+'</span></div><div class="grid">';
-    dep.forEach(function(t){html+=makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-    html+='</div>';
-  } else if(dep.length){
-    html+='<div style="margin-top:10px;text-align:center;font-size:11px;color:var(--t3)">'+dep.length+' camion(s) parti(s) &mdash; <button onclick="togDep()" style="background:none;border:none;color:#0a84ff;cursor:pointer;font-size:11px">Afficher</button></div>';
-  }
+  function byCren(a,b){return (a.creneau||'99:99').localeCompare(b.creneau||'99:99');}
+  waiting.sort(byCren);onsite.sort(byCren);
+  departed.sort(function(a,b){return new Date((tsm[b.id]||{}).dep||0).getTime()-new Date((tsm[a.id]||{}).dep||0).getTime();});
+  var last8=departed.slice(0,8);
+  // Col counts
+  document.getElementById('cnW').textContent=waiting.length;
+  document.getElementById('cnS').textContent=onsite.length;
+  document.getElementById('cnD').textContent=departed.length;
+  // En attente
+  var bW=document.getElementById('bW');
+  if(bW){bW.innerHTML=waiting.length
+    ?waiting.map(function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
+    :'<div class="empty-col">Aucun camion en attente</div>';}
+  // Sur site
+  var bS=document.getElementById('bS');
+  if(bS){bS.innerHTML=onsite.length
+    ?onsite.map(function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
+    :'<div class="empty-col">Aucun camion sur site</div>';}
+  // Partis
+  var bD=document.getElementById('bD');
+  if(bD){bD.innerHTML=last8.length
+    ?last8.map(function(t){return makeCompact(t,tsm[t.id]||{});}).join('')
+      +(departed.length>8?'<div class="dep-total">'+departed.length+' départs au total aujourd\'hui</div>':'')
+    :'<div class="empty-col">Aucun départ</div>';}
   if(!day.length){
-    html='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div><div class="sub">Les camions importés dans TruckFlow apparaîtront ici automatiquement</div></div>';
+    if(bS)bS.innerHTML='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div><div class="sub">Les camions importés dans TruckFlow apparaîtront ici automatiquement</div></div>';
+    if(bW)bW.innerHTML='';if(bD)bD.innerHTML='';
   }
-  document.getElementById('main').innerHTML=html;
 }
 function tick(){
   var n=new Date();
@@ -8772,7 +8701,7 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
   var _body=
     '<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>'+
     '<header>'+
-      '<div style="display:flex;flex-direction:column;gap:1px">'+
+      '<div style="display:flex;flex-direction:column;gap:2px">'+
         '<div class="brand">\uD83D\uDE9A Truck<span>Flow</span> Monitor</div>'+
         '<div class="dtlbl" id="dtlbl">\u2014</div>'+
       '</div>'+
@@ -8781,10 +8710,22 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
       '<div class="hbtns">'+
         '<span class="rdot"></span>'+
         '<button class="hbtn" onclick="render()">\u21BB Actualiser</button>'+
-        '<button class="hbtn" id="dtgl" onclick="togDep()">Afficher partis</button>'+
       '</div>'+
     '</header>'+
-    '<div id="main"></div>'+
+    '<div id="main">'+
+      '<div class="col col-w">'+
+        '<div class="col-h"><div class="col-title">\u23F3 En attente</div><div class="col-cnt" id="cnW">0</div></div>'+
+        '<div class="col-b" id="bW"></div>'+
+      '</div>'+
+      '<div class="col col-s">'+
+        '<div class="col-h"><div class="col-title">\uD83D\uDE9B Sur site</div><div class="col-cnt" style="color:#fb923c" id="cnS">0</div></div>'+
+        '<div class="col-b" id="bS"></div>'+
+      '</div>'+
+      '<div class="col col-d">'+
+        '<div class="col-h"><div class="col-title">\uD83D\uDE80 Partis (8 derniers)</div><div class="col-cnt" style="color:#4ade80" id="cnD">0</div></div>'+
+        '<div class="col-b" id="bD"></div>'+
+      '</div>'+
+    '</div>'+
     '<div id="toast"></div>';
 
   var _src='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>\uD83D\uDE9A TruckFlow Monitor</title><style>'+_css+'</style></head><body>'+_body+'<script>'+_js+'<\/script></body></html>';
@@ -9051,192 +8992,6 @@ computeCarrierStats=function(){
 };
 
 // ─── PWA — Service Worker registration ────────────────────────────────────
-// ═══ MONITOR ══════════════════════════════════════════════════════════════
-var _monTimer=null;
-var _monClockTimer=null;
-
-function renderMonitor(){
-  _monUpdateClock();
-  _monRenderData();
-  // Horloge 1s
-  if(!_monClockTimer){
-    _monClockTimer=setInterval(function(){
-      _monUpdateClock();
-    },1000);
-  }
-}
-
-function _monUpdateClock(){
-  var now=new Date();
-  var hh=String(now.getHours()).padStart(2,'0');
-  var mm=String(now.getMinutes()).padStart(2,'0');
-  var ss=String(now.getSeconds()).padStart(2,'0');
-  var eh=document.getElementById('monH');if(eh)eh.textContent=hh;
-  var em=document.getElementById('monM');if(em)em.textContent=mm;
-  var es=document.getElementById('monS');if(es)es.textContent=ss;
-  var ed=document.getElementById('monDate');
-  if(ed&&!ed._dated){
-    ed._dated=true;
-    ed.textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).replace(/^\w/,function(c){return c.toUpperCase();});
-  }
-}
-
-function _monRenderData(){
-  var now=Date.now();
-  // Rassembler tous les camions du jour courant (live + archivés d'aujourd'hui)
-  var ref=getWorkingDate();
-  var allT=trucks.filter(function(t){return t.date===ref;});
-  var archT=(_completedTrucks||[]).filter(function(c){return c.date===ref;});
-  // Enrichir les archivés avec structure camion
-  var archAsTrucks=archT.map(function(c){
-    return {id:c.id,transporteur:c.transporteur,itin:c.itin,creneau:c.creneau,date:c.date,
-      deliveries:c.deliveries,_ts:c.timestamps,_ponct:c.ponctualite,_archived:true};
-  });
-  var all=allT.concat(archAsTrucks);
-
-  // Séparer
-  var waiting=[],onsite=[],departed=[];
-  all.forEach(function(t){
-    var ts=t._ts||(timestamps[t.id]||{});
-    t._tsRef=ts;
-    if(ts.dep) departed.push(t);
-    else if(ts.arr||ts.quai||ts.chg||ts.fin_chg) onsite.push(t);
-    else waiting.push(t);
-  });
-
-  // Trier
-  function byCren(a,b){return creToMinutes(a.creneau||'')-creToMinutes(b.creneau||'');}
-  waiting.sort(byCren); onsite.sort(byCren);
-  departed.sort(function(a,b){
-    var ta=new Date(a._tsRef.dep||0).getTime();
-    var tb=new Date(b._tsRef.dep||0).getTime();
-    return tb-ta;
-  });
-  var lastDep=departed.slice(0,8);
-
-  // ── KPIs header ──────────────────────────────────────────────────────────
-  var nRetard=0;
-  all.forEach(function(t){var p=t._ponct||getPonctualite(t,t._tsRef,now);if(p.status==='retard_reel'||p.status==='retard_auto')nRetard++;});
-  var nPart=departed.length;
-  var kEl=document.getElementById('monKpis');
-  if(kEl){kEl.innerHTML=
-    '<div class="mon-kpi" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25)">'+
-      '<div class="mon-kpi-v" style="color:#60a5fa">'+all.length+'</div><div class="mon-kpi-l" style="color:rgba(96,165,250,.7)">Total</div></div>'+
-    '<div class="mon-kpi" style="background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">'+
-      '<div class="mon-kpi-v" style="color:#fb923c">'+onsite.length+'</div><div class="mon-kpi-l" style="color:rgba(251,146,60,.7)">Sur site</div></div>'+
-    '<div class="mon-kpi" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)">'+
-      '<div class="mon-kpi-v" style="color:#34d399">'+nPart+'</div><div class="mon-kpi-l" style="color:rgba(52,211,153,.7)">Partis</div></div>'+
-    '<div class="mon-kpi" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)">'+
-      '<div class="mon-kpi-v" style="color:#f87171">'+nRetard+'</div><div class="mon-kpi-l" style="color:rgba(248,113,113,.7)">Retards</div></div>';
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
-  function elapsed(from){
-    if(!from)return'';
-    var m=Math.round((now-new Date(from))/60000);
-    if(m<0)return'';
-    if(m<60)return m+'min';
-    return Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):'');
-  }
-  function quaiStr(t){
-    var tid=t.id;
-    for(var k in quaiAssign){if(quaiAssign[k]===tid)return k;}
-    return null;
-  }
-  function ponctBadge(t,ts){
-    var p=t._ponct||getPonctualite(t,ts,now);
-    if(p.status==='heure')return'<span class="mc-ponct mc-ponct-h">\uD83D\uDFE2 \u00c0 l\'heure'+(p.delta!==null?'  '+fmtDelta(Math.abs(p.delta)):'')+'</span>';
-    if(p.status==='avance')return'<span class="mc-ponct mc-ponct-a">\uD83D\uDD35 En avance'+(p.delta!==null?' '+fmtDelta(Math.abs(p.delta)):'')+'</span>';
-    if(p.status==='retard_reel'||p.status==='retard_auto')return'<span class="mc-ponct mc-ponct-r">\uD83D\uDD34 Retard'+(p.delta!==null?' +'+fmtDelta(Math.abs(p.delta)):'')+'</span>';
-    return'';
-  }
-
-  // ── Colonne En attente ───────────────────────────────────────────────────
-  var elW=document.getElementById('monListWait');
-  var cW=document.getElementById('monCntWait');
-  if(cW)cW.textContent=waiting.length;
-  if(elW){
-    if(!waiting.length){elW.innerHTML='<div class="mon-empty">Aucun en attente</div>';}
-    else{
-      elW.innerHTML=waiting.map(function(t){
-        var p=t._ponct||getPonctualite(t,t._tsRef,now);
-        var isLate=p.status==='retard_reel'||p.status==='retard_auto';
-        var lateHtml=isLate?'<div class="mc-late">\u26A0 '+p.label+(p.delta?' +'+fmtDelta(Math.abs(p.delta)):'')+'</div>':'';
-        var name=(t.transporteur||t.itin||'?').toUpperCase();
-        return'<div class="mon-card-wait'+(isLate?' late':'')+'">'+
-          '<div class="mc-name" title="'+name+'">'+name+'</div>'+
-          '<div class="mc-cren">'+(t.creneau||'—')+'</div>'+
-          lateHtml+
-          '</div>';
-      }).join('');
-    }
-  }
-
-  // ── Colonne Sur site ─────────────────────────────────────────────────────
-  var elS=document.getElementById('monListSite');
-  var cS=document.getElementById('monCntSite');
-  if(cS)cS.textContent=onsite.length;
-  if(elS){
-    if(!onsite.length){elS.innerHTML='<div class="mon-empty">Aucun sur site</div>';}
-    else{
-      elS.innerHTML=onsite.map(function(t){
-        var ts=t._tsRef;
-        var q=quaiStr(t);
-        var statusCls,statusTxt,elapsedFrom;
-        if(ts.fin_chg){statusCls='status-fin';statusTxt='Chargé — en attente départ';elapsedFrom=ts.fin_chg;}
-        else if(ts.chg){statusCls='status-chg';statusTxt='En chargement';elapsedFrom=ts.chg;}
-        else if(ts.quai){statusCls='status-quai';statusTxt='À quai';elapsedFrom=ts.quai;}
-        else{statusCls='status-arr';statusTxt='Arrivé';elapsedFrom=ts.arr;}
-        var el=elapsed(elapsedFrom);
-        var name=(t.transporteur||t.itin||'?').toUpperCase();
-        return'<div class="mon-card-site '+statusCls+'">'+
-          '<div style="display:flex;align-items:center">'+
-            '<span class="mc-dot"></span>'+
-            '<div class="mc-name" title="'+name+'">'+name+'</div>'+
-          '</div>'+
-          '<div class="mc-status">'+statusTxt+'</div>'+
-          (q?'<div><span class="mc-quai">Quai '+q+'</span></div>':'')+
-          '<div class="mc-meta">'+
-            '<span>'+( t.creneau||'—')+'</span>'+
-            (ts.arr?'<span>Arr. '+ft(ts.arr)+'</span>':'')+
-          '</div>'+
-          (el?'<div class="mc-elapsed">⏱ depuis '+el+'</div>':'')+
-          ponctBadge(t,ts)+
-          '</div>';
-      }).join('');
-    }
-  }
-
-  // ── Colonne Partis ────────────────────────────────────────────────────────
-  var elD=document.getElementById('monListDep');
-  var cD=document.getElementById('monCntDep');
-  if(cD)cD.textContent=departed.length;
-  if(elD){
-    if(!lastDep.length){elD.innerHTML='<div class="mon-empty">Aucun départ</div>';}
-    else{
-      elD.innerHTML=lastDep.map(function(t){
-        var ts=t._tsRef;
-        var p=t._ponct||getPonctualite(t,ts,now);
-        var cls=p.status==='heure'?'ph':p.status==='avance'?'pa':'pr';
-        var pTxt=p.status==='heure'?'\uD83D\uDFE2':p.status==='avance'?'\uD83D\uDD35':'\uD83D\uDD34';
-        var pLbl=p.status==='heure'?'À l\'heure':p.status==='avance'?'Avance':'Retard';
-        if(p.delta&&Math.abs(p.delta)>0)pLbl+=' '+(p.delta>0?'+':'')+fmtDelta(Math.abs(p.delta));
-        var name=(t.transporteur||t.itin||'?').toUpperCase();
-        return'<div class="mon-card-dep '+cls+'">'+
-          '<div class="mc-dep-name" title="'+name+'">'+name+'</div>'+
-          '<div class="mc-dep-time">'+ft(ts.dep)+'</div>'+
-          '<div class="mc-dep-ponct '+cls+'">'+pTxt+' '+pLbl+'</div>'+
-          '</div>';
-      }).join('');
-    }
-  }
-
-  // Ticker
-  var tk=document.getElementById('monTicker');
-  if(tk){var u=new Date();tk.textContent='Màj '+String(u.getHours()).padStart(2,'0')+':'+String(u.getMinutes()).padStart(2,'0')+':'+String(u.getSeconds()).padStart(2,'0');}
-}
-
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('./sw.js')
