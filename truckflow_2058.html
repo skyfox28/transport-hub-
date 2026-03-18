@@ -2681,7 +2681,7 @@ function makeTsCell(def,real,deb,ti){
     okBtn.addEventListener('click',function(){
       if(!inp.value)return;
       var parts=inp.value.split(':');
-      var now=new Date();
+      var tdate2=trucks[ti]&&trucks[ti].date;var now=tdate2?new Date(tdate2+'T00:00:00'):new Date();
       now.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=now.toISOString();
@@ -2790,7 +2790,7 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
     var okB=document.createElement('button');okB.className='go-btn';okB.textContent='\u2713';
     okB.addEventListener('click',function(ev){
       ev.stopPropagation();if(!inp.value)return;
-      var parts=inp.value.split(':');var nd=new Date();
+      var parts=inp.value.split(':');var tdate=trucks[ti]&&trucks[ti].date;var nd=tdate?new Date(tdate+'T00:00:00'):new Date();
       nd.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=nd.toISOString();
@@ -7883,7 +7883,7 @@ function renderArchive(){
       var ts=ct.timestamps||{};
       var p=ct.ponctualite||{};
       var pColor=p.status==='heure'?'var(--green)':p.status==='avance'?'var(--teal)':(p.status==='retard_reel'||p.status==='retard_auto')?'var(--red)':'var(--t3)';
-      function ft(v){return v?v.replace('T',' ').slice(11,16):'\u2014';}
+      function ft(v){if(!v)return'\u2014';var d=new Date(v);return(d.getHours()<10?'0':'')+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();}
       // Durée chargement effectif si fin_chg disponible
       var finChgCell=ts.fin_chg?ft(ts.fin_chg)+(ts.chg?' <span style="font-size:10px;color:var(--green)">('
         +Math.round((new Date(ts.fin_chg)-new Date(ts.chg))/60000)+'min)</span>':''): '\u2014';
