@@ -2685,7 +2685,9 @@ function makeTsCell(def,real,deb,ti){
       now.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=now.toISOString();
-      save();renderTrucks();showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);
+      save();
+      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);return;}}
+      renderTrucks();showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);
     });
     var cancelBtn=document.createElement('button');cancelBtn.className='ts-btn clr';cancelBtn.textContent='\u2715';
     cancelBtn.addEventListener('click',function(){editRow.style.display='none';});
