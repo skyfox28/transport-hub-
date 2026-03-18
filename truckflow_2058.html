@@ -4537,11 +4537,14 @@ function exportExcel(){
     function fmtTs(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
     var delta = '';
     if(ts.arr && t.creneau){
-      var cHr = creToMinutes(t.creneau);
-      var aDate = new Date(ts.arr);
-      var aMins = aDate.getHours()*60+aDate.getMinutes();
-      var diff = aMins - cHr;
-      delta = (diff>=0?'+':'')+diff+' min';
+      var cwin=creWindow(t.creneau);
+      if(cwin){
+        var aDate = new Date(ts.arr);
+        var aMins = aDate.getHours()*60+aDate.getMinutes();
+        if(aMins<cwin.start){delta='-'+Math.round(cwin.start-aMins)+' min';}
+        else if(aMins<=cwin.end){delta='\u00c0 l\'heure';}
+        else{delta='+'+Math.round(aMins-cwin.end)+' min';}
+      }
     }
     var ponctX=getPonctualite(t,ts,Date.now());
     camRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',(t.deliveries||[]).length,
@@ -4584,11 +4587,14 @@ function exportExcel(){
       function fmtA(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
       var deltaA = '';
       if(ts.arr && t.creneau){
-        var cHr2 = creToMinutes(t.creneau);
-        var aDate2 = new Date(ts.arr);
-        var aMins2 = aDate2.getHours()*60+aDate2.getMinutes();
-        var diff2 = aMins2 - cHr2;
-        deltaA = (diff2>=0?'+':'')+diff2+' min';
+        var cwin2=creWindow(t.creneau);
+        if(cwin2){
+          var aDate2 = new Date(ts.arr);
+          var aMins2 = aDate2.getHours()*60+aDate2.getMinutes();
+          if(aMins2<cwin2.start){deltaA='-'+Math.round(cwin2.start-aMins2)+' min';}
+          else if(aMins2<=cwin2.end){deltaA='\u00c0 l\'heure';}
+          else{deltaA='+'+Math.round(aMins2-cwin2.end)+' min';}
+        }
       }
       archRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
         (t.deliveries||[]).length, fmtA('arr'), fmtA('quai'), fmtA('chg'), fmtA('fin_chg'), fmtA('dep'), deltaA]);
@@ -8325,16 +8331,15 @@ function ponctBadge(t,ts){
   var now=nowMin();
   var ongoing=now>=cr.s&&now<=cr.e?'<span class="b bpt">⏰ En cours</span>':'';
   if(!ts||!ts.arr){
-    if(now>cr.e+5)return ongoing+'<span class="b bprt">⚠️ Retard '+fm(now-cr.s)+'</span>';
+    if(now>cr.e+5)return ongoing+'<span class="b bprt">⚠️ Retard '+fm(now-cr.e)+'</span>';
     if(now>=cr.s)return ongoing;
     return ongoing;
   }
   var arrT=new Date(ts.arr);
   var arrMin=arrT.getHours()*60+arrT.getMinutes();
-  var diff=arrMin-cr.s;
-  if(diff<=-10)return ongoing+'<span class="b bpav">⚡ En avance '+fm(-diff)+'</span>';
-  if(diff<=15)return ongoing+'<span class="b bpok">✅ À l\'heure</span>';
-  return ongoing+'<span class="b bprt">⚠️ Retard '+fm(diff)+'</span>';
+  if(arrMin<cr.s-10)return ongoing+'<span class="b bpav">⚡ En avance '+fm(cr.s-arrMin)+'</span>';
+  if(arrMin<=cr.e)return ongoing+'<span class="b bpok">✅ À l\'heure</span>';
+  return ongoing+'<span class="b bprt">⚠️ Retard '+fm(arrMin-cr.e)+'</span>';
 }
 function makeCard(t,ts,quai,prio){
   var s=getStatus(ts);
