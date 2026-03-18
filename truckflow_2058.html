@@ -2617,7 +2617,7 @@ function stampNow(ti,key){
     saveQuaiAssign();
   }
   timestamps[trucks[ti].id][key]=new Date().toISOString();
-  if(key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}return;}}
+  if(key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}return;}}
   save(); renderTrucks(); renderQuai();
   if(_activeDay) try{renderDayDetail(_activeDay);}catch(e){}
   var lbl=(TS_DEFS.find(function(t){return t.key===key;})||{lbl:key}).lbl;
@@ -2686,7 +2686,7 @@ function makeTsCell(def,real,deb,ti){
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=now.toISOString();
       save();
-      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);return;}}
+      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);return;}}
       renderTrucks();showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);
     });
     var cancelBtn=document.createElement('button');cancelBtn.className='ts-btn clr';cancelBtn.textContent='\u2715';
@@ -2795,7 +2795,7 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=nd.toISOString();
       save();
-      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' \u2192 '+inp.value);return;}}
+      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' \u2192 '+inp.value);return;}}
       renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
     });
     var cxB=document.createElement('button');cxB.className='clr-btn';cxB.textContent='\u2715';
