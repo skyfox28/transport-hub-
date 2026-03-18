@@ -8792,7 +8792,7 @@ function _doBilanPDF(allTrucks){
       '</tr></thead><tbody>';
     allList.forEach(function(x){
       var t=x.t,ts=x.ts,p=x.p;
-      var arrDelta=ts.arr&&t.creneau?(function(){var w=parseCreneau(t.creneau,t.date||d);if(!w)return'—';var m=Math.round((new Date(ts.arr)-new Date((t.date||d)+'T00:00:00')-w.start*60000)/60000);return(m>0?'+':'')+m+'min';})():'—';
+      var arrDelta=ts.arr&&t.creneau?(function(){var w=creWindow(t.creneau);if(!w)return'—';var m=Math.round((new Date(ts.arr)-new Date((t.date||d)+'T00:00:00')-w.start*60000)/60000);return(m>0?'+':'')+m+'min';})():'—';
       var chgtDur=dur(ts.chg,ts.fin_chg||ts.dep);
       var pC=ponctColor(p.status),pL=ponctLabel(p.status);
       var dBadge='—';
