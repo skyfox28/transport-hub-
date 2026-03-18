@@ -2794,7 +2794,9 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
       nd.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=nd.toISOString();
-      save();renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
+      save();
+      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' \u2192 '+inp.value);return;}}
+      renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
     });
     var cxB=document.createElement('button');cxB.className='clr-btn';cxB.textContent='\u2715';
     cxB.addEventListener('click',function(ev){ev.stopPropagation();editArea.classList.remove('open');});
