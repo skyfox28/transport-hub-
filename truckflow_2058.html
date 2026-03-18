@@ -1219,7 +1219,20 @@ html.tv-mode body{overflow:auto}
     <div class="hdr-group">
       <button class="btn-imp" style="color:var(--purple);border-color:rgba(155,109,255,.3)" onclick="exportSession()" title="Exporter session JSON">&#x2193; Partager</button>
       <button class="btn-imp" style="color:var(--green);border-color:rgba(45,202,114,.3)" onclick="exportExcel()" title="Exporter Excel">&#128196; Excel</button>
-      <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="generatePDFReport()" title="Rapport PDF journée">&#128203; Rapport</button>
+      <div style="position:relative;display:inline-block" id="rapportMenuWrap">
+        <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="toggleRapportMenu()" title="Rapports PDF">&#128203; Rapport &#9662;</button>
+        <div id="rapportMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:6px;min-width:230px;z-index:200;box-shadow:var(--sh)">
+          <button onclick="generatePDFReport();toggleRapportMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(94,92,230,.12)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128203; Rapport instantan\u00e9</span>
+            <span style="font-size:11px;color:var(--t3)">Snapshot de l'\u00e9tat actuel</span>
+          </button>
+          <div style="height:1px;background:var(--bd);margin:4px 6px"></div>
+          <button onclick="generateBilanPDF();toggleRapportMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(45,202,114,.1)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128196; Bilan de fin de journ\u00e9e</span>
+            <span style="font-size:11px;color:var(--t3)">Tous les camions \u2022 d\u00e9calages \u2022 stats</span>
+          </button>
+        </div>
+      </div>
       <button class="btn-imp" style="color:var(--orange);border-color:rgba(255,107,53,.3)" onclick="exportPlanningMural()" title="Planning mural A3">&#128200; Mural</button>
     </div>
     <div class="hdr-sep"></div>
@@ -1330,12 +1343,25 @@ html.tv-mode body{overflow:auto}
       <button class="btn-new" onclick="regenTrucks()">&#x21BB; Regenerer VL06O</button>
       <button class="btn-sm" onclick="var r=cleanCompletedTrucks();showToast(r?r+' camion(s) nettoye(s)':'Aucun camion termine')">&#128465; Nettoyer termines</button>
       <button class="btn-sm" id="groupCreneauBtn" onclick="toggleGroupCreneau()" title="Grouper par créneau">&#128336; Grouper</button>
+      <span style="display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:4px 10px;border-radius:20px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)" title="Définir la date de saisie (utile le lendemain matin pour saisir des timestamps rétroactifs)">
+        <span style="font-size:12px;color:#f59e0b">📅</span>
+        <span style="font-size:11px;color:var(--t3)">Saisie du</span>
+        <input id="workingDateInput" type="date" value="" onchange="setWorkingDate(this.value);renderTrucks()"
+          style="background:transparent;border:none;color:#f59e0b;font-size:11px;font-weight:700;cursor:pointer;outline:none;font-family:inherit;width:110px">
+      </span>
     </div>
     <div class="cam-filter-bar" style="gap:8px">
       <span style="font-size:11px;font-weight:700;color:var(--t3);flex-shrink:0">Jour :</span>
       <div class="cam-date-tabs" id="truckDateTabs"></div>
       <input id="truckSearchInput" type="search" placeholder="&#128269; Rechercher transporteur, itin., destination…" oninput="applyTruckSearch()" style="margin-left:auto;padding:5px 12px;font-size:12px;border-radius:20px;border:1.5px solid var(--bd2);background:var(--sf2);color:var(--t1);outline:none;width:280px;flex-shrink:0">
     </div>
+  </div>
+  <!-- Bannière mode saisie différée -->
+  <div id="workingDateBanner" style="display:none;align-items:center;gap:10px;padding:8px 18px;background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.35);font-size:12px">
+    <span style="font-size:16px">📅</span>
+    <span id="workingDateLabel" style="font-weight:700;color:#f59e0b;flex:1"></span>
+    <span style="color:var(--t3);font-size:11px">Les timestamps instant seront horodatés sur cette date.</span>
+    <button onclick="setWorkingDate(new Date().toISOString().slice(0,10));renderTrucks()" style="padding:3px 12px;border-radius:20px;border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.15);color:#f59e0b;font-size:11px;cursor:pointer;font-weight:700">✕ Quitter ce mode</button>
   </div>
   <div id="ponctStats"></div>
   <div class="focus-bar" id="focusBar"><span style="font-size:14px">&#x1F50D;</span><span class="focus-bar-label" id="focusBarLabel">Mode focus</span><button class="focus-bar-close" onclick="exitFocusMode()">&#x2715; Quitter le focus</button></div>
@@ -1542,6 +1568,19 @@ var fTruckPonct = '';
 var fTruckPeriod = '';
 var fTruckStatus = '';
 var _completedTrucks = [];
+// Date de saisie : null = aujourd'hui, sinon YYYY-MM-DD (mode saisie décalée)
+var _workingDate = null;
+function getWorkingDate(){return _workingDate||new Date().toISOString().slice(0,10);}
+function setWorkingDate(v){
+  _workingDate=(v&&v!==new Date().toISOString().slice(0,10))?v:null;
+  var el=document.getElementById('workingDateBanner');
+  if(el){el.style.display=_workingDate?'flex':'none';
+    if(_workingDate){var d=new Date(_workingDate+'T12:00:00');
+      document.getElementById('workingDateLabel').textContent='Mode saisie diff\u00e9r\u00e9e : '+d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'});
+    }
+  }
+  var inp=document.getElementById('workingDateInput');if(inp)inp.value=_workingDate||new Date().toISOString().slice(0,10);
+}
 var showExport = true;
 var _activeDay = null;
 var _ponctTimer = null;
@@ -2616,7 +2655,7 @@ function stampNow(ti,key){
     quaiAssign[q]=tid;
     saveQuaiAssign();
   }
-  timestamps[trucks[ti].id][key]=new Date().toISOString();
+  (function(){var tdate=(trucks[ti]&&trucks[ti].date)||_workingDate;var base=tdate?new Date(tdate+'T00:00:00'):new Date();var now=new Date();base.setHours(now.getHours(),now.getMinutes(),now.getSeconds(),0);timestamps[trucks[ti].id][key]=base.toISOString();})();
   if(key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}return;}}
   save(); renderTrucks(); renderQuai();
   if(_activeDay) try{renderDayDetail(_activeDay);}catch(e){}
@@ -5142,6 +5181,11 @@ function init(){
   loadQuaiAssign();
   loadCompleted();
   purgeOldCompleted();
+  // Initialiser le datepicker "Date de saisie" avec aujourd'hui
+  setTimeout(function(){
+    var inp=document.getElementById('workingDateInput');
+    if(inp) inp.value=new Date().toISOString().slice(0,10);
+  },0);
   setUpdLabel();
   renderAll();
   // Start notification checker on page load (not just after import)
@@ -8641,6 +8685,164 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
   w.document.close();
   logActivity('\uD83D\uDDA5','Mode Monitor ouvert dans un nouvel onglet');
 }
+
+// ─── Rapport menu ──────────────────────────────────────────────────────────
+function toggleRapportMenu(){
+  var m=document.getElementById('rapportMenu');if(!m)return;
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  if(!open){setTimeout(function(){document.addEventListener('click',function h(e){if(!document.getElementById('rapportMenuWrap').contains(e.target)){m.style.display='none';document.removeEventListener('click',h);}},true);},0);}
+}
+
+// ─── Bilan PDF fin de journée ──────────────────────────────────────────────
+function generateBilanPDF(){
+  var allTrucks=trucks.slice();
+  (_completedTrucks||[]).forEach(function(ct){
+    allTrucks.push({id:ct.id,transporteur:ct.transporteur,itin:ct.itin,creneau:ct.creneau,
+      date:ct.date,deliveries:ct.deliveries,decalage:ct.decalage||null,locked:ct.locked||false,
+      _ts:ct.timestamps,_ponct:ct.ponctualite,_archived:true});
+  });
+  if(!allTrucks.length){showToast('Aucune donn\u00e9e');return;}
+  showToast('\uD83D\uDCC4 G\u00e9n\u00e9ration bilan...');
+  setTimeout(function(){_doBilanPDF(allTrucks);},120);
+}
+function _doBilanPDF(allTrucks){
+  var refDate=getWorkingDate();
+  // Grouper par date
+  var byDate={};
+  allTrucks.forEach(function(t){
+    var d=t.date||refDate;
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(t);
+  });
+  var dates=Object.keys(byDate).sort();
+  var now=Date.now();
+  function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+  function fdate(iso){if(!iso)return'—';var d=new Date(iso+'T12:00:00');return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});}
+  function dur(a,b){if(!a||!b)return'—';var m=Math.round((new Date(b)-new Date(a))/60000);return m+'min';}
+  function ponctColor(s){return s==='heure'?'#2a9d5c':s==='avance'?'#1565c0':s==='retard_reel'||s==='retard_auto'?'#d32f2f':'#888';}
+  function ponctLabel(s){return s==='heure'?'\uD83D\uDFE2 \u00c0 l\'heure':s==='avance'?'\uD83D\uDD35 En avance':s==='retard_reel'||s==='retard_auto'?'\uD83D\uDD34 En retard':'\u23F3 En attente';}
+  var motifColors={'mtx3':'#e65100','transporteur':'#1565c0','pas_venu':'#b71c1c'};
+
+  var S='<style>'+
+    '*{box-sizing:border-box}'+
+    'body{font-family:Arial,sans-serif;color:#1a1a1a;padding:24px;max-width:980px;margin:0 auto;font-size:12px;background:#fff}'+
+    'h1{font-size:22px;font-weight:900;margin:0 0 2px;color:#111}'+
+    'h2{font-size:14px;font-weight:800;margin:22px 0 8px;padding:6px 12px;background:#f0f4ff;border-left:5px solid #4d7cfe;color:#222;border-radius:0 6px 6px 0}'+
+    'h3{font-size:12px;font-weight:700;margin:14px 0 5px;color:#444;padding:3px 8px;background:#f8f8f8;border-radius:4px}'+
+    'table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;page-break-inside:avoid}'+
+    'th{background:#e8edf8;padding:5px 7px;text-align:left;font-weight:700;border:1px solid #ccd;font-size:10px;text-transform:uppercase;letter-spacing:.03em}'+
+    'td{padding:5px 7px;border:1px solid #dde;vertical-align:middle}'+
+    'tr:nth-child(even) td{background:#fafbff}'+
+    '.krow{display:grid;gap:8px;margin:10px 0}'+
+    '.kbox{text-align:center;padding:10px 6px;border:2px solid #ddd;border-radius:8px;background:#fafafa}'+
+    '.kv{font-size:24px;font-weight:900;line-height:1}.kl{font-size:10px;color:#666;margin-top:3px}'+
+    '.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}'+
+    '.decal-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}'+
+    '.day-block{border:1px solid #dde;border-radius:10px;padding:16px;margin-bottom:24px;page-break-inside:avoid}'+
+    '.day-title{font-size:15px;font-weight:800;color:#222;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e0e6ff}'+
+    '.green{color:#2a9d5c}.red{color:#d32f2f}.blue{color:#1565c0}.amber{color:#e65100}.grey{color:#777}'+
+    '.lock{font-size:10px;opacity:.6}'+
+    '@media print{body{padding:8px}button{display:none!important}.no-print{display:none!important}.day-block{page-break-inside:avoid}}'+
+    '</style>';
+
+  var genDate=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var genTime=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan TruckFlow \u2014 '+refDate+'</title>'+S+'</head><body>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">'+
+    '<div><h1>\uD83D\uDE9B Bilan de fin de journ\u00e9e \u2014 TruckFlow</h1>'+
+    '<div style="color:#666;font-size:12px">G\u00e9n\u00e9r\u00e9 le '+genDate.charAt(0).toUpperCase()+genDate.slice(1)+' \u00e0 '+genTime+'</div>'+
+    (_workingDate?'<div style="font-size:11px;color:#e65100;font-weight:700;margin-top:3px">\u26A0 Mode saisie diff\u00e9r\u00e9e \u2014 donn\u00e9es de '+fdate(_workingDate)+'</div>':'')+
+    '</div>'+
+    '<div style="text-align:right;font-size:11px;color:#888">'+dates.length+' journ\u00e9e'+(dates.length>1?'s':'')+' \u2022 '+allTrucks.length+' camion'+(allTrucks.length>1?'s':'')+'</div></div>';
+
+  // ── Section par jour ──────────────────────────────────────────────────────
+  dates.forEach(function(d){
+    var list=byDate[d];
+    var partis=[],enCours=[],attente=[],decalages=[];
+    var pH=0,pA=0,pR=0;
+    list.forEach(function(t){
+      var ts=t._ts||(timestamps[t.id]||{});
+      var p=t._ponct||getPonctualite(t,ts,now);
+      if(ts.dep){partis.push({t:t,ts:ts,p:p});}
+      else if(ts.arr||ts.quai||ts.chg){enCours.push({t:t,ts:ts,p:p});}
+      else{attente.push({t:t,ts:ts,p:p});}
+      if(p.status==='heure')pH++;else if(p.status==='avance')pA++;else if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
+      if(t.decalage) decalages.push(t);
+    });
+    html+='<div class="day-block">';
+    html+='<div class="day-title">'+fdate(d).charAt(0).toUpperCase()+fdate(d).slice(1)+'</div>';
+    // KPI résumé jour
+    html+='<div class="krow" style="grid-template-columns:repeat(6,1fr);margin-bottom:14px">'+
+      '<div class="kbox" style="border-color:#4d7cfe"><div class="kv blue">'+list.length+'</div><div class="kl">Total</div></div>'+
+      '<div class="kbox" style="border-color:#2a9d5c"><div class="kv green">'+partis.length+'</div><div class="kl">Partis</div></div>'+
+      '<div class="kbox" style="border-color:#e65100"><div class="kv amber">'+enCours.length+'</div><div class="kl">En cours</div></div>'+
+      '<div class="kbox" style="border-color:#888"><div class="kv grey">'+attente.length+'</div><div class="kl">En attente</div></div>'+
+      '<div class="kbox" style="border-color:#d32f2f"><div class="kv red">'+pR+'</div><div class="kl">Retards</div></div>'+
+      '<div class="kbox" style="border-color:#f59e0b"><div class="kv amber">'+decalages.length+'</div><div class="kl">D\u00e9calages</div></div>'+
+      '</div>';
+    // Tableau tous les camions
+    var allList=partis.concat(enCours,attente);
+    allList.sort(function(a,b){return (a.t.creneau||'').localeCompare(b.t.creneau||'');});
+    html+='<h3>Tous les camions ('+list.length+')</h3>'+
+      '<table><thead><tr>'+
+      '<th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>D\u00e9b. chgt</th><th>Fin chgt</th><th>D\u00e9part</th>'+
+      '<th>&Delta; arr.</th><th>Chgt.</th><th>Ponctualit\u00e9</th><th>Livraisons</th><th>D\u00e9calage</th>'+
+      '</tr></thead><tbody>';
+    allList.forEach(function(x){
+      var t=x.t,ts=x.ts,p=x.p;
+      var arrDelta=ts.arr&&t.creneau?(function(){var w=parseCreneau(t.creneau,t.date||d);if(!w)return'—';var m=Math.round((new Date(ts.arr)-new Date((t.date||d)+'T00:00:00')-w.start*60000)/60000);return(m>0?'+':'')+m+'min';})():'—';
+      var chgtDur=dur(ts.chg,ts.fin_chg||ts.dep);
+      var pC=ponctColor(p.status),pL=ponctLabel(p.status);
+      var dBadge='—';
+      if(t.decalage){var mc=motifColors[t.decalage.motif]||'#888';dBadge='<span class="decal-badge" style="background:'+mc+'22;color:'+mc+';border:1px solid '+mc+'55">'+t.decalage.label+'</span>'+(t.decalage.dateNew?'<br><span style="font-size:10px;color:#e65100">→'+t.decalage.dateNew+(t.decalage.creneauNew?' '+t.decalage.creneauNew:'')+'</span>':'');}
+      html+='<tr>'+
+        '<td><b>'+(t.transporteur||t.itin||'?')+'</b>'+(t.locked?' <span class="lock">\uD83D\uDD12</span>':'')+(t._archived?' <span style="font-size:9px;color:#888;background:#f0f0f0;padding:1px 4px;border-radius:3px">arch.</span>':'')+'</td>'+
+        '<td>'+(t.creneau||'—')+'</td>'+
+        '<td>'+ft(ts.arr)+'</td>'+
+        '<td>'+ft(ts.quai)+'</td>'+
+        '<td>'+ft(ts.chg)+'</td>'+
+        '<td>'+ft(ts.fin_chg)+'</td>'+
+        '<td><b>'+ft(ts.dep)+'</b></td>'+
+        '<td style="color:'+(arrDelta&&arrDelta.startsWith('+')&&parseInt(arrDelta)>5?'#d32f2f':arrDelta&&arrDelta.startsWith('-')?'#2a9d5c':'#666')+'">'+arrDelta+'</td>'+
+        '<td>'+chgtDur+'</td>'+
+        '<td><span style="color:'+pC+';font-weight:700">'+pL+'</span></td>'+
+        '<td style="color:#444">'+(t.deliveries||[]).length+' livr.</td>'+
+        '<td>'+dBadge+'</td>'+
+        '</tr>';
+    });
+    html+='</tbody></table>';
+    // Section décalages du jour
+    if(decalages.length){
+      html+='<h3>\u23F1 D\u00e9calages d\u00e9clar\u00e9s ('+decalages.length+')</h3>'+
+        '<table><thead><tr><th>Transporteur</th><th>Motif</th><th>Cr\u00e9neau orig.</th><th>Nouvelle date</th><th>Nouveau cr\u00e9neau</th><th>Note</th><th>Enregistr\u00e9</th></tr></thead><tbody>';
+      decalages.forEach(function(t){
+        var dc=t.decalage,mc=motifColors[dc.motif]||'#888';
+        html+='<tr>'+
+          '<td><b>'+(t.transporteur||t.itin||'?')+'</b></td>'+
+          '<td><span class="decal-badge" style="background:'+mc+'22;color:'+mc+';border:1px solid '+mc+'55">'+dc.label+'</span></td>'+
+          '<td>'+(dc.creneauOrig||t.creneau||'—')+'</td>'+
+          '<td style="color:#e65100;font-weight:700">'+(dc.dateNew||'—')+'</td>'+
+          '<td style="color:#e65100">'+(dc.creneauNew||'—')+'</td>'+
+          '<td style="color:#555;font-size:11px">'+(dc.note||'—')+'</td>'+
+          '<td style="color:#888;font-size:10px">'+(dc.date||'')+(dc.heure?' '+dc.heure:'')+'</td>'+
+          '</tr>';
+      });
+      html+='</tbody></table>';
+    }
+    html+='</div>'; // end day-block
+  });
+
+  // ── Bouton imprimer ──────────────────────────────────────────────────────
+  html+='<div class="no-print" style="text-align:center;margin:24px 0">'+
+    '<button onclick="window.print()" style="padding:10px 32px;background:#4d7cfe;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">&#128196; Imprimer / Enregistrer en PDF</button>'+
+    '</div></body></html>';
+
+  var w=window.open('','_blank','width=1020,height=800');
+  if(!w){showToast('Popup bloqu\u00e9 \u2014 autorisez les popups');return;}
+  w.document.write(html);w.document.close();
+  logActivity('\uD83D\uDCC4','Bilan PDF g\u00e9n\u00e9r\u00e9 ('+allTrucks.length+' camions, '+dates.length+' jour'+(dates.length>1?'s':'')+')');}
 
 // ─── Décalage feature ────────────────────────────────────────────────────
 var _decalageMotifs=[
