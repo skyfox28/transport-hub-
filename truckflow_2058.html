@@ -8115,7 +8115,102 @@ renderStats=function(){
   var el=document.getElementById('statsContent');if(!el)return;
   try{renderHalfdayComparison(el);}catch(e){console.warn('halfday:',e);}
   try{renderMonthlyChart(el);}catch(e){console.warn('monthly:',e);}
+  try{renderDecalageStats(el);}catch(e){console.warn('decalage-stats:',e);}
 };
+
+// ─── Section Suivi des Décalages ──────────────────────────────────────────
+function renderDecalageStats(container){
+  // Collecte : camions actifs + archivés
+  var allTrucks=trucks.slice();
+  (_completedTrucks||[]).forEach(function(ct){allTrucks.push(ct);});
+
+  var rows=[];
+  allTrucks.forEach(function(t){
+    if(!t.decalage)return;
+    rows.push({
+      transporteur:t.transporteur||t.itin||'—',
+      motif:t.decalage.motif||'',
+      label:t.decalage.label||'?',
+      note:t.decalage.note||'',
+      dateOrig:t.decalage.dateOrig||t.date||'',
+      creneauOrig:t.decalage.creneauOrig||t.creneau||'',
+      dateNew:t.decalage.dateNew||'',
+      creneauNew:t.decalage.creneauNew||'',
+      enreg:(t.decalage.date||'')+(t.decalage.heure?' '+t.decalage.heure:''),
+      locked:!!t.locked
+    });
+  });
+
+  // KPI par motif
+  var motifColors={'mtx3':'#e65100','transporteur':'#1565c0','pas_venu':'#b71c1c'};
+  var motifLabels={'mtx3':'MTX3','transporteur':'Transporteur','pas_venu':'Pas venu'};
+  var motifKeys=['mtx3','transporteur','pas_venu'];
+  var counts={};
+  motifKeys.forEach(function(k){counts[k]=0;});
+  rows.forEach(function(r){if(counts[r.motif]!==undefined)counts[r.motif]++;else counts[r.motif]=(counts[r.motif]||0)+1;});
+
+  var kpiHtml='';
+  if(rows.length===0){
+    kpiHtml='<div style="color:var(--t3);font-size:13px;padding:18px 0;text-align:center">Aucun décalage enregistré</div>';
+  } else {
+    // Carte total
+    kpiHtml+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">';
+    kpiHtml+='<div class="stats-kpi" style="border:1px solid rgba(255,180,0,.25);background:rgba(255,180,0,.06)">'+
+      '<div style="font-size:28px;font-weight:700;color:#f59e0b">'+rows.length+'</div>'+
+      '<div style="font-size:11px;color:var(--t3);margin-top:2px">Total d\u00e9calages</div></div>';
+    motifKeys.forEach(function(k){
+      var c=motifColors[k]||'var(--cyan)';
+      var cnt=counts[k]||0;
+      kpiHtml+='<div class="stats-kpi" style="border:1px solid '+c+'33;background:'+c+'11">'+
+        '<div style="font-size:28px;font-weight:700;color:'+c+'">'+cnt+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+(motifLabels[k]||k)+'</div></div>';
+    });
+    kpiHtml+='</div>';
+  }
+
+  // Table détail
+  var tableHtml='';
+  if(rows.length>0){
+    tableHtml='<div style="overflow-x:auto"><table class="stats-day-table" style="min-width:720px">'+
+      '<thead><tr>'+
+      '<th>Transporteur</th>'+
+      '<th>Motif</th>'+
+      '<th>Date orig.</th>'+
+      '<th>Cr\u00e9neau orig.</th>'+
+      '<th style="color:#f59e0b">\u2192 Nouvelle date</th>'+
+      '<th style="color:#f59e0b">Nouveau cr\u00e9neau</th>'+
+      '<th>Note</th>'+
+      '<th>Enregistr\u00e9</th>'+
+      '</tr></thead><tbody>';
+    rows.forEach(function(r){
+      var c=motifColors[r.motif]||'var(--cyan)';
+      var badge='<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;'+
+        'background:'+c+'22;color:'+c+';border:1px solid '+c+'55">'+r.label+'</span>';
+      tableHtml+='<tr>'+
+        '<td><span style="font-weight:600;color:var(--t1)">'+r.transporteur+'</span>'+(r.locked?' <span style="font-size:10px;opacity:.6">🔒</span>':'')+'</td>'+
+        '<td>'+badge+'</td>'+
+        '<td style="color:var(--t2)">'+r.dateOrig+'</td>'+
+        '<td style="color:var(--t2)">'+r.creneauOrig+'</td>'+
+        '<td style="color:#f59e0b;font-weight:600">'+(r.dateNew||'<span style="color:var(--t3)">—</span>')+'</td>'+
+        '<td style="color:#f59e0b">'+(r.creneauNew||'<span style="color:var(--t3)">—</span>')+'</td>'+
+        '<td style="color:var(--t3);font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+r.note.replace(/"/g,"'")+'">'+
+          (r.note||'<span style="opacity:.4">—</span>')+'</td>'+
+        '<td style="color:var(--t3);font-size:10px;white-space:nowrap">'+r.enreg+'</td>'+
+        '</tr>';
+    });
+    tableHtml+='</tbody></table></div>';
+  }
+
+  var sec=document.createElement('div');
+  sec.className='stats-section';
+  sec.style.cssText='margin-top:18px';
+  sec.innerHTML=
+    '<div class="stats-section-title">\u23F1 Suivi des D\u00e9calages</div>'+
+    kpiHtml+tableHtml+
+    (rows.length===0?'':'<div style="font-size:10px;color:var(--t3);margin-top:10px;text-align:right">'+
+      'Inclut les camions actifs et les camions archiv\u00e9s. Les camions fig\u00e9s (🔒) sont conserv\u00e9s ind\u00e9finiment.</div>');
+  container.appendChild(sec);
+}
 
 // ─── Start chrono refresh + initial states ────────────────────────────────
 startChronoRefresh();
