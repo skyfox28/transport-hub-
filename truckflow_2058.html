@@ -6081,12 +6081,16 @@ function _buildPDFReport(){
     else if(ts.arr||ts.quai||ts.chg) trucksEnCours.push({t:t,ts:ts});
     else trucksAttente.push({t:t,ts:ts});
   });
-  // Ponctualité (partis uniquement — réels)
+  // Ponctualité : à l'heure/avance sur les partis, retard sur tous
   var pH=0,pA=0,pR=0;
   trucksPartis.forEach(function(x){
     var p=x.t._ponct||getPonctualite(x.t,x.ts,now);
     if(p.status==='heure')pH++;else if(p.status==='avance')pA++;
     else if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
+  });
+  trucksEnCours.concat(trucksAttente).forEach(function(x){
+    var p=getPonctualite(x.t,x.ts,now);
+    if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
   });
   // Volumes : livraisons liées aux camions partis
   var depLivIds=new Set();
