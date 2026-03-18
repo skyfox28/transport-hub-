@@ -3518,6 +3518,8 @@ function cleanCompletedTrucks(){
   var before = trucks.length;
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
+    // Camion figé ou décalé → reste actif même si ts.dep présent
+    if(t.locked || t._dateManuallyChanged || t._creneauManuallyChanged || t.decalage) return true;
     if(!ts.dep) return true;
     {
       // Archive completed truck before removal
@@ -4781,6 +4783,8 @@ function exportExcel(){
   (APP.deliveries||[]).forEach(function(d){livMap2[d.id]=d;});
   var removed=0;
   trucks=trucks.filter(function(t){
+    // Camion figé ou décalé manuellement → INTOUCHABLE par l'export
+    if(t.locked || t._dateManuallyChanged || t._creneauManuallyChanged || t.decalage) return true;
     var ts=timestamps[t.id]||{};
     var has4ts = ts.arr && ts.quai && ts.chg && ts.dep;
     var allC   = (t.deliveries||[]).length>0 && (t.deliveries||[]).every(function(id){
@@ -4795,7 +4799,9 @@ function exportExcel(){
     return true;
   });
   if(removed){ save(); saveQuaiAssign(); renderAll(); }
-  showToast('Export t\u00e9l\u00e9charg\u00e9'+(removed?' \u00b7 '+removed+' camion'+(removed>1?'s':'')+' archiv\u00e9'+(removed>1?'s':''):'')+' \u2705');
+  var locked_kept=trucks.filter(function(t){return t.locked||t._dateManuallyChanged||t._creneauManuallyChanged||t.decalage;}).length;
+  showToast('Export t\u00e9l\u00e9charg\u00e9'+(removed?' \u00b7 '+removed+' camion'+(removed>1?'s':'')+' archiv\u00e9'+(removed>1?'s':''):'')+
+    (locked_kept?' \u00b7 '+locked_kept+' fig\u00e9'+(locked_kept>1?'s':'')+' conserv\u00e9'+(locked_kept>1?'s':''):'')+' \u2705');
 }
 
 // ─── Quai plan ────────────────────────────────────────────────────────────
