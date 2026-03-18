@@ -3557,11 +3557,9 @@ function cleanCompletedTrucks(){
   var before = trucks.length;
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
-    // Seul le verrouillage explicite bloque l'archivage définitif
-    // _dateManuallyChanged/_creneauManuallyChanged/decalage = conserve les données entre reimports,
-    // mais si le camion a un ts.dep il est parti → on l'archive quand même
-    if(t.locked){ console.warn('[archive] camion '+t.id+' ignoré : verrouillé'); return true; }
-    if(!ts.dep) return true; // pas encore parti → on garde (avec ou sans flags)
+    // Le verrouillage protège contre les reimports VL06O, mais un camion PARTI (dep timbré)
+    // doit toujours être archivé — le verrou n'empêche plus l'archivage si dep est présent
+    if(!ts.dep) return true; // pas encore parti → on garde (verrouillé ou non)
     {
       // Archive completed truck before removal (try/catch : erreur interne ne bloque pas)
       try{
