@@ -8351,6 +8351,8 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .tc.sl{border-color:rgba(230,81,0,.55);background:linear-gradient(145deg,rgba(230,81,0,.11) 0%,rgba(230,81,0,.03) 100%);box-shadow:0 4px 22px rgba(230,81,0,.18),inset 0 1px 0 rgba(230,81,0,.18)}
 .tc.slo{border-color:rgba(42,157,92,.55);background:linear-gradient(145deg,rgba(42,157,92,.11) 0%,rgba(42,157,92,.03) 100%);box-shadow:0 4px 22px rgba(42,157,92,.18),inset 0 1px 0 rgba(42,157,92,.2)}
 .tc.sp{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.02);opacity:.5}
+.tc.sretard{border-color:rgba(211,47,47,.6);background:linear-gradient(145deg,rgba(211,47,47,.1) 0%,rgba(211,47,47,.03) 100%);box-shadow:0 4px 22px rgba(211,47,47,.22),inset 0 1px 0 rgba(211,47,47,.18);animation:retardpulse 2.5s ease-in-out infinite}
+@keyframes retardpulse{0%,100%{box-shadow:0 4px 22px rgba(211,47,47,.22),inset 0 1px 0 rgba(211,47,47,.18)}50%{box-shadow:0 4px 30px rgba(211,47,47,.45),inset 0 1px 0 rgba(211,47,47,.3),0 0 0 2px rgba(211,47,47,.25)}}
 .tc-top{display:flex;align-items:center;gap:5px;margin-bottom:9px;flex-wrap:wrap}
 .b{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
 .bw{background:rgba(139,148,158,.18);color:#8b949e}.ba{background:rgba(10,132,255,.2);color:#60a5fa}
@@ -8657,7 +8659,8 @@ function makeCard(t,ts,quai,prio){
      +'</div>'
     :'<button class="act act-done" disabled>✅ Parti</button>';
   var cn=isCrenNow(t);
-  return '<div class="tc '+tcls(s)+(cn?' cren-now':'')+'">'
+  var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
+  return '<div class="tc '+tcls(s)+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
     +'<div class="tc-top">'
     +'<span class="b '+scls(s)+'">'+slbl(s)+'</span>'
     +(quai?'<span class="b bq">Q'+quai+'</span>':'')
@@ -8692,15 +8695,20 @@ function render(){
   var td=new Date().toISOString().slice(0,10);
   var day=trucks.filter(function(t){return t.date===td;});
   updateKPIs(trucks,tsm);
-  var waiting=[],onsite=[],departed=[];
+  var waiting=[],late=[],onsite=[],departed=[];
   day.forEach(function(t){
     var s=getStatus(tsm[t.id]||{});
     if(s==='p')departed.push(t);
-    else if(s==='w')waiting.push(t);
+    else if(s==='w'){
+      var cr=parseCren(t.creneau);
+      if(cr&&nowMin()>cr.e+5)late.push(t);
+      else waiting.push(t);
+    }
     else onsite.push(t);
   });
   function byCren(a,b){return (a.creneau||'99:99').localeCompare(b.creneau||'99:99');}
-  waiting.sort(byCren);onsite.sort(byCren);
+  function byRetard(a,b){var ca=parseCren(a.creneau),cb=parseCren(b.creneau);return (ca?ca.e:0)-(cb?cb.e:0);}
+  waiting.sort(byCren);late.sort(byRetard);onsite.sort(byCren);
   departed.sort(function(a,b){return new Date((tsm[b.id]||{}).dep||0).getTime()-new Date((tsm[a.id]||{}).dep||0).getTime();});
   var main=document.getElementById('main');if(!main)return;
   if(!day.length){
@@ -8715,6 +8723,15 @@ function render(){
       +'<span class="sec-hdr-n" style="color:#fb923c">'+onsite.length+'</span></div>'
       +'<div class="sec-grid">'
       +onsite.map(function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
+      +'</div></div>';
+  }
+  if(late.length){
+    html+='<div class="sec-wrap">'
+      +'<div class="sec-hdr"><span class="sec-hdr-dot" style="background:#d32f2f;color:#d32f2f;animation:retardpulse 2s infinite"></span>'
+      +'<span class="sec-hdr-t" style="color:#f87171">⚠️ En retard</span>'
+      +'<span class="sec-hdr-n" style="color:#f87171">'+late.length+'</span></div>'
+      +'<div class="sec-grid sec-grid-sm">'
+      +late.map(function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
       +'</div></div>';
   }
   if(waiting.length){
@@ -8746,9 +8763,37 @@ function tick(){
   document.getElementById('clk').textContent=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('dtlbl').textContent=n.toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
-tick();render();autoFit();
+var _notifShown={};
+function checkAlerts(){
+  var trucks=getData(),tsm=getTs();
+  var td=new Date().toISOString().slice(0,10);
+  var day=trucks.filter(function(t){return t.date===td;});
+  var lateList=[];
+  day.forEach(function(t){
+    var ts=tsm[t.id]||{};
+    if(ts.arr) return;
+    var cr=parseCren(t.creneau);
+    if(cr&&nowMin()>cr.e+5) lateList.push(t);
+  });
+  if(!lateList.length){_notifShown={};return;}
+  lateList.forEach(function(t){
+    if(_notifShown[t.id]) return;
+    _notifShown[t.id]=true;
+    var name=t.transporteur||t.itin||'Camion';
+    var over=nowMin()-(parseCren(t.creneau)||{e:0}).e;
+    var msg=name+' — en retard de '+over+' min (créneau '+t.creneau+')';
+    if(Notification&&Notification.permission==='granted'){
+      new Notification('🔴 Camion en retard',{body:msg,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚛</text></svg>'});
+    } else if(Notification&&Notification.permission!=='denied'){
+      Notification.requestPermission().then(function(p){if(p==='granted')new Notification('🔴 Camion en retard',{body:msg});});
+    }
+    toast('🔴 RETARD '+name+' (+'+over+'min)');
+  });
+}
+tick();render();autoFit();checkAlerts();
 setInterval(tick,1000);
 setInterval(function(){render();autoFit();},10000);
+setInterval(checkAlerts,30000);
 window.addEventListener('resize',autoFit);
 window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key===LQ){render();autoFit();}});
   */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
