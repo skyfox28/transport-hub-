@@ -3555,42 +3555,50 @@ function cleanCompletedTrucks(){
   var livMap = {};
   (APP.deliveries||[]).forEach(function(d){ livMap[d.id]=d; });
   var before = trucks.length;
+  var _debugInfo = [];
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
-    // Le verrouillage protège contre les reimports VL06O, mais un camion PARTI (dep timbré)
-    // doit toujours être archivé — le verrou n'empêche plus l'archivage si dep est présent
-    if(!ts.dep) return true; // pas encore parti → on garde (verrouillé ou non)
-    {
-      // Archive completed truck before removal (try/catch : erreur interne ne bloque pas)
-      try{
-        var ponct=getPonctualite(t,ts,Date.now());
-        var delivDetails=(t.deliveries||[]).map(function(id){
-          var d=livMap[id];
-          return d?{id:d.id,dest:d.dest||'',ville:d.ville||'',sp:d.sp||'',wm:d.wm||'',
-            pkg:d.pkg||0,palSilo:d.palSilo||0,colisSilo:d.colisSilo||0,colisPick:d.colisPick||0}
-            :{id:id,dest:'\u2014',ville:'\u2014',sp:'\u2014',wm:'\u2014',pkg:0,palSilo:0,colisSilo:0,colisPick:0};
-        });
-        var quaiNum=null;
-        Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)quaiNum=Number(q);});
-        _completedTrucks.push({
-          id:t.id,transporteur:t.transporteur||'',itin:t.itin||'',creneau:t.creneau||'',date:t.date||'',
-          completedAt:new Date().toISOString(),
-          deliveries:(t.deliveries||[]).slice(),deliveryDetails:delivDetails,
-          timestamps:{arr:ts.arr,quai:ts.quai,chg:ts.chg,fin_chg:ts.fin_chg,dep:ts.dep},
-          quai:quaiNum,
-          decalage:t.decalage||null,locked:false,
-          ponctualite:{status:ponct.status,label:ponct.label,delta:ponct.delta}
-        });
-        Object.keys(quaiAssign).forEach(function(q){
-          if(quaiAssign[q]===t.id) delete quaiAssign[q];
-        });
-        delete timestamps[t.id];
-      }catch(e){console.warn('[archive] erreur pour camion '+t.id+':',e);}
-      return false; // retirer du tableau actif dans tous les cas si ts.dep présent
+    if(!ts.dep){
+      return true; // pas encore parti → on garde
     }
-    return true;
+    // ts.dep est défini → ce camion est parti, on l'archive
+    _debugInfo.push('📦 '+( t.transporteur||t.itin||t.id)+' dep='+ts.dep+' locked='+!!t.locked);
+    try{
+      var ponct=getPonctualite(t,ts,Date.now());
+      var delivDetails=(t.deliveries||[]).map(function(id){
+        var d=livMap[id];
+        return d?{id:d.id,dest:d.dest||'',ville:d.ville||'',sp:d.sp||'',wm:d.wm||'',
+          pkg:d.pkg||0,palSilo:d.palSilo||0,colisSilo:d.colisSilo||0,colisPick:d.colisPick||0}
+          :{id:id,dest:'\u2014',ville:'\u2014',sp:'\u2014',wm:'\u2014',pkg:0,palSilo:0,colisSilo:0,colisPick:0};
+      });
+      var quaiNum=null;
+      Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)quaiNum=Number(q);});
+      _completedTrucks.push({
+        id:t.id,transporteur:t.transporteur||'',itin:t.itin||'',creneau:t.creneau||'',date:t.date||'',
+        completedAt:new Date().toISOString(),
+        deliveries:(t.deliveries||[]).slice(),deliveryDetails:delivDetails,
+        timestamps:{arr:ts.arr,quai:ts.quai,chg:ts.chg,fin_chg:ts.fin_chg,dep:ts.dep},
+        quai:quaiNum,
+        decalage:t.decalage||null,locked:false,
+        ponctualite:{status:ponct.status,label:ponct.label,delta:ponct.delta}
+      });
+      Object.keys(quaiAssign).forEach(function(q){
+        if(quaiAssign[q]===t.id) delete quaiAssign[q];
+      });
+      delete timestamps[t.id];
+    }catch(e){
+      _debugInfo.push('❌ ERREUR: '+e.message);
+      console.error('[archive] erreur pour camion '+t.id+':', e);
+    }
+    return false; // retirer du tableau actif dans tous les cas
   });
   var removed = before - trucks.length;
+  // ── DIAGNOSTIC VISIBLE ──
+  if(_debugInfo.length>0){
+    console.warn('[cleanCompletedTrucks] avant='+before+' après='+trucks.length+' archivés='+removed);
+    _debugInfo.forEach(function(d){console.warn(d);});
+    try{showToast('🗃 Archive: '+removed+' camion(s) archivé(s)');}catch(e){}
+  }
   if(removed>0){ purgeOldCompleted(); saveCompleted(); }
   save(); saveQuaiAssign();
   return removed;
@@ -8451,8 +8459,8 @@ function getStatus(ts){
 function slbl(s){return s==='w'?'⏳ En attente':s==='a'?'🚛 Sur site':s==='d'?'🔄 À quai':s==='l'?'📦 En chargement':s==='lo'?'✅ Chargé':'🚀 Parti';}
 function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s==='lo'?'blo':'bp';}
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
-function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);toast('⏱ '+kl(k)+' enregistré');render();}
-function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);toast('✎ '+kl(k)+' modifié');render();}
+function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}toast('⏱ '+kl(k)+' enregistré');render();}
+function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}toast('✎ '+kl(k)+' modifié');render();}
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
 function apM(tid,k){var inp=document.getElementById('ti_'+tid);if(inp&&inp.value){stampM(tid,k,inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');}}
 function togDep(){showDep=!showDep;document.getElementById('dtgl').textContent=showDep?'Masquer partis':'Afficher partis';render();}
