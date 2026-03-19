@@ -6918,7 +6918,8 @@ function predictDelayRisk(truck){
 function computeWeekComparison(){
   if(_dailyArchive.length<5) return null;
   var today=new Date();
-  var thisWeekStart=new Date(today);thisWeekStart.setDate(today.getDate()-today.getDay()+1);
+  var dow=today.getDay()||7; // 1=lundi...7=dimanche (ISO)
+  var thisWeekStart=new Date(today);thisWeekStart.setDate(today.getDate()-dow+1);
   var lastWeekStart=new Date(thisWeekStart);lastWeekStart.setDate(lastWeekStart.getDate()-7);
   var lastWeekEnd=new Date(thisWeekStart);lastWeekEnd.setDate(lastWeekEnd.getDate()-1);
   var twISO=thisWeekStart.toISOString().slice(0,10);
