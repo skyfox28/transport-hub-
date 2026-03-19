@@ -1670,7 +1670,7 @@ function purgeOldCompleted(){
 
 // ─── UI Helpers ───────────────────────────────────────────────────────────
 function showToast(msg){
-  var t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('on');
+  var t=document.getElementById('toastEl');if(!t)return;t.textContent=msg;t.classList.add('on');
   setTimeout(function(){t.classList.remove('on');},2800);
 }
 function switchTab(id,btn){
@@ -3555,14 +3555,9 @@ function cleanCompletedTrucks(){
   var livMap = {};
   (APP.deliveries||[]).forEach(function(d){ livMap[d.id]=d; });
   var before = trucks.length;
-  var _debugInfo = [];
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
-    if(!ts.dep){
-      return true; // pas encore parti → on garde
-    }
-    // ts.dep est défini → ce camion est parti, on l'archive
-    _debugInfo.push('📦 '+( t.transporteur||t.itin||t.id)+' dep='+ts.dep+' locked='+!!t.locked);
+    if(!ts.dep) return true; // pas encore parti → on garde
     try{
       var ponct=getPonctualite(t,ts,Date.now());
       var delivDetails=(t.deliveries||[]).map(function(id){
@@ -3586,19 +3581,10 @@ function cleanCompletedTrucks(){
         if(quaiAssign[q]===t.id) delete quaiAssign[q];
       });
       delete timestamps[t.id];
-    }catch(e){
-      _debugInfo.push('❌ ERREUR: '+e.message);
-      console.error('[archive] erreur pour camion '+t.id+':', e);
-    }
+    }catch(e){console.error('[archive] erreur pour camion '+t.id+':', e);}
     return false; // retirer du tableau actif dans tous les cas
   });
   var removed = before - trucks.length;
-  // ── DIAGNOSTIC VISIBLE ──
-  if(_debugInfo.length>0){
-    console.warn('[cleanCompletedTrucks] avant='+before+' après='+trucks.length+' archivés='+removed);
-    _debugInfo.forEach(function(d){console.warn(d);});
-    try{showToast('🗃 Archive: '+removed+' camion(s) archivé(s)');}catch(e){}
-  }
   if(removed>0){ purgeOldCompleted(); saveCompleted(); }
   save(); saveQuaiAssign();
   return removed;
@@ -5751,9 +5737,10 @@ setupDragDrop();
 // ─── Patch: Hook stamp/purge/import into activity log ─────────────────────
 var _origStampNow=stampNow;
 stampNow=function(ti,key){
+  var _tName=trucks[ti]?trucks[ti].transporteur||trucks[ti].itin||'?':'?';
   _origStampNow(ti,key);
   var lbl=(TS_DEFS.find(function(t){return t.key===key;})||{lbl:key}).lbl;
-  logActivity('\u23f1',lbl+' \u2014 '+(trucks[ti]?trucks[ti].transporteur||trucks[ti].itin||'?':'?'));
+  logActivity('\u23f1',lbl+' \u2014 '+_tName);
   checkCompletionFlash();
 };
 
@@ -8459,8 +8446,8 @@ function getStatus(ts){
 function slbl(s){return s==='w'?'⏳ En attente':s==='a'?'🚛 Sur site':s==='d'?'🔄 À quai':s==='l'?'📦 En chargement':s==='lo'?'✅ Chargé':'🚀 Parti';}
 function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s==='lo'?'blo':'bp';}
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
-function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}toast('⏱ '+kl(k)+' enregistré');render();}
-function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}toast('✎ '+kl(k)+' modifié');render();}
+function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}}toast('⏱ '+kl(k)+' enregistré');render();}
+function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}catch(e){}}toast('✎ '+kl(k)+' modifié');render();}
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
 function apM(tid,k){var inp=document.getElementById('ti_'+tid);if(inp&&inp.value){stampM(tid,k,inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');}}
 function togDep(){showDep=!showDep;document.getElementById('dtgl').textContent=showDep?'Masquer partis':'Afficher partis';render();}
