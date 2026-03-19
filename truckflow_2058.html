@@ -3382,6 +3382,11 @@ function confirmSplit(){
     trucks[_splitTruckIdx].deliveries=trucks[_splitTruckIdx].deliveries.filter(function(x){return x!==id;});
     newTruck.deliveries.push(id);
   });
+  // Si le camion source est figé, mettre à jour lockedDeliveries pour refléter le split
+  // Sans ça, le prochain reimport VL06O restaure les livraisons déplacées → doublon
+  if(t.locked && t.lockedDeliveries){
+    t.lockedDeliveries=t.lockedDeliveries.filter(function(id){return !_splitSelected.has(id);});
+  }
   trucks.push(newTruck);save();closeSplitModal();renderAll();
   showToast('Camion splitt\u00e9 \u2192 '+newTruck.deliveries.length+' livraisons');
 }
