@@ -8760,6 +8760,44 @@ function makeCompact(t,ts){
     +'</div>'
     +'</div>';
 }
+function togDet(id){
+  var el=document.getElementById('det_'+id);
+  var btn=document.getElementById('detbtn_'+id);
+  if(!el)return;
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  if(btn)btn.textContent=open?'\u25b8 D\u00e9tails':'\u25be Masquer';
+}
+function cancelTs(tid,k){
+  if(!confirm('Annuler le timestamp "'+kl(k)+'" ?'))return;
+  var m=getTs();if(m[tid])delete m[tid][k];
+  saveTs(m);toast('\u21a9 '+kl(k)+' annul\u00e9');render();
+}
+function lastFilledKey(ts){
+  var keys=['arr','quai','chg','fin_chg','dep'],last=null;
+  keys.forEach(function(k){if(ts[k])last=k;});
+  return last;
+}
+function delSummary(t){
+  var _dels=getDels(),_dcache=getDCache();
+  var ids=t.deliveries||[];
+  if(!ids.length)return '';
+  var _delivs=ids.map(function(id){return _dels.find(function(x){return x.id===id;})||_dcache[id]||null;}).filter(Boolean);
+  var totPal=0,totCol=0;
+  _delivs.forEach(function(d){totPal+=(+d.palSilo||0)+(+d.palPick||0);totCol+=(+d.colisPick||0);});
+  var meta=(totPal?totPal+' pal':'')+(totCol?(totPal?' \u00b7 ':'')+totCol+' col':'');
+  return '<div style="font-size:9px;color:var(--t2);margin:3px 0 2px;display:flex;align-items:center;gap:6px">'
+    +'<span>\ud83d\udce6 '+ids.length+' livraison'+(ids.length>1?'s':'')+(meta?' \u2014 '+meta:'')+'</span>'
+    +(_delivs.length?'<button id="detbtn_'+t.id+'" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:0;text-decoration:underline" onclick="togDet(\''+t.id+'\')">\u25b8 D\u00e9tails</button>':'')
+    +'</div>'
+    +(_delivs.length?'<div id="det_'+t.id+'" style="display:none;margin-bottom:3px;padding:5px 7px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06)">'
+    +_delivs.map(function(d){return '<div style="font-size:9px;display:flex;gap:5px;align-items:center;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">'
+      +'<span style="color:var(--t1);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+(d.dest||d.id||'?')+(d.ville?' \u00b7 '+d.ville:'')+'</span>'
+      +((+d.palSilo||+d.palPick)?'<span style="color:#60a5fa;flex-shrink:0">'+((+d.palSilo||0)+(+d.palPick||0))+'p</span>':'')
+      +(+d.colisPick?'<span style="color:#fb923c;flex-shrink:0">'+d.colisPick+'c</span>':'')
+      +'</div>';}).join('')
+    +'</div>':'');
+}
 function makeLateBar(t,ts,quai){
   var _cr=parseCren(t.creneau);
   var over=_cr?nowMin()-_cr.e:0;
@@ -8824,7 +8862,10 @@ function makeActiveCard(t,ts,quai,prio){
     +'</div>'
     +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="ac-sub">'+(t.dest||t.itin||'—')+'</div>'
-    +prog+elapsed+ab
+    +prog+elapsed
+    +delSummary(t)
+    +ab
+    +(lastFilledKey(ts)&&s!=='p'?'<div style="text-align:right;margin-top:2px"><button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;text-decoration:underline" onclick="cancelTs(\''+tid+'\',\''+lastFilledKey(ts)+'\')">↩ Annuler '+kl(lastFilledKey(ts))+'</button></div>':'')
     +'</div>';
 }
 function makeStrip(t,ts,quai,prio){
@@ -8851,15 +8892,20 @@ function makeStrip(t,ts,quai,prio){
   var cn=isCrenNow(t);
   var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
   var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴</span>':'';
+  var nDel=(t.deliveries||[]).length;
+  var lk=lastFilledKey(ts);
+  var cancelBtn=lk?'<button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;text-decoration:underline;flex-shrink:0" onclick="cancelTs(\''+tid+'\',\''+lk+'\')">↩</button>':'';
   return '<div class="strip'+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
     +'<div class="strip-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="strip-badges">'
     +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
     +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
+    +(nDel?'<span style="font-size:9px;color:var(--t3)">\ud83d\udce6 '+nDel+'</span>':'')
     +prB
     +'</div>'
     +prog
     +'<div class="strip-spacer"></div>'
+    +cancelBtn
     +ab
     +'</div>';
 }
