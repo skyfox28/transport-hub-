@@ -1544,7 +1544,15 @@ html.tv-mode body{overflow:auto}
 <div class="notif-container" id="notifContainer"></div>
 
 <!-- ═══ XLSX Library ═══ -->
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<script>
+/* SheetJS chargé de façon async pour ne pas bloquer l'app */
+(function(){
+  var s=document.createElement('script');
+  s.src='https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+  s.onerror=function(){console.warn('[TruckFlow] SheetJS CDN indisponible — export Excel désactivé');};
+  document.head.appendChild(s);
+})();
+</script>
 
 <!-- ═══ APPLICATION JAVASCRIPT ═══ -->
 <script>
