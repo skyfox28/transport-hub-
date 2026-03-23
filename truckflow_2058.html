@@ -8802,7 +8802,9 @@ function makeLateBar(t,ts,quai){
   var _cr=parseCren(t.creneau);
   var over=_cr?nowMin()-_cr.e:0;
   var tid=t.id;
-  return '<div class="late-bar">'
+  var ds=delSummary(t);
+  return '<div style="display:flex;flex-direction:column;gap:3px">'
+    +'<div class="late-bar">'
     +'<span style="font-size:18px">⚠️</span>'
     +'<div class="lb-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="lb-meta">'
@@ -8811,6 +8813,8 @@ function makeLateBar(t,ts,quai){
     +'</div>'
     +'<span class="lb-over">+'+over+' min</span>'
     +'<button class="strip-btn act-arr" onclick="stamp(\''+tid+'\',\'arr\')">🕐 Arrivée</button>'
+    +'</div>'
+    +(ds?'<div style="padding:0 14px 2px;background:rgba(211,47,47,.04);border-radius:0 0 10px 10px;border:1px solid rgba(211,47,47,.2);border-top:none;margin-top:-4px;padding-top:6px">'+ds+'</div>':'')
     +'</div>';
 }
 function makeActiveCard(t,ts,quai,prio){
@@ -8895,18 +8899,21 @@ function makeStrip(t,ts,quai,prio){
   var nDel=(t.deliveries||[]).length;
   var lk=lastFilledKey(ts);
   var cancelBtn=lk?'<button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;text-decoration:underline;flex-shrink:0" onclick="cancelTs(\''+tid+'\',\''+lk+'\')">↩</button>':'';
-  return '<div class="strip'+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
+  var ds=delSummary(t);
+  return '<div style="display:flex;flex-direction:column;gap:2px">'
+    +'<div class="strip'+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
     +'<div class="strip-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="strip-badges">'
     +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
     +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
-    +(nDel?'<span style="font-size:9px;color:var(--t3)">\ud83d\udce6 '+nDel+'</span>':'')
     +prB
     +'</div>'
     +prog
     +'<div class="strip-spacer"></div>'
     +cancelBtn
     +ab
+    +'</div>'
+    +(ds?'<div style="padding:0 12px 4px">'+ds+'</div>':'')
     +'</div>';
 }
 function render(){
