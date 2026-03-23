@@ -6699,33 +6699,6 @@ renderStats=function(){
       lastTh.parentNode.appendChild(scoreTh);
     }
   }
-  // Heatmap section
-  var heatData=computeHeatmapData();
-  var days=['lun.','mar.','mer.','jeu.','ven.','sam.'];
-  var hours=[];for(var h=5;h<22;h++)hours.push(h);
-  var maxVal=1;
-  Object.keys(heatData).forEach(function(k){if(heatData[k].count>maxVal)maxVal=heatData[k].count;});
-  var hmHtml='<div class="stats-section"><div class="stats-section-title">\uD83D\uDD25 Heatmap horaire — Occupation quais <span style="font-size:11px;font-weight:400;color:var(--t3);margin-left:8px">Cliquez sur un cr\u00e9neau pour voir les camions</span></div>';
-  hmHtml+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:50px repeat('+hours.length+',1fr);min-width:600px">';
-  hmHtml+='<div></div>';
-  hours.forEach(function(h){hmHtml+='<div class="heatmap-lbl">'+h+'h</div>';});
-  days.forEach(function(day){
-    hmHtml+='<div class="heatmap-lbl" style="text-align:right;padding-right:6px;font-weight:700">'+day+'</div>';
-    hours.forEach(function(h){
-      var cell=heatData[day+':'+h];
-      var v=cell?cell.count:0;
-      var intensity=v/maxVal;
-      var bg=v===0?'var(--sf2)':
-        intensity<0.33?'rgba(48,209,88,.3)':
-        intensity<0.66?'rgba(255,159,10,.5)':
-        'rgba(255,69,58,.6)';
-      var clickAttr=v>0?'onclick="showHeatmapDetail(\''+day+'\','+h+',_heatmapCache[\''+day+':'+h+'\'].trucks)" style="cursor:pointer;background:'+bg+'"':'style="background:'+bg+'"';
-      hmHtml+='<div class="heatmap-cell" '+clickAttr+' title="'+day+' '+h+'h : '+v+' camion'+(v>1?'s':'')+'">'+(v||'')+'</div>';
-    });
-  });
-  hmHtml+='</div></div></div>';
-  window._heatmapCache=heatData;
-  el.innerHTML+=hmHtml;
 };
 
 // ─── #2 Gantt: Enhance planning with real-time bars ───────────────────────
@@ -7876,7 +7849,8 @@ function renderGoals(){
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #8 COMPARATIF MATIN / APRÈS-MIDI ──────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-function renderHalfdayComparison(el){
+function renderHalfdayComparison(el){return;}
+function _renderHalfdayComparison_disabled(el){
   if(!el)return;
   var todayISO=new Date().toISOString().slice(0,10);
   var dayT=trucks.filter(function(t){return t.date===todayISO;});
@@ -8195,8 +8169,7 @@ var _origRenderStats5=renderStats;
 renderStats=function(){
   _origRenderStats5();
   var el=document.getElementById('statsContent');if(!el)return;
-  try{renderHalfdayComparison(el);}catch(e){console.warn('halfday:',e);}
-  try{renderMonthlyChart(el);}catch(e){console.warn('monthly:',e);}
+try{renderMonthlyChart(el);}catch(e){console.warn('monthly:',e);}
   try{renderDecalageStats(el);}catch(e){console.warn('decalage-stats:',e);}
 };
 
