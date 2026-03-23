@@ -8479,37 +8479,6 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .lb-name{font-size:14px;font-weight:800;color:#f87171;flex:1}
 .lb-meta{font-size:11px;color:rgba(248,113,113,.7);display:flex;gap:6px;align-items:center}
 .lb-over{font-size:13px;font-weight:900;color:#f87171;background:rgba(211,47,47,.2);padding:3px 10px;border-radius:8px;white-space:nowrap}
-.tl-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden}
-.tl-head-row{display:flex;border-bottom:1.5px solid rgba(160,210,255,.12);background:rgba(255,255,255,.02);flex-shrink:0}
-.tl-qlbl{width:70px;flex-shrink:0;font-size:9px;color:var(--t2);padding:6px 8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;border-right:1px solid rgba(160,210,255,.08)}
-.tl-hours{flex:1;display:flex;position:relative;height:30px}
-.tl-hour{flex:1;border-left:1px solid rgba(160,210,255,.07);font-size:9px;color:var(--t3);padding:5px 3px;font-weight:600}
-.tl-hour.cur-h{color:#fb923c;border-left-color:rgba(251,146,60,.5)}
-.tl-rows{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(160,210,255,.2) transparent}
-.tl-row{display:flex;border-bottom:1px solid rgba(160,210,255,.06);min-height:46px}
-.tl-ql{width:70px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--t2);border-right:1px solid rgba(160,210,255,.08);background:rgba(255,255,255,.02)}
-.tl-lane{flex:1;position:relative;overflow:hidden}
-.tl-now-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(248,113,113,.75);z-index:8;pointer-events:none}
-.tl-now-top{position:absolute;top:0;bottom:0;width:2px;background:rgba(248,113,113,.75);pointer-events:none}
-.tl-block{position:absolute;top:5px;bottom:5px;border-radius:9px;overflow:hidden;cursor:pointer;border:1.5px solid rgba(255,255,255,.18);transition:filter .15s;z-index:5}
-.tl-block:hover{filter:brightness(1.2);z-index:20}
-.tl-bi{padding:3px 8px;height:100%;display:flex;flex-direction:column;justify-content:center;gap:1px}
-.tl-bn{font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
-.tl-bm{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.8;color:#fff}
-.tl-block.sw{background:rgba(100,110,120,.5);border-color:rgba(139,148,158,.5)}
-.tl-block.sa{background:rgba(10,132,255,.55);border-color:rgba(96,165,250,.7)}
-.tl-block.sd{background:rgba(76,110,245,.55);border-color:rgba(129,140,248,.7)}
-.tl-block.sl{background:rgba(220,90,10,.6);border-color:rgba(251,146,60,.7)}
-.tl-block.slo{background:rgba(34,160,100,.55);border-color:rgba(74,222,128,.7)}
-.tl-block.sp{background:rgba(80,80,80,.4);border-color:rgba(255,255,255,.15);opacity:.6}
-.tl-block.sretard{background:rgba(200,40,40,.6);border-color:rgba(248,113,113,.8);animation:retardpulse 2s ease-in-out infinite}
-.tl-nq{padding:8px 14px;border-top:1.5px solid rgba(160,210,255,.1);display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex-shrink:0}
-.tl-nq-lbl{font-size:9px;color:var(--t2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-.tl-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid rgba(160,210,255,.1);border-radius:8px;padding:5px 10px;cursor:pointer}
-.tl-pill:hover{background:rgba(255,255,255,.1)}
-.tl-pn{font-size:11px;font-weight:800;color:var(--t1)}.tl-pm{font-size:9px;color:var(--t2)}
-.vbtn{padding:5px 12px;border-radius:8px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t2);font-size:11px;cursor:pointer;transition:all .15s}
-.vbtn.on{background:rgba(10,132,255,.22);border-color:rgba(10,132,255,.5);color:#60a5fa;font-weight:700}
 @media(max-width:640px){
   header{flex-wrap:wrap;padding:8px 14px;gap:8px}
   .brand{font-size:13px}
@@ -8829,96 +8798,6 @@ function delSummary(t){
       +'</div>';}).join('')
     +'</div>':'');
 }
-var _viewMode='hybrid';
-var TL_S=5*60,TL_E=22*60,TL_D=17*60;
-var QUAIS=[2,3,4,5,6,7,8,9,10,11];
-function tlLeft(min){return Math.max(0,Math.min(100,(min-TL_S)/TL_D*100))+'%';}
-function tlWidth(s,e){return Math.max(1.5,(e-s)/TL_D*100)+'%';}
-function setView(v){
-  _viewMode=v;
-  var b1=document.getElementById('vbtn-h'),b2=document.getElementById('vbtn-t');
-  if(b1){b1.className='vbtn'+(v==='hybrid'?' on':'');}
-  if(b2){b2.className='vbtn'+(v==='timeline'?' on':'');}
-  render();
-}
-function renderTimeline(){
-  var trucks=getData(),tsm=getTs(),qa=getQ();
-  var rq={};Object.keys(qa).forEach(function(q){if(qa[q])rq[qa[q]]=q;});
-  var td=new Date().toISOString().slice(0,10);
-  var day=trucks.filter(function(t){return t.date===td;});
-  updateKPIs(trucks,tsm);
-  var main=document.getElementById('main');if(!main)return;
-  if(!day.length){
-    main.innerHTML='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div></div>';
-    return;
-  }
-  var nowPct=tlLeft(nowMin());
-  var byQuai={};QUAIS.forEach(function(q){byQuai[q]=[];});
-  var noQuai=[];
-  day.forEach(function(t){
-    var q=rq[t.id];
-    if(q&&byQuai[String(q)])byQuai[String(q)].push(t);
-    else noQuai.push(t);
-  });
-  var curH=new Date().getHours();
-  var hoursHtml='';
-  for(var h=5;h<=21;h++){
-    hoursHtml+='<div class="tl-hour'+(h===curH?' cur-h':'')+'">'+h+'h</div>';
-  }
-  var html='<div class="tl-wrap">'
-    +'<div class="tl-head-row">'
-    +'<div class="tl-qlbl">Quai</div>'
-    +'<div class="tl-hours">'+hoursHtml
-    +'<div class="tl-now-top" style="left:'+nowPct+'"></div>'
-    +'</div></div>'
-    +'<div class="tl-rows">';
-  QUAIS.forEach(function(q){
-    var qTrucks=byQuai[String(q)]||[];
-    html+='<div class="tl-row">'
-      +'<div class="tl-ql">Q'+q+'</div>'
-      +'<div class="tl-lane">'
-      +'<div class="tl-now-line" style="left:'+nowPct+'"></div>';
-    qTrucks.forEach(function(t,idx){
-      var ts=tsm[t.id]||{};
-      var s=getStatus(ts);
-      var cr=parseCren(t.creneau);
-      if(!cr)return;
-      var _isLate=!ts.arr&&nowMin()>cr.e+5;
-      var topPct=idx*(33);
-      var blockTop=5+topPct+'px';
-      var blockBot=(qTrucks.length>1)?(100-topPct-28)+'px':'5px';
-      html+='<div class="tl-block '+tcls(s)+(_isLate?' sretard':'')+'" '
-        +'style="left:'+tlLeft(cr.s)+';width:'+tlWidth(cr.s,cr.e)+';top:'+blockTop+';bottom:'+blockBot+'">'
-        +'<div class="tl-bi">'
-        +'<div class="tl-bn">'+(t.transporteur||t.itin||'?')+'</div>'
-        +'<div class="tl-bm">'+t.creneau+(ts.arr?' · A:'+ft(ts.arr):'')+(ts.dep?' · D:'+ft(ts.dep):'')+'</div>'
-        +'</div></div>';
-    });
-    if(!qTrucks.length){
-      html+='<div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 12px">'
-        +'<div style="height:1px;flex:1;background:rgba(160,210,255,.04)"></div>'
-        +'</div>';
-    }
-    html+='</div></div>';
-  });
-  html+='</div>';
-  if(noQuai.length){
-    html+='<div class="tl-nq">'
-      +'<span class="tl-nq-lbl">Sans quai ('+noQuai.length+')</span>'
-      +noQuai.map(function(t){
-        var ts=tsm[t.id]||{};
-        var s=getStatus(ts);
-        return '<div class="tl-pill">'
-          +'<span class="b '+scls(s)+'" style="font-size:8px">'+slbl(s)+'</span>'
-          +'<span class="tl-pn">'+(t.transporteur||t.itin||'?')+'</span>'
-          +(t.creneau?'<span class="tl-pm">'+t.creneau+'</span>':'')
-          +'</div>';
-      }).join('')
-      +'</div>';
-  }
-  html+='</div>';
-  main.innerHTML=html;
-}
 function makeLateBar(t,ts,quai){
   var _cr=parseCren(t.creneau);
   var over=_cr?nowMin()-_cr.e:0;
@@ -9031,7 +8910,6 @@ function makeStrip(t,ts,quai,prio){
     +'</div>';
 }
 function render(){
-  if(_viewMode==='timeline'){renderTimeline();return;}
   var trucks=getData(),tsm=getTs(),qa=getQ(),prios=getPrio();
   var rq={};Object.keys(qa).forEach(function(q){if(qa[q])rq[qa[q]]=q;});
   var td=new Date().toISOString().slice(0,10);
@@ -9154,8 +9032,7 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
       '<div class="kpis" id="kpis"></div>'+
       '<div class="hbtns">'+
         '<span class="rdot"></span>'+
-        '<button class="vbtn on" id="vbtn-h" onclick="setView(\'hybrid\')">\u22DE Hybride</button>'+
-        '<button class="vbtn" id="vbtn-t" onclick="setView(\'timeline\')">&#128197; Timeline</button>'+
+        '<button class="hbtn" onclick="document.body.classList.toggle(\'compact-view\');this.textContent=document.body.classList.contains(\'compact-view\')?\'Vue normale\':\'Vue compacte\'">\uD83D\uDDDC Vue compacte</button>'+
         '<button class="hbtn" onclick="render()">\u21BB Actualiser</button>'+
       '</div>'+
     '</header>'+
