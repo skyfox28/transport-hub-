@@ -8430,6 +8430,55 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.95)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.hyb{display:flex;flex-direction:column;gap:8px}
+.sec-wrap2{display:flex;flex-direction:column;gap:5px}
+.sec-hdr2{display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:8px;background:rgba(255,255,255,.025);border-left:3px solid currentColor;margin-bottom:3px}
+.sec-hdr2 .sht{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;flex:1}
+.sec-hdr2 .shn{font-size:18px;font-weight:900;line-height:1}
+.sec-hdr2 .shd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.active-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ac{background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(160,210,255,.15);border-radius:14px;padding:10px 13px;display:flex;flex-direction:column;gap:3px}
+.ac.sa{border-color:rgba(10,132,255,.5);background:linear-gradient(145deg,rgba(10,132,255,.1),rgba(10,132,255,.03))}
+.ac.sd{border-color:rgba(76,110,245,.5);background:linear-gradient(145deg,rgba(76,110,245,.1),rgba(76,110,245,.03))}
+.ac.sl{border-color:rgba(230,81,0,.5);background:linear-gradient(145deg,rgba(230,81,0,.1),rgba(230,81,0,.03))}
+.ac.slo{border-color:rgba(42,157,92,.5);background:linear-gradient(145deg,rgba(42,157,92,.1),rgba(42,157,92,.03))}
+.ac.sretard{border-color:rgba(211,47,47,.7);background:linear-gradient(145deg,rgba(211,47,47,.12),rgba(211,47,47,.04));animation:retardpulse 3s ease-in-out infinite}
+.ac-top{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px}
+.ac-name{font-size:14px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-sub{font-size:9px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.mprog{display:flex;align-items:flex-start;gap:0;margin:4px 0}
+.mps{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0}
+.mpd{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;border:1.5px solid;flex-shrink:0}
+.mpd.done{background:#2a9d5c;border-color:#2a9d5c;color:#fff}
+.mpd.active{background:var(--blue);border-color:var(--blue);color:#fff;animation:pulse 1.5s infinite}
+.mpd.pend{background:transparent;border-color:rgba(255,255,255,.18);color:var(--t3)}
+.mpl{height:2px;flex:1;margin-top:8px;background:rgba(255,255,255,.1)}
+.mpl.done{background:#2a9d5c}
+.mplbl{font-size:7px;color:var(--t2);margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;width:100%}
+.mptm{font-size:7px;color:var(--t1);font-weight:600;text-align:center;font-variant-numeric:tabular-nums}
+.ac-elapsed{font-size:10px;color:var(--t2);margin:2px 0}
+.ac-elapsed.hot{color:#fb923c;font-weight:700}
+.ac-elapsed.ok{color:#4ade80;font-weight:600}
+.act-sm{width:100%;padding:6px 10px;border-radius:9px;border:none;font-size:11px;font-weight:700;cursor:pointer;margin-top:3px}
+.act-sm:active{transform:scale(.97)}
+.strip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.025);border:1px solid rgba(160,210,255,.08);border-left:3px solid #8b949e;border-radius:9px;padding:7px 12px}
+.strip.sretard{border-left-color:#f87171;background:rgba(211,47,47,.06);animation:retardpulse 3s ease-in-out infinite}
+.strip-name{font-size:12px;font-weight:800;white-space:nowrap;min-width:150px;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.strip-badges{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.strip-prog{display:flex;align-items:center;gap:2px;flex-shrink:0;margin:0 6px}
+.strip-spd{width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;border:1.5px solid;flex-shrink:0}
+.strip-spd.done{background:#2a9d5c;border-color:#2a9d5c;color:#fff}
+.strip-spd.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.strip-spd.pend{background:transparent;border-color:rgba(255,255,255,.18)}
+.strip-spl{height:2px;width:8px;background:rgba(255,255,255,.1)}
+.strip-spl.done{background:#2a9d5c}
+.strip-spacer{flex:1}
+.strip-btn{padding:5px 10px;border-radius:8px;border:none;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.strip-btn:active{transform:scale(.97)}
+.late-bar{background:linear-gradient(135deg,rgba(211,47,47,.18),rgba(211,47,47,.06));border:1.5px solid rgba(211,47,47,.65);border-radius:12px;padding:9px 16px;display:flex;align-items:center;gap:12px;animation:retardpulse 2s ease-in-out infinite}
+.lb-name{font-size:14px;font-weight:800;color:#f87171;flex:1}
+.lb-meta{font-size:11px;color:rgba(248,113,113,.7);display:flex;gap:6px;align-items:center}
+.lb-over{font-size:13px;font-weight:900;color:#f87171;background:rgba(211,47,47,.2);padding:3px 10px;border-radius:8px;white-space:nowrap}
 @media(max-width:640px){
   header{flex-wrap:wrap;padding:8px 14px;gap:8px}
   .brand{font-size:13px}
@@ -8711,6 +8760,109 @@ function makeCompact(t,ts){
     +'</div>'
     +'</div>';
 }
+function makeLateBar(t,ts,quai){
+  var _cr=parseCren(t.creneau);
+  var over=_cr?nowMin()-_cr.e:0;
+  var tid=t.id;
+  return '<div class="late-bar">'
+    +'<span style="font-size:18px">⚠️</span>'
+    +'<div class="lb-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="lb-meta">'
+    +(t.creneau?'<span class="b bc">'+t.creneau+'</span>':'')
+    +(quai?'<span class="b bq">Q'+quai+'</span>':'<span style="color:rgba(248,113,113,.5)">Quai non assigné</span>')
+    +'</div>'
+    +'<span class="lb-over">+'+over+' min</span>'
+    +'<button class="strip-btn act-arr" onclick="stamp(\''+tid+'\',\'arr\')">🕐 Arrivée</button>'
+    +'</div>';
+}
+function makeActiveCard(t,ts,quai,prio){
+  var s=getStatus(ts);
+  var keys=['arr','quai','chg','fin_chg','dep'];
+  var icos=['🕐','🔄','📦','✅','🚀'];
+  var lbls=['Arr.','Quai','Chgt','Fin','Dép.'];
+  var prog='<div class="mprog">';
+  keys.forEach(function(k,i){
+    var done=!!ts[k];
+    var act=!done&&(i===0||!!ts[keys[i-1]]);
+    var dc=done?'done':act?'active':'pend';
+    if(i>0)prog+='<div class="mpl'+(ts[keys[i-1]]?' done':'')+'"></div>';
+    prog+='<div class="mps"><div class="mpd '+dc+'">'+(done?'✓':icos[i])+'</div>'
+      +'<div class="mplbl">'+lbls[i]+'</div>'
+      +(ts[k]?'<div class="mptm">'+ft(ts[k])+'</div>':'<div class="mptm" style="color:var(--t3)">—</div>')
+      +'</div>';
+  });
+  prog+='</div>';
+  var elapsed='';
+  var stageStarts={a:ts.arr,d:ts.quai,l:ts.chg,lo:ts.fin_chg};
+  var ss=stageStarts[s];
+  if(ss){
+    var el=Math.round((Date.now()-new Date(ss))/60000);
+    var col=el<30?'ok':el<90?'':'hot';
+    elapsed='<div class="ac-elapsed '+col+'">⏱ '+fm(el)+(el>=90?' ⚠️':'')+'</div>';
+  }
+  var nk=null,ac='act-done',al='✅ Parti';
+  if(!ts.arr){nk='arr';ac='act-arr';al='🕐 Arrivée';}
+  else if(!ts.quai){nk='quai';ac='act-quai';al='🔄 À quai';}
+  else if(!ts.chg){nk='chg';ac='act-chg';al='📦 Chargement';}
+  else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin chgt';}
+  else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Départ';}
+  var tid=t.id;
+  var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
+  var ab=nk
+    ?'<button class="act-sm '+ac+'" onclick="'+actOnclick+'">'+al+'</button>'
+    :'<button class="act-sm act-done" disabled>✅ Parti</button>';
+  var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴 Urgent</span>':'';
+  var ptB=ponctBadge(t,ts);
+  var cn=isCrenNow(t);
+  var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
+  return '<div class="ac '+tcls(s)+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
+    +'<div class="ac-top">'
+    +'<span class="b '+scls(s)+'" style="font-size:9px">'+slbl(s)+'</span>'
+    +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
+    +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
+    +prB+ptB
+    +'</div>'
+    +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="ac-sub">'+(t.dest||t.itin||'—')+'</div>'
+    +prog+elapsed+ab
+    +'</div>';
+}
+function makeStrip(t,ts,quai,prio){
+  var keys=['arr','quai','chg','fin_chg','dep'];
+  var icos=['🕐','🔄','📦','✅','🚀'];
+  var prog='<div class="strip-prog">';
+  keys.forEach(function(k,i){
+    var done=!!ts[k];
+    var act=!done&&(i===0||!!ts[keys[i-1]]);
+    var dc=done?'done':act?'active':'pend';
+    if(i>0)prog+='<div class="strip-spl'+(ts[keys[i-1]]?' done':'')+'"></div>';
+    prog+='<div class="strip-spd '+dc+'">'+(done?'✓':icos[i])+'</div>';
+  });
+  prog+='</div>';
+  var nk=null,ac='act-arr',al='🕐 Arrivée';
+  if(!ts.arr){nk='arr';ac='act-arr';al='🕐 Arrivée';}
+  else if(!ts.quai){nk='quai';ac='act-quai';al='🔄 À quai';}
+  else if(!ts.chg){nk='chg';ac='act-chg';al='📦 Chgt';}
+  else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin';}
+  else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Départ';}
+  var tid=t.id;
+  var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
+  var ab=nk?'<button class="strip-btn '+ac+'" onclick="'+actOnclick+'">'+al+'</button>':'';
+  var cn=isCrenNow(t);
+  var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
+  var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴</span>':'';
+  return '<div class="strip'+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
+    +'<div class="strip-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="strip-badges">'
+    +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
+    +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
+    +prB
+    +'</div>'
+    +prog
+    +'<div class="strip-spacer"></div>'
+    +ab
+    +'</div>';
+}
 function render(){
   var trucks=getData(),tsm=getTs(),qa=getQ(),prios=getPrio();
   var rq={};Object.keys(qa).forEach(function(q){if(qa[q])rq[qa[q]]=q;});
@@ -8741,44 +8893,46 @@ function render(){
     main.innerHTML='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div><div class="sub">Les camions importés dans TruckFlow apparaîtront ici automatiquement</div></div>';
     return;
   }
-  function secHtml(color,icon,label,count,gridCls,items,makeFn){
-    if(!items.length)return '';
-    return '<div class="sec-wrap">'
-      +'<div class="sec-hdr" style="color:'+color+'">'
-      +'<span class="sec-hdr-dot" style="background:'+color+';color:'+color+'"></span>'
-      +'<span class="sec-hdr-t">'+icon+' '+label+'</span>'
-      +'<span class="sec-hdr-n" style="color:'+color+'">'+count+'</span>'
-      +'</div>'
-      +'<div class="sec-grid '+gridCls+'">'
-      +items.map(makeFn).join('')
+  function secHdr2(color,icon,label,count){
+    return '<div class="sec-hdr2" style="color:'+color+'">'
+      +'<span class="shd" style="background:'+color+'"></span>'
+      +'<span class="sht">'+icon+' '+label+'</span>'
+      +'<span class="shn" style="color:'+color+'">'+count+'</span>'
+      +'</div>';
+  }
+  var html='<div class="hyb">';
+  var actifs=loading.concat(at_quai).concat(on_site);
+  if(!late.length&&!actifs.length&&!waiting.length){
+    html='<div class="empty"><div class="ico">✅</div><div class="ttl">Tous les camions sont partis !</div><div class="sub">'+departed.length+' départ'+(departed.length>1?'s':'')+' aujourd\'hui</div></div>';
+    main.innerHTML=html;return;
+  }
+  if(late.length){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#f87171','⚠️','En retard',late.length)
+      +late.map(function(t){return makeLateBar(t,tsm[t.id]||{},rq[t.id]);}).join('')
+      +'</div>';
+  }
+  if(actifs.length){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#fb923c','🔴','Actifs',actifs.length)
+      +'<div class="active-grid">'
+      +actifs.map(function(t){return makeActiveCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
       +'</div></div>';
   }
-  var html='';
-  // 1. En retard (rouge — priorité max)
-  html+=secHtml('#f87171','⚠️','En retard',late.length,'sec-grid-sm',late,function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-  // 2. En chargement / Chargé (orange)
-  html+=secHtml('#fb923c','📦','En chargement',loading.length,'',loading,function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-  // 3. À quai (indigo)
-  html+=secHtml('#818cf8','🔄','À quai',at_quai.length,'',at_quai,function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-  // 4. Sur site (bleu)
-  html+=secHtml('#60a5fa','🚛','Sur site',on_site.length,'',on_site,function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-  // 5. En attente (gris)
-  html+=secHtml('#8b949e','⏳','En attente',waiting.length,'sec-grid-sm',waiting,function(t){return makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-  // 6. Partis (compact — vert)
-  if(departed.length){
-    html+='<div class="sec-wrap">'
-      +'<div class="sec-hdr" style="color:#4ade80">'
-      +'<span class="sec-hdr-dot" style="background:#4ade80;color:#4ade80"></span>'
-      +'<span class="sec-hdr-t">✅ Partis aujourd\'hui</span>'
-      +'<span class="sec-hdr-n" style="color:#4ade80">'+departed.length+'</span>'
-      +'</div>'
+  if(waiting.length){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#8b949e','⏳','En attente',waiting.length)
+      +waiting.map(function(t){return makeStrip(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
+      +'</div>';
+  }
+  if(departed.length&&showDep){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#4ade80','✅','Partis aujourd\'hui',departed.length)
       +'<div class="sec-dep">'
       +departed.map(function(t){return makeCompact(t,tsm[t.id]||{});}).join('')
       +'</div></div>';
   }
-  if(!loading.length&&!at_quai.length&&!on_site.length&&!late.length&&!waiting.length){
-    html='<div class="empty"><div class="ico">✅</div><div class="ttl">Tous les camions sont partis !</div><div class="sub">'+departed.length+' départ'+(departed.length>1?'s':'')+' aujourd\'hui</div></div>';
-  }
+  html+='</div>';
   main.innerHTML=html;
 }
 function tick(){
