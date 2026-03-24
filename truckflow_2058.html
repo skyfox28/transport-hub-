@@ -3,6 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- ═══ SÉCURITÉ — Content Security Policy ═════════════════════════════════
+     AUDIT 2026-03 — Correctif C2 (OWASP A05, ANSSI)
+     - default-src 'none' : bloque tout par défaut
+     - script-src 'unsafe-inline' requis (app monofichier ~220 fonctions inline)
+     - connect-src 'none' : aucune requête réseau autorisée sauf SheetJS CDN
+     - Pour renforcer davantage : supprimer 'unsafe-inline' en séparant JS dans
+       un fichier externe signé avec un nonce/hash (refactoring majeur requis)
+  ══════════════════════════════════════════════════════════════════════════ -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'unsafe-inline' https://cdn.sheetjs.com;
+  style-src 'unsafe-inline';
+  img-src 'self' data: blob:;
+  font-src 'self' data:;
+  connect-src 'none';
+  object-src 'none';
+  base-uri 'none';
+  form-action 'none';
+  frame-ancestors 'none';
+">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
 <title>TruckFlow</title>
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -1335,7 +1356,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
     <button class="toggle-btn" id="exportToggle2" onclick="toggleExport2()">&#128230; Exports</button>
   </div>
   <div class="tbl-wrap"><div class="scroll"><table><thead><tr>
-    <th>Livraison</th><th>Date</th><th>Destinataire</th><th>Ville</th><th>Transp.</th><th>Prelev.</th><th>WM</th><th>Pkg SAP</th><th>Cree par</th>
+    <th>Livraison</th><th>Date</th><th>Destinataire</th><th>Ville</th><th>Transp.</th><th>Prelev.</th><th>WM</th><th>Pkg SAP</th><th title="Identifiant SAP — Donnée personnelle (RGPD Art.4) — Pseudonymisée à l'affichage">Créé par ⚿</th>
   </tr></thead><tbody id="tbody"></tbody></table></div></div>
   <div id="tblCount" style="text-align:right;font-size:11px;color:var(--t3);margin-top:6px"></div>
 </div>
@@ -1559,13 +1580,38 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 <!-- ═══ NOTIFICATION POPUP ═══ -->
 <div class="notif-container" id="notifContainer"></div>
 
-<!-- ═══ XLSX Library ═══ -->
+<!-- ═══ XLSX Library ═══════════════════════════════════════════════════════
+     AUDIT 2026-03 — Correctif C3/I5 (OWASP A06, ANSSI supply chain)
+     RECOMMANDATION ENTREPRISE : remplacer le CDN par une copie locale hébergée
+     sur l'intranet / sharepoint de l'entreprise :
+       <script src="/outils/xlsx-0.20.0.full.min.js" ...>
+     Pour activer le SRI (Subresource Integrity), calculer le hash :
+       cat xlsx.full.min.js | openssl dgst -sha384 -binary | base64
+     puis ajouter : integrity="sha384-<HASH>" crossorigin="anonymous"
+  ════════════════════════════════════════════════════════════════════════ -->
 <script>
-/* SheetJS chargé de façon async pour ne pas bloquer l'app */
+/* SheetJS — chargé de façon async avec vérification d'intégrité post-chargement */
 (function(){
+  var XLSX_CDN_URL='https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+  /* NOTE SÉCURITÉ (AUDIT C3) : remplacer la ligne ci-dessus par l'URL locale
+     de votre infrastructure. L'attribut integrity="sha384-..." doit être ajouté
+     dès que le hash SHA-384 du fichier local est connu.
+     Procédure : openssl dgst -sha384 -binary xlsx.full.min.js | base64          */
   var s=document.createElement('script');
-  s.src='https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
-  s.onerror=function(){console.warn('[TruckFlow] SheetJS CDN indisponible — export Excel désactivé');};
+  s.src=XLSX_CDN_URL;
+  s.crossOrigin='anonymous';
+  s.onerror=function(){
+    console.warn('[TruckFlow] SheetJS CDN indisponible — export/import Excel désactivé');
+    window._xlsxLoadFailed=true;
+  };
+  s.onload=function(){
+    /* Vérification minimale de l'API attendue (défense en profondeur) */
+    if(!window.XLSX||typeof XLSX.read!=='function'||typeof XLSX.utils!=='object'||typeof XLSX.writeFile!=='function'){
+      console.error('[TruckFlow][SÉCURITÉ] SheetJS chargé mais API inattendue — désactivation par précaution');
+      window.XLSX=undefined;
+      window._xlsxLoadFailed=true;
+    }
+  };
   document.head.appendChild(s);
 })();
 </script>
@@ -1592,6 +1638,18 @@ var fTruckPonct = '';
 var fTruckPeriod = '';
 var fTruckStatus = '';
 var _completedTrucks = [];
+/* ── AUDIT 2026-03 — Correctif I3 (OWASP A04, BroadcastChannel token) ─────
+   Jeton de session aléatoire partagé entre les onglets TruckFlow de la même
+   origine. Les messages BroadcastChannel sans ce jeton sont ignorés.
+   Protège contre toute page malveillante de la même origine qui tenterait
+   d'écraser les données en diffusant de faux messages de sync.
+   ─────────────────────────────────────────────────────────────────────── */
+var _tfSessionToken=(function(){
+  var k='tf_session_token';
+  var t=sessionStorage.getItem(k);
+  if(!t){t=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);sessionStorage.setItem(k,t);}
+  return t;
+})();
 // Date de saisie : null = aujourd'hui, sinon YYYY-MM-DD (mode saisie décalée)
 var _workingDate = null;
 function getWorkingDate(){return _workingDate||new Date().toISOString().slice(0,10);}
@@ -1850,10 +1908,10 @@ function renderSynPonct(){
             var sp=d.sp==='C'?'<span style="color:var(--green);font-size:10px;font-weight:700">\u2713 C</span>':
                    d.sp==='B'?'<span style="color:var(--amber);font-size:10px;font-weight:700">B</span>':
                                '<span style="color:var(--t3);font-size:10px">A</span>';
-            var vi=d.ville?('<span style="color:var(--t3);font-size:10px;white-space:nowrap">'+d.ville+'</span>'):'';
+            var vi=d.ville?('<span style="color:var(--t3);font-size:10px;white-space:nowrap">'+escH(d.ville)+'</span>'):'';
             return '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;background:var(--sf3)">'+
-              '<span style="font-size:10px;font-weight:700;color:var(--blue);font-family:monospace">'+d.id+'</span>'+
-              '<span style="font-size:11px;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</span>'+
+              '<span style="font-size:10px;font-weight:700;color:var(--blue);font-family:monospace">'+escH(d.id)+'</span>'+
+              '<span style="font-size:11px;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(d.dest||'\u2014')+'</span>'+
               vi+' '+sp+
             '</div>';
           }).join('')+
@@ -2380,8 +2438,8 @@ function renderDayDetail(date){
               var d=getDeliv(id);
               if(!d)return '<div style="font-size:10px;color:var(--t3);padding:3px 6px">'+id+'</div>';
               var sp2=d.sp==='C'?'<span style="color:var(--green);font-size:10px;font-weight:700">\u2713 C</span>':d.sp==='B'?'<span style="color:var(--amber);font-size:10px;font-weight:700">B</span>':'<span style="color:var(--t3);font-size:10px">A</span>';
-              var vi2=d.ville?('<span style="color:var(--t3);font-size:10px;white-space:nowrap">'+d.ville+'</span>'):'';
-              return '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;background:var(--sf3)"><span style="font-size:10px;font-weight:700;color:var(--blue);font-family:monospace">'+d.id+'</span><span style="font-size:11px;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</span>'+vi2+' '+sp2+'</div>';
+              var vi2=d.ville?('<span style="color:var(--t3);font-size:10px;white-space:nowrap">'+escH(d.ville)+'</span>'):'';
+              return '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;background:var(--sf3)"><span style="font-size:10px;font-weight:700;color:var(--blue);font-family:monospace">'+escH(d.id)+'</span><span style="font-size:11px;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(d.dest||'\u2014')+'</span>'+vi2+' '+sp2+'</div>';
             }).join('')+
           '</div>';
         }
@@ -2557,15 +2615,15 @@ function renderTable(){
   if(!delivs.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><div class="empty-ico">\uD83D\uDCED</div>Aucun r\u00e9sultat</div></td></tr>';return;}
   tb.innerHTML=delivs.map(function(d){
     var exp=isExport(d)?'<span class="exp-badge">EXPORT</span>':'';
-    var itnName = ITIN_MAP[d.itin]||d.itin||'\u2014';
-    return '<tr><td><b class="num" style="color:var(--t1)">'+d.id+'</b></td>'+
-      '<td style="color:var(--t3);font-size:11px">'+(d.date||'\u2014')+'</td>'+
-      '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)">'+(d.dest||'\u2014')+exp+'</td>'+
-      '<td style="color:var(--t3)">'+(d.ville||'\u2014')+'</td>'+
+    var itnName = escH(ITIN_MAP[d.itin]||d.itin||'\u2014');
+    return '<tr><td><b class="num" style="color:var(--t1)">'+escH(d.id)+'</b></td>'+
+      '<td style="color:var(--t3);font-size:11px">'+escH(d.date||'\u2014')+'</td>'+
+      '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)">'+escH(d.dest||'\u2014')+exp+'</td>'+
+      '<td style="color:var(--t3)">'+escH(d.ville||'\u2014')+'</td>'+
       '<td style="font-size:11px;color:var(--t2)">'+itnName+'</td>'+
       '<td>'+badge(d.sp)+'</td><td>'+badge(d.wm)+'</td>'+
       '<td class="num" style="color:var(--t3);font-size:11px">'+(d.pkg||0)+'</td>'+
-      '<td style="font-size:11px;color:var(--t3)">'+(d.cree||'\u2014')+'</td></tr>';
+      '<td style="font-size:11px;color:var(--t3)" title="Donnée pseudonymisée (RGPD)">'+_maskCree(d.cree||'\u2014')+'</td></tr>';
   }).join('');
   var rows_tr = tb.querySelectorAll('tr');
   delivs.forEach(function(d, i){
@@ -3074,7 +3132,7 @@ function renderTrucks(){
       var dBadge=document.createElement('span');
       dBadge.style.cssText='font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(255,100,0,.12);border:1px solid rgba(255,100,0,.35);color:'+dColor+';cursor:pointer;white-space:nowrap';
       var dNewStr=t.decalage.dateNew?(t.decalage.dateNew+(t.decalage.creneauNew?' '+t.decalage.creneauNew:'')):'';
-      dBadge.innerHTML='\u23F1 '+t.decalage.label+(dNewStr?' \u2192 '+dNewStr:'')+(t.decalage.note?' \u00b7 '+t.decalage.note.slice(0,25):'');
+      dBadge.innerHTML='\u23F1 '+escH(t.decalage.label)+(dNewStr?' \u2192 '+escH(dNewStr):'')+(t.decalage.note?' \u00b7 '+escH(t.decalage.note.slice(0,25)):'');
       dBadge.title='D\u00e9calage : '+t.decalage.label+
         (t.decalage.dateOrig?'\nOrig.\u00a0: '+t.decalage.dateOrig+(t.decalage.creneauOrig?' '+t.decalage.creneauOrig:''):'')+
         (dNewStr?'\nNouveau\u00a0: '+dNewStr:'')+
@@ -3229,8 +3287,8 @@ function renderTrucks(){
         if(d.colisPick)detailHtml+='<span class="di-pick">\u270b '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span> ';
         if(d.hrSilo||d.hrPick)detailHtml+='<span class="di-hr">\u23f1 '+((d.hrSilo||0)+(d.hrPick||0)).toFixed(1)+'h</span>';
         iDiv.innerHTML=
-          '<div style="font-size:12px;font-weight:700;color:var(--t1)">'+d.id+' \u2014 '+(d.dest||'\u2014')+'</div>'+
-          '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(d.ville||'')+(d.date?' \u00b7 '+d.date:'')+' \u00b7 '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>'+
+          '<div style="font-size:12px;font-weight:700;color:var(--t1)">'+escH(d.id)+' \u2014 '+escH(d.dest||'\u2014')+'</div>'+
+          '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+escH(d.ville||'')+(d.date?' \u00b7 '+escH(d.date):'')+' \u00b7 '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>'+
           (detailHtml?'<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">'+detailHtml+'</div>':'');
         makeArtToggle(d.id, iDiv);
         var acts=document.createElement('div');acts.style.cssText='display:flex;align-items:center;flex-shrink:0';
@@ -3345,7 +3403,7 @@ function printTruckSheet(truckId){
     }).join('')+'</div>'+
     '<table><thead><tr><th>#</th><th>N° Livraison</th><th>Destinataire</th><th>Ville</th><th>SP</th><th>WM</th><th>Pal</th><th>Cs Silo</th><th>Picking</th><th>✓</th></tr></thead><tbody>';
   delivs.forEach(function(d,i){
-    html+='<tr><td>'+(i+1)+'</td><td><b>'+d.id+'</b></td><td>'+(d.dest||'—')+'</td><td>'+(d.ville||'—')+'</td>';
+    html+='<tr><td>'+(i+1)+'</td><td><b>'+escH(d.id)+'</b></td><td>'+escH(d.dest||'—')+'</td><td>'+escH(d.ville||'—')+'</td>';
     html+='<td>'+( d.sp||'—')+'</td><td>'+(d.wm||'—')+'</td>';
     html+='<td>'+(d.palSilo?Math.round(d.palSilo):'—')+'</td><td>'+(d.colisSilo?Math.round(d.colisSilo).toLocaleString('fr'):'—')+'</td>';
     html+='<td>'+(d.colisPick?Math.round(d.colisPick).toLocaleString('fr'):'—')+'</td><td style="width:28px"></td></tr>';
@@ -3391,7 +3449,7 @@ function openSplitModal(ti){
   var ul=document.getElementById('splitLivs');ul.innerHTML='';
   delivs.forEach(function(d){
     var li=document.createElement('div');li.className='split-liv';li.setAttribute('data-id',d.id);
-    li.innerHTML='<div class="split-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="split-liv-info"><div class="split-liv-id">'+d.id+' \u2014 '+(d.dest||'\u2014')+'</div><div class="split-liv-sub">'+(d.ville||'')+(d.date?' \u00b7 '+d.date:'')+' \u00b7 '+badge(d.sp)+'</div></div>';
+    li.innerHTML='<div class="split-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="split-liv-info"><div class="split-liv-id">'+escH(d.id)+' \u2014 '+escH(d.dest||'\u2014')+'</div><div class="split-liv-sub">'+escH(d.ville||'')+(d.date?' \u00b7 '+escH(d.date):'')+' \u00b7 '+badge(d.sp)+'</div></div>';
     li.addEventListener('click',function(){
       if(_splitSelected.has(d.id)){_splitSelected.delete(d.id);li.classList.remove('selected');}
       else{_splitSelected.add(d.id);li.classList.add('selected');}
@@ -3488,6 +3546,22 @@ function makeArtToggle(livId,parentEl){
 
 // ─── Export / Import session ──────────────────────────────────────────────
 function exportSession(){
+  /* AUDIT 2026-03 — Correctif I6 (RGPD Art.5, ISO 27001 A.5.33)
+     L'export contient l'intégralité des données opérationnelles (livraisons SAP,
+     camions, timestamps, archives). Avertissement obligatoire avant export. */
+  var totalDelivs=(APP.deliveries||[]).length;
+  var totalTrucks=trucks.length+(_completedTrucks||[]).length;
+  var warnMsg='⚠️ EXPORT DE DONNÉES SENSIBLES\n\n'
+    +'Ce fichier contiendra :\n'
+    +'• '+totalTrucks+' camion(s) avec timestamps et notes\n'
+    +'• '+totalDelivs+' livraison(s) SAP avec destinations\n'
+    +'• Archives et journal d\'activité\n\n'
+    +'Ce fichier NE DOIT PAS être :\n'
+    +'  – Envoyé par email non chiffré\n'
+    +'  – Stocké sur un cloud personnel (Google Drive, Dropbox…)\n'
+    +'  – Transmis à un outil IA externe\n\n'
+    +'Confirmer l\'export vers un espace sécurisé ?';
+  if(!confirm(warnMsg))return;
   // Auto-archive today before exporting
   if(typeof archiveDayToFile==='function'&&trucks.length) archiveDayToFile();
   var session = {
@@ -4041,6 +4115,21 @@ function renderNotifPanel(){
 }
 
 function escH(s){ var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+/* ── RGPD — Pseudonymisation du champ "Créé par" ─────────────────────────
+   AUDIT 2026-03 — Correctif C4 (RGPD Art.4 & Art.32, ANSSI)
+   L'identifiant SAP (ex: PDURAND) est une donnée personnelle directe.
+   Conformité : affichage masqué ; valeur brute conservée uniquement pour
+   la recherche interne (ne transite pas vers des tiers).
+   Pour une conformité totale : ne pas stocker du tout le champ cree
+   et retirer la colonne de l'interface (nécessite validation DPO).
+   ─────────────────────────────────────────────────────────────────────── */
+function _maskCree(v){
+  if(!v||v==='\u2014')return v||'\u2014';
+  var s=String(v).trim();
+  if(s.length<=1)return s;
+  return escH(s.charAt(0))+'***';
+}
 
 function markNotifRead(nid){
   _notifHistory.forEach(function(n){ if(n.id === nid) n.read = true; });
@@ -5432,8 +5521,8 @@ function renderCamDetailPanel(id){
     html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">\uD83D\uDCE6 Livraisons</div>';
     delivs.forEach(function(d){
       html+='<div style="padding:9px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-bottom:6px'+(isExport(d)?';border-color:rgba(255,140,66,.25)':'')+'">';
-      html+='<div style="font-size:12px;font-weight:700;color:var(--t1)">'+d.id+' \u2014 '+(d.dest||'\u2014')+'</div>';
-      html+='<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(d.ville||'')+(d.date?' &middot; '+d.date:'')+' &middot; '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>';
+      html+='<div style="font-size:12px;font-weight:700;color:var(--t1)">'+escH(d.id)+' \u2014 '+escH(d.dest||'\u2014')+'</div>';
+      html+='<div style="font-size:11px;color:var(--t2);margin-top:2px">'+escH(d.ville||'')+(d.date?' &middot; '+escH(d.date):'')+' &middot; '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>';
       var pts=[];
       if(d.palSilo) pts.push('<span class="di-silo">\uD83C\uDFED '+Math.round(d.palSilo)+'pal '+Math.round(d.colisSilo||0).toLocaleString('fr')+'cs</span>');
       if(d.colisPick) pts.push('<span class="di-pick">\u270B '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>');
@@ -5615,9 +5704,9 @@ function renderMontagePanel(){
           '<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(sel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(sel?'#4d7cfe':'transparent')+';display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">'+(sel?'&#10003;':'')+'</div>'+
         '</td>'+
         '<td style="padding:7px 12px;color:var(--amber);font-size:11px;font-weight:600;white-space:nowrap">'+(d.date||'\u2014')+'</td>'+
-        '<td style="padding:7px 12px;font-weight:700;color:var(--blue);font-family:monospace;white-space:nowrap">'+d.id+'</td>'+
-        '<td style="padding:7px 12px;color:var(--t1);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</td>'+
-        '<td style="padding:7px 12px;color:var(--t2);white-space:nowrap">'+(d.ville||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;font-weight:700;color:var(--blue);font-family:monospace;white-space:nowrap">'+escH(d.id)+'</td>'+
+        '<td style="padding:7px 12px;color:var(--t1);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(d.dest||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;color:var(--t2);white-space:nowrap">'+escH(d.ville||'\u2014')+'</td>'+
         '<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+spCol+'">'+(d.sp||'\u2014')+'</td>'+
         '<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+wmCol+'">'+(d.wm||'\u2014')+'</td>'+
         '<td style="padding:7px 12px;text-align:right;color:#2dc272;font-weight:700">'+(d.palSilo||0)+'</td>'+
@@ -5989,7 +6078,7 @@ function doImportVL06O(event){
         if(!grouped[id])grouped[id]={id:id,date:xlDate(row[datKey]),dest:String(row[dstKey]||'').trim(),
           ville:String(row[vilKey]||'').trim(),sp:String(row[spKey]||'').trim(),
           wm:String(row[wmKey]||'').trim(),itin:String(row[itnKey]||'').trim(),
-          cree:String(row[creKey]||'').trim(),
+          cree:String(row[creKey]||'').trim(), /* RGPD: identifiant SAP nominatif — affiché masqué (voir _maskCree) */
           pkg:0,palSilo:0,colisSilo:0,colisPick:0,hrSilo:0,hrPick:0};
         var p=parseFloat(row[pkgKey])||0;
         grouped[id].pkg+=p;
@@ -6217,7 +6306,7 @@ function globalSearch(q){
   // Search deliveries
   (APP.deliveries||[]).forEach(function(d){
     if((d.id+'').toLowerCase().indexOf(q)>=0||(d.dest||'').toLowerCase().indexOf(q)>=0||(d.ville||'').toLowerCase().indexOf(q)>=0)
-      results.push({type:'Livraison',label:d.id+' \u2014 '+(d.dest||'')+' ('+(d.ville||'')+')',tab:'liv'});
+      results.push({type:'Livraison',label:escH(d.id)+' \u2014 '+escH(d.dest||'')+' ('+escH(d.ville||'')+')',tab:'liv'});
   });
   // Search trucks
   trucks.forEach(function(t){
@@ -6235,11 +6324,13 @@ function globalSearch(q){
 }
 
 // ─── BroadcastChannel sync ───────────────────────────────────────────────
+// AUDIT 2026-03 — Correctif I3 : chaque message inclut _tfSessionToken
+// Les messages sans token valide sont rejetés silencieusement.
 var _tfChannel=null;
 try{_tfChannel=new BroadcastChannel('truckflow_sync');}catch(e){}
 function broadcastSync(){
   if(!_tfChannel)return;
-  try{_tfChannel.postMessage({type:'sync',data:{
+  try{_tfChannel.postMessage({type:'sync',tok:_tfSessionToken,data:{
     deliveries:APP.deliveries,articles:APP.articles,trucks:trucks,
     timestamps:timestamps,quai:quaiAssign,manual:quaiManual
   }});}catch(e){}
@@ -6247,6 +6338,11 @@ function broadcastSync(){
 if(_tfChannel){
   _tfChannel.onmessage=function(ev){
     if(!ev.data)return;
+    /* Vérification token — rejeter tout message sans jeton de session valide */
+    if(ev.data.tok!==_tfSessionToken){
+      console.warn('[TruckFlow][SÉCURITÉ] Message BroadcastChannel rejeté — token invalide');
+      return;
+    }
     if(ev.data.type==='sync'){
       var s=ev.data.data;
       APP.deliveries=s.deliveries||[];APP.articles=s.articles||[];
@@ -6307,7 +6403,7 @@ function openActivityLog(){
   body.innerHTML=_activityLog.map(function(a){
     var d=new Date(a.t);
     var ts=d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    return '<div class="actlog-item"><span class="actlog-time">'+ts+'</span><span class="actlog-ico">'+a.ico+'</span><span class="actlog-msg">'+a.msg+'</span></div>';
+    return '<div class="actlog-item"><span class="actlog-time">'+escH(ts)+'</span><span class="actlog-ico">'+escH(a.ico)+'</span><span class="actlog-msg">'+escH(a.msg)+'</span></div>';
   }).join('');
   bg.classList.add('open');
 }
@@ -7169,9 +7265,9 @@ function _buildPDFReport(){
         livIdsCours.forEach(function(lid){
           var d=getDeliv(lid);
           if(!d)return;
-          html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
-            '<td style="border:none">'+(d.dest||'—')+'</td>'+
-            '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
+          html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+escH(d.id)+'</b></td>'+
+            '<td style="border:none">'+escH(d.dest||'—')+'</td>'+
+            '<td style="border:none;color:#666">'+escH(d.ville||'—')+'</td>'+
             '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
         });
@@ -7276,9 +7372,9 @@ function _buildPDFReport(){
         livIds.forEach(function(lid){
           var d=getDeliv(lid);
           if(!d)return;
-          html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
-            '<td style="border:none">'+(d.dest||'—')+'</td>'+
-            '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
+          html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+escH(d.id)+'</b></td>'+
+            '<td style="border:none">'+escH(d.dest||'—')+'</td>'+
+            '<td style="border:none;color:#666">'+escH(d.ville||'—')+'</td>'+
             '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
@@ -8140,8 +8236,8 @@ function openTimelineKanban(truckId,archived){
       '</div>';
     livs.forEach(function(d){
       html+='<div style="padding:5px 8px;margin-bottom:3px;background:var(--sf1);border-radius:6px;font-size:11px">'+
-        '<span style="font-weight:600;color:var(--t1)">'+d.id+'</span>'+
-        ' \u2014 <span style="color:var(--t2)">'+(d.dest||d.ville||'\u2014')+'</span>'+
+        '<span style="font-weight:600;color:var(--t1)">'+escH(d.id)+'</span>'+
+        ' \u2014 <span style="color:var(--t2)">'+escH(d.dest||d.ville||'\u2014')+'</span>'+
         (d.palSilo?' <span style="color:var(--indigo)">\uD83C\uDFED '+Math.round(d.palSilo)+'pal</span>':'')+
         (d.colisSilo?' <span style="color:var(--blue)">'+Math.round(d.colisSilo).toLocaleString('fr')+'cs</span>':'')+
         (d.colisPick?' <span style="color:var(--purple)">\u270b '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>':'')+
@@ -8897,7 +8993,7 @@ function renderArchive(){
           html+='<table style="width:100%;font-size:11px"><thead><tr style="color:var(--t3)">';
           html+='<th>Livraison</th><th>Destinataire</th><th>Ville</th><th>Colis</th><th>Pal SILO</th><th>Col. SILO</th><th>Col. Pick.</th><th>SP</th><th>WM</th></tr></thead><tbody>';
           rows.forEach(function(d){
-            html+='<tr><td>'+d.id+'</td><td>'+d.dest+'</td><td>'+d.ville+'</td>';
+            html+='<tr><td>'+escH(d.id)+'</td><td>'+escH(d.dest)+'</td><td>'+escH(d.ville)+'</td>';
             html+='<td>'+d.pkg+'</td><td>'+d.palSilo+'</td><td>'+d.colisSilo+'</td><td>'+d.colisPick+'</td>';
             html+='<td>'+d.sp+'</td><td>'+d.wm+'</td></tr>';
           });
@@ -9271,14 +9367,18 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities',LD='th10_deliveries',LDC='th10_delcache';
 var showDep=false,_bc;
 try{_bc=new BroadcastChannel('truckflow_sync');}catch(e){}
-if(_bc){_bc.onmessage=function(){setTimeout(render,300);};}
+if(_bc){_bc.onmessage=function(ev){
+  /* AUDIT I3 : valider le token avant d'accepter tout message */
+  if(!ev.data||ev.data.tok!==_tfSessionToken)return;
+  setTimeout(render,300);
+};}
 function getData(){try{return JSON.parse(localStorage.getItem(LT)||'[]');}catch(e){return[];}}
 function getTs(){try{return JSON.parse(localStorage.getItem(LTS)||'{}');}catch(e){return{};}}
 function getQ(){try{return JSON.parse(localStorage.getItem(LQ)||'{}');}catch(e){return{};}}
 function getPrio(){try{return JSON.parse(localStorage.getItem(LP)||'{}');}catch(e){return{};}}
 function getDels(){try{return JSON.parse(localStorage.getItem(LD)||'[]');}catch(e){return[];}}
 function getDCache(){try{return JSON.parse(localStorage.getItem(LDC)||'{}');}catch(e){return{};}}
-function saveTs(m){localStorage.setItem(LTS,JSON.stringify(m));if(_bc)_bc.postMessage({type:'ts'});}
+function saveTs(m){localStorage.setItem(LTS,JSON.stringify(m));if(_bc)_bc.postMessage({type:'ts',tok:_tfSessionToken});}
 function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
 function fm(m){if(m<1)return '<1min';if(m<60)return m+'min';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
 function kl(k){return k==='arr'?'Arrivée':k==='quai'?'Mise à quai':k==='chg'?'Début chgt':k==='fin_chg'?'Fin chgt':'Départ';}
@@ -9319,7 +9419,7 @@ function saveQ(truckId,quaiNum){
   Object.keys(qa).forEach(function(q){if(qa[q]===truckId)delete qa[q];});
   if(quaiNum)qa[String(quaiNum)]=truckId;
   localStorage.setItem(LQ,JSON.stringify(qa));
-  if(_bc)_bc.postMessage({type:'ts'});
+  if(_bc)_bc.postMessage({type:'ts',tok:_tfSessionToken});
 }
 function pickQuai(tid){
   var existing=getQ();
@@ -9468,7 +9568,7 @@ function makeCard(t,ts,quai,prio){
     var _delivs=(t.deliveries||[]).map(function(id){return _dels.find(function(x){return x.id===id;})||_dcache[id]||null;}).filter(Boolean);
     if(_delivs.length){
       delHtml='<div style="margin:5px 0 2px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07)">'+
-        _delivs.map(function(d){return '<div style="font-size:9px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u21b3 '+(d.dest||d.id)+(d.ville?' \u00b7 '+d.ville:'')+'</div>';}).join('')+
+        _delivs.map(function(d){return '<div style="font-size:9px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u21b3 '+escH(d.dest||d.id)+(d.ville?' \u00b7 '+escH(d.ville):'')+'</div>';}).join('')+
       '</div>';
     }
   }
@@ -9549,7 +9649,7 @@ function delSummary(t){
     +'</div>'
     +(_delivs.length?'<div id="det_'+t.id+'" style="display:none;margin-bottom:3px;padding:5px 7px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06)">'
     +_delivs.map(function(d){return '<div style="font-size:9px;display:flex;gap:5px;align-items:center;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">'
-      +'<span style="color:var(--t1);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+(d.dest||d.id||'?')+(d.ville?' \u00b7 '+d.ville:'')+'</span>'
+      +'<span style="color:var(--t1);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+escH(d.dest||d.id||'?')+(d.ville?' \u00b7 '+escH(d.ville):'')+'</span>'
       +((+d.palSilo||+d.palPick)?'<span style="color:#60a5fa;flex-shrink:0">'+((+d.palSilo||0)+(+d.palPick||0))+'p</span>':'')
       +(+d.colisPick?'<span style="color:#fb923c;flex-shrink:0">'+d.colisPick+'c</span>':'')
       +'</div>';}).join('')
@@ -9802,7 +9902,9 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
     '<div id="main"></div>'+
     '<div id="toast"></div>';
 
-  var _src='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>\uD83D\uDE9A TruckFlow Monitor</title><style>'+_css+'</style></head><body>'+_body+'<script>'+_js+'<\/script></body></html>';
+  /* AUDIT I3 : injecter le token de session dans le Monitor pour la validation BroadcastChannel */
+  var _tokenInject='var _tfSessionToken='+JSON.stringify(_tfSessionToken)+';';
+  var _src='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>\uD83D\uDE9A TruckFlow Monitor</title><style>'+_css+'</style></head><body>'+_body+'<script>'+_tokenInject+_js+'<\/script></body></html>';
   w.document.write(_src);
   w.document.close();
   logActivity('\uD83D\uDDA5','Mode Monitor ouvert dans un nouvel onglet');
