@@ -1196,7 +1196,20 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
     <!-- Groupe Export -->
     <div class="hdr-group">
       <button class="btn-imp" style="color:var(--purple);border-color:rgba(155,109,255,.3)" onclick="exportSession()" title="Exporter session JSON">&#x2193; Partager</button>
-      <button class="btn-imp" style="color:var(--green);border-color:rgba(45,202,114,.3)" onclick="exportExcel()" title="Exporter Excel">&#128196; Excel</button>
+      <div style="position:relative;display:inline-block" id="excelMenuWrap">
+        <button class="btn-imp" style="color:var(--green);border-color:rgba(45,202,114,.3)" onclick="toggleExcelMenu()" title="Exports Excel">&#128196; Excel &#9662;</button>
+        <div id="excelMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:6px;min-width:240px;z-index:200;box-shadow:var(--sh)">
+          <button onclick="exportExcel();toggleExcelMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(45,202,114,.1)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128196; Export complet</span>
+            <span style="font-size:11px;color:var(--t3)">Camions actifs &middot; stats &middot; archive</span>
+          </button>
+          <div style="height:1px;background:var(--bd);margin:4px 6px"></div>
+          <button onclick="openWeekExportModal();toggleExcelMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(77,124,254,.1)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128197; Export par semaine</span>
+            <span style="font-size:11px;color:var(--t3)">Choisir une semaine archiv&eacute;e</span>
+          </button>
+        </div>
+      </div>
       <div style="position:relative;display:inline-block" id="rapportMenuWrap">
         <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="toggleRapportMenu()" title="Rapports PDF">&#128203; Rapport &#9662;</button>
         <div id="rapportMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:6px;min-width:230px;z-index:200;box-shadow:var(--sh)">
@@ -1490,6 +1503,13 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
       <button class="btn-cancel" style="flex:1" onclick="clearAdvFilter()">R&eacute;initialiser</button>
       <button class="btn-ok" style="flex:1" onclick="applyAdvFilter()">Appliquer</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══ WEEK EXPORT MODAL ═══ -->
+<div id="weekExportBg" onclick="if(event.target===this)closeWeekExportModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);z-index:220;align-items:center;justify-content:center">
+  <div style="width:min(520px,92vw);background:linear-gradient(165deg,rgba(160,210,255,.09) 0%,rgba(140,180,220,.04) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(160,210,255,.22);border-radius:20px;box-shadow:0 0 0 1px rgba(160,210,255,.08) inset,0 24px 60px rgba(0,0,0,.45);padding:24px">
+    <div id="weekExportContent"></div>
   </div>
 </div>
 
@@ -4898,6 +4918,228 @@ function exportExcel(){
   var locked_kept=trucks.filter(function(t){return t.locked||t._dateManuallyChanged||t._creneauManuallyChanged||t.decalage;}).length;
   showToast('Export t\u00e9l\u00e9charg\u00e9'+(removed?' \u00b7 '+removed+' camion'+(removed>1?'s':'')+' archiv\u00e9'+(removed>1?'s':''):'')+
     (locked_kept?' \u00b7 '+locked_kept+' fig\u00e9'+(locked_kept>1?'s':'')+' conserv\u00e9'+(locked_kept>1?'s':''):'')+' \u2705');
+}
+
+// ─── Excel menu + Export par semaine ──────────────────────────────────────
+function toggleExcelMenu(){
+  var m=document.getElementById('excelMenu');if(!m)return;
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  if(!open){setTimeout(function(){document.addEventListener('click',function h(e){
+    var w=document.getElementById('excelMenuWrap');
+    if(w&&!w.contains(e.target)){m.style.display='none';document.removeEventListener('click',h);}
+  },true);},0);}
+}
+
+function _isoWk(dateStr){
+  var d=new Date((dateStr||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+  if(isNaN(d))return dateStr||'?';
+  var day=d.getDay();if(day===0)day=7;
+  d.setDate(d.getDate()+4-day);
+  var y=d.getFullYear(),jan1=new Date(y,0,1);
+  return y+'-S'+String(Math.ceil(((d-jan1)/86400000+1)/7)).padStart(2,'0');
+}
+
+function openWeekExportModal(){
+  var allArch=(_completedTrucks||[]);
+  var bg=document.getElementById('weekExportBg');
+  var content=document.getElementById('weekExportContent');
+  if(!bg||!content)return;
+  if(!allArch.length){showToast('Aucune archive disponible');return;}
+  var wkMap={};
+  allArch.forEach(function(ct){
+    var wk=_isoWk(ct.date);
+    if(!wkMap[wk])wkMap[wk]={count:0,ph:0,pa:0,pr:0};
+    wkMap[wk].count++;
+    var p=(ct.ponctualite||{}).status||'';
+    if(p==='heure')wkMap[wk].ph++;else if(p==='avance')wkMap[wk].pa++;
+    else if(p==='retard_reel'||p==='retard_auto')wkMap[wk].pr++;
+  });
+  function wkMon(wk){
+    var parts=wk.split('-S');if(parts.length<2)return null;
+    var y=parseInt(parts[0]),w=parseInt(parts[1]);
+    var j4=new Date(y,0,4),d4=j4.getDay();if(d4===0)d4=7;
+    var m=new Date(j4);m.setDate(j4.getDate()-d4+1+(w-1)*7);return m;
+  }
+  var weeks=Object.keys(wkMap).sort().reverse();
+  var fr=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">'+
+    '<div>'+
+      '<h3 style="margin:0;font-size:18px;font-weight:800;color:var(--t1)">&#128197; Export par semaine</h3>'+
+      '<div style="font-size:12px;color:var(--t3);margin-top:3px">'+allArch.length+' camion'+(allArch.length>1?'s':'')+' archiv\u00e9'+(allArch.length>1?'s':'')+' &middot; '+weeks.length+' semaine'+(weeks.length>1?'s':'')+' disponible'+(weeks.length>1?'s':'')+'</div>'+
+    '</div>'+
+    '<button onclick="closeWeekExportModal()" style="background:none;border:none;color:var(--t3);font-size:24px;cursor:pointer;padding:2px 8px;border-radius:8px;line-height:1" onmouseover="this.style.color=\'var(--t1)\'" onmouseout="this.style.color=\'var(--t3)\'">&#215;</button>'+
+  '</div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:2px">';
+  weeks.forEach(function(wk){
+    var e=wkMap[wk];
+    var pct=e.count?Math.round((e.ph+e.pa)/e.count*100):0;
+    var pctCol=pct>=80?'#2dc272':pct>=60?'#ff9f0a':'#ff453a';
+    var mon=wkMon(wk),sun=mon?new Date(mon.getTime()+6*86400000):null;
+    var rng=mon&&sun?fr.format(mon)+' \u2192 '+fr.format(sun):'';
+    var wkNum=wk.split('-S')[1]||wk;
+    html+='<div onclick="exportWeekExcel(\''+wk+'\')" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--sf2);border:1px solid var(--bd2);border-radius:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.background=\'rgba(45,202,114,.08)\';this.style.borderColor=\'rgba(45,202,114,.3)\'" onmouseout="this.style.background=\'var(--sf2)\';this.style.borderColor=\'var(--bd2)\'">'+
+      '<div style="width:50px;height:50px;border-radius:10px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">'+
+        '<div style="font-size:8px;font-weight:800;color:#2dc272;letter-spacing:1px;line-height:1;text-transform:uppercase">Sem.</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#2dc272;line-height:1.1">'+wkNum+'</div>'+
+      '</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--t1)">'+wk+'</div>'+
+        (rng?'<div style="font-size:11px;color:var(--t3);margin-top:1px">'+rng+'</div>':'')+
+        '<div style="display:flex;align-items:center;gap:10px;margin-top:5px">'+
+          '<span style="font-size:11px;background:rgba(77,124,254,.12);color:var(--blue);padding:2px 8px;border-radius:5px;font-weight:700">'+e.count+' camion'+(e.count>1?'s':'')+'</span>'+
+          '<span style="font-size:11px;font-weight:700;color:'+pctCol+'">'+pct+'% ponctuel'+(pct>1?'s':'')+'</span>'+
+          (e.pr?'<span style="font-size:11px;color:#ff453a">'+e.pr+' retard'+(e.pr>1?'s':'')+'</span>':'')+'</div>'+
+      '</div>'+
+      '<div style="font-size:18px;color:var(--t3)">&#8659;</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  content.innerHTML=html;
+  bg.style.display='flex';
+}
+
+function closeWeekExportModal(){
+  var bg=document.getElementById('weekExportBg');
+  if(bg)bg.style.display='none';
+}
+
+function exportWeekExcel(weekKey){
+  closeWeekExportModal();
+  var allArch=(_completedTrucks||[]);
+  var trucks_wk=allArch.filter(function(ct){return _isoWk(ct.date)===weekKey;});
+  if(!trucks_wk.length){showToast('Aucun camion pour '+weekKey);return;}
+  trucks_wk.sort(function(a,b){
+    var da=a.date||'',db=b.date||'';
+    if(da!==db)return da.localeCompare(db);
+    return ((a.timestamps||{}).arr||'').localeCompare((b.timestamps||{}).dep||'');
+  });
+  function fmtT(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+  function dur(a,b){return (a&&b)?Math.round((new Date(b)-new Date(a))/60000):null;}
+  function fmtS(ds){
+    var d=new Date((ds||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+    return isNaN(d)?ds:d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  }
+  function fmtL(ds){
+    var d=new Date((ds||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+    return isNaN(d)?ds:d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  // Week boundaries
+  var parts=weekKey.split('-S');
+  var wy=parseInt(parts[0]||0),wn=parseInt(parts[1]||0);
+  var j4=new Date(wy,0,4),d4=j4.getDay();if(d4===0)d4=7;
+  var mon=new Date(j4);mon.setDate(j4.getDate()-d4+1+(wn-1)*7);
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  var fr2=new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var rangeStr=fr2.format(mon)+' → '+fr2.format(sun);
+  // Aggregates
+  var N=trucks_wk.length,ph=0,pa=0,pr=0,pw=0;
+  var wN=0,wS=0,pN=0,pS=0,lN=0,lS=0,tN=0,tS=0;
+  var dayMap={},carrMap={};
+  trucks_wk.forEach(function(ct){
+    var ts=ct.timestamps||{};
+    var p=(ct.ponctualite||{}).status||'';
+    if(p==='heure')ph++;else if(p==='avance')pa++;else if(p==='retard_reel'||p==='retard_auto')pr++;else pw++;
+    var dW=dur(ts.arr,ts.quai),dP=dur(ts.quai,ts.chg),dL=dur(ts.chg,ts.fin_chg||ts.dep),dT=dur(ts.arr,ts.dep);
+    if(dW!=null&&dW>=0){wN++;wS+=dW;}if(dP!=null&&dP>=0){pN++;pS+=dP;}
+    if(dL!=null&&dL>=0){lN++;lS+=dL;}if(dT!=null&&dT>=0){tN++;tS+=dT;}
+    var dt=ct.date||'?';
+    if(!dayMap[dt])dayMap[dt]={date:dt,n:0,ph:0,pa:0,pr:0,lN:0,lS:0,tN:0,tS:0};
+    var de=dayMap[dt];de.n++;
+    if(p==='heure')de.ph++;else if(p==='avance')de.pa++;else if(p==='retard_reel'||p==='retard_auto')de.pr++;
+    if(dL!=null&&dL>=0){de.lN++;de.lS+=dL;}if(dT!=null&&dT>=0){de.tN++;de.tS+=dT;}
+    var nm=ct.transporteur||ct.itin||'?';
+    if(!carrMap[nm])carrMap[nm]={name:nm,n:0,ph:0,pa:0,pr:0,lN:0,lS:0};
+    var ce=carrMap[nm];ce.n++;
+    if(p==='heure')ce.ph++;else if(p==='avance')ce.pa++;else if(p==='retard_reel'||p==='retard_auto')ce.pr++;
+    if(dL!=null&&dL>=0){ce.lN++;ce.lS+=dL;}
+  });
+  var days=Object.keys(dayMap).sort();
+  var carriers=Object.values(carrMap).sort(function(a,b){return b.n-a.n;});
+  var pctG=N?Math.round((ph+pa)/N*100):0;
+  var SEP=['────────────────────────────────────────────────────────────'];
+  var B=[''];
+  var wb=XLSX.utils.book_new();
+
+  // ══════════════════════════════════════════════════════════
+  // Feuille 1 : Synthèse
+  // ══════════════════════════════════════════════════════════
+  var syn=[];
+  syn.push(['TRUCKFLOW  ·  SEMAINE '+weekKey,'','','Exporté le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})]);
+  syn.push([rangeStr]);
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['INDICATEURS CLÉS DE LA SEMAINE']);
+  syn.push(SEP);
+  syn.push(['Camions traités','',N,'']);
+  syn.push(['\u00c0 l\'heure','',ph,N?Math.round(ph/N*100)+'%':'']);
+  syn.push(['En avance','',pa,N?Math.round(pa/N*100)+'%':'']);
+  syn.push(['En retard','',pr,N?Math.round(pr/N*100)+'%':'']);
+  if(pw)syn.push(['Sans cr\u00e9neau / attente','',pw,'']);
+  syn.push(['Taux de ponctualit\u00e9','',pctG+'%','']);
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['TEMPS DE PASSAGE MOYENS']);
+  syn.push(SEP);
+  syn.push(['Attente \u00e0 quai  (Arriv\u00e9e \u2192 \u00c0 quai)','',wN?fmtMinutes(Math.round(wS/wN)):'\u2014','']);
+  syn.push(['Mise en place  (\u00c0 quai \u2192 D\u00e9but chgt)','',pN?fmtMinutes(Math.round(pS/pN)):'\u2014','']);
+  syn.push(['Chargement  (D\u00e9but \u2192 Fin chgt)','',lN?fmtMinutes(Math.round(lS/lN)):'\u2014','']);
+  syn.push(['Dur\u00e9e totale  (Arriv\u00e9e \u2192 D\u00e9part)','',tN?fmtMinutes(Math.round(tS/tN)):'\u2014','']);
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['R\u00c9CAPITULATIF PAR JOUR']);
+  syn.push(SEP);
+  syn.push(['Date','Jour','Camions','\u00c0 l\'heure','En avance','En retard','% Ponct.','Moy. chargement','Moy. total']);
+  days.forEach(function(dt){
+    var e=dayMap[dt];
+    var pct=e.n?Math.round((e.ph+e.pa)/e.n*100):0;
+    syn.push([dt,fmtS(dt),e.n,e.ph,e.pa,e.pr,pct+'%',
+      e.lN?fmtMinutes(Math.round(e.lS/e.lN)):'\u2014',
+      e.tN?fmtMinutes(Math.round(e.tS/e.tN)):'\u2014']);
+  });
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['TRANSPORTEURS']);
+  syn.push(SEP);
+  syn.push(['Transporteur','Camions','\u00c0 l\'heure','En avance','En retard','% Ponct.','Moy. chargement']);
+  carriers.forEach(function(c){
+    var pct=c.n?Math.round((c.ph+c.pa)/c.n*100):0;
+    syn.push([c.name,c.n,c.ph,c.pa,c.pr,pct+'%',c.lN?fmtMinutes(Math.round(c.lS/c.lN)):'\u2014']);
+  });
+  var wsSyn=XLSX.utils.aoa_to_sheet(syn);
+  wsSyn['!cols']=[{wch:40},{wch:18},{wch:14},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,wsSyn,'Synth\u00e8se');
+
+  // ══════════════════════════════════════════════════════════
+  // Feuille 2 : Timestamps détaillés
+  // ══════════════════════════════════════════════════════════
+  var tsR=[['Date','Jour','Transporteur','Cr\u00e9neau','Quai','Arriv\u00e9e','\u00c0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','Att. quai','Pr\u00e9pa','Chargement','Total','D\u0394 Cr\u00e9neau','Ponctualit\u00e9']];
+  var lastD='';
+  trucks_wk.forEach(function(ct){
+    var ts=ct.timestamps||{};
+    if(ct.date!==lastD&&lastD!=='')tsR.push(B);
+    lastD=ct.date;
+    var delta='';
+    if(ts.arr&&ct.creneau){
+      var cw=creWindow(ct.creneau);
+      if(cw){var ad=new Date(ts.arr),am=ad.getHours()*60+ad.getMinutes();
+        if(am<cw.start)delta='-'+fmtMinutes(Math.round(cw.start-am));
+        else if(am<=cw.end)delta='\u00c0 l\'heure';
+        else delta='+'+fmtMinutes(Math.round(am-cw.end));}}
+    var dW=dur(ts.arr,ts.quai),dP=dur(ts.quai,ts.chg),dL=dur(ts.chg,ts.fin_chg||ts.dep),dT=dur(ts.arr,ts.dep);
+    tsR.push([ct.date,fmtS(ct.date),ct.transporteur||ct.itin||'',ct.creneau||'',ct.quai||'',
+      fmtT(ts.arr),fmtT(ts.quai),fmtT(ts.chg),fmtT(ts.fin_chg),fmtT(ts.dep),
+      dW!=null?fmtMinutes(dW):'\u2014',dP!=null?fmtMinutes(dP):'\u2014',
+      dL!=null?fmtMinutes(dL):'\u2014',dT!=null?fmtMinutes(dT):'\u2014',
+      delta,(ct.ponctualite||{}).label||'']);
+  });
+  var wsTs=XLSX.utils.aoa_to_sheet(tsR);
+  wsTs['!cols']=[{wch:12},{wch:16},{wch:16},{wch:10},{wch:6},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:10},{wch:9},{wch:12},{wch:9},{wch:11},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsTs,'Timestamps');
+
+  XLSX.writeFile(wb,'TruckFlow_'+weekKey+'.xlsx');
+  showToast('\u2705 Export '+weekKey+' t\u00e9l\u00e9charg\u00e9');
+  logActivity('\uD83D\uDCC5','Export semaine '+weekKey+' g\u00e9n\u00e9r\u00e9');
 }
 
 // ─── Quai plan ────────────────────────────────────────────────────────────
