@@ -9380,7 +9380,7 @@ var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities',LD='th10_de
 var showDep=false,_bc;
 try{_bc=new BroadcastChannel('truckflow_sync');}catch(e){}
 if(_bc){_bc.onmessage=function(ev){
-  /* AUDIT I3 : valider le token avant d'accepter tout message */
+  // AUDIT I3 : valider le token avant d'accepter tout message
   if(!ev.data||ev.data.tok!==_tfSessionToken)return;
   setTimeout(render,300);
 };}
