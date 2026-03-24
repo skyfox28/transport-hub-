@@ -795,16 +795,6 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .tc.tc-flash{animation:tc-flash-green .8s ease}
 
 /* ── Compact mode ────────────────────────────────────────────── */
-.tc.compact-mode .tc-delivs{display:none}
-.tc.compact-mode .ts-row{grid-template-columns:repeat(4,1fr);gap:0;padding:0}
-.tc.compact-mode .ts-chip{padding:5px 10px;min-height:auto}
-.tc.compact-mode .ts-chip-lbl{font-size:8px;margin-bottom:2px}
-.tc.compact-mode .ts-chip-time{font-size:12px}
-.tc.compact-mode .ts-chip-elapsed{display:none}
-.tc.compact-mode .ts-chip-cta{padding:3px 9px;font-size:10px;margin-top:3px;animation:none}
-.tc.compact-mode .ts-chip-cta2{display:none}
-.tc.compact-mode .tc-head{flex-wrap:nowrap}
-.tc.compact-mode{padding:8px 14px}
 
 /* ── Activity log ────────────────────────────────────────────── */
 .actlog-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center}
@@ -867,18 +857,6 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .planning-bar-real.active{background:var(--blue);animation:gantt-pulse 2s infinite}
 @keyframes gantt-pulse{0%,100%{opacity:.4}50%{opacity:.6}}
 
-/* ── TV mode ──────────────────────────────────────────────────── */
-html.tv-mode .hdr-actions .hdr-group{display:none}
-html.tv-mode .hdr-actions .hdr-sep{display:none}
-html.tv-mode .hdr-actions .hdr-group.tv-keep{display:flex!important}
-html.tv-mode .gs-wrap,html.tv-mode .cad-group{display:none}
-html.tv-mode #tvBtn{background:rgba(94,92,230,.2)!important}
-html.tv-mode .kpi-v{font-size:42px}
-html.tv-mode .kpi{padding:24px 28px}
-html.tv-mode .tc-name{font-size:18px}
-html.tv-mode .planning-row-name{font-size:16px}
-html.tv-mode .tabs-in .tab{font-size:16px;padding:10px 24px}
-html.tv-mode body{overflow:auto}
 
 /* ── Sparklines ───────────────────────────────────────────────── */
 .sparkline{display:inline-block;vertical-align:middle}
@@ -1233,13 +1211,10 @@ html.tv-mode body{overflow:auto}
           </button>
         </div>
       </div>
-      <button class="btn-imp" style="color:var(--orange);border-color:rgba(255,107,53,.3)" onclick="exportPlanningMural()" title="Planning mural A3">&#128200; Mural</button>
     </div>
     <div class="hdr-sep"></div>
     <!-- Groupe Outils condensé -->
     <div class="hdr-group tv-keep" style="position:relative">
-      <button class="btn-imp" style="color:var(--amber);border-color:rgba(255,159,10,.3)" onclick="toggleCompactMode()" id="compactBtn" title="Mode compact">&#9776;</button>
-      <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="toggleTVMode()" id="tvBtn" title="Mode grand &eacute;cran">&#128250;</button>
       <button class="btn-imp" style="color:var(--t2);border-color:rgba(118,118,128,.3)" onclick="toggleHdrMore()" id="hdrMoreBtn" title="Plus d'outils">&#x22EF;</button>
       <div class="hdr-more-menu" id="hdrMoreMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:6px;min-width:180px;z-index:150;box-shadow:var(--sh)">
         <button class="hdr-more-item" onclick="openActivityLog();toggleHdrMore()">&#128221; Journal d'activit&eacute;</button>
@@ -5449,22 +5424,6 @@ function saveAlertConfig(){
 }
 
 
-// ─── #14 Compact Mode ─────────────────────────────────────────────────────
-var _compactMode=false;
-try{_compactMode=localStorage.getItem('tf_compact')==='true';}catch(e){}
-function toggleCompactMode(){
-  _compactMode=!_compactMode;
-  try{localStorage.setItem('tf_compact',_compactMode?'true':'false');}catch(e){}
-  applyCompactMode();
-  showToast(_compactMode?'Mode compact activ\u00e9':'Mode d\u00e9taill\u00e9 activ\u00e9');
-}
-function applyCompactMode(){
-  document.querySelectorAll('.tc').forEach(function(tc){
-    if(_compactMode)tc.classList.add('compact-mode');else tc.classList.remove('compact-mode');
-  });
-  var btn=document.getElementById('compactBtn');
-  if(btn)btn.style.background=_compactMode?'rgba(255,159,10,.15)':'';
-}
 
 // ─── #4 Auto-refresh chronos (30s) ───────────────────────────────────────
 var _chronoInterval=null;
@@ -5786,7 +5745,6 @@ var _origRenderAll=renderAll;
 renderAll=function(){
   _origRenderAll();
   addKPITooltips();
-  applyCompactMode();
   checkCompletionFlash();
 };
 
@@ -6042,15 +6000,6 @@ function clearAdvFilter(){
   showToast('Filtres r\u00e9initialis\u00e9s');
 }
 
-// ─── #9 TV Mode ───────────────────────────────────────────────────────────
-var _tvMode=false;
-function toggleTVMode(){
-  _tvMode=!_tvMode;
-  document.documentElement.classList.toggle('tv-mode',_tvMode);
-  var btn=document.getElementById('tvBtn');
-  if(btn) btn.style.background=_tvMode?'rgba(94,92,230,.15)':'';
-  showToast(_tvMode?'Mode grand \u00e9cran activ\u00e9 \uD83D\uDCFA':'Mode normal');
-}
 
 // ─── #7 Progress Ring SVG helper ──────────────────────────────────────────
 function progressRingSVG(pct,color,size){
@@ -6560,8 +6509,6 @@ function showKBShortcuts(){
     '<div class="kb-row"><span class="kb-key">1-6</span><span class="kb-desc">Changer d\u2019onglet</span></div>'+
     '<div class="kb-row"><span class="kb-key">Ctrl+F</span><span class="kb-desc">Recherche globale</span></div>'+
     '<div class="kb-row"><span class="kb-key">Ctrl+Z</span><span class="kb-desc">Annuler derni\u00e8re action</span></div>'+
-    '<div class="kb-row"><span class="kb-key">C</span><span class="kb-desc">Mode compact camions</span></div>'+
-    '<div class="kb-row"><span class="kb-key">T</span><span class="kb-desc">Mode grand \u00e9cran</span></div>'+
     '<div class="kb-row"><span class="kb-key">K</span><span class="kb-desc">Vue Kanban</span></div>'+
     '<div class="kb-row"><span class="kb-key">E</span><span class="kb-desc">Copier rapport email</span></div>'+
     '<div class="kb-row"><span class="kb-key">?</span><span class="kb-desc">Afficher cette aide</span></div>'+
@@ -6595,10 +6542,6 @@ document.addEventListener('keydown',function(e){
   if((e.ctrlKey||e.metaKey)&&e.key==='z'){
     e.preventDefault();doUndo();return;
   }
-  // C → compact
-  if(e.key==='c'||e.key==='C'){toggleCompactMode();return;}
-  // T → TV mode
-  if(e.key==='t'||e.key==='T'){toggleTVMode();return;}
   // ? → shortcuts help
   if(e.key==='?'){showKBShortcuts();return;}
   // Esc → close overlays
@@ -6670,7 +6613,6 @@ renderTrucks=function(){
       noteDiv.appendChild(ta);card.appendChild(noteDiv);
     }
   });
-  applyCompactMode();
 };
 
 // ─── Patch renderStats: add heatmap + scoring ─────────────────────────────
@@ -8056,71 +7998,7 @@ function renderArchive(){
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ─── #15 EXPORT PLANNING MURAL A3 ──────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
-function exportPlanningMural(){
-  var todayISO=new Date().toISOString().slice(0,10);
-  var dayT=trucks.filter(function(t){return t.date===todayISO&&!isExport({itin:t.itin,dest:''});});
-  if(!dayT.length){showToast('Aucun camion pour aujourd\'hui');return;}
-  dayT.sort(function(a,b){return creToMinutes(a.creneau)-creToMinutes(b.creneau);});
-  var dateStr=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var hours=[];for(var h=5;h<22;h++)hours.push(h);
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Planning Mural '+todayISO+'</title>'+
-    '<style>@page{size:A3 landscape;margin:10mm}'+
-    'body{font-family:Arial,sans-serif;color:#222;margin:0;padding:10px}'+
-    'h1{font-size:24px;margin:0 0 4px;text-align:center}'+
-    '.subtitle{font-size:12px;color:#666;text-align:center;margin-bottom:12px}'+
-    'table{width:100%;border-collapse:collapse;table-layout:fixed}'+
-    'th{background:#333;color:#fff;padding:6px 2px;font-size:9px;text-align:center;border:1px solid #555}'+
-    'td{border:1px solid #ccc;padding:4px 3px;font-size:9px;vertical-align:top;height:32px}'+
-    '.truck-name{font-weight:700;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
-    '.truck-cre{font-size:8px;color:#666}'+
-    '.truck-dest{font-size:8px;color:#444}'+
-    '.slot{border-radius:3px;padding:2px 3px;margin:1px 0;font-size:8px;font-weight:700}'+
-    '.slot-active{background:#cde7ff;border:1px solid #7ab8f5}'+
-    '.slot-done{background:#d4f4dd;border:1px solid #5cc97e}'+
-    '.slot-wait{background:#fff3cd;border:1px solid #f0c040}'+
-    '.slot-late{background:#ffe0e0;border:1px solid #ff6b6b;color:#c0392b}'+
-    '@media print{body{padding:0}}</style></head><body>';
-  html+='<h1>\uD83D\uDE9B Planning Mural \u2014 TruckFlow</h1>';
-  html+='<div class="subtitle">'+dateStr+' \u2014 '+dayT.length+' camions \u2014 G\u00e9n\u00e9r\u00e9 '+new Date().toLocaleTimeString('fr-FR')+'</div>';
-  html+='<table><tr><th style="width:120px">Camion</th>';
-  hours.forEach(function(h){html+='<th>'+h+'h</th>';});
-  html+='</tr>';
-  dayT.forEach(function(t){
-    var ts=timestamps[t.id]||{};
-    var ponct=getPonctualite(t,ts,Date.now());
-    html+='<tr><td><div class="truck-name">'+(t.transporteur||t.itin||'?')+'</div>'+
-      '<div class="truck-cre">\u23f0 '+(t.creneau||'\u2014')+'</div>'+
-      '<div class="truck-dest">'+(t.dest||'')+'</div></td>';
-    var startMin=null,endMin=null;
-    if(ts.arr)startMin=new Date(ts.arr).getHours()*60+new Date(ts.arr).getMinutes();
-    else{var cm=creToMinutes(t.creneau||'');if(cm<9999)startMin=cm;}
-    if(ts.dep)endMin=new Date(ts.dep).getHours()*60+new Date(ts.dep).getMinutes();
-    else if(startMin!==null)endMin=startMin+90;
-    var isDone=ts.arr&&ts.quai&&ts.chg&&ts.dep;
-    hours.forEach(function(h){
-      var hStart=h*60,hEnd=(h+1)*60;
-      var overlap=startMin!==null&&endMin!==null&&startMin<hEnd&&endMin>hStart;
-      if(overlap){
-        var isLate=(ponct.status==='retard_reel'||ponct.status==='retard_auto');
-        var cls=isDone?'slot-done':isLate?'slot-late':ts.arr?'slot-active':'slot-wait';
-        var label='';
-        if(h*60<=startMin&&startMin<(h+1)*60)label=ponct.label||'';
-        html+='<td><div class="slot '+cls+'">'+label+'</div></td>';
-      }else{html+='<td></td>';}
-    });
-    html+='</tr>';
-  });
-  html+='</table>';
-  html+='<div style="text-align:center;margin-top:12px"><button onclick="window.print()" style="background:#333;color:#fff;border:none;padding:10px 30px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">\uD83D\uDDA8 Imprimer A3</button></div>';
-  html+='<style>@media print{button{display:none!important}}</style></body></html>';
-  var w=window.open('','_blank','width=1200,height=800');
-  if(w){w.document.write(html);w.document.close();}
-  else showToast('Popup bloqu\u00e9 \u2014 autorisez les popups');
-  logActivity('\uD83D\uDDA8','Export planning mural');
-}
+// placeholder supprimé : exportPlanningMural retiré
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #18 RAPPORT AUTOMATIQUE 16H ────────────────────────────────────────
@@ -8308,13 +8186,6 @@ function openTruckMonitor(){
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d1117;--sf1:rgba(255,255,255,.05);--sf2:rgba(255,255,255,.08);--bd1:rgba(160,210,255,.12);--bd2:rgba(160,210,255,.18);--t1:#f0f6fc;--t2:#8b949e;--t3:#484f57;--blue:#0a84ff;--green:#2a9d5c;--orange:#e65100;--red:#d32f2f;--indigo:#4c6ef5;--cyan:#00bcd4}
 body{background:#0d1117;color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-body.compact-view .tc{padding:8px 12px!important}
-body.compact-view .tc-name{font-size:13px!important}
-body.compact-view .prog{margin-bottom:5px!important}
-body.compact-view .plbl,.compact-view .ptm{font-size:7px!important}
-body.compact-view .pd{width:20px!important;height:20px!important;font-size:9px!important}
-body.compact-view .act{font-size:10px!important;padding:6px 8px!important}
-body.compact-view .man{margin-top:3px!important}
 .orb{position:fixed;border-radius:50%;filter:blur(45px);pointer-events:none;z-index:0}
 .o1{width:400px;height:400px;background:rgba(10,132,255,.1);top:-160px;left:-60px}
 .o2{width:350px;height:350px;background:rgba(147,51,234,.07);bottom:-120px;right:-100px}
@@ -9012,7 +8883,6 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
       '<div class="kpis" id="kpis"></div>'+
       '<div class="hbtns">'+
         '<span class="rdot"></span>'+
-        '<button class="hbtn" onclick="document.body.classList.toggle(\'compact-view\');this.textContent=document.body.classList.contains(\'compact-view\')?\'Vue normale\':\'Vue compacte\'">\uD83D\uDDDC Vue compacte</button>'+
         '<button class="hbtn" onclick="render()">\u21BB Actualiser</button>'+
       '</div>'+
     '</header>'+
