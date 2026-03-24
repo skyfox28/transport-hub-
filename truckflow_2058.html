@@ -5192,6 +5192,13 @@ function exportWeekExcel(weekKey){
 var _montageMode=false;
 var _montageSelected={};
 
+// Retourne le nom transporteur depuis les camions existants ayant le même itin, sinon l'itin lui-même
+function _transp4itin(itin){
+  if(!itin)return '';
+  var t=trucks.find(function(tk){return (tk.itin||'')===(itin||'')&&tk.transporteur&&tk.transporteur!==tk.itin;});
+  return t?t.transporteur:itin;
+}
+
 function enterMontageMode(){
   _montageMode=true;
   _montageSelected={};
@@ -5230,6 +5237,14 @@ function renderMontagePanel(){
     var k=d.itin||'?';
     if(!groups[k])groups[k]=[];
     groups[k].push(d);
+  });
+  // Tri des livraisons par date dans chaque groupe
+  Object.keys(groups).forEach(function(k){
+    groups[k].sort(function(a,b){
+      var da=(a.date||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1');
+      var db=(b.date||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1');
+      return da.localeCompare(db)||(a.dest||'').localeCompare(b.dest||'');
+    });
   });
   var keys=Object.keys(groups).sort(function(a,b){return groups[b].length-groups[a].length;});
 
@@ -5279,7 +5294,8 @@ function renderMontagePanel(){
         '<div style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(allSel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(allSel?'#4d7cfe':'transparent')+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;flex-shrink:0">'+(allSel?'&#10003;':'')+'</div>'+
         '<span style="font-size:15px">&#128666;</span>'+
         '<div style="flex:1">'+
-          '<span style="font-size:14px;font-weight:800;color:var(--t1)">'+itin+'</span>'+
+          '<span style="font-size:14px;font-weight:800;color:var(--t1)">'+_transp4itin(itin)+'</span>'+
+          (_transp4itin(itin)!==itin?'<span style="font-size:10px;color:var(--t3);margin-left:6px">'+itin+'</span>':'')+
           '<span style="font-size:11px;color:var(--t3);margin-left:8px">'+delivs.length+' livr.</span>'+
           (totPal?'<span style="font-size:11px;background:rgba(45,202,114,.1);color:#2dc272;padding:2px 8px;border-radius:5px;margin-left:6px;font-weight:700">'+totPal+' pal SILO</span>':'')+
           (totColis?'<span style="font-size:11px;background:rgba(155,109,255,.1);color:var(--purple);padding:2px 8px;border-radius:5px;margin-left:4px;font-weight:700">'+totColis+' colis pick</span>':'')+
@@ -5294,6 +5310,7 @@ function renderMontagePanel(){
         '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
           '<thead><tr style="background:rgba(0,0,0,.12)">'+
             '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600;width:32px">&bull;</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600;white-space:nowrap">Date</th>'+
             '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600;white-space:nowrap">N&#176; Livraison</th>'+
             '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Destination</th>'+
             '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Ville</th>'+
@@ -5312,6 +5329,7 @@ function renderMontagePanel(){
         '<td style="padding:7px 12px;text-align:center">'+
           '<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(sel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(sel?'#4d7cfe':'transparent')+';display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">'+(sel?'&#10003;':'')+'</div>'+
         '</td>'+
+        '<td style="padding:7px 12px;color:var(--amber);font-size:11px;font-weight:600;white-space:nowrap">'+(d.date||'\u2014')+'</td>'+
         '<td style="padding:7px 12px;font-weight:700;color:var(--blue);font-family:monospace;white-space:nowrap">'+d.id+'</td>'+
         '<td style="padding:7px 12px;color:var(--t1);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</td>'+
         '<td style="padding:7px 12px;color:var(--t2);white-space:nowrap">'+(d.ville||'\u2014')+'</td>'+
@@ -5369,6 +5387,7 @@ function openMontageForm(){
     dateCount[d.date||'']=(dateCount[d.date||'']||0)+1;
   });
   var mainItin=Object.keys(itinCount).sort(function(a,b){return itinCount[b]-itinCount[a];})[0]||'';
+  var mainTransp=_transp4itin(mainItin)||mainItin;
   var mainDate=Object.keys(dateCount).sort(function(a,b){return dateCount[b]-dateCount[a];})[0]||new Date().toISOString().slice(0,10);
   // Convertir date DD/MM/YYYY -> YYYY-MM-DD pour l'input
   if(/^\d{2}\/\d{2}\/\d{4}$/.test(mainDate)){
@@ -5398,7 +5417,7 @@ function openMontageForm(){
       '<div style="display:flex;flex-direction:column;gap:14px">'+
         '<div>'+
           '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur / Route</label>'+
-          '<input id="mcTransp" value="'+mainItin+'" placeholder="Nom du transporteur" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '<input id="mcTransp" value="'+mainTransp+'" placeholder="Nom du transporteur" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
         '</div>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
           '<div>'+
