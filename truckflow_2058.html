@@ -156,14 +156,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text'
 
 /* ── Orbes lumineuses background ──────────────────────────────── */
 body::before,body::after{content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;will-change:transform,opacity}
-body::before{width:1000px;height:1000px;top:-12%;left:-10%;background:radial-gradient(circle,rgba(10,132,255,.4) 0%,rgba(10,132,255,.15) 30%,transparent 60%);filter:blur(80px);animation:orbFloat1 28s ease-in-out infinite}
-body::after{width:900px;height:900px;bottom:-15%;right:-12%;background:radial-gradient(circle,rgba(191,90,242,.35) 0%,rgba(94,92,230,.12) 30%,transparent 60%);filter:blur(80px);animation:orbFloat2 24s ease-in-out infinite}
+body::before{width:600px;height:600px;top:-12%;left:-10%;background:radial-gradient(circle,rgba(10,132,255,.28) 0%,rgba(10,132,255,.08) 30%,transparent 60%);filter:blur(50px);animation:orbFloat1 40s ease-in-out infinite}
+body::after{width:500px;height:500px;bottom:-15%;right:-12%;background:radial-gradient(circle,rgba(191,90,242,.22) 0%,rgba(94,92,230,.07) 30%,transparent 60%);filter:blur(50px);animation:orbFloat2 36s ease-in-out infinite}
 @keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1);opacity:.8}25%{transform:translate(10%,14%) scale(1.1);opacity:1}50%{transform:translate(18%,6%) scale(.95);opacity:.85}75%{transform:translate(6%,-10%) scale(1.07);opacity:.9}}
 @keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1);opacity:.7}30%{transform:translate(-12%,-10%) scale(1.12);opacity:1}60%{transform:translate(-6%,12%) scale(.92);opacity:.8}80%{transform:translate(-14%,4%) scale(1.08);opacity:.9}}
-.tabs-bar::before{content:'';position:fixed;width:700px;height:700px;top:35%;left:40%;border-radius:50%;background:radial-gradient(circle,rgba(90,200,250,.3) 0%,rgba(48,209,88,.08) 30%,transparent 60%);filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat3 32s ease-in-out infinite}
+.tabs-bar::before{content:'';position:fixed;width:400px;height:400px;top:35%;left:40%;border-radius:50%;background:radial-gradient(circle,rgba(90,200,250,.18) 0%,rgba(48,209,88,.05) 30%,transparent 60%);filter:blur(50px);pointer-events:none;z-index:0;animation:orbFloat3 44s ease-in-out infinite}
 @keyframes orbFloat3{0%,100%{transform:translate(0,0) scale(1);opacity:.6}35%{transform:translate(-14%,18%) scale(1.15);opacity:.9}65%{transform:translate(12%,-12%) scale(.9);opacity:.7}}
 /* 4th orb — warm amber */
-.main::after{content:'';position:fixed;width:600px;height:600px;top:60%;right:15%;border-radius:50%;background:radial-gradient(circle,rgba(255,159,10,.25) 0%,rgba(255,107,53,.08) 30%,transparent 60%);filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat4 26s ease-in-out infinite}
+.main::after{content:'';position:fixed;width:350px;height:350px;top:60%;right:15%;border-radius:50%;background:radial-gradient(circle,rgba(255,159,10,.16) 0%,rgba(255,107,53,.05) 30%,transparent 60%);filter:blur(50px);pointer-events:none;z-index:0;animation:orbFloat4 38s ease-in-out infinite}
 @keyframes orbFloat4{0%,100%{transform:translate(0,0) scale(1);opacity:.5}40%{transform:translate(-10%,-15%) scale(1.1);opacity:.8}70%{transform:translate(8%,10%) scale(.9);opacity:.6}}
 /* Noise texture overlay */
 .main::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px 200px}
@@ -315,7 +315,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .cam-date-tab.on{color:var(--t1);background:rgba(99,99,102,.55);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 
 /* ── Truck cards ───────────────────────────────────────────────── */
-.tc{background:linear-gradient(165deg,rgba(160,210,255,.06) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.03) 100%);backdrop-filter:saturate(200%) blur(28px);-webkit-backdrop-filter:saturate(200%) blur(28px);border-radius:var(--r);border:1px solid rgba(160,210,255,.18);margin-bottom:12px;overflow:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s;box-shadow:var(--glass-glow),var(--glass-sh)}
+.tc{background:linear-gradient(165deg,rgba(160,210,255,.06) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.03) 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:var(--r);border:1px solid rgba(160,210,255,.18);margin-bottom:12px;overflow:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s;box-shadow:var(--glass-glow),var(--glass-sh)}
 .tc:hover{box-shadow:var(--glass-glow-s),var(--glass-sh-h),0 0 20px rgba(100,200,255,.06);transform:translateY(-2px)}
 .tc.export-tc{border-color:rgba(255,140,66,.25)}
 .tc-head{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
@@ -795,16 +795,6 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .tc.tc-flash{animation:tc-flash-green .8s ease}
 
 /* ── Compact mode ────────────────────────────────────────────── */
-.tc.compact-mode .tc-delivs{display:none}
-.tc.compact-mode .ts-row{grid-template-columns:repeat(4,1fr);gap:0;padding:0}
-.tc.compact-mode .ts-chip{padding:5px 10px;min-height:auto}
-.tc.compact-mode .ts-chip-lbl{font-size:8px;margin-bottom:2px}
-.tc.compact-mode .ts-chip-time{font-size:12px}
-.tc.compact-mode .ts-chip-elapsed{display:none}
-.tc.compact-mode .ts-chip-cta{padding:3px 9px;font-size:10px;margin-top:3px;animation:none}
-.tc.compact-mode .ts-chip-cta2{display:none}
-.tc.compact-mode .tc-head{flex-wrap:nowrap}
-.tc.compact-mode{padding:8px 14px}
 
 /* ── Activity log ────────────────────────────────────────────── */
 .actlog-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center}
@@ -867,18 +857,6 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .planning-bar-real.active{background:var(--blue);animation:gantt-pulse 2s infinite}
 @keyframes gantt-pulse{0%,100%{opacity:.4}50%{opacity:.6}}
 
-/* ── TV mode ──────────────────────────────────────────────────── */
-html.tv-mode .hdr-actions .hdr-group{display:none}
-html.tv-mode .hdr-actions .hdr-sep{display:none}
-html.tv-mode .hdr-actions .hdr-group.tv-keep{display:flex!important}
-html.tv-mode .gs-wrap,html.tv-mode .cad-group{display:none}
-html.tv-mode #tvBtn{background:rgba(94,92,230,.2)!important}
-html.tv-mode .kpi-v{font-size:42px}
-html.tv-mode .kpi{padding:24px 28px}
-html.tv-mode .tc-name{font-size:18px}
-html.tv-mode .planning-row-name{font-size:16px}
-html.tv-mode .tabs-in .tab{font-size:16px;padding:10px 24px}
-html.tv-mode body{overflow:auto}
 
 /* ── Sparklines ───────────────────────────────────────────────── */
 .sparkline{display:inline-block;vertical-align:middle}
@@ -1207,24 +1185,49 @@ html.tv-mode body{overflow:auto}
     <input type="file" id="fi-vl06o" accept=".xlsx,.xls,.xlsm,.xlsb,.csv" style="display:none" onchange="doImportVL06O(event)">
     <input type="file" id="fi-archive" accept=".json" style="display:none" onchange="importArchiveFile(event)">
     <input type="file" id="fi-session" accept=".json" style="display:none" onchange="importSession(event)">
+    <input type="file" id="fi-mobile-ts" accept=".json" style="display:none" onchange="importMobileTS(event)">
     <!-- Groupe Import -->
     <div class="hdr-group">
       <button class="btn-imp btn-vl06o" onclick="triggerVL06O()" title="Importer fichier VL06O">&#x2191; VL06O</button>
       <button class="btn-imp" style="color:var(--teal);border-color:rgba(38,201,211,.3)" onclick="document.getElementById('fi-session').click()" title="Importer session JSON">&#x2191; Sync</button>
+      <button class="btn-imp" style="color:var(--amber);border-color:rgba(255,159,10,.3)" onclick="document.getElementById('fi-mobile-ts').click()" title="Importer timestamps depuis mobile">&#128241; Mobile</button>
     </div>
     <div class="hdr-sep"></div>
     <!-- Groupe Export -->
     <div class="hdr-group">
       <button class="btn-imp" style="color:var(--purple);border-color:rgba(155,109,255,.3)" onclick="exportSession()" title="Exporter session JSON">&#x2193; Partager</button>
-      <button class="btn-imp" style="color:var(--green);border-color:rgba(45,202,114,.3)" onclick="exportExcel()" title="Exporter Excel">&#128196; Excel</button>
-      <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="generatePDFReport()" title="Rapport PDF journée">&#128203; Rapport</button>
-      <button class="btn-imp" style="color:var(--orange);border-color:rgba(255,107,53,.3)" onclick="exportPlanningMural()" title="Planning mural A3">&#128200; Mural</button>
+      <div style="position:relative;display:inline-block" id="excelMenuWrap">
+        <button class="btn-imp" style="color:var(--green);border-color:rgba(45,202,114,.3)" onclick="toggleExcelMenu()" title="Exports Excel">&#128196; Excel &#9662;</button>
+        <div id="excelMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:6px;min-width:240px;z-index:200;box-shadow:var(--sh)">
+          <button onclick="exportExcel();toggleExcelMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(45,202,114,.1)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128196; Export complet</span>
+            <span style="font-size:11px;color:var(--t3)">Camions actifs &middot; stats &middot; archive</span>
+          </button>
+          <div style="height:1px;background:var(--bd);margin:4px 6px"></div>
+          <button onclick="openWeekExportModal();toggleExcelMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(77,124,254,.1)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128197; Export par semaine</span>
+            <span style="font-size:11px;color:var(--t3)">Choisir une semaine archiv&eacute;e</span>
+          </button>
+        </div>
+      </div>
+      <div style="position:relative;display:inline-block" id="rapportMenuWrap">
+        <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="toggleRapportMenu()" title="Rapports PDF">&#128203; Rapport &#9662;</button>
+        <div id="rapportMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:6px;min-width:230px;z-index:200;box-shadow:var(--sh)">
+          <button onclick="generatePDFReport();toggleRapportMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(94,92,230,.12)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128203; Rapport instantané</span>
+            <span style="font-size:11px;color:var(--t3)">Snapshot de l'état actuel</span>
+          </button>
+          <div style="height:1px;background:var(--bd);margin:4px 6px"></div>
+          <button onclick="generateBilanPDF();toggleRapportMenu()" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--t1);border-radius:10px;cursor:pointer;text-align:left;gap:2px" onmouseover="this.style.background='rgba(45,202,114,.1)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:600">&#128196; Bilan de fin de journée</span>
+            <span style="font-size:11px;color:var(--t3)">Tous les camions • décalages • stats</span>
+          </button>
+        </div>
+      </div>
     </div>
     <div class="hdr-sep"></div>
     <!-- Groupe Outils condensé -->
     <div class="hdr-group tv-keep" style="position:relative">
-      <button class="btn-imp" style="color:var(--amber);border-color:rgba(255,159,10,.3)" onclick="toggleCompactMode()" id="compactBtn" title="Mode compact">&#9776;</button>
-      <button class="btn-imp" style="color:var(--indigo);border-color:rgba(94,92,230,.3)" onclick="toggleTVMode()" id="tvBtn" title="Mode grand &eacute;cran">&#128250;</button>
       <button class="btn-imp" style="color:var(--t2);border-color:rgba(118,118,128,.3)" onclick="toggleHdrMore()" id="hdrMoreBtn" title="Plus d'outils">&#x22EF;</button>
       <div class="hdr-more-menu" id="hdrMoreMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:6px;min-width:180px;z-index:150;box-shadow:var(--sh)">
         <button class="hdr-more-item" onclick="openActivityLog();toggleHdrMore()">&#128221; Journal d'activit&eacute;</button>
@@ -1293,7 +1296,6 @@ html.tv-mode body{overflow:auto}
   <!-- Vue Semaine: KPIs globaux + ponctualité + récap -->
   <div id="weekSection" style="display:none">
     <div id="kpiRow"></div>
-    <div id="synPonct" style="display:none"></div>
     <div class="card" id="weekCard">
       <div class="card-ttl">
         <span>&#x1F4C6; R&#xe9;capitulatif par jour</span>
@@ -1325,9 +1327,14 @@ html.tv-mode body{overflow:auto}
       <button class="btn-sm" style="background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.25);color:var(--blue)" onclick="openAdvFilter()">&#128270; Filtres</button>
       <button class="btn-sm" style="background:rgba(94,92,230,.1);border-color:rgba(94,92,230,.25);color:var(--indigo)" onclick="openKanban()">&#128203; Kanban</button>
 
-      <button class="btn-new" onclick="regenTrucks()">&#x21BB; Regenerer VL06O</button>
-      <button class="btn-sm" onclick="var r=cleanCompletedTrucks();showToast(r?r+' camion(s) nettoye(s)':'Aucun camion termine')">&#128465; Nettoyer termines</button>
       <button class="btn-sm" id="groupCreneauBtn" onclick="toggleGroupCreneau()" title="Grouper par créneau">&#128336; Grouper</button>
+      <button class="btn-sm" id="montageModeBtn" onclick="enterMontageMode()" style="background:rgba(77,124,254,.12);border-color:rgba(77,124,254,.3);color:var(--blue);font-weight:700" title="Construire les camions manuellement par transporteur">&#128295; Montage</button>
+      <span style="display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:4px 10px;border-radius:20px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)" title="Définir la date de saisie (utile le lendemain matin pour saisir des timestamps rétroactifs)">
+        <span style="font-size:12px;color:#f59e0b">📅</span>
+        <span style="font-size:11px;color:var(--t3)">Saisie du</span>
+        <input id="workingDateInput" type="date" value="" onchange="setWorkingDate(this.value);renderTrucks()"
+          style="background:transparent;border:none;color:#f59e0b;font-size:11px;font-weight:700;cursor:pointer;outline:none;font-family:inherit;width:110px">
+      </span>
     </div>
     <div class="cam-filter-bar" style="gap:8px">
       <span style="font-size:11px;font-weight:700;color:var(--t3);flex-shrink:0">Jour :</span>
@@ -1335,9 +1342,17 @@ html.tv-mode body{overflow:auto}
       <input id="truckSearchInput" type="search" placeholder="&#128269; Rechercher transporteur, itin., destination…" oninput="applyTruckSearch()" style="margin-left:auto;padding:5px 12px;font-size:12px;border-radius:20px;border:1.5px solid var(--bd2);background:var(--sf2);color:var(--t1);outline:none;width:280px;flex-shrink:0">
     </div>
   </div>
+  <!-- Bannière mode saisie différée -->
+  <div id="workingDateBanner" style="display:none;align-items:center;gap:10px;padding:8px 18px;background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.35);font-size:12px">
+    <span style="font-size:16px">📅</span>
+    <span id="workingDateLabel" style="font-weight:700;color:#f59e0b;flex:1"></span>
+    <span style="color:var(--t3);font-size:11px">Les timestamps instant seront horodatés sur cette date.</span>
+    <button onclick="setWorkingDate(new Date().toISOString().slice(0,10));renderTrucks()" style="padding:3px 12px;border-radius:20px;border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.15);color:#f59e0b;font-size:11px;cursor:pointer;font-weight:700">✕ Quitter ce mode</button>
+  </div>
   <div id="ponctStats"></div>
   <div class="focus-bar" id="focusBar"><span style="font-size:14px">&#x1F50D;</span><span class="focus-bar-label" id="focusBarLabel">Mode focus</span><button class="focus-bar-close" onclick="exitFocusMode()">&#x2715; Quitter le focus</button></div>
   <div id="truckList"></div>
+  <div id="montagePanel" style="display:none"></div>
 </div>
 
 <!-- ── Panel: Planning (NEW) ── -->
@@ -1491,6 +1506,13 @@ html.tv-mode body{overflow:auto}
   </div>
 </div>
 
+<!-- ═══ WEEK EXPORT MODAL ═══ -->
+<div id="weekExportBg" onclick="if(event.target===this)closeWeekExportModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);z-index:220;align-items:center;justify-content:center">
+  <div style="width:min(520px,92vw);background:linear-gradient(165deg,rgba(160,210,255,.09) 0%,rgba(140,180,220,.04) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(160,210,255,.22);border-radius:20px;box-shadow:0 0 0 1px rgba(160,210,255,.08) inset,0 24px 60px rgba(0,0,0,.45);padding:24px">
+    <div id="weekExportContent"></div>
+  </div>
+</div>
+
 <!-- ═══ KANBAN ═══ -->
 <div class="kanban-bg" id="kanbanBg" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="kanban-wrap">
@@ -1516,7 +1538,15 @@ html.tv-mode body{overflow:auto}
 <div class="notif-container" id="notifContainer"></div>
 
 <!-- ═══ XLSX Library ═══ -->
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<script>
+/* SheetJS chargé de façon async pour ne pas bloquer l'app */
+(function(){
+  var s=document.createElement('script');
+  s.src='https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+  s.onerror=function(){console.warn('[TruckFlow] SheetJS CDN indisponible — export Excel désactivé');};
+  document.head.appendChild(s);
+})();
+</script>
 
 <!-- ═══ APPLICATION JAVASCRIPT ═══ -->
 <script>
@@ -1540,6 +1570,19 @@ var fTruckPonct = '';
 var fTruckPeriod = '';
 var fTruckStatus = '';
 var _completedTrucks = [];
+// Date de saisie : null = aujourd'hui, sinon YYYY-MM-DD (mode saisie décalée)
+var _workingDate = null;
+function getWorkingDate(){return _workingDate||new Date().toISOString().slice(0,10);}
+function setWorkingDate(v){
+  _workingDate=(v&&v!==new Date().toISOString().slice(0,10))?v:null;
+  var el=document.getElementById('workingDateBanner');
+  if(el){el.style.display=_workingDate?'flex':'none';
+    if(_workingDate){var d=new Date(_workingDate+'T12:00:00');
+      document.getElementById('workingDateLabel').textContent='Mode saisie diff\u00e9r\u00e9e : '+d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'});
+    }
+  }
+  var inp=document.getElementById('workingDateInput');if(inp)inp.value=_workingDate||new Date().toISOString().slice(0,10);
+}
 var showExport = true;
 var _activeDay = null;
 var _ponctTimer = null;
@@ -1629,7 +1672,7 @@ function purgeOldCompleted(){
 
 // ─── UI Helpers ───────────────────────────────────────────────────────────
 function showToast(msg){
-  var t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('on');
+  var t=document.getElementById('toastEl');if(!t)return;t.textContent=msg;t.classList.add('on');
   setTimeout(function(){t.classList.remove('on');},2800);
 }
 function switchTab(id,btn){
@@ -2034,7 +2077,6 @@ function renderKPIs(){
     {l:'Livraisons', v:s.total, acc:'var(--blue)',  sub:expNote||'total SAP', ico:'\uD83D\uDCE6', ibg:'rgba(10,132,255,.12)'},
     {l:'SGP \u2014 Pr\u00e9pa termin\u00e9e',v:s.sp_C,acc:'var(--green)',sub:Math.round(s.sp_C/(s.total||1)*100)+'% \u00b7 '+s.sp_A+' OT cr\u00e9\u00e9s \u00b7 '+s.sp_B+' commenc\u00e9es', ico:'\u2705', ibg:'rgba(48,209,88,.12)'},
     {l:'SWM \u2014 WM termin\u00e9e',v:s.wm_C,acc:'var(--teal)',sub:Math.round(s.wm_C/(s.total||1)*100)+'% \u00b7 '+s.wm_B+' OT transf\u00e9r\u00e9s', ico:'\uD83D\uDD04', ibg:'rgba(90,200,250,.12)'},
-    {l:'Camions',    v:trucks.length, acc:'var(--orange)', sub:'auto SAP', ico:'\uD83D\uDE9A', ibg:'rgba(255,159,10,.12)'},
   ].map(function(k){
     return '<div class="kpi" style="--acc:'+k.acc+'">'+
       '<div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div>'+
@@ -2044,7 +2086,7 @@ function renderKPIs(){
   var csHtml='<div class="kpi" style="--acc:var(--blue)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(10,132,255,.12)">\uD83D\uDCE6</div><div class="kpi-body"><div class="kpi-l">Colis Total</div>'+kpiDelta(s.colisSiloPrev,s.colisSiloRest,'var(--blue)',0)+'</div></div>';
   var pickHtml='<div class="kpi" style="--acc:var(--purple)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(191,90,242,.12)">\u270b</div><div class="kpi-body"><div class="kpi-l">Colis Picking</div>'+kpiDelta(s.colisPickPrev,s.colisPickRest,'var(--purple)',s.hrPick)+'</div></div>';
   document.getElementById('kpiRow').innerHTML=
-    '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'+simple+'</div>'+
+    '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+simple+'</div>'+
     '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+siloHtml+csHtml+pickHtml+'</div>';
 }
 
@@ -2283,7 +2325,6 @@ function renderDayDetail(date){
     {l:'Livraisons',v:total,acc:'var(--blue)',sub:(nExport?'dont '+nExport+' export':'total du jour'),ico:'\uD83D\uDCE6',ibg:'rgba(10,132,255,.12)'},
     {l:'SGP \u2014 Pr\u00e9pa termin\u00e9e',v:spC,acc:'var(--green)',sub:pct+'% \u00b7 '+spA+' en cours \u00b7 '+spB+' commenc.',ico:'\u2705',ibg:'rgba(48,209,88,.12)'},
     {l:'SWM \u2014 WM termin\u00e9e',v:wC,acc:'var(--teal)',sub:(total?Math.round(wC/total*100):0)+'% du jour',ico:'\uD83D\uDD04',ibg:'rgba(90,200,250,.12)'},
-    {l:'Camions',v:nbTrucks,acc:'var(--orange)',sub:tPctDone+'% partis \u00b7 '+tParti+'/'+nbTrucks,ico:'\uD83D\uDE9A',ibg:'rgba(255,159,10,.12)'},
   ].map(function(k){
     return '<div class="kpi" style="--acc:'+k.acc+'"><div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div><div class="kpi-body"><div class="kpi-l">'+k.l+'</div><div class="kpi-v">'+k.v+'</div><div class="kpi-s">'+k.sub+'</div></div></div>';
   }).join('');
@@ -2291,25 +2332,13 @@ function renderDayDetail(date){
     '<div class="kpi" style="--acc:var(--indigo)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(94,92,230,.12)">\uD83C\uDFED</div><div class="kpi-body"><div class="kpi-l">Palettes SILO</div>'+kpiDeltaDay(totPalSilo,restPalSilo,'var(--indigo)',restHrSilo)+'</div></div>'+
     '<div class="kpi" style="--acc:var(--blue)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(10,132,255,.12)">\uD83D\uDCE6</div><div class="kpi-body"><div class="kpi-l">Colis Total</div>'+kpiDeltaDay(totColSilo,restColSilo,'var(--blue)',0)+'</div></div>'+
     '<div class="kpi" style="--acc:var(--purple)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(191,90,242,.12)">\u270b</div><div class="kpi-body"><div class="kpi-l">Colis Picking</div>'+kpiDeltaDay(totColPick,restColPick,'var(--purple)',restHrPick)+'</div></div>';
-  // ── Compteurs temps réel → kpi-row identique Vue Semaine ──
-  var kpiRealtime='';
-  if(nbTrucks>0){
-    kpiRealtime=[
-      {l:'Sur site',      v:onSite,  acc:'var(--blue)',  sub:tAquai+' \u00e0 quai \u00b7 '+tEnChg+' en chg.',ico:'\uD83C\uDFED',ibg:'rgba(10,132,255,.12)'},
-      {l:'Arriv\u00e9s',  v:tArrive, acc:'var(--amber)', sub:'en attente de quai',              ico:'\u23F3',        ibg:'rgba(255,159,10,.12)'},
-      {l:'\u00c0 quai',   v:tAquai,  acc:'var(--indigo)',sub:'dock assign\u00e9',                ico:'\uD83D\uDEA7',  ibg:'rgba(94,92,230,.12)'},
-      {l:'En chargement', v:tEnChg,  acc:'var(--purple)',sub:'op\u00e9ration en cours',         ico:'\uD83D\uDCE6',  ibg:'rgba(191,90,242,.12)'},
-      {l:'Partis',        v:tParti,  acc:'var(--green)', sub:tPctDone+'% termin\u00e9s',        ico:'\uD83D\uDE80',  ibg:'rgba(48,209,88,.12)'},
-    ].map(function(k){return '<div class="kpi" style="--acc:'+k.acc+'"><div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div><div class="kpi-body"><div class="kpi-l">'+k.l+'</div><div class="kpi-v">'+k.v+'</div><div class="kpi-s">'+k.sub+'</div></div></div>';}).join('');
-  }
   var blocKpi=
-    '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'+kpiRow1+'</div>'+
-    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'')+
-    (kpiRealtime?'<div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">'+kpiRealtime+'</div>':'');
+    '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow1+'</div>'+
+    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'');
 
-  // ── Bloc 3 : Ponctualité cliquable (identique Vue Semaine) ──
+  // ── Bloc 3 : Ponctualité camions — retiré (voir onglet Statistiques) ──
   var blocPonct='';
-  if(nbTrucks>0){
+  if(false&&nbTrucks>0){
     function buildDayPonctPanel(arr){
       return arr.map(function(item){
         var t=item.t,p=item.p,ts2=timestamps[t.id]||{};
@@ -2367,19 +2396,17 @@ function renderDayDetail(date){
   var prepPct=total?Math.round(spC/total*100):0;
   var palPct=totPalSilo?Math.round(Math.max(0,totPalSilo-restPalSilo)/totPalSilo*100):0;
   var colPct=totColSilo?Math.round(Math.max(0,totColSilo-restColSilo)/totColSilo*100):0;
-  var trkPct=nbTrucks?Math.round(tParti/nbTrucks*100):0;
-  var advGlobal=Math.round((prepPct+trkPct+(totPalSilo?palPct:prepPct))/3);
+  var advGlobal=Math.round((prepPct+(totPalSilo?palPct:prepPct)+colPct)/3);
   var blocAvancement='';
-  if(nbTrucks>0||total>0){
+  if(total>0){
     function spcRing(pct2,lbl,col){return '<div class="spc" style="cursor:default;padding:14px 12px">'+progressRingSVG(pct2,col,48)+'<div class="spc-lbl" style="margin-top:6px">'+lbl+'</div></div>';}
-    var nRings=3+(totPalSilo?1:0);
+    var nRings=2+(totPalSilo?1:0);
     blocAvancement='<div class="syn-ponct">'+
       '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\u2B55 Avancement global</span><span class="syn-ponct-sub">'+advGlobal+'% moyen</span></div>'+
       '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+(nRings+1)+',1fr)">'+
         spcRing(prepPct,'Pr\u00e9pa SGP','var(--green)')+
         (totPalSilo?spcRing(palPct,'SILO Pal.','var(--indigo)'):'')+
         spcRing(colPct,'Colis','var(--blue)')+
-        spcRing(trkPct,'Camions','var(--orange)')+
         '<div class="spc" style="cursor:default;padding:14px 12px"><div class="spc-val" style="font-size:36px;color:'+(advGlobal>=80?'var(--green)':advGlobal>=40?'var(--amber)':'var(--red)')+'">'+advGlobal+'%</div><div class="spc-lbl" style="margin-top:6px">Avanc. global</div></div>'+
       '</div>'+
     '</div>';
@@ -2614,8 +2641,8 @@ function stampNow(ti,key){
     quaiAssign[q]=tid;
     saveQuaiAssign();
   }
-  timestamps[trucks[ti].id][key]=new Date().toISOString();
-  if(key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}return;}}
+  timestamps[trucks[ti].id][key]=_workingDate?(function(){var b=new Date(_workingDate+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);return isNaN(b.getTime())?n.toISOString():b.toISOString();})():new Date().toISOString();
+  if(key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}return;}}
   save(); renderTrucks(); renderQuai();
   if(_activeDay) try{renderDayDetail(_activeDay);}catch(e){}
   var lbl=(TS_DEFS.find(function(t){return t.key===key;})||{lbl:key}).lbl;
@@ -2679,11 +2706,13 @@ function makeTsCell(def,real,deb,ti){
     okBtn.addEventListener('click',function(){
       if(!inp.value)return;
       var parts=inp.value.split(':');
-      var now=new Date();
+      var tdate2=trucks[ti]&&trucks[ti].date;var now=tdate2?new Date(tdate2+'T00:00:00'):new Date();
       now.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=now.toISOString();
-      save();renderTrucks();showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);
+      save();
+      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);return;}}
+      renderTrucks();showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);
     });
     var cancelBtn=document.createElement('button');cancelBtn.className='ts-btn clr';cancelBtn.textContent='\u2715';
     cancelBtn.addEventListener('click',function(){editRow.style.display='none';});
@@ -2723,8 +2752,10 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
     html+='<button class="ts-chip-cta2">\u270e Heure manuelle</button>';
     html+='<span class="ts-chip-edit-row"></span>';
   } else {
-    // Étape non encore accessible
+    // Étape non encore accessible — bouton discret pour saisie manuelle rétroactive
     html+='<span class="ts-chip-empty">\u2014</span>';
+    html+='<button class="ts-chip-cta2 ts-chip-bypass" title="Saisir manuellement sans respecter l\'ordre">\u270e Saisir</button>';
+    html+='<span class="ts-chip-edit-row"></span>';
   }
   // Pour le chip Chargement : afficher fin_chg intégré
   if(def.key==='chg' && real){
@@ -2754,7 +2785,12 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
       finBtnEl.addEventListener('click',function(e){
         e.stopPropagation();
         if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
-        timestamps[trucks[ti].id].fin_chg=new Date().toISOString();
+        // Utiliser la date du camion (mode saisie différée)
+        var _tdate=trucks[ti]&&trucks[ti].date;
+        var _now=_workingDate||_tdate?
+          (function(){var b=new Date((_workingDate||_tdate)+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);return isNaN(b.getTime())?n.toISOString():b.toISOString();})()
+          :new Date().toISOString();
+        timestamps[trucks[ti].id].fin_chg=_now;
         save();renderTrucks();showToast('\u2705 Chargement termin\u00e9');
       });
     }
@@ -2765,7 +2801,7 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
         if(finEditEl.style.display==='block'&&!finEditEl.innerHTML){
           var inp=document.createElement('input');inp.type='time';inp.style.cssText='font-size:11px;width:80px;background:var(--sf2);border:1px solid var(--bd2);border-radius:5px;padding:2px 5px;color:var(--t1)';
           var okB=document.createElement('button');okB.textContent='\u2713';okB.style.cssText='font-size:10px;padding:2px 6px;border-radius:5px;background:rgba(45,202,114,.2);border:1px solid rgba(45,202,114,.4);color:var(--green);cursor:pointer;margin-left:3px';
-          okB.addEventListener('click',function(ev){ev.stopPropagation();if(!inp.value)return;var p=inp.value.split(':');var nd=new Date();nd.setHours(+p[0],+p[1],0,0);if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};timestamps[trucks[ti].id].fin_chg=nd.toISOString();save();renderTrucks();showToast('Fin chgt \u2192 '+inp.value);});
+          okB.addEventListener('click',function(ev){ev.stopPropagation();if(!inp.value)return;var p=inp.value.split(':');var _tdate2=trucks[ti]&&trucks[ti].date;var nd=_tdate2?new Date(_tdate2+'T00:00:00'):new Date();nd.setHours(+p[0],+p[1],0,0);if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};timestamps[trucks[ti].id].fin_chg=nd.toISOString();save();renderTrucks();showToast('Fin chgt \u2192 '+inp.value);});
           finEditEl.appendChild(inp);finEditEl.appendChild(okB);
         }
       });
@@ -2786,11 +2822,13 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
     var okB=document.createElement('button');okB.className='go-btn';okB.textContent='\u2713';
     okB.addEventListener('click',function(ev){
       ev.stopPropagation();if(!inp.value)return;
-      var parts=inp.value.split(':');var nd=new Date();
+      var parts=inp.value.split(':');var tdate=trucks[ti]&&trucks[ti].date;var nd=tdate?new Date(tdate+'T00:00:00'):new Date();
       nd.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=nd.toISOString();
-      save();renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
+      save();
+      if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' \u2192 '+inp.value);return;}}
+      renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
     });
     var cxB=document.createElement('button');cxB.className='clr-btn';cxB.textContent='\u2715';
     cxB.addEventListener('click',function(ev){ev.stopPropagation();editArea.classList.remove('open');});
@@ -2820,6 +2858,17 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
       if(editArea.classList.contains('open')){editArea.classList.remove('open');return;}
       _buildEditRow(editArea,null);
     });
+  } else {
+    // Saisie rétroactive — bouton bypass (ordre non respecté)
+    var bypassBtn=el.querySelector('.ts-chip-bypass');
+    var bypassEdit=el.querySelector('.ts-chip-edit-row');
+    if(bypassBtn&&bypassEdit){
+      bypassBtn.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(bypassEdit.classList.contains('open')){bypassEdit.classList.remove('open');return;}
+        _buildEditRow(bypassEdit,null);
+      });
+    }
   }
   return el;
 }
@@ -2995,6 +3044,21 @@ function renderTrucks(){
       head.appendChild(pSpan);
     }
 
+    // Décalage badge inline
+    if(t.decalage){
+      var decMotifs={'mtx3':'#e65100','transporteur':'#1565c0','pas_venu':'#b71c1c'};
+      var dColor=decMotifs[t.decalage.motif]||'#888';
+      var dBadge=document.createElement('span');
+      dBadge.style.cssText='font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(255,100,0,.12);border:1px solid rgba(255,100,0,.35);color:'+dColor+';cursor:pointer;white-space:nowrap';
+      var dNewStr=t.decalage.dateNew?(t.decalage.dateNew+(t.decalage.creneauNew?' '+t.decalage.creneauNew:'')):'';
+      dBadge.innerHTML='\u23F1 '+t.decalage.label+(dNewStr?' \u2192 '+dNewStr:'')+(t.decalage.note?' \u00b7 '+t.decalage.note.slice(0,25):'');
+      dBadge.title='D\u00e9calage : '+t.decalage.label+
+        (t.decalage.dateOrig?'\nOrig.\u00a0: '+t.decalage.dateOrig+(t.decalage.creneauOrig?' '+t.decalage.creneauOrig:''):'')+
+        (dNewStr?'\nNouveau\u00a0: '+dNewStr:'')+
+        (t.decalage.note?'\nNote\u00a0: '+t.decalage.note:'')+(t.decalage.heure?' (enreg. '+t.decalage.heure+')':'');
+      (function(id){dBadge.addEventListener('click',function(){openDecalageModal(id);});})(t.id);
+      head.appendChild(dBadge);
+    }
     // Loading alert badge inline
     var loadAlert=getLoadingAlert(ts);
     if(loadAlert){
@@ -3054,7 +3118,9 @@ function renderTrucks(){
     (function(id){printBtn.addEventListener('click',function(){printTruckSheet(id);});})(t.id);
     var delBtn=document.createElement('button');delBtn.className='btn-sm btn-red';delBtn.textContent='\u2715';delBtn.title='Supprimer';delBtn.style.cssText='font-size:10px;padding:2px 7px';
     (function(idx){delBtn.addEventListener('click',function(){delTruck(idx);});})(ti);
-    btnGrp.appendChild(splitBtn);btnGrp.appendChild(printBtn);btnGrp.appendChild(lockBtn);btnGrp.appendChild(delBtn);
+    var decBtn=document.createElement('button');decBtn.className='btn-sm';decBtn.style.cssText='font-size:10px;padding:2px 7px;'+(t.decalage?'background:rgba(255,100,0,.15);border-color:rgba(255,100,0,.4);color:#e65100':'');decBtn.textContent=t.decalage?'\u23F1':'\u23F1';decBtn.title=t.decalage?'D\u00e9calage: '+t.decalage.label+' (cliquer pour modifier)':'D\u00e9clarer un d\u00e9calage';
+    (function(id){decBtn.addEventListener('click',function(){openDecalageModal(id);});})(t.id);
+    btnGrp.appendChild(splitBtn);btnGrp.appendChild(printBtn);btnGrp.appendChild(lockBtn);btnGrp.appendChild(decBtn);btnGrp.appendChild(delBtn);
     head.appendChild(btnGrp);
     tc.appendChild(head);
 
@@ -3116,12 +3182,12 @@ function renderTrucks(){
     if(totColSilo) hdrRight+='<span style="font-size:11px;font-weight:600;color:var(--t2);margin-left:6px">'+Math.round(totColSilo).toLocaleString('fr')+'cs</span>';
     if(totColPick) hdrRight+='<span style="font-size:11px;font-weight:600;color:var(--purple);margin-left:6px">\u270b '+Math.round(totColPick).toLocaleString('fr')+'pk</span>';
     if(isLocked) hdrRight+='<span style="font-size:10px;color:var(--amber);margin-left:8px">\uD83D\uDD12 Fig\u00e9</span>';
-    hdrRight+='<span class="tc-del-toggle-ico" style="font-size:11px;color:var(--t3);margin-left:10px">\u25bc</span>';
+    hdrRight+='<span class="tc-del-toggle-ico" style="font-size:11px;color:var(--t3);margin-left:10px">\u25b6</span>';
     secHdr.innerHTML=hdrLeft+'<span style="display:flex;align-items:center">'+hdrRight+'</span>';
     secDiv.appendChild(secHdr);
-    // Corps livraisons
+    // Corps livraisons (fermé par défaut)
     var secBody=document.createElement('div');
-    secBody.style.cssText='padding:8px 10px;display:flex;flex-direction:column;gap:6px';
+    secBody.style.cssText='padding:8px 10px;display:none;flex-direction:column;gap:6px';
     // Toggle collapse
     secHdr.addEventListener('click',function(){
       var ico=secHdr.querySelector('.tc-del-toggle-ico');
@@ -3320,6 +3386,11 @@ function confirmSplit(){
     trucks[_splitTruckIdx].deliveries=trucks[_splitTruckIdx].deliveries.filter(function(x){return x!==id;});
     newTruck.deliveries.push(id);
   });
+  // Si le camion source est figé, mettre à jour lockedDeliveries pour refléter le split
+  // Sans ça, le prochain reimport VL06O restaure les livraisons déplacées → doublon
+  if(t.locked && t.lockedDeliveries){
+    t.lockedDeliveries=t.lockedDeliveries.filter(function(id){return !_splitSelected.has(id);});
+  }
   trucks.push(newTruck);save();closeSplitModal();renderAll();
   showToast('Camion splitt\u00e9 \u2192 '+newTruck.deliveries.length+' livraisons');
 }
@@ -3462,6 +3533,32 @@ function importSession(event){
   reader.readAsText(file);
 }
 
+// ─── Import timestamps mobile ────────────────────────────────────────────
+function importMobileTS(event){
+  var file = event.target.files[0]; event.target.value='';
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var d = JSON.parse(ev.target.result);
+      if(d.type !== 'tf-mobile-ts' || !d.timestamps) throw new Error('Format invalide (attendu tf-mobile-ts)');
+      var count = 0;
+      Object.keys(d.timestamps).forEach(function(id){
+        var mts = d.timestamps[id];
+        if(!timestamps[id]) timestamps[id] = {};
+        ['arr','quai','chg','dep'].forEach(function(step){
+          if(mts[step]) timestamps[id][step] = mts[step];
+        });
+        count++;
+      });
+      save();
+      renderAll();
+      showToast('\uD83D\uDCF1 '+count+' camion'+(count>1?'s':'')+' mis à jour depuis mobile \u2705');
+    }catch(e){ showToast('Erreur import mobile : '+e.message); }
+  };
+  reader.readAsText(file);
+}
+
 // ─── Nettoyage camions complets ───────────────────────────────────────────
 function cleanCompletedTrucks(){
   var livMap = {};
@@ -3469,9 +3566,8 @@ function cleanCompletedTrucks(){
   var before = trucks.length;
   trucks = trucks.filter(function(t){
     var ts = timestamps[t.id]||{};
-    if(!ts.dep) return true;
-    {
-      // Archive completed truck before removal
+    if(!ts.dep) return true; // pas encore parti → on garde
+    try{
       var ponct=getPonctualite(t,ts,Date.now());
       var delivDetails=(t.deliveries||[]).map(function(id){
         var d=livMap[id];
@@ -3487,15 +3583,15 @@ function cleanCompletedTrucks(){
         deliveries:(t.deliveries||[]).slice(),deliveryDetails:delivDetails,
         timestamps:{arr:ts.arr,quai:ts.quai,chg:ts.chg,fin_chg:ts.fin_chg,dep:ts.dep},
         quai:quaiNum,
+        decalage:t.decalage||null,locked:false,
         ponctualite:{status:ponct.status,label:ponct.label,delta:ponct.delta}
       });
       Object.keys(quaiAssign).forEach(function(q){
         if(quaiAssign[q]===t.id) delete quaiAssign[q];
       });
       delete timestamps[t.id];
-      return false;
-    }
-    return true;
+    }catch(e){console.error('[archive] erreur pour camion '+t.id+':', e);}
+    return false; // retirer du tableau actif dans tous les cas
   });
   var removed = before - trucks.length;
   if(removed>0){ purgeOldCompleted(); saveCompleted(); }
@@ -3553,13 +3649,13 @@ function switchSynView(view){
   var weekBtn=document.getElementById('synViewWeek');
   var dayDetailEl=document.getElementById('dayDetail');
   var weekSection=document.getElementById('weekSection');
-  // Also hide/show injected elements that belong to week global view
-  var weekExtras=['avgWaitBadge','goalsWrap'];
+  // Blocs masqués en vue semaine (compteurs + KPIs + objectifs)
+  var synWeekHidden=['avgWaitBadge','goalsWrap','rtCountersWrap','kpiRow'];
   if(view==='day'){
     dayBtn.classList.add('on');weekBtn.classList.remove('on');
     if(dayDetailEl) dayDetailEl.style.display='';
     if(weekSection) weekSection.style.display='none';
-    weekExtras.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
+    synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
     var todayISO=new Date().toISOString().slice(0,10);
     if(!_activeDay) _activeDay=todayISO;
     try{renderDayDetail(_activeDay);}catch(e){}
@@ -3567,9 +3663,10 @@ function switchSynView(view){
     weekBtn.classList.add('on');dayBtn.classList.remove('on');
     if(dayDetailEl) dayDetailEl.style.display='none';
     if(weekSection) weekSection.style.display='';
-    weekExtras.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
     try{renderSynPonct();}catch(e){}
     try{renderWeekSummary();}catch(e){}
+    // Vue semaine : uniquement le récapitulatif par jour, sans KPIs ni compteurs
+    synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
   }
 }
 // Auto-refresh active view on every renderAll
@@ -3598,6 +3695,8 @@ function patchRenderAllForSynView(){
       if(weekSection) weekSection.style.display='';
       try{renderSynPonct();}catch(e){}
       try{renderWeekSummary();}catch(e){}
+      // Vue semaine : masquer KPIs, compteurs et objectifs après re-render
+      ['avgWaitBadge','goalsWrap','rtCountersWrap','kpiRow'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
     }
   };
 }
@@ -3606,20 +3705,13 @@ function renderWeekSummary(){
   var el=document.getElementById('weekSummaryBody');
   if(!el) return;
   var bd=getByDate();
-  var totalLivs=0, totalTrucks=0, totalSpC=0, totalSpB=0;
+  var totalLivs=0, totalSpC=0, totalSpB=0;
   var totPalSilo=0, totPalSiloRest=0, totColisSilo=0, totColisSiloRest=0, totColisPick=0, totColisPickRest=0;
   bd.forEach(function(d){
     totalLivs+=d.total; totalSpC+=(d.sp_C||0); totalSpB+=(d.sp_B||0);
     totPalSilo+=(d.palSilo||0); totPalSiloRest+=(d.palSiloRest||0);
     totColisSilo+=(d.colisSilo||0); totColisSiloRest+=(d.colisSiloRest||0);
     totColisPick+=(d.colisPick||0); totColisPickRest+=(d.colisPickRest||0);
-  });
-  var trucksByDate={};
-  trucks.forEach(function(t){
-    var dt=t.date||'?';
-    if(!trucksByDate[dt]) trucksByDate[dt]=0;
-    trucksByDate[dt]++;
-    totalTrucks++;
   });
   var pctGlobal=totalLivs?Math.round(totalSpC/totalLivs*100):0;
 
@@ -3655,7 +3747,6 @@ function renderWeekSummary(){
     html+='<thead><tr style="border-bottom:2px solid rgba(160,210,255,.12);background:rgba(160,210,255,.04)">'+
       '<th style="text-align:left;padding:12px 14px;color:var(--t3);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">\uD83D\uDCC5 Date</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase">\uD83D\uDCE6 Livr.</th>'+
-      '<th style="text-align:center;padding:12px 8px;color:var(--orange);font-size:11px;font-weight:700;text-transform:uppercase">\uD83D\uDE9A Cam.</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--green);font-size:11px;font-weight:700;text-transform:uppercase">\u2705 C</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--amber);font-size:11px;font-weight:700;text-transform:uppercase">\u23F3 B</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--t3);font-size:11px;font-weight:700;text-transform:uppercase">\uD83D\uDCDD A</th>'+
@@ -3667,7 +3758,6 @@ function renderWeekSummary(){
     bd.forEach(function(d,idx){
       var dtObj=new Date(d.date+'T12:00:00');
       var dayLbl=dtObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
-      var nT=trucksByDate[d.date]||0;
       var pct=d.total?Math.round((d.sp_C||0)/d.total*100):0;
       var barCol=pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
       var isToday=(d.date===todayISO2);
@@ -3675,7 +3765,6 @@ function renderWeekSummary(){
       html+='<tr onclick="selectDay(\''+d.date+'\')" style="cursor:pointer;border-bottom:1px solid var(--bd);transition:background .15s;'+rowBg+'" onmouseover="this.style.background=\'rgba(77,124,254,.08)\'" onmouseout="this.style.background=\''+(isToday?'rgba(10,132,255,.06)':idx%2===0?'rgba(255,255,255,.02)':'')+'\'">'+
         '<td style="padding:12px 14px;font-weight:800;color:var(--t1);white-space:nowrap">'+(isToday?'\uD83D\uDFE2 ':'')+dayLbl+'</td>'+
         '<td style="text-align:center;padding:12px 8px;font-weight:800;color:var(--blue)">'+d.total+'</td>'+
-        '<td style="text-align:center;padding:12px 8px;font-weight:800;color:var(--orange)">'+nT+'</td>'+
         '<td style="text-align:center;padding:12px 8px;font-weight:700;color:var(--green)">'+(d.sp_C||0)+'</td>'+
         '<td style="text-align:center;padding:12px 8px;font-weight:700;color:var(--amber)">'+(d.sp_B||0)+'</td>'+
         '<td style="text-align:center;padding:12px 8px;color:var(--t3)">'+(d.sp_A||0)+'</td>'+
@@ -3967,6 +4056,10 @@ function autoGenTrucks(){
   var allLivIds = new Set(APP.deliveries.map(function(d){return d.id;}));
   var reserved = new Set();
   var assigned  = new Set();
+  // Réserver les livraisons des camions déjà archivés pour éviter de les recréer au reimport
+  (_completedTrucks||[]).forEach(function(ct){
+    (ct.deliveries||[]).forEach(function(id){ reserved.add(id); });
+  });
   // Index des livraisons déplacées manuellement vers un autre camion
   var movedIn = {};
   trucks.forEach(function(t){ Object.keys(t._movedIn||{}).forEach(function(lid){ movedIn[lid]=t.id; }); });
@@ -3982,12 +4075,12 @@ function autoGenTrucks(){
     }
     (t.deliveries||[]).forEach(function(id){
       assigned.add(id);
-      if(t.locked || hasTS) reserved.add(id);
+      if(t.locked || hasTS || t._dateManuallyChanged) reserved.add(id);
     });
   });
   trucks.forEach(function(t){
     var hasTS = Object.keys(timestamps[t.id]||{}).length > 0;
-    if(t.locked || hasTS) return; // Camions avec timestamps: garder leurs livraisons
+    if(t.locked || hasTS || t._dateManuallyChanged) return; // Camions avec timestamps ou date manuelle: garder leurs livraisons
     var key = (t.itin||'SANS')+':'+(t.date||'');
     var sapLivs = sapMap[key] || [];
     var sapSet  = new Set(sapLivs);
@@ -3999,7 +4092,7 @@ function autoGenTrucks(){
   });
   trucks.forEach(function(t){
     var hasTS = Object.keys(timestamps[t.id]||{}).length > 0;
-    if(t.locked || hasTS) return;
+    if(t.locked || hasTS || t._dateManuallyChanged) return;
     var key = (t.itin||'SANS')+':'+(t.date||'');
     var sapLivs = sapMap[key] || [];
     sapLivs.forEach(function(id){
@@ -4499,40 +4592,56 @@ function exportExcel(){
     return ts.arr && ts.quai && ts.chg && ts.dep;
   });
 
-  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9']];
+  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouvelle date pr\u00e9vue','Note d\u00e9calage']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti]; var ts = timestamps[t.id]||{};
     function fmtTs(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
     var delta = '';
     if(ts.arr && t.creneau){
-      var cHr = creToMinutes(t.creneau);
-      var aDate = new Date(ts.arr);
-      var aMins = aDate.getHours()*60+aDate.getMinutes();
-      var diff = aMins - cHr;
-      delta = (diff>=0?'+':'')+diff+' min';
+      var cwin=creWindow(t.creneau);
+      if(cwin){
+        var aDate = new Date(ts.arr);
+        var aMins = aDate.getHours()*60+aDate.getMinutes();
+        if(aMins<cwin.start){delta='-'+Math.round(cwin.start-aMins)+' min';}
+        else if(aMins<=cwin.end){delta='\u00c0 l\'heure';}
+        else{delta='+'+Math.round(aMins-cwin.end)+' min';}
+      }
     }
     var ponctX=getPonctualite(t,ts,Date.now());
     camRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',(t.deliveries||[]).length,
-      fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'']);
+      fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'',
+      t.decalage?(t.decalage.label+(t.decalage.heure?' ('+t.decalage.heure+')':'')):'',
+      t.decalage?(t.decalage.dateOrig||t.date||''):'',
+      t.decalage?(t.decalage.creneauOrig||t.creneau||''):'',
+      t.decalage?(t.decalage.dateNew||'')+(t.decalage&&t.decalage.creneauNew?' '+t.decalage.creneauNew:''):'',
+      t.decalage?(t.decalage.note||''):'']);
   });
   var wsCam = XLSX.utils.aoa_to_sheet(camRows);
-  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25}];
+  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsCam, 'Camions');
 
-  var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.']];
+  var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','D\u00e9calage motif','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.','Note d\u00e9calage']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti];
+    var dcLbl=t.decalage?(t.decalage.label+(t.decalage.heure?' ('+t.decalage.heure+')':'')):'';
+    var dcNote=t.decalage?(t.decalage.note||''):'';
     (t.deliveries||[]).forEach(function(id){
       var d = getDeliv(id);
       if(!d) return;
-      livRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
+      livRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'', dcLbl,
         d.id, d.dest||'', d.ville||'',d.sp||'', d.wm||'',
-        d.pkg||0, d.palSilo||0, d.colisSilo||0, d.colisPick||0,d.hrSilo||0, d.hrPick||0]);
+        d.pkg||0, d.palSilo||0, d.colisSilo||0, d.colisPick||0, d.hrSilo||0, d.hrPick||0, dcNote]);
     });
-    livRows.push(['','','','','','','','','','','','','','']);
+    // Total par camion si plusieurs livraisons
+    if((t.deliveries||[]).length>1){
+      var tPkg=0,tPal=0,tCS=0,tCP=0;
+      (t.deliveries||[]).forEach(function(id){var d=getDeliv(id);if(d){tPkg+=d.pkg||0;tPal+=d.palSilo||0;tCS+=d.colisSilo||0;tCP+=d.colisPick||0;}});
+      livRows.push(['','','',dcLbl?'\u21b3 D\u00e9cal\u00e9':'','TOTAL '+(t.deliveries||[]).length+' livr.','','','','',tPkg,tPal,tCS,tCP,'','','']);
+    }
+    livRows.push(['','','','','','','','','','','','','','','','']);
   });
   var wsLiv = XLSX.utils.aoa_to_sheet(livRows);
-  wsLiv['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:12},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:11},{wch:11},{wch:9},{wch:9}];
+  wsLiv['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:24},{wch:12},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:11},{wch:11},{wch:9},{wch:9},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsLiv, 'Livraisons par camion');
 
   var byDate = getByDate();
@@ -4552,11 +4661,14 @@ function exportExcel(){
       function fmtA(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
       var deltaA = '';
       if(ts.arr && t.creneau){
-        var cHr2 = creToMinutes(t.creneau);
-        var aDate2 = new Date(ts.arr);
-        var aMins2 = aDate2.getHours()*60+aDate2.getMinutes();
-        var diff2 = aMins2 - cHr2;
-        deltaA = (diff2>=0?'+':'')+diff2+' min';
+        var cwin2=creWindow(t.creneau);
+        if(cwin2){
+          var aDate2 = new Date(ts.arr);
+          var aMins2 = aDate2.getHours()*60+aDate2.getMinutes();
+          if(aMins2<cwin2.start){deltaA='-'+Math.round(cwin2.start-aMins2)+' min';}
+          else if(aMins2<=cwin2.end){deltaA='\u00c0 l\'heure';}
+          else{deltaA='+'+Math.round(aMins2-cwin2.end)+' min';}
+        }
       }
       archRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
         (t.deliveries||[]).length, fmtA('arr'), fmtA('quai'), fmtA('chg'), fmtA('fin_chg'), fmtA('dep'), deltaA]);
@@ -4608,8 +4720,21 @@ function exportExcel(){
       var pct=c.count?Math.round((c.heure+c.avance)/c.count*100):0;
       var avgLoad=c.loadCount?fmtMinutes(Math.round(c.totalLoadMin/c.loadCount)):'\u2014';
       var avgWait=c.waitCount?fmtMinutes(Math.round(c.totalWaitMin/c.waitCount)):'\u2014';
-      statRows.push([c.name,c.count,c.heure,c.avance,c.retard,c.attente,pct+'%',avgLoad,avgWait]);
+      var dec=c.decalage||{mtx3:0,transporteur:0,pas_venu:0,total:0};
+      statRows.push([c.name,c.count,c.heure,c.avance,c.retard,c.attente,pct+'%',avgLoad,avgWait,dec.total||0,dec.mtx3||0,dec.transporteur||0,dec.pas_venu||0]);
     });
+  }
+  // ═══ Section Décalages ═══
+  var decRows=[['Date orig.','Cr\u00e9neau orig.','Transporteur','Motif d\u00e9calage','Nouvelle date pr\u00e9vue','Nouveau cr\u00e9neau','Note','Enregistr\u00e9 le']];
+  var hasDecalage=false;
+  function pushDecRow(t,dc){hasDecalage=true;decRows.push([dc.dateOrig||t.date||'',dc.creneauOrig||t.creneau||'',t.transporteur||t.itin||'',dc.label||'',dc.dateNew||'',dc.creneauNew||'',dc.note||'',(dc.date||'')+(dc.heure?' '+dc.heure:'')]);}
+  trucks.forEach(function(t){if(t.decalage)pushDecRow(t,t.decalage);});
+  (_completedTrucks||[]).forEach(function(ct){if(ct.decalage)pushDecRow(ct,ct.decalage);});
+  if(hasDecalage){var wsDecal=XLSX.utils.aoa_to_sheet(decRows);wsDecal['!cols']=[{wch:12},{wch:14},{wch:18},{wch:16},{wch:14},{wch:12},{wch:35},{wch:16}];XLSX.utils.book_append_sheet(wb,wsDecal,'D\u00e9calages');}
+  // Mise à jour header transporteurs avec colonnes décalage
+  if(carriers.length){
+    var idxCarr=statRows.findIndex(function(r){return r[0]==='=== COMPARATIF TRANSPORTEURS ===';});
+    if(idxCarr>=0) statRows[idxCarr+1]=['Transporteur','Camions','\u00c0 l\'heure','En avance','En retard','En attente','% Ponctualit\u00e9','Moy. chargement','Moy. attente','D\u00e9calages total','MTX3','Transporteur','Pas venu'];
   }
   var wsStat=XLSX.utils.aoa_to_sheet(statRows);
   wsStat['!cols']=[{wch:30},{wch:14},{wch:12},{wch:12},{wch:14},{wch:12},{wch:14},{wch:16},{wch:16}];
@@ -4654,14 +4779,16 @@ function exportExcel(){
     // 1. KPIs quotidiens
     var archAnalRows=[['=== SUIVI QUOTIDIEN ('+_dailyArchive.length+' jours) ==='],[''],
       ['Date','Camions','Livraisons','\u00c0 l\'heure','En avance','En retard','En attente','% Ponct.',
-       'Moy. attente (min)','Moy. pr\u00e9pa. (min)','Moy. chargement (min)','Moy. total (min)']];
+       'Moy. attente (min)','Moy. pr\u00e9pa. (min)','Moy. chargement (min)','Moy. total (min)','D\u00e9calages','MTX3','Transporteur','Pas venu']];
     _dailyArchive.forEach(function(d){
       var total=(d.ponct.heure||0)+(d.ponct.avance||0)+(d.ponct.retard||0)+(d.ponct.attente||0);
       var pctH=total?Math.round(d.ponct.heure/total*100):0;
       var iv=d.intervals||{};
+      var dec=d.decalages||{};
       archAnalRows.push([d.date,d.truckCount||0,d.deliveryCount||0,
         d.ponct.heure||0,d.ponct.avance||0,d.ponct.retard||0,d.ponct.attente||0,pctH+'%',
-        (iv.wait||{}).avg||0,(iv.prep||{}).avg||0,(iv.load||{}).avg||0,(iv.total||{}).avg||0]);
+        (iv.wait||{}).avg||0,(iv.prep||{}).avg||0,(iv.load||{}).avg||0,(iv.total||{}).avg||0,
+        dec.total||0,dec.mtx3||0,dec.transporteur||0,dec.pas_venu||0]);
     });
     // 2. Stats par transporteur
     archAnalRows.push([''],['=== TRANSPORTEURS PAR JOUR ==='],[''],
@@ -4696,6 +4823,83 @@ function exportExcel(){
     XLSX.utils.book_append_sheet(wb,wsArchAnal,'Archive Analyse');
   }
 
+  // ═══ Feuilles Archive par semaine + Analyse semaine (_completedTrucks) ═══
+  var allArchived=(_completedTrucks||[]);
+  if(allArchived.length){
+    // Calcul numéro de semaine ISO
+    function isoWeek(dateStr){
+      var d=new Date((dateStr||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+      if(isNaN(d)) return dateStr||'?';
+      var day=d.getDay();if(day===0)day=7;
+      d.setDate(d.getDate()+4-day);
+      var y=d.getFullYear();
+      var jan1=new Date(y,0,1);
+      var wk=Math.ceil(((d-jan1)/86400000+1)/7);
+      return y+'-S'+String(wk).padStart(2,'0');
+    }
+    function fmtA(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+    function durMin(a,b){return (a&&b)?Math.round((new Date(b)-new Date(a))/60000):null;}
+    // ─── Feuille 1 : Timestamps détaillés par semaine ───
+    var weekTsRows=[['Semaine','Date','Transporteur','Créneau','Arrivée','À quai','Début chgt','Fin chgt','Départ','Durée totale','Durée chgt','Δ Créneau','Ponctualité','Livraisons']];
+    // trier par semaine puis date
+    var sorted=allArchived.slice().sort(function(a,b){
+      return (a.date||'').localeCompare(b.date||'');
+    });
+    var lastWeek='';
+    sorted.forEach(function(ct){
+      var ts=ct.timestamps||{};
+      var wk=isoWeek(ct.date);
+      if(wk!==lastWeek){weekTsRows.push([wk,'','','','','','','','','','','','','']);lastWeek=wk;}
+      var durTot=durMin(ts.arr,ts.dep);
+      var durChg=durMin(ts.chg,ts.fin_chg);
+      var delta='';
+      if(ts.arr&&ct.creneau){
+        var cw=creWindow(ct.creneau);
+        if(cw){var aD=new Date(ts.arr),aM=aD.getHours()*60+aD.getMinutes();
+          if(aM<cw.start)delta='-'+fmtMinutes(Math.round(cw.start-aM));
+          else if(aM<=cw.end)delta='À l\'heure';
+          else delta='+'+fmtMinutes(Math.round(aM-cw.end));}
+      }
+      var ponct=ct.ponctualite?ct.ponctualite.label:(getPonctualite({id:ct.id,creneau:ct.creneau,date:ct.date},ts,Date.now()).label||'');
+      weekTsRows.push([wk,ct.date,ct.transporteur||ct.itin||'',ct.creneau||'',
+        fmtA(ts.arr),fmtA(ts.quai),fmtA(ts.chg),fmtA(ts.fin_chg),fmtA(ts.dep),
+        durTot!=null?fmtMinutes(durTot):'—',durChg!=null?fmtMinutes(durChg):'—',
+        delta,ponct,(ct.deliveries||[]).length]);
+    });
+    var wsWkTs=XLSX.utils.aoa_to_sheet(weekTsRows);
+    wsWkTs['!cols']=[{wch:11},{wch:12},{wch:16},{wch:10},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:13},{wch:11},{wch:11},{wch:14},{wch:11}];
+    XLSX.utils.book_append_sheet(wb,wsWkTs,'Archive par semaine');
+    // ─── Feuille 2 : Analyse agrégée par semaine ───
+    var wkMap={};
+    sorted.forEach(function(ct){
+      var wk=isoWeek(ct.date);
+      var ts=ct.timestamps||{};
+      if(!wkMap[wk])wkMap[wk]={wk:wk,count:0,ponct_h:0,ponct_a:0,ponct_r:0,ponct_w:0,
+        waitN:0,waitS:0,prepN:0,prepS:0,loadN:0,loadS:0,totN:0,totS:0};
+      var e=wkMap[wk];e.count++;
+      var p=ct.ponctualite?ct.ponctualite.status:(getPonctualite({id:ct.id,creneau:ct.creneau,date:ct.date},ts,Date.now()).status||'');
+      if(p==='heure')e.ponct_h++;else if(p==='avance')e.ponct_a++;
+      else if(p==='retard_reel'||p==='retard_auto')e.ponct_r++;else e.ponct_w++;
+      var dWait=durMin(ts.arr,ts.quai);if(dWait!=null&&dWait>=0){e.waitN++;e.waitS+=dWait;}
+      var dPrep=durMin(ts.quai,ts.chg);if(dPrep!=null&&dPrep>=0){e.prepN++;e.prepS+=dPrep;}
+      var dLoad=durMin(ts.chg,ts.fin_chg||ts.dep);if(dLoad!=null&&dLoad>=0){e.loadN++;e.loadS+=dLoad;}
+      var dTot=durMin(ts.arr,ts.dep);if(dTot!=null&&dTot>=0){e.totN++;e.totS+=dTot;}
+    });
+    var wkRows=[['Semaine','Nb camions','À l\'heure','En avance','En retard','% ponctualité','Moy. attente','Moy. prépa','Moy. chargement','Moy. total']];
+    Object.keys(wkMap).sort().forEach(function(wk){
+      var e=wkMap[wk];
+      var pct=e.count?Math.round((e.ponct_h+e.ponct_a)/e.count*100):0;
+      wkRows.push([wk,e.count,e.ponct_h,e.ponct_a,e.ponct_r,pct+'%',
+        e.waitN?fmtMinutes(Math.round(e.waitS/e.waitN)):'—',
+        e.prepN?fmtMinutes(Math.round(e.prepS/e.prepN)):'—',
+        e.loadN?fmtMinutes(Math.round(e.loadS/e.loadN)):'—',
+        e.totN?fmtMinutes(Math.round(e.totS/e.totN)):'—']);
+    });
+    var wsWkAnal=XLSX.utils.aoa_to_sheet(wkRows);
+    wsWkAnal['!cols']=[{wch:11},{wch:13},{wch:11},{wch:11},{wch:11},{wch:16},{wch:14},{wch:13},{wch:17},{wch:13}];
+    XLSX.utils.book_append_sheet(wb,wsWkAnal,'Analyse semaine');
+  }
+
   // Archive current session
   archiveSession();
 
@@ -4706,6 +4910,8 @@ function exportExcel(){
   (APP.deliveries||[]).forEach(function(d){livMap2[d.id]=d;});
   var removed=0;
   trucks=trucks.filter(function(t){
+    // Camion figé ou décalé manuellement → INTOUCHABLE par l'export
+    if(t.locked || t._dateManuallyChanged || t._creneauManuallyChanged || t.decalage) return true;
     var ts=timestamps[t.id]||{};
     var has4ts = ts.arr && ts.quai && ts.chg && ts.dep;
     var allC   = (t.deliveries||[]).length>0 && (t.deliveries||[]).every(function(id){
@@ -4720,7 +4926,554 @@ function exportExcel(){
     return true;
   });
   if(removed){ save(); saveQuaiAssign(); renderAll(); }
-  showToast('Export t\u00e9l\u00e9charg\u00e9'+(removed?' \u00b7 '+removed+' camion'+(removed>1?'s':'')+' archiv\u00e9'+(removed>1?'s':''):'')+' \u2705');
+  var locked_kept=trucks.filter(function(t){return t.locked||t._dateManuallyChanged||t._creneauManuallyChanged||t.decalage;}).length;
+  showToast('Export t\u00e9l\u00e9charg\u00e9'+(removed?' \u00b7 '+removed+' camion'+(removed>1?'s':'')+' archiv\u00e9'+(removed>1?'s':''):'')+
+    (locked_kept?' \u00b7 '+locked_kept+' fig\u00e9'+(locked_kept>1?'s':'')+' conserv\u00e9'+(locked_kept>1?'s':''):'')+' \u2705');
+}
+
+// ─── Excel menu + Export par semaine ──────────────────────────────────────
+function toggleExcelMenu(){
+  var m=document.getElementById('excelMenu');if(!m)return;
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  if(!open){setTimeout(function(){document.addEventListener('click',function h(e){
+    var w=document.getElementById('excelMenuWrap');
+    if(w&&!w.contains(e.target)){m.style.display='none';document.removeEventListener('click',h);}
+  },true);},0);}
+}
+
+function _isoWk(dateStr){
+  var d=new Date((dateStr||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+  if(isNaN(d))return dateStr||'?';
+  var day=d.getDay();if(day===0)day=7;
+  d.setDate(d.getDate()+4-day);
+  var y=d.getFullYear(),jan1=new Date(y,0,1);
+  return y+'-S'+String(Math.ceil(((d-jan1)/86400000+1)/7)).padStart(2,'0');
+}
+
+function openWeekExportModal(){
+  var allArch=(_completedTrucks||[]);
+  var bg=document.getElementById('weekExportBg');
+  var content=document.getElementById('weekExportContent');
+  if(!bg||!content)return;
+  if(!allArch.length){showToast('Aucune archive disponible');return;}
+  var wkMap={};
+  allArch.forEach(function(ct){
+    var wk=_isoWk(ct.date);
+    if(!wkMap[wk])wkMap[wk]={count:0,ph:0,pa:0,pr:0};
+    wkMap[wk].count++;
+    var p=(ct.ponctualite||{}).status||'';
+    if(p==='heure')wkMap[wk].ph++;else if(p==='avance')wkMap[wk].pa++;
+    else if(p==='retard_reel'||p==='retard_auto')wkMap[wk].pr++;
+  });
+  function wkMon(wk){
+    var parts=wk.split('-S');if(parts.length<2)return null;
+    var y=parseInt(parts[0]),w=parseInt(parts[1]);
+    var j4=new Date(y,0,4),d4=j4.getDay();if(d4===0)d4=7;
+    var m=new Date(j4);m.setDate(j4.getDate()-d4+1+(w-1)*7);return m;
+  }
+  var weeks=Object.keys(wkMap).sort().reverse();
+  var fr=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">'+
+    '<div>'+
+      '<h3 style="margin:0;font-size:18px;font-weight:800;color:var(--t1)">&#128197; Export par semaine</h3>'+
+      '<div style="font-size:12px;color:var(--t3);margin-top:3px">'+allArch.length+' camion'+(allArch.length>1?'s':'')+' archiv\u00e9'+(allArch.length>1?'s':'')+' &middot; '+weeks.length+' semaine'+(weeks.length>1?'s':'')+' disponible'+(weeks.length>1?'s':'')+'</div>'+
+    '</div>'+
+    '<button onclick="closeWeekExportModal()" style="background:none;border:none;color:var(--t3);font-size:24px;cursor:pointer;padding:2px 8px;border-radius:8px;line-height:1" onmouseover="this.style.color=\'var(--t1)\'" onmouseout="this.style.color=\'var(--t3)\'">&#215;</button>'+
+  '</div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:2px">';
+  weeks.forEach(function(wk){
+    var e=wkMap[wk];
+    var pct=e.count?Math.round((e.ph+e.pa)/e.count*100):0;
+    var pctCol=pct>=80?'#2dc272':pct>=60?'#ff9f0a':'#ff453a';
+    var mon=wkMon(wk),sun=mon?new Date(mon.getTime()+6*86400000):null;
+    var rng=mon&&sun?fr.format(mon)+' \u2192 '+fr.format(sun):'';
+    var wkNum=wk.split('-S')[1]||wk;
+    html+='<div onclick="exportWeekExcel(\''+wk+'\')" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--sf2);border:1px solid var(--bd2);border-radius:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.background=\'rgba(45,202,114,.08)\';this.style.borderColor=\'rgba(45,202,114,.3)\'" onmouseout="this.style.background=\'var(--sf2)\';this.style.borderColor=\'var(--bd2)\'">'+
+      '<div style="width:50px;height:50px;border-radius:10px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">'+
+        '<div style="font-size:8px;font-weight:800;color:#2dc272;letter-spacing:1px;line-height:1;text-transform:uppercase">Sem.</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#2dc272;line-height:1.1">'+wkNum+'</div>'+
+      '</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--t1)">'+wk+'</div>'+
+        (rng?'<div style="font-size:11px;color:var(--t3);margin-top:1px">'+rng+'</div>':'')+
+        '<div style="display:flex;align-items:center;gap:10px;margin-top:5px">'+
+          '<span style="font-size:11px;background:rgba(77,124,254,.12);color:var(--blue);padding:2px 8px;border-radius:5px;font-weight:700">'+e.count+' camion'+(e.count>1?'s':'')+'</span>'+
+          '<span style="font-size:11px;font-weight:700;color:'+pctCol+'">'+pct+'% ponctuel'+(pct>1?'s':'')+'</span>'+
+          (e.pr?'<span style="font-size:11px;color:#ff453a">'+e.pr+' retard'+(e.pr>1?'s':'')+'</span>':'')+'</div>'+
+      '</div>'+
+      '<div style="font-size:18px;color:var(--t3)">&#8659;</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  content.innerHTML=html;
+  bg.style.display='flex';
+}
+
+function closeWeekExportModal(){
+  var bg=document.getElementById('weekExportBg');
+  if(bg)bg.style.display='none';
+}
+
+function exportWeekExcel(weekKey){
+  closeWeekExportModal();
+  var allArch=(_completedTrucks||[]);
+  var trucks_wk=allArch.filter(function(ct){return _isoWk(ct.date)===weekKey;});
+  if(!trucks_wk.length){showToast('Aucun camion pour '+weekKey);return;}
+  trucks_wk.sort(function(a,b){
+    var da=a.date||'',db=b.date||'';
+    if(da!==db)return da.localeCompare(db);
+    return ((a.timestamps||{}).arr||'').localeCompare((b.timestamps||{}).dep||'');
+  });
+  function fmtT(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+  function dur(a,b){return (a&&b)?Math.round((new Date(b)-new Date(a))/60000):null;}
+  function fmtS(ds){
+    var d=new Date((ds||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+    return isNaN(d)?ds:d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  }
+  function fmtL(ds){
+    var d=new Date((ds||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+    return isNaN(d)?ds:d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  // Week boundaries
+  var parts=weekKey.split('-S');
+  var wy=parseInt(parts[0]||0),wn=parseInt(parts[1]||0);
+  var j4=new Date(wy,0,4),d4=j4.getDay();if(d4===0)d4=7;
+  var mon=new Date(j4);mon.setDate(j4.getDate()-d4+1+(wn-1)*7);
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  var fr2=new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var rangeStr=fr2.format(mon)+' → '+fr2.format(sun);
+  // Aggregates
+  var N=trucks_wk.length,ph=0,pa=0,pr=0,pw=0;
+  var wN=0,wS=0,pN=0,pS=0,lN=0,lS=0,tN=0,tS=0;
+  var dayMap={},carrMap={};
+  trucks_wk.forEach(function(ct){
+    var ts=ct.timestamps||{};
+    var p=(ct.ponctualite||{}).status||'';
+    if(p==='heure')ph++;else if(p==='avance')pa++;else if(p==='retard_reel'||p==='retard_auto')pr++;else pw++;
+    var dW=dur(ts.arr,ts.quai),dP=dur(ts.quai,ts.chg),dL=dur(ts.chg,ts.fin_chg||ts.dep),dT=dur(ts.arr,ts.dep);
+    if(dW!=null&&dW>=0){wN++;wS+=dW;}if(dP!=null&&dP>=0){pN++;pS+=dP;}
+    if(dL!=null&&dL>=0){lN++;lS+=dL;}if(dT!=null&&dT>=0){tN++;tS+=dT;}
+    var dt=ct.date||'?';
+    if(!dayMap[dt])dayMap[dt]={date:dt,n:0,ph:0,pa:0,pr:0,lN:0,lS:0,tN:0,tS:0};
+    var de=dayMap[dt];de.n++;
+    if(p==='heure')de.ph++;else if(p==='avance')de.pa++;else if(p==='retard_reel'||p==='retard_auto')de.pr++;
+    if(dL!=null&&dL>=0){de.lN++;de.lS+=dL;}if(dT!=null&&dT>=0){de.tN++;de.tS+=dT;}
+    var nm=ct.transporteur||ct.itin||'?';
+    if(!carrMap[nm])carrMap[nm]={name:nm,n:0,ph:0,pa:0,pr:0,lN:0,lS:0};
+    var ce=carrMap[nm];ce.n++;
+    if(p==='heure')ce.ph++;else if(p==='avance')ce.pa++;else if(p==='retard_reel'||p==='retard_auto')ce.pr++;
+    if(dL!=null&&dL>=0){ce.lN++;ce.lS+=dL;}
+  });
+  var days=Object.keys(dayMap).sort();
+  var carriers=Object.values(carrMap).sort(function(a,b){return b.n-a.n;});
+  var pctG=N?Math.round((ph+pa)/N*100):0;
+  var SEP=['────────────────────────────────────────────────────────────'];
+  var B=[''];
+  var wb=XLSX.utils.book_new();
+
+  // ══════════════════════════════════════════════════════════
+  // Feuille 1 : Synthèse
+  // ══════════════════════════════════════════════════════════
+  var syn=[];
+  syn.push(['TRUCKFLOW  ·  SEMAINE '+weekKey,'','','Exporté le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})]);
+  syn.push([rangeStr]);
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['INDICATEURS CLÉS DE LA SEMAINE']);
+  syn.push(SEP);
+  syn.push(['Camions traités','',N,'']);
+  syn.push(['\u00c0 l\'heure','',ph,N?Math.round(ph/N*100)+'%':'']);
+  syn.push(['En avance','',pa,N?Math.round(pa/N*100)+'%':'']);
+  syn.push(['En retard','',pr,N?Math.round(pr/N*100)+'%':'']);
+  if(pw)syn.push(['Sans cr\u00e9neau / attente','',pw,'']);
+  syn.push(['Taux de ponctualit\u00e9','',pctG+'%','']);
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['TEMPS DE PASSAGE MOYENS']);
+  syn.push(SEP);
+  syn.push(['Attente \u00e0 quai  (Arriv\u00e9e \u2192 \u00c0 quai)','',wN?fmtMinutes(Math.round(wS/wN)):'\u2014','']);
+  syn.push(['Mise en place  (\u00c0 quai \u2192 D\u00e9but chgt)','',pN?fmtMinutes(Math.round(pS/pN)):'\u2014','']);
+  syn.push(['Chargement  (D\u00e9but \u2192 Fin chgt)','',lN?fmtMinutes(Math.round(lS/lN)):'\u2014','']);
+  syn.push(['Dur\u00e9e totale  (Arriv\u00e9e \u2192 D\u00e9part)','',tN?fmtMinutes(Math.round(tS/tN)):'\u2014','']);
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['R\u00c9CAPITULATIF PAR JOUR']);
+  syn.push(SEP);
+  syn.push(['Date','Jour','Camions','\u00c0 l\'heure','En avance','En retard','% Ponct.','Moy. chargement','Moy. total']);
+  days.forEach(function(dt){
+    var e=dayMap[dt];
+    var pct=e.n?Math.round((e.ph+e.pa)/e.n*100):0;
+    syn.push([dt,fmtS(dt),e.n,e.ph,e.pa,e.pr,pct+'%',
+      e.lN?fmtMinutes(Math.round(e.lS/e.lN)):'\u2014',
+      e.tN?fmtMinutes(Math.round(e.tS/e.tN)):'\u2014']);
+  });
+  syn.push(B);
+  syn.push(SEP);
+  syn.push(['TRANSPORTEURS']);
+  syn.push(SEP);
+  syn.push(['Transporteur','Camions','\u00c0 l\'heure','En avance','En retard','% Ponct.','Moy. chargement']);
+  carriers.forEach(function(c){
+    var pct=c.n?Math.round((c.ph+c.pa)/c.n*100):0;
+    syn.push([c.name,c.n,c.ph,c.pa,c.pr,pct+'%',c.lN?fmtMinutes(Math.round(c.lS/c.lN)):'\u2014']);
+  });
+  var wsSyn=XLSX.utils.aoa_to_sheet(syn);
+  wsSyn['!cols']=[{wch:40},{wch:18},{wch:14},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,wsSyn,'Synth\u00e8se');
+
+  // ══════════════════════════════════════════════════════════
+  // Feuille 2 : Timestamps détaillés
+  // ══════════════════════════════════════════════════════════
+  var tsR=[['Date','Jour','Transporteur','Cr\u00e9neau','Quai','Arriv\u00e9e','\u00c0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','Att. quai','Pr\u00e9pa','Chargement','Total','\u0394 Cr\u00e9neau','Ponctualit\u00e9','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouv. date / cr\u00e9neau','Note d\u00e9calage']];
+  var lastD='';
+  trucks_wk.forEach(function(ct){
+    var ts=ct.timestamps||{};
+    if(ct.date!==lastD&&lastD!=='')tsR.push(B);
+    lastD=ct.date;
+    var delta='';
+    if(ts.arr&&ct.creneau){
+      var cw=creWindow(ct.creneau);
+      if(cw){var ad=new Date(ts.arr),am=ad.getHours()*60+ad.getMinutes();
+        if(am<cw.start)delta='-'+fmtMinutes(Math.round(cw.start-am));
+        else if(am<=cw.end)delta='\u00c0 l\'heure';
+        else delta='+'+fmtMinutes(Math.round(am-cw.end));}}
+    var dW=dur(ts.arr,ts.quai),dP=dur(ts.quai,ts.chg),dL=dur(ts.chg,ts.fin_chg||ts.dep),dT=dur(ts.arr,ts.dep);
+    var dc=ct.decalage||null;
+    tsR.push([ct.date,fmtS(ct.date),ct.transporteur||ct.itin||'',ct.creneau||'',ct.quai||'',
+      fmtT(ts.arr),fmtT(ts.quai),fmtT(ts.chg),fmtT(ts.fin_chg),fmtT(ts.dep),
+      dW!=null?fmtMinutes(dW):'\u2014',dP!=null?fmtMinutes(dP):'\u2014',
+      dL!=null?fmtMinutes(dL):'\u2014',dT!=null?fmtMinutes(dT):'\u2014',
+      delta,(ct.ponctualite||{}).label||'',
+      dc?dc.label+(dc.heure?' ('+dc.heure+')':''):'',
+      dc?dc.dateOrig||'':'',
+      dc?dc.creneauOrig||'':'',
+      dc?(dc.dateNew||'')+(dc.creneauNew?' '+dc.creneauNew:''):'',
+      dc?dc.note||'':'']);
+  });
+  var wsTs=XLSX.utils.aoa_to_sheet(tsR);
+  wsTs['!cols']=[{wch:12},{wch:16},{wch:16},{wch:10},{wch:6},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:10},{wch:9},{wch:12},{wch:9},{wch:11},{wch:14},{wch:22},{wch:12},{wch:13},{wch:20},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,wsTs,'Timestamps');
+
+  // ══════════════════════════════════════════════════════════
+  // Feuille 3 : Livraisons détaillées
+  // ══════════════════════════════════════════════════════════
+  var livR=[['Date','Transporteur','Cr\u00e9neau','Quai','D\u00e9calage','N\u00b0 Livraison','Destinataire','Ville','Statut Pr\u00e9pa','Statut WM','Colis SAP','Pal SILO','Colis SILO','Colis Pick.']];
+  var lastDL='';
+  trucks_wk.forEach(function(ct){
+    var dc2=ct.decalage||null;
+    var dcLbl2=dc2?dc2.label+(dc2.heure?' ('+dc2.heure+')':''):'';
+    if(ct.date!==lastDL&&lastDL!=='')livR.push(B);
+    lastDL=ct.date;
+    var dds=ct.deliveryDetails||[];
+    dds.forEach(function(dd){
+      livR.push([ct.date,ct.transporteur||ct.itin||'',ct.creneau||'',ct.quai||'',dcLbl2,
+        dd.id||'',dd.dest||'',dd.ville||'',dd.sp||'',dd.wm||'',
+        dd.pkg||0,dd.palSilo||0,dd.colisSilo||0,dd.colisPick||0]);
+    });
+    if(dds.length>1){
+      var tp=0,tpal=0,tcs=0,tcp=0;
+      dds.forEach(function(dd){tp+=dd.pkg||0;tpal+=dd.palSilo||0;tcs+=dd.colisSilo||0;tcp+=dd.colisPick||0;});
+      livR.push(['','','','',dcLbl2?'\u21b3 D\u00e9cal\u00e9':'','TOTAL '+dds.length+' livr.','','','','',tp,tpal,tcs,tcp]);
+    }
+    livR.push(B);
+  });
+  var wsLivW=XLSX.utils.aoa_to_sheet(livR);
+  wsLivW['!cols']=[{wch:12},{wch:16},{wch:10},{wch:6},{wch:22},{wch:14},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsLivW,'Livraisons');
+
+  XLSX.writeFile(wb,'TruckFlow_'+weekKey+'.xlsx');
+  showToast('\u2705 Export '+weekKey+' t\u00e9l\u00e9charg\u00e9');
+  logActivity('\uD83D\uDCC5','Export semaine '+weekKey+' g\u00e9n\u00e9r\u00e9');
+}
+
+// ─── Mode Montage ─────────────────────────────────────────────────────────
+var _montageMode=false;
+var _montageSelected={};
+
+// Retourne le nom transporteur depuis les camions existants ayant le même itin, sinon l'itin lui-même
+function _transp4itin(itin){
+  if(!itin)return '';
+  var t=trucks.find(function(tk){return (tk.itin||'')===(itin||'')&&tk.transporteur&&tk.transporteur!==tk.itin;});
+  return t?t.transporteur:itin;
+}
+
+function enterMontageMode(){
+  _montageMode=true;
+  _montageSelected={};
+  document.getElementById('truckList').style.display='none';
+  var btn=document.getElementById('montageModeBtn');
+  if(btn){btn.style.background='rgba(77,124,254,.3)';btn.textContent='⬅ Retour camions';btn.onclick=exitMontageMode;}
+  document.getElementById('montagePanel').style.display='';
+  renderMontagePanel();
+}
+
+function exitMontageMode(){
+  _montageMode=false;
+  _montageSelected={};
+  document.getElementById('montagePanel').style.display='none';
+  document.getElementById('truckList').style.display='';
+  var btn=document.getElementById('montageModeBtn');
+  if(btn){btn.style.background='rgba(77,124,254,.12)';btn.innerHTML='&#128295; Montage';btn.onclick=enterMontageMode;}
+  renderTrucks();
+}
+
+function _montageAssigned(){
+  var s=new Set();
+  trucks.forEach(function(t){(t.lockedDeliveries||t.deliveries||[]).forEach(function(id){s.add(id);});});
+  return s;
+}
+
+function renderMontagePanel(){
+  var panel=document.getElementById('montagePanel');
+  if(!panel)return;
+  var assigned=_montageAssigned();
+  var unassigned=(APP.deliveries||[]).filter(function(d){return !assigned.has(d.id);});
+
+  // Group by itin
+  var groups={};
+  unassigned.forEach(function(d){
+    var k=d.itin||'?';
+    if(!groups[k])groups[k]=[];
+    groups[k].push(d);
+  });
+  // Tri des livraisons par date dans chaque groupe
+  Object.keys(groups).forEach(function(k){
+    groups[k].sort(function(a,b){
+      var da=(a.date||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1');
+      var db=(b.date||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1');
+      return da.localeCompare(db)||(a.dest||'').localeCompare(b.dest||'');
+    });
+  });
+  var keys=Object.keys(groups).sort(function(a,b){return groups[b].length-groups[a].length;});
+
+  // Selection stats
+  var selIds=Object.keys(_montageSelected);
+  var selPal=0,selColis=0,selItins={};
+  selIds.forEach(function(id){var d=getDeliv(id);if(d){selPal+=d.palSilo||0;selColis+=d.colisPick||0;if(d.itin)selItins[d.itin]=true;}});
+  var selItinStr=Object.keys(selItins).join(' + ');
+
+  if(!unassigned.length){
+    panel.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--t3)">'+
+      '<div style="font-size:48px;margin-bottom:12px">&#10003;</div>'+
+      '<div style="font-size:16px;font-weight:700;color:var(--t1)">Toutes les livraisons sont mont\u00e9es</div>'+
+      '<div style="font-size:13px;color:var(--t3);margin-top:6px">Aucune livraison non assign\u00e9e</div>'+
+      '<button onclick="exitMontageMode()" style="margin-top:18px;padding:9px 24px;border-radius:20px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Retourner aux camions</button>'+
+    '</div>';
+    return;
+  }
+
+  var html='';
+
+  // ── En-tête mode montage ──
+  html+='<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(165deg,rgba(77,124,254,.08),rgba(77,124,254,.03));border-bottom:1px solid rgba(77,124,254,.18);margin-bottom:16px">'+
+    '<div style="width:34px;height:34px;border-radius:9px;background:rgba(77,124,254,.15);border:1px solid rgba(77,124,254,.25);display:flex;align-items:center;justify-content:center;font-size:17px">&#128295;</div>'+
+    '<div>'+
+      '<div style="font-size:15px;font-weight:800;color:var(--t1)">Mode Montage</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+unassigned.length+' livraison'+(unassigned.length>1?'s':'')+' \u00e0 monter &middot; '+keys.length+' transporteur'+(keys.length>1?'s':'')+' &middot; Camions verrouill\u00e9s auto</div>'+
+    '</div>'+
+    '<div style="margin-left:auto;display:flex;align-items:center;gap:8px">'+
+      '<button onclick="exitMontageMode()" style="padding:6px 16px;border-radius:20px;border:1px solid rgba(255,69,58,.3);background:rgba(255,69,58,.06);color:#ff453a;font-size:12px;font-weight:700;cursor:pointer">&#x2190; Retour</button>'+
+    '</div>'+
+  '</div>';
+
+  // ── Groupes par transporteur ──
+  html+='<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;padding-bottom:'+(selIds.length?'80px':'16px')+'">';
+
+  keys.forEach(function(itin){
+    var delivs=groups[itin];
+    var totPal=0,totColis=0,totPkg=0;
+    delivs.forEach(function(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;totPkg+=d.pkg||0;});
+    var selInGrp=delivs.filter(function(d){return !!_montageSelected[d.id];}).length;
+    var allSel=selInGrp===delivs.length;
+
+    html+='<div style="background:linear-gradient(165deg,rgba(160,210,255,.05),rgba(140,180,220,.02));border:1px solid rgba(160,210,255,.15);border-radius:14px;overflow:hidden">'+
+      // Group header
+      '<div onclick="toggleMontageGroup(\''+itin+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(160,210,255,.1)" onmouseover="this.style.background=\'rgba(77,124,254,.06)\'" onmouseout="this.style.background=\'\'">'+
+        '<div style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(allSel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(allSel?'#4d7cfe':'transparent')+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;flex-shrink:0">'+(allSel?'&#10003;':'')+'</div>'+
+        '<span style="font-size:15px">&#128666;</span>'+
+        '<div style="flex:1">'+
+          '<span style="font-size:14px;font-weight:800;color:var(--t1)">'+_transp4itin(itin)+'</span>'+
+          (_transp4itin(itin)!==itin?'<span style="font-size:10px;color:var(--t3);margin-left:6px">'+itin+'</span>':'')+
+          '<span style="font-size:11px;color:var(--t3);margin-left:8px">'+delivs.length+' livr.</span>'+
+          (totPal?'<span style="font-size:11px;background:rgba(45,202,114,.1);color:#2dc272;padding:2px 8px;border-radius:5px;margin-left:6px;font-weight:700">'+totPal+' pal SILO</span>':'')+
+          (totColis?'<span style="font-size:11px;background:rgba(155,109,255,.1);color:var(--purple);padding:2px 8px;border-radius:5px;margin-left:4px;font-weight:700">'+totColis+' colis pick</span>':'')+
+          (totPkg?'<span style="font-size:11px;color:var(--t3);margin-left:6px">'+totPkg+' colis SAP</span>':'')+
+        '</div>'+
+        '<span style="font-size:12px;font-weight:700;color:'+(selInGrp?'var(--blue)':'var(--t3)')+'">'+
+          (selInGrp?selInGrp+'/'+delivs.length+' \u2713':'Tout s\u00e9l.')+
+        '</span>'+
+      '</div>'+
+      // Delivery table
+      '<div style="overflow-x:auto">'+
+        '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+          '<thead><tr style="background:rgba(0,0,0,.12)">'+
+            '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600;width:32px">&bull;</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600;white-space:nowrap">Date</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600;white-space:nowrap">N&#176; Livraison</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Destination</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Ville</th>'+
+            '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600;white-space:nowrap">Pr\u00e9pa</th>'+
+            '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600">WM</th>'+
+            '<th style="padding:6px 12px;text-align:right;color:var(--t3);font-weight:600;white-space:nowrap">Pal SILO</th>'+
+            '<th style="padding:6px 12px;text-align:right;color:var(--t3);font-weight:600;white-space:nowrap">Colis Pick</th>'+
+          '</tr></thead>'+
+          '<tbody>';
+
+    delivs.forEach(function(d){
+      var sel=!!_montageSelected[d.id];
+      var spCol=d.sp==='C'?'#2dc272':d.sp==='B'?'#ff9f0a':d.sp==='A'?'#ff453a':'var(--t3)';
+      var wmCol=d.wm==='C'?'#2dc272':d.wm==='B'?'#ff9f0a':'var(--t3)';
+      html+='<tr onclick="toggleMontageDelivery(\''+d.id+'\')" style="cursor:pointer;border-top:1px solid rgba(160,210,255,.06);background:'+(sel?'rgba(77,124,254,.1)':'')+'" onmouseover="this.style.background=\''+(sel?'rgba(77,124,254,.15)':'rgba(160,210,255,.04)')+'\'" onmouseout="this.style.background=\''+(sel?'rgba(77,124,254,.1)':'')+'\'">' +
+        '<td style="padding:7px 12px;text-align:center">'+
+          '<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(sel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(sel?'#4d7cfe':'transparent')+';display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">'+(sel?'&#10003;':'')+'</div>'+
+        '</td>'+
+        '<td style="padding:7px 12px;color:var(--amber);font-size:11px;font-weight:600;white-space:nowrap">'+(d.date||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;font-weight:700;color:var(--blue);font-family:monospace;white-space:nowrap">'+d.id+'</td>'+
+        '<td style="padding:7px 12px;color:var(--t1);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;color:var(--t2);white-space:nowrap">'+(d.ville||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+spCol+'">'+(d.sp||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+wmCol+'">'+(d.wm||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;text-align:right;color:#2dc272;font-weight:700">'+(d.palSilo||0)+'</td>'+
+        '<td style="padding:7px 12px;text-align:right;color:var(--purple);font-weight:700">'+(d.colisPick||0)+'</td>'+
+      '</tr>';
+    });
+
+    html+='</tbody></table></div></div>';
+  });
+
+  html+='</div>';
+
+  // ── Barre de création sticky ──
+  if(selIds.length){
+    html+='<div id="montageBar" style="position:sticky;bottom:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:12px 18px;background:linear-gradient(165deg,rgba(10,10,20,.92),rgba(20,20,40,.88));backdrop-filter:saturate(200%) blur(28px);border-top:1px solid rgba(77,124,254,.3);z-index:20">'+
+      '<div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+        '<span style="font-size:14px;font-weight:800;color:var(--t1)">'+selIds.length+' livraison'+(selIds.length>1?'s':'')+' s\u00e9lectionn\u00e9e'+(selIds.length>1?'s':'')+'</span>'+
+        (selPal?'<span style="font-size:12px;background:rgba(45,202,114,.12);color:#2dc272;padding:3px 10px;border-radius:6px;font-weight:700">'+selPal+' pal SILO</span>':'')+
+        (selColis?'<span style="font-size:12px;background:rgba(155,109,255,.12);color:var(--purple);padding:3px 10px;border-radius:6px;font-weight:700">'+selColis+' colis pick</span>':'')+
+        (selItinStr?'<span style="font-size:11px;color:var(--t3)">&#x2022; '+selItinStr+'</span>':'')+
+      '</div>'+
+      '<button onclick="_montageSelected={};renderMontagePanel()" style="padding:7px 14px;border-radius:20px;border:1px solid rgba(160,210,255,.15);background:transparent;color:var(--t3);font-size:12px;cursor:pointer;flex-shrink:0">D\u00e9s\u00e9lectionner</button>'+
+      '<button onclick="openMontageForm()" style="padding:9px 22px;border-radius:20px;border:none;background:linear-gradient(135deg,#4d7cfe,#5e5ce6);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 4px 14px rgba(77,124,254,.35)">&#128295; Cr\u00e9er le camion</button>'+
+    '</div>';
+  }
+
+  panel.innerHTML=html;
+}
+
+function toggleMontageDelivery(id){
+  if(_montageSelected[id])delete _montageSelected[id];else _montageSelected[id]=true;
+  renderMontagePanel();
+}
+
+function toggleMontageGroup(itin){
+  var assigned=_montageAssigned();
+  var delivs=(APP.deliveries||[]).filter(function(d){return d.itin===itin&&!assigned.has(d.id);});
+  var allSel=delivs.length&&delivs.every(function(d){return !!_montageSelected[d.id];});
+  if(allSel){delivs.forEach(function(d){delete _montageSelected[d.id];});}
+  else{delivs.forEach(function(d){_montageSelected[d.id]=true;});}
+  renderMontagePanel();
+}
+
+function openMontageForm(){
+  var selIds=Object.keys(_montageSelected);
+  if(!selIds.length)return;
+  // Détecter transporteur et date dominants
+  var itinCount={},dateCount={};
+  selIds.forEach(function(id){
+    var d=getDeliv(id);if(!d)return;
+    itinCount[d.itin||'']=(itinCount[d.itin||'']||0)+1;
+    dateCount[d.date||'']=(dateCount[d.date||'']||0)+1;
+  });
+  var mainItin=Object.keys(itinCount).sort(function(a,b){return itinCount[b]-itinCount[a];})[0]||'';
+  var mainTransp=_transp4itin(mainItin)||mainItin;
+  var mainDate=Object.keys(dateCount).sort(function(a,b){return dateCount[b]-dateCount[a];})[0]||new Date().toISOString().slice(0,10);
+  // Convertir date DD/MM/YYYY -> YYYY-MM-DD pour l'input
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(mainDate)){
+    var p=mainDate.split('/');mainDate=p[2]+'-'+p[1]+'-'+p[0];
+  }
+  var totPal=0,totColis=0;
+  selIds.forEach(function(id){var d=getDeliv(id);if(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;}});
+  // Plusieurs itins différents ?
+  var multiItin=Object.keys(itinCount).length>1;
+
+  var el=document.createElement('div');
+  el.id='montageFormBg';
+  el.onclick=function(e){if(e.target===el)closeMontageForm();};
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:saturate(180%) blur(20px);z-index:300;display:flex;align-items:center;justify-content:center';
+  el.innerHTML=
+    '<div style="width:min(460px,92vw);background:linear-gradient(165deg,rgba(160,210,255,.09),rgba(140,180,220,.04));backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(160,210,255,.22);border-radius:20px;padding:24px;box-shadow:0 0 0 1px rgba(160,210,255,.07) inset,0 24px 60px rgba(0,0,0,.45)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--t1)">&#128295; Cr\u00e9er le camion</h3>'+
+        '<button onclick="closeMontageForm()" style="background:none;border:none;color:var(--t3);font-size:24px;cursor:pointer;padding:0 6px;line-height:1">&#215;</button>'+
+      '</div>'+
+      '<div style="background:rgba(77,124,254,.08);border:1px solid rgba(77,124,254,.18);border-radius:10px;padding:10px 14px;margin-bottom:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+        '<span style="font-size:13px;font-weight:700;color:var(--t1)">'+selIds.length+' livraison'+(selIds.length>1?'s':'')+'</span>'+
+        (totPal?'<span style="font-size:12px;color:#2dc272;font-weight:700">'+totPal+' pal SILO</span>':'')+
+        (totColis?'<span style="font-size:12px;color:var(--purple);font-weight:700">'+totColis+' colis pick</span>':'')+
+        (multiItin?'<span style="font-size:11px;color:#ff9f0a">&#9888; Plusieurs transporteurs</span>':'')+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:14px">'+
+        '<div>'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur / Route</label>'+
+          '<input id="mcTransp" value="'+mainTransp+'" placeholder="Nom du transporteur" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Date</label>'+
+            '<input id="mcDate" type="date" value="'+mainDate+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '</div>'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Cr\u00e9neau</label>'+
+            '<input id="mcCreneau" placeholder="ex: 07-09" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-top:20px">'+
+        '<button onclick="closeMontageForm()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Annuler</button>'+
+        '<button onclick="confirmMontage()" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#4d7cfe,#5e5ce6);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(77,124,254,.3)">&#10003; Cr\u00e9er et verrouiller</button>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">&#128274; Ce camion sera verrouill\u00e9 &mdash; les r\u00e9imports VL06O ne le modifieront pas</div>'+
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(function(){var i=document.getElementById('mcCreneau');if(i)i.focus();},100);
+}
+
+function closeMontageForm(){
+  var el=document.getElementById('montageFormBg');
+  if(el)el.remove();
+}
+
+function confirmMontage(){
+  var transp=(document.getElementById('mcTransp')||{}).value||'';
+  var dateVal=(document.getElementById('mcDate')||{}).value||'';
+  var creneau=(document.getElementById('mcCreneau')||{}).value||'';
+  if(!transp){showToast('\u26a0 Transporteur requis');return;}
+  var selIds=Object.keys(_montageSelected);
+  if(!selIds.length){closeMontageForm();return;}
+  // L'app utilise le format ISO YYYY-MM-DD partout (xlDate, date tabs, input camion)
+  var itin=(getDeliv(selIds[0])||{}).itin||transp;
+  var newTruck={
+    id:'mont_'+Date.now(),
+    transporteur:transp,
+    itin:itin,
+    date:dateVal,
+    creneau:creneau,
+    deliveries:selIds.slice(),
+    lockedDeliveries:selIds.slice(),
+    lockedDate:dateVal,
+    lockedCreneau:creneau,
+    locked:true,
+    _montage:true,
+    decalage:null,
+    notes:''
+  };
+  trucks.push(newTruck);
+  save();
+  try{logActivity('\uD83D\uDD27','Camion mont\u00e9 verrouill\u00e9 : '+transp+' \u00b7 '+selIds.length+' livraisons'+(creneau?' \u00b7 '+creneau:''));}catch(e){}
+  closeMontageForm();
+  _montageSelected={};
+  renderMontagePanel();
+  showToast('\u2705 Camion '+transp+' mont\u00e9 \u00b7 '+selIds.length+' livraison'+(selIds.length>1?'s':'')+' \u2022 \uD83D\uDD12 verrouill\u00e9');
 }
 
 // ─── Quai plan ────────────────────────────────────────────────────────────
@@ -5061,12 +5814,20 @@ function init(){
   loadQuaiAssign();
   loadCompleted();
   purgeOldCompleted();
+  cleanCompletedTrucks(); // archiver les camions avec ts.dep présent dès le chargement
+  // Initialiser le datepicker "Date de saisie" avec aujourd'hui
+  setTimeout(function(){
+    var inp=document.getElementById('workingDateInput');
+    if(inp) inp.value=new Date().toISOString().slice(0,10);
+  },0);
   setUpdLabel();
   renderAll();
   // Start notification checker on page load (not just after import)
   if(trucks.length) startNotifChecker();
   if(_ponctTimer) clearInterval(_ponctTimer);
   _ponctTimer=setInterval(function(){
+    // Filet de sécurité : archiver camions partis non encore archivés
+    var cleaned=cleanCompletedTrucks();
     var panel=document.getElementById('tab-cam');
     if(panel&&panel.classList.contains('on')){
       renderTrucks();
@@ -5075,6 +5836,7 @@ function init(){
       try{addQuickStampButtons();}catch(e){}
       try{addETABadges();}catch(e){}
     }
+    if(cleaned>0) renderAll();
     updatePonctStats();
     renderSynPonct();
   },30000);
@@ -5288,22 +6050,6 @@ function saveAlertConfig(){
 }
 
 
-// ─── #14 Compact Mode ─────────────────────────────────────────────────────
-var _compactMode=false;
-try{_compactMode=localStorage.getItem('tf_compact')==='true';}catch(e){}
-function toggleCompactMode(){
-  _compactMode=!_compactMode;
-  try{localStorage.setItem('tf_compact',_compactMode?'true':'false');}catch(e){}
-  applyCompactMode();
-  showToast(_compactMode?'Mode compact activ\u00e9':'Mode d\u00e9taill\u00e9 activ\u00e9');
-}
-function applyCompactMode(){
-  document.querySelectorAll('.tc').forEach(function(tc){
-    if(_compactMode)tc.classList.add('compact-mode');else tc.classList.remove('compact-mode');
-  });
-  var btn=document.getElementById('compactBtn');
-  if(btn)btn.style.background=_compactMode?'rgba(255,159,10,.15)':'';
-}
 
 // ─── #4 Auto-refresh chronos (30s) ───────────────────────────────────────
 var _chronoInterval=null;
@@ -5607,9 +6353,10 @@ setupDragDrop();
 // ─── Patch: Hook stamp/purge/import into activity log ─────────────────────
 var _origStampNow=stampNow;
 stampNow=function(ti,key){
+  var _tName=trucks[ti]?trucks[ti].transporteur||trucks[ti].itin||'?':'?';
   _origStampNow(ti,key);
   var lbl=(TS_DEFS.find(function(t){return t.key===key;})||{lbl:key}).lbl;
-  logActivity('\u23f1',lbl+' \u2014 '+(trucks[ti]?trucks[ti].transporteur||trucks[ti].itin||'?':'?'));
+  logActivity('\u23f1',lbl+' \u2014 '+_tName);
   checkCompletionFlash();
 };
 
@@ -5624,7 +6371,6 @@ var _origRenderAll=renderAll;
 renderAll=function(){
   _origRenderAll();
   addKPITooltips();
-  applyCompactMode();
   checkCompletionFlash();
 };
 
@@ -5880,15 +6626,6 @@ function clearAdvFilter(){
   showToast('Filtres r\u00e9initialis\u00e9s');
 }
 
-// ─── #9 TV Mode ───────────────────────────────────────────────────────────
-var _tvMode=false;
-function toggleTVMode(){
-  _tvMode=!_tvMode;
-  document.documentElement.classList.toggle('tv-mode',_tvMode);
-  var btn=document.getElementById('tvBtn');
-  if(btn) btn.style.background=_tvMode?'rgba(94,92,230,.15)':'';
-  showToast(_tvMode?'Mode grand \u00e9cran activ\u00e9 \uD83D\uDCFA':'Mode normal');
-}
 
 // ─── #7 Progress Ring SVG helper ──────────────────────────────────────────
 function progressRingSVG(pct,color,size){
@@ -6043,12 +6780,16 @@ function _buildPDFReport(){
     else if(ts.arr||ts.quai||ts.chg) trucksEnCours.push({t:t,ts:ts});
     else trucksAttente.push({t:t,ts:ts});
   });
-  // Ponctualité (partis uniquement — réels)
+  // Ponctualité : à l'heure/avance sur les partis, retard sur tous
   var pH=0,pA=0,pR=0;
   trucksPartis.forEach(function(x){
     var p=x.t._ponct||getPonctualite(x.t,x.ts,now);
     if(p.status==='heure')pH++;else if(p.status==='avance')pA++;
     else if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
+  });
+  trucksEnCours.concat(trucksAttente).forEach(function(x){
+    var p=getPonctualite(x.t,x.ts,now);
+    if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
   });
   // Volumes : livraisons liées aux camions partis
   var depLivIds=new Set();
@@ -6137,15 +6878,13 @@ function _buildPDFReport(){
         '<td style="text-align:center">'+livIdsCours.length+'</td></tr>';
       if(livIdsCours.length){
         html+='<tr><td colspan="7" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
-          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Pick.</th></tr>';
+          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Pick.</th></tr>';
         livIdsCours.forEach(function(lid){
           var d=getDeliv(lid);
           if(!d)return;
-          var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
           html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
             '<td style="border:none">'+(d.dest||'—')+'</td>'+
             '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
-            '<td style="border:none;font-weight:700;color:'+spCol+'">'+(d.sp||'—')+'</td>'+
             '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
         });
@@ -6166,6 +6905,32 @@ function _buildPDFReport(){
         '<td>'+(x.t.creneau||'—')+'</td>'+
         '<td class="'+pColor+'"><b>'+p.label+'</b></td>'+
         '<td style="text-align:center">'+(x.t.deliveries||[]).length+'</td></tr>';
+    });
+    html+='</table>';
+  }
+  // Décalages
+  var decalages=allDay.filter(function(t){return t.decalage;});
+  if(decalages.length){
+    var dColorMap={mtx3:'#e65100',transporteur:'#1565c0',pas_venu:'#b71c1c'};
+    var dCounts={mtx3:0,transporteur:0,pas_venu:0};
+    decalages.forEach(function(t){dCounts[t.decalage.motif]=(dCounts[t.decalage.motif]||0)+1;});
+    html+='<h2>\u23F1 D\u00e9calages d\u00e9clar\u00e9s ('+decalages.length+')</h2>';
+    html+='<div class="krow" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px">'+
+      '<div class="kbox" style="border-color:#e65100"><div class="kv amber">'+dCounts.mtx3+'</div><div class="kl">MTX3</div></div>'+
+      '<div class="kbox" style="border-color:#1565c0"><div class="kv blue">'+dCounts.transporteur+'</div><div class="kl">Transporteur</div></div>'+
+      '<div class="kbox" style="border-color:#b71c1c"><div class="kv red">'+dCounts.pas_venu+'</div><div class="kl">Pas venu</div></div>'+
+    '</div>';
+    html+='<table><tr><th>Transporteur</th><th>Date orig.</th><th>Cr\u00e9neau orig.</th><th>Motif</th><th>Nouvelle date pr\u00e9vue</th><th>Note</th><th>Enregistr\u00e9</th></tr>';
+    decalages.forEach(function(t){
+      var dc=t.decalage;var dCol=dColorMap[dc.motif]||'#666';
+      var dNewFull=(dc.dateNew||'')+(dc.creneauNew?' '+dc.creneauNew:'');
+      html+='<tr><td><b>'+(t.transporteur||t.itin||'?')+'</b></td>'+
+        '<td>'+(dc.dateOrig||t.date||'\u2014')+'</td>'+
+        '<td>'+(dc.creneauOrig||t.creneau||'\u2014')+'</td>'+
+        '<td><span style="color:'+dCol+';font-weight:700">'+dc.label+'</span></td>'+
+        '<td style="color:#e65100;font-weight:700">'+(dNewFull||'\u2014')+'</td>'+
+        '<td style="color:#666">'+(dc.note||'\u2014')+'</td>'+
+        '<td style="color:#999;font-size:10px">'+(dc.heure||'\u2014')+'</td></tr>';
     });
     html+='</table>';
   }
@@ -6200,7 +6965,7 @@ function _buildPDFReport(){
       var dur='—';
       if(x.ts.arr&&x.ts.dep){var m=Math.round((new Date(x.ts.dep)-new Date(x.ts.arr))/60000);dur=fmtMinutes(m);}
       var finChgCell=ft(x.ts.fin_chg);
-      if(x.ts.fin_chg&&x.ts.chg){var loadM=Math.round((new Date(x.ts.fin_chg)-new Date(x.ts.chg))/60000);finChgCell+=' <span style="color:green">('+loadM+'min)</span>';}
+      if(x.ts.fin_chg&&x.ts.chg){var loadM=Math.round((new Date(x.ts.fin_chg)-new Date(x.ts.chg))/60000);finChgCell+=' <span style="color:green">('+fmtMinutes(loadM)+')</span>';}
       var livIds=x.t.deliveries||[];
       var palT=0,cpT=0;
       livIds.forEach(function(lid){
@@ -6220,15 +6985,13 @@ function _buildPDFReport(){
       // Livraisons du camion
       if(livIds.length){
         html+='<tr><td colspan="10" style="padding:0;background:#f9f9f9"><table style="margin:0;font-size:10px;border:none"><tr style="background:#efefef">'+
-          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">SGP</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
+          '<th style="border:none;padding:3px 10px 3px 30px">Livraison</th><th style="border:none">Destination</th><th style="border:none">Ville</th><th style="border:none">Pal.SILO</th><th style="border:none">Col.Silo</th><th style="border:none">Col.Pick.</th></tr>';
         livIds.forEach(function(lid){
           var d=getDeliv(lid);
           if(!d)return;
-          var spCol=d.sp==='C'?'#2a9d5c':d.sp==='B'?'#e65100':'#999';
           html+='<tr><td style="border:none;padding:2px 8px 2px 30px"><b>'+d.id+'</b></td>'+
             '<td style="border:none">'+(d.dest||'—')+'</td>'+
             '<td style="border:none;color:#666">'+(d.ville||'—')+'</td>'+
-            '<td style="border:none;font-weight:700;color:'+spCol+'">'+(d.sp||'—')+'</td>'+
             '<td style="border:none;text-align:center">'+(d.palSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisSilo||0)+'</td>'+
             '<td style="border:none;text-align:center">'+(d.colisPick||0)+'</td></tr>';
@@ -6372,8 +7135,6 @@ function showKBShortcuts(){
     '<div class="kb-row"><span class="kb-key">1-6</span><span class="kb-desc">Changer d\u2019onglet</span></div>'+
     '<div class="kb-row"><span class="kb-key">Ctrl+F</span><span class="kb-desc">Recherche globale</span></div>'+
     '<div class="kb-row"><span class="kb-key">Ctrl+Z</span><span class="kb-desc">Annuler derni\u00e8re action</span></div>'+
-    '<div class="kb-row"><span class="kb-key">C</span><span class="kb-desc">Mode compact camions</span></div>'+
-    '<div class="kb-row"><span class="kb-key">T</span><span class="kb-desc">Mode grand \u00e9cran</span></div>'+
     '<div class="kb-row"><span class="kb-key">K</span><span class="kb-desc">Vue Kanban</span></div>'+
     '<div class="kb-row"><span class="kb-key">E</span><span class="kb-desc">Copier rapport email</span></div>'+
     '<div class="kb-row"><span class="kb-key">?</span><span class="kb-desc">Afficher cette aide</span></div>'+
@@ -6407,10 +7168,6 @@ document.addEventListener('keydown',function(e){
   if((e.ctrlKey||e.metaKey)&&e.key==='z'){
     e.preventDefault();doUndo();return;
   }
-  // C → compact
-  if(e.key==='c'||e.key==='C'){toggleCompactMode();return;}
-  // T → TV mode
-  if(e.key==='t'||e.key==='T'){toggleTVMode();return;}
   // ? → shortcuts help
   if(e.key==='?'){showKBShortcuts();return;}
   // Esc → close overlays
@@ -6482,7 +7239,6 @@ renderTrucks=function(){
       noteDiv.appendChild(ta);card.appendChild(noteDiv);
     }
   });
-  applyCompactMode();
 };
 
 // ─── Patch renderStats: add heatmap + scoring ─────────────────────────────
@@ -6511,33 +7267,6 @@ renderStats=function(){
       lastTh.parentNode.appendChild(scoreTh);
     }
   }
-  // Heatmap section
-  var heatData=computeHeatmapData();
-  var days=['lun.','mar.','mer.','jeu.','ven.','sam.'];
-  var hours=[];for(var h=5;h<22;h++)hours.push(h);
-  var maxVal=1;
-  Object.keys(heatData).forEach(function(k){if(heatData[k].count>maxVal)maxVal=heatData[k].count;});
-  var hmHtml='<div class="stats-section"><div class="stats-section-title">\uD83D\uDD25 Heatmap horaire — Occupation quais <span style="font-size:11px;font-weight:400;color:var(--t3);margin-left:8px">Cliquez sur un cr\u00e9neau pour voir les camions</span></div>';
-  hmHtml+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:50px repeat('+hours.length+',1fr);min-width:600px">';
-  hmHtml+='<div></div>';
-  hours.forEach(function(h){hmHtml+='<div class="heatmap-lbl">'+h+'h</div>';});
-  days.forEach(function(day){
-    hmHtml+='<div class="heatmap-lbl" style="text-align:right;padding-right:6px;font-weight:700">'+day+'</div>';
-    hours.forEach(function(h){
-      var cell=heatData[day+':'+h];
-      var v=cell?cell.count:0;
-      var intensity=v/maxVal;
-      var bg=v===0?'var(--sf2)':
-        intensity<0.33?'rgba(48,209,88,.3)':
-        intensity<0.66?'rgba(255,159,10,.5)':
-        'rgba(255,69,58,.6)';
-      var clickAttr=v>0?'onclick="showHeatmapDetail(\''+day+'\','+h+',_heatmapCache[\''+day+':'+h+'\'].trucks)" style="cursor:pointer;background:'+bg+'"':'style="background:'+bg+'"';
-      hmHtml+='<div class="heatmap-cell" '+clickAttr+' title="'+day+' '+h+'h : '+v+' camion'+(v>1?'s':'')+'">'+(v||'')+'</div>';
-    });
-  });
-  hmHtml+='</div></div></div>';
-  window._heatmapCache=heatData;
-  el.innerHTML+=hmHtml;
 };
 
 // ─── #2 Gantt: Enhance planning with real-time bars ───────────────────────
@@ -6644,10 +7373,16 @@ function buildDaySnapshot(){
     else{var cm=creToMinutes(t.creneau||'');if(cm<9999)h=Math.floor(cm/60);}
     if(h!==null){slots[h]=(slots[h]||0)+1;}
   });
+  // Comptage décalages du jour
+  var decCounts={total:0,mtx3:0,transporteur:0,pas_venu:0};
+  dayTrucks.forEach(function(t){
+    if(t.decalage){decCounts.total++;decCounts[t.decalage.motif]=(decCounts[t.decalage.motif]||0)+1;}
+  });
   return {
     date:todayISO, ts:new Date().toISOString(),
     truckCount:dayTrucks.length, deliveryCount:(APP.deliveries||[]).length,
     ponct:{heure:pH,avance:pA,retard:pR,attente:pW},
+    decalages:decCounts,
     intervals:intervals,
     carriers:Object.values(cMap),
     quais:Object.values(qMap),
@@ -6755,7 +7490,8 @@ function predictDelayRisk(truck){
 function computeWeekComparison(){
   if(_dailyArchive.length<5) return null;
   var today=new Date();
-  var thisWeekStart=new Date(today);thisWeekStart.setDate(today.getDate()-today.getDay()+1);
+  var dow=today.getDay()||7; // 1=lundi...7=dimanche (ISO)
+  var thisWeekStart=new Date(today);thisWeekStart.setDate(today.getDate()-dow+1);
   var lastWeekStart=new Date(thisWeekStart);lastWeekStart.setDate(lastWeekStart.getDate()-7);
   var lastWeekEnd=new Date(thisWeekStart);lastWeekEnd.setDate(lastWeekEnd.getDate()-1);
   var twISO=thisWeekStart.toISOString().slice(0,10);
@@ -7681,7 +8417,8 @@ function renderGoals(){
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #8 COMPARATIF MATIN / APRÈS-MIDI ──────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-function renderHalfdayComparison(el){
+function renderHalfdayComparison(el){return;}
+function _renderHalfdayComparison_disabled(el){
   if(!el)return;
   var todayISO=new Date().toISOString().slice(0,10);
   var dayT=trucks.filter(function(t){return t.date===todayISO;});
@@ -7851,7 +8588,7 @@ function renderArchive(){
       var ts=ct.timestamps||{};
       var p=ct.ponctualite||{};
       var pColor=p.status==='heure'?'var(--green)':p.status==='avance'?'var(--teal)':(p.status==='retard_reel'||p.status==='retard_auto')?'var(--red)':'var(--t3)';
-      function ft(v){return v?v.replace('T',' ').slice(11,16):'\u2014';}
+      function ft(v){if(!v)return'\u2014';var d=new Date(v);return(d.getHours()<10?'0':'')+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();}
       // Durée chargement effectif si fin_chg disponible
       var finChgCell=ts.fin_chg?ft(ts.fin_chg)+(ts.chg?' <span style="font-size:10px;color:var(--green)">('
         +Math.round((new Date(ts.fin_chg)-new Date(ts.chg))/60000)+'min)</span>':''): '\u2014';
@@ -7887,71 +8624,7 @@ function renderArchive(){
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ─── #15 EXPORT PLANNING MURAL A3 ──────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
-function exportPlanningMural(){
-  var todayISO=new Date().toISOString().slice(0,10);
-  var dayT=trucks.filter(function(t){return t.date===todayISO&&!isExport({itin:t.itin,dest:''});});
-  if(!dayT.length){showToast('Aucun camion pour aujourd\'hui');return;}
-  dayT.sort(function(a,b){return creToMinutes(a.creneau)-creToMinutes(b.creneau);});
-  var dateStr=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var hours=[];for(var h=5;h<22;h++)hours.push(h);
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Planning Mural '+todayISO+'</title>'+
-    '<style>@page{size:A3 landscape;margin:10mm}'+
-    'body{font-family:Arial,sans-serif;color:#222;margin:0;padding:10px}'+
-    'h1{font-size:24px;margin:0 0 4px;text-align:center}'+
-    '.subtitle{font-size:12px;color:#666;text-align:center;margin-bottom:12px}'+
-    'table{width:100%;border-collapse:collapse;table-layout:fixed}'+
-    'th{background:#333;color:#fff;padding:6px 2px;font-size:9px;text-align:center;border:1px solid #555}'+
-    'td{border:1px solid #ccc;padding:4px 3px;font-size:9px;vertical-align:top;height:32px}'+
-    '.truck-name{font-weight:700;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
-    '.truck-cre{font-size:8px;color:#666}'+
-    '.truck-dest{font-size:8px;color:#444}'+
-    '.slot{border-radius:3px;padding:2px 3px;margin:1px 0;font-size:8px;font-weight:700}'+
-    '.slot-active{background:#cde7ff;border:1px solid #7ab8f5}'+
-    '.slot-done{background:#d4f4dd;border:1px solid #5cc97e}'+
-    '.slot-wait{background:#fff3cd;border:1px solid #f0c040}'+
-    '.slot-late{background:#ffe0e0;border:1px solid #ff6b6b;color:#c0392b}'+
-    '@media print{body{padding:0}}</style></head><body>';
-  html+='<h1>\uD83D\uDE9B Planning Mural \u2014 TruckFlow</h1>';
-  html+='<div class="subtitle">'+dateStr+' \u2014 '+dayT.length+' camions \u2014 G\u00e9n\u00e9r\u00e9 '+new Date().toLocaleTimeString('fr-FR')+'</div>';
-  html+='<table><tr><th style="width:120px">Camion</th>';
-  hours.forEach(function(h){html+='<th>'+h+'h</th>';});
-  html+='</tr>';
-  dayT.forEach(function(t){
-    var ts=timestamps[t.id]||{};
-    var ponct=getPonctualite(t,ts,Date.now());
-    html+='<tr><td><div class="truck-name">'+(t.transporteur||t.itin||'?')+'</div>'+
-      '<div class="truck-cre">\u23f0 '+(t.creneau||'\u2014')+'</div>'+
-      '<div class="truck-dest">'+(t.dest||'')+'</div></td>';
-    var startMin=null,endMin=null;
-    if(ts.arr)startMin=new Date(ts.arr).getHours()*60+new Date(ts.arr).getMinutes();
-    else{var cm=creToMinutes(t.creneau||'');if(cm<9999)startMin=cm;}
-    if(ts.dep)endMin=new Date(ts.dep).getHours()*60+new Date(ts.dep).getMinutes();
-    else if(startMin!==null)endMin=startMin+90;
-    var isDone=ts.arr&&ts.quai&&ts.chg&&ts.dep;
-    hours.forEach(function(h){
-      var hStart=h*60,hEnd=(h+1)*60;
-      var overlap=startMin!==null&&endMin!==null&&startMin<hEnd&&endMin>hStart;
-      if(overlap){
-        var isLate=(ponct.status==='retard_reel'||ponct.status==='retard_auto');
-        var cls=isDone?'slot-done':isLate?'slot-late':ts.arr?'slot-active':'slot-wait';
-        var label='';
-        if(h*60<=startMin&&startMin<(h+1)*60)label=ponct.label||'';
-        html+='<td><div class="slot '+cls+'">'+label+'</div></td>';
-      }else{html+='<td></td>';}
-    });
-    html+='</tr>';
-  });
-  html+='</table>';
-  html+='<div style="text-align:center;margin-top:12px"><button onclick="window.print()" style="background:#333;color:#fff;border:none;padding:10px 30px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">\uD83D\uDDA8 Imprimer A3</button></div>';
-  html+='<style>@media print{button{display:none!important}}</style></body></html>';
-  var w=window.open('','_blank','width=1200,height=800');
-  if(w){w.document.write(html);w.document.close();}
-  else showToast('Popup bloqu\u00e9 \u2014 autorisez les popups');
-  logActivity('\uD83D\uDDA8','Export planning mural');
-}
+// placeholder supprimé : exportPlanningMural retiré
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #18 RAPPORT AUTOMATIQUE 16H ────────────────────────────────────────
@@ -8000,9 +8673,103 @@ var _origRenderStats5=renderStats;
 renderStats=function(){
   _origRenderStats5();
   var el=document.getElementById('statsContent');if(!el)return;
-  try{renderHalfdayComparison(el);}catch(e){console.warn('halfday:',e);}
-  try{renderMonthlyChart(el);}catch(e){console.warn('monthly:',e);}
+try{renderMonthlyChart(el);}catch(e){console.warn('monthly:',e);}
+  try{renderDecalageStats(el);}catch(e){console.warn('decalage-stats:',e);}
 };
+
+// ─── Section Suivi des Décalages ──────────────────────────────────────────
+function renderDecalageStats(container){
+  // Collecte : camions actifs + archivés
+  var allTrucks=trucks.slice();
+  (_completedTrucks||[]).forEach(function(ct){allTrucks.push(ct);});
+
+  var rows=[];
+  allTrucks.forEach(function(t){
+    if(!t.decalage)return;
+    rows.push({
+      transporteur:t.transporteur||t.itin||'—',
+      motif:t.decalage.motif||'',
+      label:t.decalage.label||'?',
+      note:t.decalage.note||'',
+      dateOrig:t.decalage.dateOrig||t.date||'',
+      creneauOrig:t.decalage.creneauOrig||t.creneau||'',
+      dateNew:t.decalage.dateNew||'',
+      creneauNew:t.decalage.creneauNew||'',
+      enreg:(t.decalage.date||'')+(t.decalage.heure?' '+t.decalage.heure:''),
+      locked:!!t.locked
+    });
+  });
+
+  // KPI par motif
+  var motifColors={'mtx3':'#e65100','transporteur':'#1565c0','pas_venu':'#b71c1c'};
+  var motifLabels={'mtx3':'MTX3','transporteur':'Transporteur','pas_venu':'Pas venu'};
+  var motifKeys=['mtx3','transporteur','pas_venu'];
+  var counts={};
+  motifKeys.forEach(function(k){counts[k]=0;});
+  rows.forEach(function(r){if(counts[r.motif]!==undefined)counts[r.motif]++;else counts[r.motif]=(counts[r.motif]||0)+1;});
+
+  var kpiHtml='';
+  if(rows.length===0){
+    kpiHtml='<div style="color:var(--t3);font-size:13px;padding:18px 0;text-align:center">Aucun décalage enregistré</div>';
+  } else {
+    // Carte total
+    kpiHtml+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">';
+    kpiHtml+='<div class="stats-kpi" style="border:1px solid rgba(255,180,0,.25);background:rgba(255,180,0,.06)">'+
+      '<div style="font-size:28px;font-weight:700;color:#f59e0b">'+rows.length+'</div>'+
+      '<div style="font-size:11px;color:var(--t3);margin-top:2px">Total d\u00e9calages</div></div>';
+    motifKeys.forEach(function(k){
+      var c=motifColors[k]||'var(--cyan)';
+      var cnt=counts[k]||0;
+      kpiHtml+='<div class="stats-kpi" style="border:1px solid '+c+'33;background:'+c+'11">'+
+        '<div style="font-size:28px;font-weight:700;color:'+c+'">'+cnt+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+(motifLabels[k]||k)+'</div></div>';
+    });
+    kpiHtml+='</div>';
+  }
+
+  // Table détail
+  var tableHtml='';
+  if(rows.length>0){
+    tableHtml='<div style="overflow-x:auto"><table class="stats-day-table" style="min-width:720px">'+
+      '<thead><tr>'+
+      '<th>Transporteur</th>'+
+      '<th>Motif</th>'+
+      '<th>Date orig.</th>'+
+      '<th>Cr\u00e9neau orig.</th>'+
+      '<th style="color:#f59e0b">\u2192 Nouvelle date</th>'+
+      '<th style="color:#f59e0b">Nouveau cr\u00e9neau</th>'+
+      '<th>Note</th>'+
+      '<th>Enregistr\u00e9</th>'+
+      '</tr></thead><tbody>';
+    rows.forEach(function(r){
+      var c=motifColors[r.motif]||'var(--cyan)';
+      var badge='<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;'+
+        'background:'+c+'22;color:'+c+';border:1px solid '+c+'55">'+r.label+'</span>';
+      tableHtml+='<tr>'+
+        '<td><span style="font-weight:600;color:var(--t1)">'+r.transporteur+'</span>'+(r.locked?' <span style="font-size:10px;opacity:.6">🔒</span>':'')+'</td>'+
+        '<td>'+badge+'</td>'+
+        '<td style="color:var(--t2)">'+r.dateOrig+'</td>'+
+        '<td style="color:var(--t2)">'+r.creneauOrig+'</td>'+
+        '<td style="color:#f59e0b;font-weight:600">'+(r.dateNew||'<span style="color:var(--t3)">—</span>')+'</td>'+
+        '<td style="color:#f59e0b">'+(r.creneauNew||'<span style="color:var(--t3)">—</span>')+'</td>'+
+        '<td style="color:var(--t3);font-size:11px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+r.note.replace(/"/g,"'")+'">'+
+          (r.note||'<span style="opacity:.4">—</span>')+'</td>'+
+        '<td style="color:var(--t3);font-size:10px;white-space:nowrap">'+r.enreg+'</td>'+
+        '</tr>';
+    });
+    tableHtml+='</tbody></table></div>';
+  }
+
+  var sec=document.createElement('div');
+  sec.className='stats-section';
+  sec.style.cssText='margin-top:18px';
+  sec.innerHTML=
+    '<div class="stats-section-title">\u23F1 Suivi des D\u00e9calages</div>'+
+    kpiHtml+tableHtml+
+    (rows.length===0?'':'<div style="font-size:10px;color:var(--t3);margin-top:10px;text-align:right">'+
+      'Inclut les camions actifs et les camions archiv\u00e9s. Les camions fig\u00e9s (🔒) sont conserv\u00e9s ind\u00e9finiment.</div>');
+  container.appendChild(sec);
+}
 
 // ─── Start chrono refresh + initial states ────────────────────────────────
 startChronoRefresh();
@@ -8045,15 +8812,15 @@ function openTruckMonitor(){
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d1117;--sf1:rgba(255,255,255,.05);--sf2:rgba(255,255,255,.08);--bd1:rgba(160,210,255,.12);--bd2:rgba(160,210,255,.18);--t1:#f0f6fc;--t2:#8b949e;--t3:#484f57;--blue:#0a84ff;--green:#2a9d5c;--orange:#e65100;--red:#d32f2f;--indigo:#4c6ef5;--cyan:#00bcd4}
 body{background:#0d1117;color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
-.o1{width:700px;height:700px;background:rgba(10,132,255,.14);top:-280px;left:-80px}
-.o2{width:600px;height:600px;background:rgba(147,51,234,.1);bottom:-200px;right:-150px}
-.o3{width:450px;height:450px;background:rgba(0,188,212,.07);top:40%;left:45%}
+.orb{position:fixed;border-radius:50%;filter:blur(45px);pointer-events:none;z-index:0}
+.o1{width:400px;height:400px;background:rgba(10,132,255,.1);top:-160px;left:-60px}
+.o2{width:350px;height:350px;background:rgba(147,51,234,.07);bottom:-120px;right:-100px}
+.o3{width:260px;height:260px;background:rgba(0,188,212,.05);top:40%;left:45%}
 header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1.5px solid var(--bd2);padding:10px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}
 .brand{font-size:17px;font-weight:800;white-space:nowrap;letter-spacing:-.3px}
 .brand span{color:var(--blue)}
-.clock{font-size:24px;font-weight:300;font-variant-numeric:tabular-nums;min-width:84px}
-.dtlbl{font-size:10px;color:var(--t2);white-space:nowrap;margin-top:1px}
+.clock{font-size:44px;font-weight:200;font-variant-numeric:tabular-nums;min-width:140px;letter-spacing:-1px;line-height:1}
+.dtlbl{font-size:13px;color:var(--t2);white-space:nowrap;margin-top:4px;text-transform:capitalize}
 .kpis{display:flex;gap:8px;flex:1;justify-content:center;flex-wrap:wrap}
 .kpi{background:var(--sf1);border:1px solid var(--bd2);border-radius:10px;padding:6px 12px;text-align:center;min-width:75px;backdrop-filter:blur(8px)}
 .kv{font-size:20px;font-weight:800}.kl{font-size:8px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
@@ -8061,20 +8828,34 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .hbtn{padding:5px 11px;border-radius:8px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:11px;cursor:pointer}
 .hbtn:hover{background:rgba(255,255,255,.12)}
 .rdot{width:7px;height:7px;border-radius:50%;background:#2a9d5c;display:inline-block;animation:blink 2s infinite}
-#main{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 20px;position:relative;z-index:5}
-#main::-webkit-scrollbar{width:5px}
-#main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+#main{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 22px 10px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:5;scrollbar-width:thin;scrollbar-color:rgba(160,210,255,.2) transparent}
+.sec-wrap{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03);border-left:3px solid currentColor}
+.sec-hdr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
+.sec-hdr-t{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;flex:1}
+.sec-hdr-n{font-size:22px;font-weight:900;line-height:1;min-width:28px;text-align:right}
+.sec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.sec-grid-sm{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.sec-dep{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.tc-compact{background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.01) 100%);border:1px solid rgba(160,210,255,.1);border-radius:14px;padding:10px 13px;box-shadow:0 2px 8px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
+.tc-compact.ph{border-left:3px solid #4ade80}.tc-compact.pa{border-left:3px solid #60a5fa}.tc-compact.pr{border-left:3px solid #f87171}
+.tc-compact .tcn{font-size:14px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-compact .tcd{font-size:11px;color:var(--t2);margin-top:4px;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.tc.cren-now{border-color:rgba(251,191,36,.5);box-shadow:0 0 0 1px rgba(251,191,36,.25),0 4px 20px rgba(251,191,36,.15);animation:cnpulse 3s ease-in-out infinite}
+@keyframes cnpulse{0%,100%{box-shadow:0 0 0 1px rgba(251,191,36,.25),0 4px 20px rgba(251,191,36,.15)}50%{box-shadow:0 0 0 2px rgba(251,191,36,.4),0 4px 30px rgba(251,191,36,.28)}}
+.b.bc.bcn{background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.55);color:#fbbf24}
 .sec{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px;padding:5px 0;margin:12px 0 8px;border-bottom:1px solid var(--bd1);display:flex;align-items:center;gap:8px}
 .sc{background:var(--sf2);padding:1px 8px;border-radius:10px}
-.tc{background:rgba(255,255,255,.04);border:1.5px solid var(--bd2);border-radius:16px;padding:14px 15px;backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:border-color .3s,background .3s}
-.tc::before{content:'';position:absolute;inset:0;border-radius:15px;background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 55%);pointer-events:none}
-.tc.sw{border-color:rgba(139,148,158,.3)}
-.tc.sa{border-color:rgba(10,132,255,.55);background:rgba(10,132,255,.06)}
-.tc.sd{border-color:rgba(76,110,245,.55);background:rgba(76,110,245,.07)}
-.tc.sl{border-color:rgba(230,81,0,.55);background:rgba(230,81,0,.07)}
-.tc.slo{border-color:rgba(42,157,92,.55);background:rgba(42,157,92,.08)}
-.tc.sp{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.02);opacity:.6}
+.tc{background:linear-gradient(145deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.02) 100%);border:1.5px solid rgba(160,210,255,.15);border-radius:18px;padding:15px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s;box-shadow:0 4px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08)}
+.tc::before{content:'';position:absolute;inset:0;border-radius:17px;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 55%);pointer-events:none}
+.tc.sw{border-color:rgba(139,148,158,.22)}
+.tc.sa{border-color:rgba(10,132,255,.55);background:linear-gradient(145deg,rgba(10,132,255,.11) 0%,rgba(10,132,255,.03) 100%);box-shadow:0 4px 22px rgba(10,132,255,.18),inset 0 1px 0 rgba(10,132,255,.2)}
+.tc.sd{border-color:rgba(76,110,245,.55);background:linear-gradient(145deg,rgba(76,110,245,.11) 0%,rgba(76,110,245,.03) 100%);box-shadow:0 4px 22px rgba(76,110,245,.18),inset 0 1px 0 rgba(76,110,245,.2)}
+.tc.sl{border-color:rgba(230,81,0,.55);background:linear-gradient(145deg,rgba(230,81,0,.11) 0%,rgba(230,81,0,.03) 100%);box-shadow:0 4px 22px rgba(230,81,0,.18),inset 0 1px 0 rgba(230,81,0,.18)}
+.tc.slo{border-color:rgba(42,157,92,.55);background:linear-gradient(145deg,rgba(42,157,92,.11) 0%,rgba(42,157,92,.03) 100%);box-shadow:0 4px 22px rgba(42,157,92,.18),inset 0 1px 0 rgba(42,157,92,.2)}
+.tc.sp{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.02);opacity:.5}
+.tc.sretard{border-color:rgba(211,47,47,.7);background:linear-gradient(145deg,rgba(211,47,47,.12) 0%,rgba(211,47,47,.04) 100%);box-shadow:0 4px 22px rgba(211,47,47,.3),inset 0 1px 0 rgba(211,47,47,.2);animation:retardpulse 3.5s ease-in-out infinite}
+@keyframes retardpulse{0%,100%{opacity:1}50%{opacity:.82}}
 .tc-top{display:flex;align-items:center;gap:5px;margin-bottom:9px;flex-wrap:wrap}
 .b{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
 .bw{background:rgba(139,148,158,.18);color:#8b949e}.ba{background:rgba(10,132,255,.2);color:#60a5fa}
@@ -8086,7 +8867,7 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .bpok{background:rgba(42,157,92,.2);color:#4ade80}
 .bpav{background:rgba(10,132,255,.2);color:#60a5fa}
 .bprt{background:rgba(211,47,47,.2);color:#f87171;font-weight:800}
-.tc-name{font-size:15px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.tc-name{font-size:17px;font-weight:900;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;letter-spacing:-.2px}
 .tc-sub{font-size:10px;color:var(--t2);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prog{display:flex;align-items:flex-start;gap:0;margin-bottom:10px}
 .ps{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0}
@@ -8119,6 +8900,55 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.95)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.hyb{display:flex;flex-direction:column;gap:8px}
+.sec-wrap2{display:flex;flex-direction:column;gap:5px}
+.sec-hdr2{display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:8px;background:rgba(255,255,255,.025);border-left:3px solid currentColor;margin-bottom:3px}
+.sec-hdr2 .sht{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;flex:1}
+.sec-hdr2 .shn{font-size:18px;font-weight:900;line-height:1}
+.sec-hdr2 .shd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.active-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ac{background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(160,210,255,.15);border-radius:14px;padding:10px 13px;display:flex;flex-direction:column;gap:3px}
+.ac.sa{border-color:rgba(10,132,255,.5);background:linear-gradient(145deg,rgba(10,132,255,.1),rgba(10,132,255,.03))}
+.ac.sd{border-color:rgba(76,110,245,.5);background:linear-gradient(145deg,rgba(76,110,245,.1),rgba(76,110,245,.03))}
+.ac.sl{border-color:rgba(230,81,0,.5);background:linear-gradient(145deg,rgba(230,81,0,.1),rgba(230,81,0,.03))}
+.ac.slo{border-color:rgba(42,157,92,.5);background:linear-gradient(145deg,rgba(42,157,92,.1),rgba(42,157,92,.03))}
+.ac.sretard{border-color:rgba(211,47,47,.7);background:linear-gradient(145deg,rgba(211,47,47,.12),rgba(211,47,47,.04));animation:retardpulse 3s ease-in-out infinite}
+.ac-top{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px}
+.ac-name{font-size:14px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-sub{font-size:9px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.mprog{display:flex;align-items:flex-start;gap:0;margin:4px 0}
+.mps{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0}
+.mpd{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;border:1.5px solid;flex-shrink:0}
+.mpd.done{background:#2a9d5c;border-color:#2a9d5c;color:#fff}
+.mpd.active{background:var(--blue);border-color:var(--blue);color:#fff;animation:pulse 1.5s infinite}
+.mpd.pend{background:transparent;border-color:rgba(255,255,255,.18);color:var(--t3)}
+.mpl{height:2px;flex:1;margin-top:8px;background:rgba(255,255,255,.1)}
+.mpl.done{background:#2a9d5c}
+.mplbl{font-size:7px;color:var(--t2);margin-top:2px;text-align:center;overflow:hidden;text-overflow:ellipsis;width:100%}
+.mptm{font-size:7px;color:var(--t1);font-weight:600;text-align:center;font-variant-numeric:tabular-nums}
+.ac-elapsed{font-size:10px;color:var(--t2);margin:2px 0}
+.ac-elapsed.hot{color:#fb923c;font-weight:700}
+.ac-elapsed.ok{color:#4ade80;font-weight:600}
+.act-sm{width:100%;padding:6px 10px;border-radius:9px;border:none;font-size:11px;font-weight:700;cursor:pointer;margin-top:3px}
+.act-sm:active{transform:scale(.97)}
+.strip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.025);border:1px solid rgba(160,210,255,.08);border-left:3px solid #8b949e;border-radius:9px;padding:7px 12px}
+.strip.sretard{border-left-color:#f87171;background:rgba(211,47,47,.06);animation:retardpulse 3s ease-in-out infinite}
+.strip-name{font-size:12px;font-weight:800;white-space:nowrap;min-width:150px;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.strip-badges{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.strip-prog{display:flex;align-items:center;gap:2px;flex-shrink:0;margin:0 6px}
+.strip-spd{width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;border:1.5px solid;flex-shrink:0}
+.strip-spd.done{background:#2a9d5c;border-color:#2a9d5c;color:#fff}
+.strip-spd.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.strip-spd.pend{background:transparent;border-color:rgba(255,255,255,.18)}
+.strip-spl{height:2px;width:8px;background:rgba(255,255,255,.1)}
+.strip-spl.done{background:#2a9d5c}
+.strip-spacer{flex:1}
+.strip-btn{padding:5px 10px;border-radius:8px;border:none;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.strip-btn:active{transform:scale(.97)}
+.late-bar{background:linear-gradient(135deg,rgba(211,47,47,.18),rgba(211,47,47,.06));border:1.5px solid rgba(211,47,47,.65);border-radius:12px;padding:9px 16px;display:flex;align-items:center;gap:12px;animation:retardpulse 2s ease-in-out infinite}
+.lb-name{font-size:14px;font-weight:800;color:#f87171;flex:1}
+.lb-meta{font-size:11px;color:rgba(248,113,113,.7);display:flex;gap:6px;align-items:center}
+.lb-over{font-size:13px;font-weight:900;color:#f87171;background:rgba(211,47,47,.2);padding:3px 10px;border-radius:8px;white-space:nowrap}
 @media(max-width:640px){
   header{flex-wrap:wrap;padding:8px 14px;gap:8px}
   .brand{font-size:13px}
@@ -8151,7 +8981,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
   // JS embedded via comment extraction
   var _js=(function(){/*
-var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities';
+var LT='th10_trucks',LTS='th10_ts',LQ='th10_quai',LP='tf_priorities',LD='th10_deliveries',LDC='th10_delcache';
 var showDep=false,_bc;
 try{_bc=new BroadcastChannel('truckflow_sync');}catch(e){}
 if(_bc){_bc.onmessage=function(){setTimeout(render,300);};}
@@ -8159,6 +8989,8 @@ function getData(){try{return JSON.parse(localStorage.getItem(LT)||'[]');}catch(
 function getTs(){try{return JSON.parse(localStorage.getItem(LTS)||'{}');}catch(e){return{};}}
 function getQ(){try{return JSON.parse(localStorage.getItem(LQ)||'{}');}catch(e){return{};}}
 function getPrio(){try{return JSON.parse(localStorage.getItem(LP)||'{}');}catch(e){return{};}}
+function getDels(){try{return JSON.parse(localStorage.getItem(LD)||'[]');}catch(e){return[];}}
+function getDCache(){try{return JSON.parse(localStorage.getItem(LDC)||'{}');}catch(e){return{};}}
 function saveTs(m){localStorage.setItem(LTS,JSON.stringify(m));if(_bc)_bc.postMessage({type:'ts'});}
 function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
 function fm(m){if(m<1)return '<1min';if(m<60)return m+'min';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
@@ -8174,8 +9006,8 @@ function getStatus(ts){
 function slbl(s){return s==='w'?'⏳ En attente':s==='a'?'🚛 Sur site':s==='d'?'🔄 À quai':s==='l'?'📦 En chargement':s==='lo'?'✅ Chargé':'🚀 Parti';}
 function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s==='lo'?'blo':'bp';}
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
-function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);toast('⏱ '+kl(k)+' enregistré');render();}
-function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);toast('✎ '+kl(k)+' modifié');render();}
+function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}}toast('⏱ '+kl(k)+' enregistré');render();}
+function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}catch(e){}}toast('✎ '+kl(k)+' modifié');render();}
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
 function apM(tid,k){var inp=document.getElementById('ti_'+tid);if(inp&&inp.value){stampM(tid,k,inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');}}
 function togDep(){showDep=!showDep;document.getElementById('dtgl').textContent=showDep?'Masquer partis':'Afficher partis';render();}
@@ -8295,16 +9127,30 @@ function ponctBadge(t,ts){
   var now=nowMin();
   var ongoing=now>=cr.s&&now<=cr.e?'<span class="b bpt">⏰ En cours</span>':'';
   if(!ts||!ts.arr){
-    if(now>cr.e+5)return ongoing+'<span class="b bprt">⚠️ Retard '+fm(now-cr.s)+'</span>';
+    if(now>cr.e+5)return ongoing+'<span class="b bprt">⚠️ Retard '+fm(now-cr.e)+'</span>';
     if(now>=cr.s)return ongoing;
     return ongoing;
   }
   var arrT=new Date(ts.arr);
   var arrMin=arrT.getHours()*60+arrT.getMinutes();
-  var diff=arrMin-cr.s;
-  if(diff<=-10)return ongoing+'<span class="b bpav">⚡ En avance '+fm(-diff)+'</span>';
-  if(diff<=15)return ongoing+'<span class="b bpok">✅ À l\'heure</span>';
-  return ongoing+'<span class="b bprt">⚠️ Retard '+fm(diff)+'</span>';
+  if(arrMin<cr.s-10)return ongoing+'<span class="b bpav">⚡ En avance '+fm(cr.s-arrMin)+'</span>';
+  if(arrMin<=cr.e)return ongoing+'<span class="b bpok">✅ À l\'heure</span>';
+  return ongoing+'<span class="b bprt">⚠️ Retard '+fm(arrMin-cr.e)+'</span>';
+}
+function isCrenNow(t){
+  if(!t||!t.creneau)return false;
+  var m=t.creneau.match(/(\d{1,2})[h:](\d{0,2})[-–](\d{1,2})[h:](\d{0,2})/);
+  if(!m)return false;
+  var s=parseInt(m[1])*60+(m[2]?parseInt(m[2])||0:0);
+  var e=parseInt(m[3])*60+(m[4]?parseInt(m[4])||0:0);
+  var now=new Date();var nm=now.getHours()*60+now.getMinutes();
+  return nm>=s&&nm<=e;
+}
+function autoFit(){
+  // Réinitialise tout scale — le scroll CSS gère l'overflow
+  var main=document.getElementById('main');
+  if(!main)return;
+  main.style.transform='';main.style.width='';main.style.height='';
 }
 function makeCard(t,ts,quai,prio){
   var s=getStatus(ts);
@@ -8329,6 +9175,16 @@ function makeCard(t,ts,quai,prio){
   var now=Date.now();
   var twg=timeWidget(t,ts);
   var nDel=(t.deliveries||[]).length;
+  var delHtml='';
+  if(nDel>0){
+    var _dels=getDels(),_dcache=getDCache();
+    var _delivs=(t.deliveries||[]).map(function(id){return _dels.find(function(x){return x.id===id;})||_dcache[id]||null;}).filter(Boolean);
+    if(_delivs.length){
+      delHtml='<div style="margin:5px 0 2px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07)">'+
+        _delivs.map(function(d){return '<div style="font-size:9px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u21b3 '+(d.dest||d.id)+(d.ville?' \u00b7 '+d.ville:'')+'</div>';}).join('')+
+      '</div>';
+    }
+  }
   var tid=t.id;
   var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
   var prB=prio==='urgent'?'<span class="b bpu">🔴 Urgent</span>':prio==='normal'?'<span class="b bpn">🟡 Normal</span>':prio==='flexible'?'<span class="b bpf">🟢 Flexible</span>':'';
@@ -8343,17 +9199,191 @@ function makeCard(t,ts,quai,prio){
      +'<button class="mcan" onclick="togM(\''+tid+'\')">✕</button>'
      +'</div>'
     :'<button class="act act-done" disabled>✅ Parti</button>';
-  return '<div class="tc '+tcls(s)+'">'
+  var cn=isCrenNow(t);
+  var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
+  return '<div class="tc '+tcls(s)+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
     +'<div class="tc-top">'
     +'<span class="b '+scls(s)+'">'+slbl(s)+'</span>'
     +(quai?'<span class="b bq">Q'+quai+'</span>':'')
-    +(t.creneau?'<span class="b bc">'+t.creneau+'</span>':'')
+    +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'">'+t.creneau+(cn?' ▶':'')+' </span>':'')
     +prB+ptB
     +'<span style="margin-left:auto;font-size:10px;color:var(--t3)">📦 '+nDel+'</span>'
     +'</div>'
     +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="tc-sub">'+(t.dest||t.itin||'—')+'</div>'
-    +prog+twg+ab
+    +delHtml+prog+twg+ab
+    +'</div>';
+}
+function makeCompact(t,ts){
+  var pb=ponctBadge(t,ts);
+  var cn=isCrenNow(t);
+  var cls=pb.indexOf('bpav')>-1?'pa':pb.indexOf('bprt')>-1?'pr':'ph';
+  var dur='';
+  if(ts.arr&&ts.dep){var dm=Math.round((new Date(ts.dep)-new Date(ts.arr))/60000);dur=fm(dm);}
+  return '<div class="tc-compact '+cls+(cn?' cren-now':'')+'">'
+    +'<div class="tcn">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="tcd">'
+    +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'">'+t.creneau+'</span>':'')
+    +'<span style="font-size:13px;font-weight:800;color:var(--t2)">🚀 '+ft(ts.dep)+'</span>'
+    +(dur?'<span style="font-size:10px;color:var(--t3)">⏱ '+dur+'</span>':'')
+    +pb
+    +'</div>'
+    +'</div>';
+}
+function togDet(id){
+  var el=document.getElementById('det_'+id);
+  var btn=document.getElementById('detbtn_'+id);
+  if(!el)return;
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  if(btn)btn.textContent=open?'\u25b8 D\u00e9tails':'\u25be Masquer';
+}
+function cancelTs(tid,k){
+  if(!confirm('Annuler le timestamp "'+kl(k)+'" ?'))return;
+  var m=getTs();if(m[tid])delete m[tid][k];
+  saveTs(m);toast('\u21a9 '+kl(k)+' annul\u00e9');render();
+}
+function lastFilledKey(ts){
+  var keys=['arr','quai','chg','fin_chg','dep'],last=null;
+  keys.forEach(function(k){if(ts[k])last=k;});
+  return last;
+}
+function delSummary(t){
+  var _dels=getDels(),_dcache=getDCache();
+  var ids=t.deliveries||[];
+  if(!ids.length)return '';
+  var _delivs=ids.map(function(id){return _dels.find(function(x){return x.id===id;})||_dcache[id]||null;}).filter(Boolean);
+  var totPal=0,totCol=0;
+  _delivs.forEach(function(d){totPal+=(+d.palSilo||0)+(+d.palPick||0);totCol+=(+d.colisPick||0);});
+  var meta=(totPal?totPal+' pal':'')+(totCol?(totPal?' \u00b7 ':'')+totCol+' col':'');
+  return '<div style="font-size:9px;color:var(--t2);margin:3px 0 2px;display:flex;align-items:center;gap:6px">'
+    +'<span>\ud83d\udce6 '+ids.length+' livraison'+(ids.length>1?'s':'')+(meta?' \u2014 '+meta:'')+'</span>'
+    +(_delivs.length?'<button id="detbtn_'+t.id+'" style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;padding:0;text-decoration:underline" onclick="togDet(\''+t.id+'\')">\u25b8 D\u00e9tails</button>':'')
+    +'</div>'
+    +(_delivs.length?'<div id="det_'+t.id+'" style="display:none;margin-bottom:3px;padding:5px 7px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06)">'
+    +_delivs.map(function(d){return '<div style="font-size:9px;display:flex;gap:5px;align-items:center;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">'
+      +'<span style="color:var(--t1);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+(d.dest||d.id||'?')+(d.ville?' \u00b7 '+d.ville:'')+'</span>'
+      +((+d.palSilo||+d.palPick)?'<span style="color:#60a5fa;flex-shrink:0">'+((+d.palSilo||0)+(+d.palPick||0))+'p</span>':'')
+      +(+d.colisPick?'<span style="color:#fb923c;flex-shrink:0">'+d.colisPick+'c</span>':'')
+      +'</div>';}).join('')
+    +'</div>':'');
+}
+function makeLateBar(t,ts,quai){
+  var _cr=parseCren(t.creneau);
+  var over=_cr?nowMin()-_cr.e:0;
+  var tid=t.id;
+  var ds=delSummary(t);
+  return '<div style="display:flex;flex-direction:column;gap:3px">'
+    +'<div class="late-bar">'
+    +'<span style="font-size:18px">⚠️</span>'
+    +'<div class="lb-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="lb-meta">'
+    +(t.creneau?'<span class="b bc">'+t.creneau+'</span>':'')
+    +(quai?'<span class="b bq">Q'+quai+'</span>':'<span style="color:rgba(248,113,113,.5)">Quai non assigné</span>')
+    +'</div>'
+    +'<span class="lb-over">+'+over+' min</span>'
+    +'<button class="strip-btn act-arr" onclick="stamp(\''+tid+'\',\'arr\')">🕐 Arrivée</button>'
+    +'</div>'
+    +(ds?'<div style="padding:0 14px 2px;background:rgba(211,47,47,.04);border-radius:0 0 10px 10px;border:1px solid rgba(211,47,47,.2);border-top:none;margin-top:-4px;padding-top:6px">'+ds+'</div>':'')
+    +'</div>';
+}
+function makeActiveCard(t,ts,quai,prio){
+  var s=getStatus(ts);
+  var keys=['arr','quai','chg','fin_chg','dep'];
+  var icos=['🕐','🔄','📦','✅','🚀'];
+  var lbls=['Arr.','Quai','Chgt','Fin','Dép.'];
+  var prog='<div class="mprog">';
+  keys.forEach(function(k,i){
+    var done=!!ts[k];
+    var act=!done&&(i===0||!!ts[keys[i-1]]);
+    var dc=done?'done':act?'active':'pend';
+    if(i>0)prog+='<div class="mpl'+(ts[keys[i-1]]?' done':'')+'"></div>';
+    prog+='<div class="mps"><div class="mpd '+dc+'">'+(done?'✓':icos[i])+'</div>'
+      +'<div class="mplbl">'+lbls[i]+'</div>'
+      +(ts[k]?'<div class="mptm">'+ft(ts[k])+'</div>':'<div class="mptm" style="color:var(--t3)">—</div>')
+      +'</div>';
+  });
+  prog+='</div>';
+  var elapsed='';
+  var stageStarts={a:ts.arr,d:ts.quai,l:ts.chg,lo:ts.fin_chg};
+  var ss=stageStarts[s];
+  if(ss){
+    var el=Math.round((Date.now()-new Date(ss))/60000);
+    var col=el<30?'ok':el<90?'':'hot';
+    elapsed='<div class="ac-elapsed '+col+'">⏱ '+fm(el)+(el>=90?' ⚠️':'')+'</div>';
+  }
+  var nk=null,ac='act-done',al='✅ Parti';
+  if(!ts.arr){nk='arr';ac='act-arr';al='🕐 Arrivée';}
+  else if(!ts.quai){nk='quai';ac='act-quai';al='🔄 À quai';}
+  else if(!ts.chg){nk='chg';ac='act-chg';al='📦 Chargement';}
+  else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin chgt';}
+  else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Départ';}
+  var tid=t.id;
+  var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
+  var ab=nk
+    ?'<button class="act-sm '+ac+'" onclick="'+actOnclick+'">'+al+'</button>'
+    :'<button class="act-sm act-done" disabled>✅ Parti</button>';
+  var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴 Urgent</span>':'';
+  var ptB=ponctBadge(t,ts);
+  var cn=isCrenNow(t);
+  var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
+  return '<div class="ac '+tcls(s)+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
+    +'<div class="ac-top">'
+    +'<span class="b '+scls(s)+'" style="font-size:9px">'+slbl(s)+'</span>'
+    +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
+    +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
+    +prB+ptB
+    +'</div>'
+    +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="ac-sub">'+(t.dest||t.itin||'—')+'</div>'
+    +prog+elapsed
+    +delSummary(t)
+    +ab
+    +(lastFilledKey(ts)&&s!=='p'?'<div style="text-align:right;margin-top:2px"><button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;text-decoration:underline" onclick="cancelTs(\''+tid+'\',\''+lastFilledKey(ts)+'\')">↩ Annuler '+kl(lastFilledKey(ts))+'</button></div>':'')
+    +'</div>';
+}
+function makeStrip(t,ts,quai,prio){
+  var keys=['arr','quai','chg','fin_chg','dep'];
+  var icos=['🕐','🔄','📦','✅','🚀'];
+  var prog='<div class="strip-prog">';
+  keys.forEach(function(k,i){
+    var done=!!ts[k];
+    var act=!done&&(i===0||!!ts[keys[i-1]]);
+    var dc=done?'done':act?'active':'pend';
+    if(i>0)prog+='<div class="strip-spl'+(ts[keys[i-1]]?' done':'')+'"></div>';
+    prog+='<div class="strip-spd '+dc+'">'+(done?'✓':icos[i])+'</div>';
+  });
+  prog+='</div>';
+  var nk=null,ac='act-arr',al='🕐 Arrivée';
+  if(!ts.arr){nk='arr';ac='act-arr';al='🕐 Arrivée';}
+  else if(!ts.quai){nk='quai';ac='act-quai';al='🔄 À quai';}
+  else if(!ts.chg){nk='chg';ac='act-chg';al='📦 Chgt';}
+  else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin';}
+  else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Départ';}
+  var tid=t.id;
+  var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
+  var ab=nk?'<button class="strip-btn '+ac+'" onclick="'+actOnclick+'">'+al+'</button>':'';
+  var cn=isCrenNow(t);
+  var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
+  var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴</span>':'';
+  var nDel=(t.deliveries||[]).length;
+  var lk=lastFilledKey(ts);
+  var cancelBtn=lk?'<button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;text-decoration:underline;flex-shrink:0" onclick="cancelTs(\''+tid+'\',\''+lk+'\')">↩</button>':'';
+  var ds=delSummary(t);
+  return '<div style="display:flex;flex-direction:column;gap:2px">'
+    +'<div class="strip'+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
+    +'<div class="strip-name">'+(t.transporteur||t.itin||'?')+'</div>'
+    +'<div class="strip-badges">'
+    +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
+    +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
+    +prB
+    +'</div>'
+    +prog
+    +'<div class="strip-spacer"></div>'
+    +cancelBtn
+    +ab
+    +'</div>'
+    +(ds?'<div style="padding:0 12px 4px">'+ds+'</div>':'')
     +'</div>';
 }
 function render(){
@@ -8362,47 +9392,116 @@ function render(){
   var td=new Date().toISOString().slice(0,10);
   var day=trucks.filter(function(t){return t.date===td;});
   updateKPIs(trucks,tsm);
-  day.sort(function(a,b){
-    var sa=getStatus(tsm[a.id]||{}),sb=getStatus(tsm[b.id]||{});
-    if(sa!=='p'&&sb==='p')return -1;
-    if(sa==='p'&&sb!=='p')return 1;
-    return (a.creneau||'99:99').localeCompare(b.creneau||'99:99');
+  // Groupes par statut précis
+  var loading=[],at_quai=[],on_site=[],late=[],waiting=[],departed=[];
+  day.forEach(function(t){
+    var s=getStatus(tsm[t.id]||{});
+    if(s==='p'){departed.push(t);}
+    else if(s==='l'||s==='lo'){loading.push(t);}
+    else if(s==='d'){at_quai.push(t);}
+    else if(s==='a'){on_site.push(t);}
+    else if(s==='w'){
+      var cr=parseCren(t.creneau);
+      if(cr&&nowMin()>cr.e+5)late.push(t);
+      else waiting.push(t);
+    }
   });
-  var active=day.filter(function(t){return getStatus(tsm[t.id]||{})!=='p';});
-  var dep=day.filter(function(t){return getStatus(tsm[t.id]||{})==='p';});
-  var html='';
-  if(active.length){
-    html+='<div class="sec">🚛 Camions actifs <span class="sc">'+active.length+'</span></div><div class="grid">';
-    active.forEach(function(t){html+=makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-    html+='</div>';
-  }
-  if(dep.length&&showDep){
-    html+='<div class="sec">🚀 Partis <span class="sc">'+dep.length+'</span></div><div class="grid">';
-    dep.forEach(function(t){html+=makeCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);});
-    html+='</div>';
-  } else if(dep.length){
-    html+='<div style="margin-top:10px;text-align:center;font-size:11px;color:var(--t3)">'+dep.length+' camion(s) parti(s) &mdash; <button onclick="togDep()" style="background:none;border:none;color:#0a84ff;cursor:pointer;font-size:11px">Afficher</button></div>';
-  }
+  function byCren(a,b){return (a.creneau||'99:99').localeCompare(b.creneau||'99:99');}
+  function byRetard(a,b){var ca=parseCren(a.creneau),cb=parseCren(b.creneau);return (ca?ca.e:0)-(cb?cb.e:0);}
+  loading.sort(byCren);at_quai.sort(byCren);on_site.sort(byCren);
+  late.sort(byRetard);waiting.sort(byCren);
+  departed.sort(function(a,b){return new Date((tsm[b.id]||{}).dep||0).getTime()-new Date((tsm[a.id]||{}).dep||0).getTime();});
+  var main=document.getElementById('main');if(!main)return;
   if(!day.length){
-    html='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div><div class="sub">Les camions importés dans TruckFlow apparaîtront ici automatiquement</div></div>';
+    main.innerHTML='<div class="empty"><div class="ico">🚛</div><div class="ttl">Aucun camion pour aujourd\'hui</div><div class="sub">Les camions importés dans TruckFlow apparaîtront ici automatiquement</div></div>';
+    return;
   }
-  document.getElementById('main').innerHTML=html;
+  function secHdr2(color,icon,label,count){
+    return '<div class="sec-hdr2" style="color:'+color+'">'
+      +'<span class="shd" style="background:'+color+'"></span>'
+      +'<span class="sht">'+icon+' '+label+'</span>'
+      +'<span class="shn" style="color:'+color+'">'+count+'</span>'
+      +'</div>';
+  }
+  var html='<div class="hyb">';
+  var actifs=loading.concat(at_quai).concat(on_site);
+  if(!late.length&&!actifs.length&&!waiting.length){
+    html='<div class="empty"><div class="ico">✅</div><div class="ttl">Tous les camions sont partis !</div><div class="sub">'+departed.length+' départ'+(departed.length>1?'s':'')+' aujourd\'hui</div></div>';
+    main.innerHTML=html;return;
+  }
+  if(late.length){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#f87171','⚠️','En retard',late.length)
+      +late.map(function(t){return makeLateBar(t,tsm[t.id]||{},rq[t.id]);}).join('')
+      +'</div>';
+  }
+  if(actifs.length){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#fb923c','🔴','Actifs',actifs.length)
+      +'<div class="active-grid">'
+      +actifs.map(function(t){return makeActiveCard(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
+      +'</div></div>';
+  }
+  if(waiting.length){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#8b949e','⏳','En attente',waiting.length)
+      +waiting.map(function(t){return makeStrip(t,tsm[t.id]||{},rq[t.id],prios[t.id]);}).join('')
+      +'</div>';
+  }
+  if(departed.length&&showDep){
+    html+='<div class="sec-wrap2">'
+      +secHdr2('#4ade80','✅','Partis aujourd\'hui',departed.length)
+      +'<div class="sec-dep">'
+      +departed.map(function(t){return makeCompact(t,tsm[t.id]||{});}).join('')
+      +'</div></div>';
+  }
+  html+='</div>';
+  main.innerHTML=html;
 }
 function tick(){
   var n=new Date();
   document.getElementById('clk').textContent=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('dtlbl').textContent=n.toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
-tick();render();
+var _notifShown={};
+function checkAlerts(){
+  var trucks=getData(),tsm=getTs();
+  var td=new Date().toISOString().slice(0,10);
+  var day=trucks.filter(function(t){return t.date===td;});
+  var lateList=[];
+  day.forEach(function(t){
+    var ts=tsm[t.id]||{};
+    if(ts.arr) return;
+    var cr=parseCren(t.creneau);
+    if(cr&&nowMin()>cr.e+5) lateList.push(t);
+  });
+  if(!lateList.length){_notifShown={};return;}
+  lateList.forEach(function(t){
+    if(_notifShown[t.id]) return;
+    _notifShown[t.id]=true;
+    var name=t.transporteur||t.itin||'Camion';
+    var over=nowMin()-(parseCren(t.creneau)||{e:0}).e;
+    var msg=name+' — en retard de '+over+' min (créneau '+t.creneau+')';
+    if(Notification&&Notification.permission==='granted'){
+      new Notification('🔴 Camion en retard',{body:msg,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚛</text></svg>'});
+    } else if(Notification&&Notification.permission!=='denied'){
+      Notification.requestPermission().then(function(p){if(p==='granted')new Notification('🔴 Camion en retard',{body:msg});});
+    }
+    toast('🔴 RETARD '+name+' (+'+over+'min)');
+  });
+}
+tick();render();autoFit();checkAlerts();
 setInterval(tick,1000);
-setInterval(render,10000);
-window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key===LQ)render();});
+setInterval(function(){render();autoFit();},10000);
+setInterval(checkAlerts,30000);
+window.addEventListener('resize',autoFit);
+window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key===LQ){render();autoFit();}});
   */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
 
   var _body=
     '<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>'+
     '<header>'+
-      '<div style="display:flex;flex-direction:column;gap:1px">'+
+      '<div style="display:flex;flex-direction:column;gap:2px">'+
         '<div class="brand">\uD83D\uDE9A Truck<span>Flow</span> Monitor</div>'+
         '<div class="dtlbl" id="dtlbl">\u2014</div>'+
       '</div>'+
@@ -8411,7 +9510,6 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
       '<div class="hbtns">'+
         '<span class="rdot"></span>'+
         '<button class="hbtn" onclick="render()">\u21BB Actualiser</button>'+
-        '<button class="hbtn" id="dtgl" onclick="togDep()">Afficher partis</button>'+
       '</div>'+
     '</header>'+
     '<div id="main"></div>'+
@@ -8422,6 +9520,263 @@ window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key=
   w.document.close();
   logActivity('\uD83D\uDDA5','Mode Monitor ouvert dans un nouvel onglet');
 }
+
+// ─── Rapport menu ──────────────────────────────────────────────────────────
+function toggleRapportMenu(){
+  var m=document.getElementById('rapportMenu');if(!m)return;
+  var open=m.style.display==='block';
+  m.style.display=open?'none':'block';
+  if(!open){setTimeout(function(){document.addEventListener('click',function h(e){if(!document.getElementById('rapportMenuWrap').contains(e.target)){m.style.display='none';document.removeEventListener('click',h);}},true);},0);}
+}
+
+// ─── Bilan PDF fin de journée ──────────────────────────────────────────────
+function generateBilanPDF(){
+  var allTrucks=trucks.slice();
+  (_completedTrucks||[]).forEach(function(ct){
+    allTrucks.push({id:ct.id,transporteur:ct.transporteur,itin:ct.itin,creneau:ct.creneau,
+      date:ct.date,deliveries:ct.deliveries,decalage:ct.decalage||null,locked:ct.locked||false,
+      _ts:ct.timestamps,_ponct:ct.ponctualite,_archived:true});
+  });
+  if(!allTrucks.length){showToast('Aucune donn\u00e9e');return;}
+  showToast('\uD83D\uDCC4 G\u00e9n\u00e9ration bilan...');
+  setTimeout(function(){_doBilanPDF(allTrucks);},120);
+}
+function _doBilanPDF(allTrucks){
+  var refDate=getWorkingDate();
+  // Grouper par date
+  var byDate={};
+  allTrucks.forEach(function(t){
+    var d=t.date||refDate;
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(t);
+  });
+  var dates=Object.keys(byDate).sort();
+  var now=Date.now();
+  function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+  function fdate(iso){if(!iso)return'—';var d=new Date(iso+'T12:00:00');return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});}
+  function dur(a,b){if(!a||!b)return'—';var m=Math.round((new Date(b)-new Date(a))/60000);return m+'min';}
+  function ponctColor(s){return s==='heure'?'#2a9d5c':s==='avance'?'#1565c0':s==='retard_reel'||s==='retard_auto'?'#d32f2f':'#888';}
+  function ponctLabel(s){return s==='heure'?'\uD83D\uDFE2 \u00c0 l\'heure':s==='avance'?'\uD83D\uDD35 En avance':s==='retard_reel'||s==='retard_auto'?'\uD83D\uDD34 En retard':'\u23F3 En attente';}
+  var motifColors={'mtx3':'#e65100','transporteur':'#1565c0','pas_venu':'#b71c1c'};
+
+  var S='<style>'+
+    '*{box-sizing:border-box}'+
+    'body{font-family:Arial,sans-serif;color:#1a1a1a;padding:24px;max-width:980px;margin:0 auto;font-size:12px;background:#fff}'+
+    'h1{font-size:22px;font-weight:900;margin:0 0 2px;color:#111}'+
+    'h2{font-size:14px;font-weight:800;margin:22px 0 8px;padding:6px 12px;background:#f0f4ff;border-left:5px solid #4d7cfe;color:#222;border-radius:0 6px 6px 0}'+
+    'h3{font-size:12px;font-weight:700;margin:14px 0 5px;color:#444;padding:3px 8px;background:#f8f8f8;border-radius:4px}'+
+    'table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;page-break-inside:avoid}'+
+    'th{background:#e8edf8;padding:5px 7px;text-align:left;font-weight:700;border:1px solid #ccd;font-size:10px;text-transform:uppercase;letter-spacing:.03em}'+
+    'td{padding:5px 7px;border:1px solid #dde;vertical-align:middle}'+
+    'tr:nth-child(even) td{background:#fafbff}'+
+    '.krow{display:grid;gap:8px;margin:10px 0}'+
+    '.kbox{text-align:center;padding:10px 6px;border:2px solid #ddd;border-radius:8px;background:#fafafa}'+
+    '.kv{font-size:24px;font-weight:900;line-height:1}.kl{font-size:10px;color:#666;margin-top:3px}'+
+    '.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}'+
+    '.decal-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}'+
+    '.day-block{border:1px solid #dde;border-radius:10px;padding:16px;margin-bottom:24px;page-break-inside:avoid}'+
+    '.day-title{font-size:15px;font-weight:800;color:#222;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e0e6ff}'+
+    '.green{color:#2a9d5c}.red{color:#d32f2f}.blue{color:#1565c0}.amber{color:#e65100}.grey{color:#777}'+
+    '.lock{font-size:10px;opacity:.6}'+
+    '@media print{body{padding:8px}button{display:none!important}.no-print{display:none!important}.day-block{page-break-inside:avoid}}'+
+    '</style>';
+
+  var genDate=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var genTime=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan TruckFlow \u2014 '+refDate+'</title>'+S+'</head><body>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">'+
+    '<div><h1>\uD83D\uDE9B Bilan de fin de journ\u00e9e \u2014 TruckFlow</h1>'+
+    '<div style="color:#666;font-size:12px">G\u00e9n\u00e9r\u00e9 le '+genDate.charAt(0).toUpperCase()+genDate.slice(1)+' \u00e0 '+genTime+'</div>'+
+    (_workingDate?'<div style="font-size:11px;color:#e65100;font-weight:700;margin-top:3px">\u26A0 Mode saisie diff\u00e9r\u00e9e \u2014 donn\u00e9es de '+fdate(_workingDate)+'</div>':'')+
+    '</div>'+
+    '<div style="text-align:right;font-size:11px;color:#888">'+dates.length+' journ\u00e9e'+(dates.length>1?'s':'')+' \u2022 '+allTrucks.length+' camion'+(allTrucks.length>1?'s':'')+'</div></div>';
+
+  // ── Section par jour ──────────────────────────────────────────────────────
+  dates.forEach(function(d){
+    var list=byDate[d];
+    var partis=[],enCours=[],attente=[],decalages=[];
+    var pH=0,pA=0,pR=0;
+    list.forEach(function(t){
+      var ts=t._ts||(timestamps[t.id]||{});
+      var p=t._ponct||getPonctualite(t,ts,now);
+      if(ts.dep){partis.push({t:t,ts:ts,p:p});}
+      else if(ts.arr||ts.quai||ts.chg){enCours.push({t:t,ts:ts,p:p});}
+      else{attente.push({t:t,ts:ts,p:p});}
+      if(p.status==='heure')pH++;else if(p.status==='avance')pA++;else if(p.status==='retard_reel'||p.status==='retard_auto')pR++;
+      if(t.decalage) decalages.push(t);
+    });
+    html+='<div class="day-block">';
+    html+='<div class="day-title">'+fdate(d).charAt(0).toUpperCase()+fdate(d).slice(1)+'</div>';
+    // KPI résumé jour
+    html+='<div class="krow" style="grid-template-columns:repeat(6,1fr);margin-bottom:14px">'+
+      '<div class="kbox" style="border-color:#4d7cfe"><div class="kv blue">'+list.length+'</div><div class="kl">Total</div></div>'+
+      '<div class="kbox" style="border-color:#2a9d5c"><div class="kv green">'+partis.length+'</div><div class="kl">Partis</div></div>'+
+      '<div class="kbox" style="border-color:#e65100"><div class="kv amber">'+enCours.length+'</div><div class="kl">En cours</div></div>'+
+      '<div class="kbox" style="border-color:#888"><div class="kv grey">'+attente.length+'</div><div class="kl">En attente</div></div>'+
+      '<div class="kbox" style="border-color:#d32f2f"><div class="kv red">'+pR+'</div><div class="kl">Retards</div></div>'+
+      '<div class="kbox" style="border-color:#f59e0b"><div class="kv amber">'+decalages.length+'</div><div class="kl">D\u00e9calages</div></div>'+
+      '</div>';
+    // Tableau tous les camions
+    var allList=partis.concat(enCours,attente);
+    allList.sort(function(a,b){return (a.t.creneau||'').localeCompare(b.t.creneau||'');});
+    html+='<h3>Tous les camions ('+list.length+')</h3>'+
+      '<table><thead><tr>'+
+      '<th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>D\u00e9b. chgt</th><th>Fin chgt</th><th>D\u00e9part</th>'+
+      '<th>&Delta; arr.</th><th>Chgt.</th><th>Ponctualit\u00e9</th><th>Livraisons</th><th>D\u00e9calage</th>'+
+      '</tr></thead><tbody>';
+    allList.forEach(function(x){
+      var t=x.t,ts=x.ts,p=x.p;
+      var arrDelta=ts.arr&&t.creneau?(function(){var w=creWindow(t.creneau);if(!w)return'—';var m=Math.round((new Date(ts.arr)-new Date((t.date||d)+'T00:00:00')-w.start*60000)/60000);return(m>0?'+':'')+m+'min';})():'—';
+      var chgtDur=dur(ts.chg,ts.fin_chg||ts.dep);
+      var pC=ponctColor(p.status),pL=ponctLabel(p.status);
+      var dBadge='—';
+      if(t.decalage){var mc=motifColors[t.decalage.motif]||'#888';dBadge='<span class="decal-badge" style="background:'+mc+'22;color:'+mc+';border:1px solid '+mc+'55">'+t.decalage.label+'</span>'+(t.decalage.dateNew?'<br><span style="font-size:10px;color:#e65100">→'+t.decalage.dateNew+(t.decalage.creneauNew?' '+t.decalage.creneauNew:'')+'</span>':'');}
+      html+='<tr>'+
+        '<td><b>'+(t.transporteur||t.itin||'?')+'</b>'+(t.locked?' <span class="lock">\uD83D\uDD12</span>':'')+(t._archived?' <span style="font-size:9px;color:#888;background:#f0f0f0;padding:1px 4px;border-radius:3px">arch.</span>':'')+'</td>'+
+        '<td>'+(t.creneau||'—')+'</td>'+
+        '<td>'+ft(ts.arr)+'</td>'+
+        '<td>'+ft(ts.quai)+'</td>'+
+        '<td>'+ft(ts.chg)+'</td>'+
+        '<td>'+ft(ts.fin_chg)+'</td>'+
+        '<td><b>'+ft(ts.dep)+'</b></td>'+
+        '<td style="color:'+(arrDelta&&arrDelta.startsWith('+')&&parseInt(arrDelta)>5?'#d32f2f':arrDelta&&arrDelta.startsWith('-')?'#2a9d5c':'#666')+'">'+arrDelta+'</td>'+
+        '<td>'+chgtDur+'</td>'+
+        '<td><span style="color:'+pC+';font-weight:700">'+pL+'</span></td>'+
+        '<td style="color:#444">'+(t.deliveries||[]).length+' livr.</td>'+
+        '<td>'+dBadge+'</td>'+
+        '</tr>';
+    });
+    html+='</tbody></table>';
+    // Section décalages du jour
+    if(decalages.length){
+      html+='<h3>\u23F1 D\u00e9calages d\u00e9clar\u00e9s ('+decalages.length+')</h3>'+
+        '<table><thead><tr><th>Transporteur</th><th>Motif</th><th>Cr\u00e9neau orig.</th><th>Nouvelle date</th><th>Nouveau cr\u00e9neau</th><th>Note</th><th>Enregistr\u00e9</th></tr></thead><tbody>';
+      decalages.forEach(function(t){
+        var dc=t.decalage,mc=motifColors[dc.motif]||'#888';
+        html+='<tr>'+
+          '<td><b>'+(t.transporteur||t.itin||'?')+'</b></td>'+
+          '<td><span class="decal-badge" style="background:'+mc+'22;color:'+mc+';border:1px solid '+mc+'55">'+dc.label+'</span></td>'+
+          '<td>'+(dc.creneauOrig||t.creneau||'—')+'</td>'+
+          '<td style="color:#e65100;font-weight:700">'+(dc.dateNew||'—')+'</td>'+
+          '<td style="color:#e65100">'+(dc.creneauNew||'—')+'</td>'+
+          '<td style="color:#555;font-size:11px">'+(dc.note||'—')+'</td>'+
+          '<td style="color:#888;font-size:10px">'+(dc.date||'')+(dc.heure?' '+dc.heure:'')+'</td>'+
+          '</tr>';
+      });
+      html+='</tbody></table>';
+    }
+    html+='</div>'; // end day-block
+  });
+
+  // ── Bouton imprimer ──────────────────────────────────────────────────────
+  html+='<div class="no-print" style="text-align:center;margin:24px 0">'+
+    '<button onclick="window.print()" style="padding:10px 32px;background:#4d7cfe;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">&#128196; Imprimer / Enregistrer en PDF</button>'+
+    '</div></body></html>';
+
+  var w=window.open('','_blank','width=1020,height=800');
+  if(!w){showToast('Popup bloqu\u00e9 \u2014 autorisez les popups');return;}
+  w.document.write(html);w.document.close();
+  logActivity('\uD83D\uDCC4','Bilan PDF g\u00e9n\u00e9r\u00e9 ('+allTrucks.length+' camions, '+dates.length+' jour'+(dates.length>1?'s':'')+')');}
+
+// ─── Décalage feature ────────────────────────────────────────────────────
+var _decalageMotifs=[
+  {key:'mtx3',label:'MTX3',desc:'Retard code SAP MTX3',color:'#e65100'},
+  {key:'transporteur',label:'Transporteur',desc:'Responsabilit\u00e9 transporteur',color:'#1565c0'},
+  {key:'pas_venu',label:'Pas venu',desc:'Camion non pr\u00e9sent\u00e9',color:'#b71c1c'}
+];
+function openDecalageModal(truckId){
+  var t=trucks.find(function(x){return x.id===truckId;});
+  if(!t) return;
+  var existing=document.getElementById('decalageModal');if(existing)existing.remove();
+  var modal=document.createElement('div');modal.id='decalageModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(4px)';
+  var cur=t.decalage||{};
+  var motifHtml=_decalageMotifs.map(function(m){
+    var sel=cur.motif===m.key;
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1.5px solid '+(sel?m.color:'rgba(255,255,255,.1)')+';background:'+(sel?'rgba(255,255,255,.06)':'transparent')+';cursor:pointer;margin-bottom:6px">'+
+      '<input type="radio" name="decalMotif" value="'+m.key+'"'+(sel?' checked':'')+' style="accent-color:'+m.color+';width:16px;height:16px">'+
+      '<span><b style="color:'+m.color+'">'+m.label+'</b><span style="font-size:11px;color:var(--t3);margin-left:8px">'+m.desc+'</span></span></label>';
+  }).join('');
+  modal.innerHTML='<div style="background:var(--surface);border:1.5px solid rgba(160,210,255,.18);border-radius:18px;padding:24px;min-width:400px;max-width:500px;box-shadow:0 24px 80px rgba(0,0,0,.6)">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
+      '<div style="font-size:15px;font-weight:800">\u23F1 D\u00e9clarer un d\u00e9calage</div>'+
+      '<button onclick="closeDecalageModal()" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer">\u2715</button></div>'+
+    '<div style="font-size:12px;color:var(--t2);margin-bottom:14px">Camion\u00a0: <b>'+(t.transporteur||t.itin||'?')+'</b> \u2014 Cr\u00e9neau\u00a0: '+(t.creneau||'\u2014')+'</div>'+
+    '<div style="margin-bottom:14px">'+motifHtml+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+      '<div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Date d\u2019origine</div>'+
+        '<input id="decalDateOrig" type="date" value="'+(cur.dateOrig||t.date||'')+'" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+      '<div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Cr\u00e9neau d\u2019origine</div>'+
+        '<input id="decalCreneauOrig" type="text" value="'+(cur.creneauOrig||t.creneau||'')+'" placeholder="ex: 08h00-09h00" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+      '<div><div style="font-size:11px;color:var(--amber);margin-bottom:4px">Nouvelle date pr\u00e9vue</div>'+
+        '<input id="decalDateNew" type="date" value="'+(cur.dateNew||'')+'" style="width:100%;box-sizing:border-box;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+      '<div><div style="font-size:11px;color:var(--amber);margin-bottom:4px">Nouveau cr\u00e9neau pr\u00e9vu</div>'+
+        '<input id="decalCreneauNew" type="text" value="'+(cur.creneauNew||'')+'" placeholder="ex: 14h00-15h00" style="width:100%;box-sizing:border-box;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:8px;color:var(--t1);padding:6px 8px;font-size:12px;font-family:inherit"></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--t3);margin-bottom:5px">Note (optionnel)</div>'+
+      '<textarea id="decalageNote" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--t1);padding:8px;font-size:12px;resize:vertical;min-height:50px;font-family:inherit" placeholder="Contexte, information compl\u00e9mentaire...">'+(cur.note||'')+'</textarea></div>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end">'+
+      (cur.motif?'<button onclick="clearDecalage(\''+truckId+'\')" style="background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.3);color:var(--red);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px">Supprimer</button>':'')+
+      '<button onclick="closeDecalageModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--t1);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px">Annuler</button>'+
+      '<button onclick="applyDecalage(\''+truckId+'\')" style="background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.4);color:var(--amber);border-radius:8px;padding:7px 16px;font-weight:700;cursor:pointer;font-size:12px">Enregistrer</button></div></div>';
+  modal.addEventListener('click',function(e){if(e.target===modal)closeDecalageModal();});
+  document.body.appendChild(modal);
+}
+function closeDecalageModal(){var m=document.getElementById('decalageModal');if(m)m.remove();}
+function applyDecalage(truckId){
+  var t=trucks.find(function(x){return x.id===truckId;});if(!t)return;
+  var motif=(document.querySelector('input[name="decalMotif"]:checked')||{}).value;
+  if(!motif){showToast('\u26a0 S\u00e9lectionnez un motif');return;}
+  var note=(document.getElementById('decalageNote')||{}).value||'';
+  var dateOrig=(document.getElementById('decalDateOrig')||{}).value||t.date||'';
+  var creneauOrig=(document.getElementById('decalCreneauOrig')||{}).value||t.creneau||'';
+  var dateNew=(document.getElementById('decalDateNew')||{}).value||'';
+  var creneauNew=(document.getElementById('decalCreneauNew')||{}).value||'';
+  var now=new Date();
+  var mObj=_decalageMotifs.find(function(m){return m.key===motif;});
+  t.decalage={motif:motif,label:mObj?mObj.label:motif,note:note,
+    dateOrig:dateOrig,creneauOrig:creneauOrig,
+    dateNew:dateNew,creneauNew:creneauNew,
+    date:now.toISOString().slice(0,10),heure:now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})};
+  // Déplacer le camion vers la nouvelle date/créneau si renseignés
+  if(dateNew){
+    t.date=dateNew;
+    t._dateManuallyChanged=true;
+  }
+  if(creneauNew){
+    t.creneau=creneauNew;
+    t._creneauManuallyChanged=true;
+  }
+  save();closeDecalageModal();renderAll();
+  logActivity('\u23F1','D\u00e9calage '+t.decalage.label+' \u2014 '+(t.transporteur||t.itin||'?')+(dateNew?' \u2192 '+dateNew+(creneauNew?' '+creneauNew:''):''));
+  showToast('\u23F1 D\u00e9calage enregistr\u00e9 \u2014 '+(dateNew?'camion d\u00e9cal\u00e9 au '+dateNew+(creneauNew?' '+creneauNew:''):t.decalage.label));
+}
+function clearDecalage(truckId){
+  var t=trucks.find(function(x){return x.id===truckId;});if(!t)return;
+  delete t.decalage;save();closeDecalageModal();renderTrucks();showToast('D\u00e9calage supprim\u00e9');
+}
+// Patch computeCarrierStats: ajouter compteurs décalages
+var _origComputeCarrierStats=computeCarrierStats;
+computeCarrierStats=function(){
+  var carriers=_origComputeCarrierStats();
+  var decalMap={};
+  function countDecal(list,getTrans,getDecal){
+    list.forEach(function(item){
+      var dec=getDecal(item);if(!dec)return;
+      var name=getTrans(item);
+      if(!decalMap[name])decalMap[name]={mtx3:0,transporteur:0,pas_venu:0,total:0};
+      decalMap[name][dec.motif]=(decalMap[name][dec.motif]||0)+1;
+      decalMap[name].total++;
+    });
+  }
+  countDecal(trucks,function(t){return t.transporteur||t.itin||'?';},function(t){return t.decalage;});
+  countDecal(_completedTrucks||[],function(ct){return ct.transporteur||ct.itin||'?';},function(ct){return ct.decalage;});
+  carriers.forEach(function(c){c.decalage=decalMap[c.name]||{mtx3:0,transporteur:0,pas_venu:0,total:0};});
+  return carriers;
+};
 
 // ─── PWA — Service Worker registration ────────────────────────────────────
 if('serviceWorker' in navigator){
