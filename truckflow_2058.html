@@ -4792,6 +4792,83 @@ function exportExcel(){
     XLSX.utils.book_append_sheet(wb,wsArchAnal,'Archive Analyse');
   }
 
+  // ═══ Feuilles Archive par semaine + Analyse semaine (_completedTrucks) ═══
+  var allArchived=(_completedTrucks||[]);
+  if(allArchived.length){
+    // Calcul numéro de semaine ISO
+    function isoWeek(dateStr){
+      var d=new Date((dateStr||'').replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')+'T12:00:00');
+      if(isNaN(d)) return dateStr||'?';
+      var day=d.getDay();if(day===0)day=7;
+      d.setDate(d.getDate()+4-day);
+      var y=d.getFullYear();
+      var jan1=new Date(y,0,1);
+      var wk=Math.ceil(((d-jan1)/86400000+1)/7);
+      return y+'-S'+String(wk).padStart(2,'0');
+    }
+    function fmtA(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
+    function durMin(a,b){return (a&&b)?Math.round((new Date(b)-new Date(a))/60000):null;}
+    // ─── Feuille 1 : Timestamps détaillés par semaine ───
+    var weekTsRows=[['Semaine','Date','Transporteur','Créneau','Arrivée','À quai','Début chgt','Fin chgt','Départ','Durée totale','Durée chgt','Δ Créneau','Ponctualité','Livraisons']];
+    // trier par semaine puis date
+    var sorted=allArchived.slice().sort(function(a,b){
+      return (a.date||'').localeCompare(b.date||'');
+    });
+    var lastWeek='';
+    sorted.forEach(function(ct){
+      var ts=ct.timestamps||{};
+      var wk=isoWeek(ct.date);
+      if(wk!==lastWeek){weekTsRows.push([wk,'','','','','','','','','','','','','']);lastWeek=wk;}
+      var durTot=durMin(ts.arr,ts.dep);
+      var durChg=durMin(ts.chg,ts.fin_chg);
+      var delta='';
+      if(ts.arr&&ct.creneau){
+        var cw=creWindow(ct.creneau);
+        if(cw){var aD=new Date(ts.arr),aM=aD.getHours()*60+aD.getMinutes();
+          if(aM<cw.start)delta='-'+fmtMinutes(Math.round(cw.start-aM));
+          else if(aM<=cw.end)delta='À l\'heure';
+          else delta='+'+fmtMinutes(Math.round(aM-cw.end));}
+      }
+      var ponct=ct.ponctualite?ct.ponctualite.label:(getPonctualite({id:ct.id,creneau:ct.creneau,date:ct.date},ts,Date.now()).label||'');
+      weekTsRows.push([wk,ct.date,ct.transporteur||ct.itin||'',ct.creneau||'',
+        fmtA(ts.arr),fmtA(ts.quai),fmtA(ts.chg),fmtA(ts.fin_chg),fmtA(ts.dep),
+        durTot!=null?fmtMinutes(durTot):'—',durChg!=null?fmtMinutes(durChg):'—',
+        delta,ponct,(ct.deliveries||[]).length]);
+    });
+    var wsWkTs=XLSX.utils.aoa_to_sheet(weekTsRows);
+    wsWkTs['!cols']=[{wch:11},{wch:12},{wch:16},{wch:10},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:13},{wch:11},{wch:11},{wch:14},{wch:11}];
+    XLSX.utils.book_append_sheet(wb,wsWkTs,'Archive par semaine');
+    // ─── Feuille 2 : Analyse agrégée par semaine ───
+    var wkMap={};
+    sorted.forEach(function(ct){
+      var wk=isoWeek(ct.date);
+      var ts=ct.timestamps||{};
+      if(!wkMap[wk])wkMap[wk]={wk:wk,count:0,ponct_h:0,ponct_a:0,ponct_r:0,ponct_w:0,
+        waitN:0,waitS:0,prepN:0,prepS:0,loadN:0,loadS:0,totN:0,totS:0};
+      var e=wkMap[wk];e.count++;
+      var p=ct.ponctualite?ct.ponctualite.status:(getPonctualite({id:ct.id,creneau:ct.creneau,date:ct.date},ts,Date.now()).status||'');
+      if(p==='heure')e.ponct_h++;else if(p==='avance')e.ponct_a++;
+      else if(p==='retard_reel'||p==='retard_auto')e.ponct_r++;else e.ponct_w++;
+      var dWait=durMin(ts.arr,ts.quai);if(dWait!=null&&dWait>=0){e.waitN++;e.waitS+=dWait;}
+      var dPrep=durMin(ts.quai,ts.chg);if(dPrep!=null&&dPrep>=0){e.prepN++;e.prepS+=dPrep;}
+      var dLoad=durMin(ts.chg,ts.fin_chg||ts.dep);if(dLoad!=null&&dLoad>=0){e.loadN++;e.loadS+=dLoad;}
+      var dTot=durMin(ts.arr,ts.dep);if(dTot!=null&&dTot>=0){e.totN++;e.totS+=dTot;}
+    });
+    var wkRows=[['Semaine','Nb camions','À l\'heure','En avance','En retard','% ponctualité','Moy. attente','Moy. prépa','Moy. chargement','Moy. total']];
+    Object.keys(wkMap).sort().forEach(function(wk){
+      var e=wkMap[wk];
+      var pct=e.count?Math.round((e.ponct_h+e.ponct_a)/e.count*100):0;
+      wkRows.push([wk,e.count,e.ponct_h,e.ponct_a,e.ponct_r,pct+'%',
+        e.waitN?fmtMinutes(Math.round(e.waitS/e.waitN)):'—',
+        e.prepN?fmtMinutes(Math.round(e.prepS/e.prepN)):'—',
+        e.loadN?fmtMinutes(Math.round(e.loadS/e.loadN)):'—',
+        e.totN?fmtMinutes(Math.round(e.totS/e.totN)):'—']);
+    });
+    var wsWkAnal=XLSX.utils.aoa_to_sheet(wkRows);
+    wsWkAnal['!cols']=[{wch:11},{wch:13},{wch:11},{wch:11},{wch:11},{wch:16},{wch:14},{wch:13},{wch:17},{wch:13}];
+    XLSX.utils.book_append_sheet(wb,wsWkAnal,'Analyse semaine');
+  }
+
   // Archive current session
   archiveSession();
 
@@ -6312,7 +6389,7 @@ function _buildPDFReport(){
       var dur='—';
       if(x.ts.arr&&x.ts.dep){var m=Math.round((new Date(x.ts.dep)-new Date(x.ts.arr))/60000);dur=fmtMinutes(m);}
       var finChgCell=ft(x.ts.fin_chg);
-      if(x.ts.fin_chg&&x.ts.chg){var loadM=Math.round((new Date(x.ts.fin_chg)-new Date(x.ts.chg))/60000);finChgCell+=' <span style="color:green">('+loadM+'min)</span>';}
+      if(x.ts.fin_chg&&x.ts.chg){var loadM=Math.round((new Date(x.ts.fin_chg)-new Date(x.ts.chg))/60000);finChgCell+=' <span style="color:green">('+fmtMinutes(loadM)+')</span>';}
       var livIds=x.t.deliveries||[];
       var palT=0,cpT=0;
       livIds.forEach(function(lid){
