@@ -314,6 +314,27 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .cam-date-tab:hover{color:var(--t1);background:rgba(99,99,102,.25)}
 .cam-date-tab.on{color:var(--t1);background:rgba(99,99,102,.55);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 
+/* ── Vue Liste + Panneau détail ─────────────────────────────── */
+.cam-lv-wrap{display:flex;gap:12px;height:calc(100vh - 230px);min-height:500px}
+.cam-lv-list{width:310px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px;scrollbar-width:thin;scrollbar-color:rgba(160,210,255,.2) transparent}
+.cam-lv-list::-webkit-scrollbar{width:4px}
+.cam-lv-list::-webkit-scrollbar-thumb{background:rgba(160,210,255,.2);border-radius:2px}
+.cam-lv-row{display:flex;align-items:stretch;border-radius:10px;background:var(--sf1);border:1px solid var(--bd1);cursor:pointer;transition:all .15s;overflow:hidden}
+.cam-lv-row:hover{border-color:rgba(160,210,255,.3);background:rgba(160,210,255,.05)}
+.cam-lv-row.selected{border-color:rgba(10,132,255,.55);background:rgba(10,132,255,.12);box-shadow:0 0 14px rgba(10,132,255,.15)}
+.cam-lv-row-status{width:4px;flex-shrink:0}
+.cam-lv-row-body{padding:8px 10px;flex:1;min-width:0}
+.cam-lv-row-name{font-size:12px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cam-lv-row-meta{font-size:11px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cam-lv-row-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;gap:4px}
+.cam-lv-detail{flex:1;overflow-y:auto;border-radius:14px;background:var(--sf1);border:1px solid var(--bd1);scrollbar-width:thin;scrollbar-color:rgba(160,210,255,.2) transparent}
+.cam-lv-detail::-webkit-scrollbar{width:4px}
+.cam-lv-detail::-webkit-scrollbar-thumb{background:rgba(160,210,255,.2);border-radius:2px}
+.cam-lv-det-hdr{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.cam-lv-det-ts{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.cam-lv-det-delivs{padding:14px 18px}
+.cam-lv-det-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:13px}
+
 /* ── Truck cards ───────────────────────────────────────────────── */
 .tc{background:linear-gradient(165deg,rgba(160,210,255,.06) 0%,rgba(140,180,220,.02) 50%,rgba(120,160,200,.03) 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:var(--r);border:1px solid rgba(160,210,255,.18);margin-bottom:12px;overflow:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s;box-shadow:var(--glass-glow),var(--glass-sh)}
 .tc:hover{box-shadow:var(--glass-glow-s),var(--glass-sh-h),0 0 20px rgba(100,200,255,.06);transform:translateY(-2px)}
@@ -1329,6 +1350,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 
       <button class="btn-sm" id="groupCreneauBtn" onclick="toggleGroupCreneau()" title="Grouper par créneau">&#128336; Grouper</button>
       <button class="btn-sm" id="montageModeBtn" onclick="enterMontageMode()" style="background:rgba(77,124,254,.12);border-color:rgba(77,124,254,.3);color:var(--blue);font-weight:700" title="Construire les camions manuellement par transporteur">&#128295; Montage</button>
+      <button class="btn-sm" id="camViewBtn" onclick="toggleCamView()" style="background:rgba(45,202,114,.1);border-color:rgba(45,202,114,.25);color:#2dc272;font-weight:700" title="Basculer vue liste / cartes">&#9783; Liste</button>
       <span style="display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:4px 10px;border-radius:20px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)" title="Définir la date de saisie (utile le lendemain matin pour saisir des timestamps rétroactifs)">
         <span style="font-size:12px;color:#f59e0b">📅</span>
         <span style="font-size:11px;color:var(--t3)">Saisie du</span>
@@ -2908,6 +2930,7 @@ function getLoadingAlert(ts){
 
 function renderTrucks(){
   updatePonctStats();
+  if(_camListMode&&!_montageMode){renderCamListView();return;}
   var container=document.getElementById('truckList');
   var indices=sortedIdx();
   if(fTruckDate)   indices=indices.filter(function(i){return trucks[i].date===fTruckDate;});
@@ -5184,6 +5207,270 @@ function exportWeekExcel(weekKey){
   XLSX.writeFile(wb,'TruckFlow_'+weekKey+'.xlsx');
   showToast('\u2705 Export '+weekKey+' t\u00e9l\u00e9charg\u00e9');
   logActivity('\uD83D\uDCC5','Export semaine '+weekKey+' g\u00e9n\u00e9r\u00e9');
+}
+
+// ─── Vue Liste + Panneau détail ───────────────────────────────────────────
+var _camListMode=false;
+var _selTruckId=null;
+
+function toggleCamView(){
+  _camListMode=!_camListMode;
+  var btn=document.getElementById('camViewBtn');
+  if(btn){
+    btn.innerHTML=_camListMode?'&#9783; Cartes':'&#9783; Liste';
+    btn.style.background=_camListMode?'rgba(45,202,114,.25)':'rgba(45,202,114,.1)';
+    btn.style.borderColor=_camListMode?'rgba(45,202,114,.5)':'rgba(45,202,114,.25)';
+  }
+  renderTrucks();
+}
+
+function _buildFilteredIndices(){
+  var indices=sortedIdx();
+  if(fTruckDate) indices=indices.filter(function(i){return trucks[i].date===fTruckDate;});
+  if(fTruckPonct) indices=indices.filter(function(i){
+    var t=trucks[i],ts=timestamps[t.id]||{},p=getPonctualite(t,ts,Date.now());
+    if(fTruckPonct==='retard') return p.status==='retard_reel'||p.status==='retard_auto';
+    return p.status===fTruckPonct;
+  });
+  if(fTruckPeriod) indices=indices.filter(function(i){
+    var w=creWindow(trucks[i].creneau||'');if(!w)return false;
+    return fTruckPeriod==='matin'?w.start<720:w.start>=720;
+  });
+  if(fTruckStatus==='encours') indices=indices.filter(function(i){
+    var tsI=timestamps[trucks[i].id]||{};
+    return (tsI.arr||tsI.quai||tsI.chg)&&!tsI.dep;
+  });
+  return indices;
+}
+
+function renderCamListView(){
+  var container=document.getElementById('truckList');
+  var indices=_buildFilteredIndices();
+  if(!indices.length){
+    container.innerHTML='<div class="empty"><div class="empty-ico">\uD83D\uDE9B</div><p>Aucun camion'+(fTruckDate?' pour cette date.':' \u2014 reimportez le VL06O pour les reg\u00e9n\u00e9rer.')+'</p></div>';
+    return;
+  }
+  var validIds=indices.map(function(i){return trucks[i].id;});
+  if(!_selTruckId||validIds.indexOf(_selTruckId)<0) _selTruckId=validIds[0];
+
+  container.innerHTML='';
+  var wrap=document.createElement('div');wrap.className='cam-lv-wrap';
+
+  // ── Liste gauche ──
+  var listDiv=document.createElement('div');listDiv.className='cam-lv-list';
+  var now=Date.now();
+  indices.forEach(function(i){
+    var t=trucks[i],ts=timestamps[t.id]||{};
+    var row=document.createElement('div');
+    row.className='cam-lv-row'+(t.id===_selTruckId?' selected':'');
+    row.dataset.id=t.id;
+    (function(id){row.addEventListener('click',function(){selectTruckRow(id);});})(t.id);
+
+    var sc='#555',sl='';
+    if(ts.dep){sc='#2dc272';sl='✓';}
+    else if(ts.chg){sc='#0a84ff';sl='⟳';}
+    else if(ts.quai){sc='#5e5ce6';sl='⬡';}
+    else if(ts.arr){sc='#f59e0b';sl='→';}
+
+    var delivs=(t.deliveries||[]).map(function(id){return getDeliv(id);}).filter(Boolean);
+    var totPal=0,totPick=0;
+    delivs.forEach(function(d){totPal+=(d.palSilo||0);totPick+=(d.colisPick||0);});
+    var ponct=getPonctualite(t,ts,now);
+    var isLate=ponct.status==='retard_reel'||ponct.status==='retard_auto';
+
+    var tsDots=['arr','quai','chg','dep'].map(function(k){
+      return '<span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:'+(ts[k]?'#2dc272':'rgba(255,255,255,.15)')+'"></span>';
+    }).join('');
+
+    row.innerHTML=
+      '<div class="cam-lv-row-status" style="background:'+sc+'"></div>'+
+      '<div class="cam-lv-row-body">'+
+        '<div class="cam-lv-row-name">'+(t.transporteur||t.itin||'?')+(t.locked?'<span style="margin-left:4px;font-size:9px;color:var(--amber)">&#x1F512;</span>':'')+(t.decalage?'<span style="margin-left:4px;font-size:9px;color:#e65100">&#x23F1;</span>':'')+'</div>'+
+        '<div class="cam-lv-row-meta">'+(t.creneau?'<span style="color:var(--blue);font-weight:700">'+t.creneau+'</span>&nbsp;&middot;&nbsp;':'')+
+          '<span>'+delivs.length+' liv.</span>'+
+          (totPal?'&nbsp;<span style="color:var(--t2)">'+Math.round(totPal)+'pal</span>':'')+
+          (totPick?'&nbsp;<span style="color:var(--purple)">'+Math.round(totPick)+'pk</span>':'')+
+        '</div>'+
+        '<div class="cam-lv-row-footer">'+
+          '<span style="display:flex;gap:3px;align-items:center">'+tsDots+'</span>'+
+          '<span style="display:flex;gap:4px;align-items:center">'+
+            (isLate?'<span style="font-size:9px;color:var(--red);font-weight:700">RETARD</span>':'')+
+            (t.date?'<span style="font-size:9px;color:var(--t3)">'+t.date+'</span>':'')+
+          '</span>'+
+        '</div>'+
+      '</div>';
+    listDiv.appendChild(row);
+  });
+
+  // ── Panneau droite ──
+  var detailDiv=document.createElement('div');detailDiv.className='cam-lv-detail';detailDiv.id='camLvDetail';
+  detailDiv.innerHTML='<div class="cam-lv-det-empty">S\u00e9lectionnez un camion</div>';
+
+  wrap.appendChild(listDiv);wrap.appendChild(detailDiv);
+  container.appendChild(wrap);
+  if(_selTruckId) renderCamDetailPanel(_selTruckId);
+}
+
+function selectTruckRow(id){
+  _selTruckId=id;
+  document.querySelectorAll('.cam-lv-row').forEach(function(r){
+    r.classList.toggle('selected',r.dataset.id===id);
+  });
+  renderCamDetailPanel(id);
+}
+
+function renderCamDetailPanel(id){
+  var el=document.getElementById('camLvDetail');if(!el)return;
+  var ti=trucks.findIndex(function(t){return t.id===id;});
+  if(ti<0){el.innerHTML='<div class="cam-lv-det-empty">Camion introuvable</div>';return;}
+  var t=trucks[ti],ts=timestamps[t.id]||{};
+  var delivs=(t.deliveries||[]).map(function(did){return getDeliv(did);}).filter(Boolean);
+  var totPal=0,totSilo=0,totPick=0;
+  delivs.forEach(function(d){totPal+=(d.palSilo||0);totSilo+=(d.colisSilo||0);totPick+=(d.colisPick||0);});
+  var ponct=getPonctualite(t,ts,Date.now());
+  var isLate=ponct.status==='retard_reel'||ponct.status==='retard_auto';
+
+  // ── Bande de statut ──
+  var bandColor='#555';
+  if(ts.dep) bandColor='#2dc272';
+  else if(ts.chg) bandColor='#0a84ff';
+  else if(ts.quai) bandColor='#5e5ce6';
+  else if(ts.arr) bandColor='#f59e0b';
+
+  var html='';
+
+  // En-tête
+  html+='<div class="cam-lv-det-hdr" style="border-top:3px solid '+bandColor+'">';
+  html+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">';
+  html+='<div style="font-size:17px;font-weight:900;color:var(--t1)">\uD83D\uDE9B '+(t.transporteur||t.itin||'?')+'</div>';
+  if(t.itin&&t.itin!==t.transporteur) html+='<span style="font-size:10px;color:var(--t3)">'+t.itin+'</span>';
+  if(t.creneau) html+='<span style="font-size:12px;font-weight:700;color:var(--blue);background:rgba(10,132,255,.12);padding:3px 10px;border-radius:980px">'+t.creneau+'</span>';
+  if(t.date) html+='<span style="font-size:11px;color:var(--t3)">\uD83D\uDCC5 '+t.date+'</span>';
+  if(t.locked) html+='<span style="font-size:11px;color:var(--amber)">\uD83D\uDD12 Fig\u00e9</span>';
+  html+='</div>';
+
+  // Ponctualité
+  if(ponct.status!=='inconnu'){
+    var pe=ponct.status==='avance'?'\uD83D\uDD35':ponct.status==='heure'?'\uD83D\uDFE2':isLate?'\uD83D\uDD34':'\uD83D\uDFE1';
+    html+='<div style="font-size:12px;color:'+ponct.color+';margin-bottom:6px">'+pe+' '+ponct.label+(ponct.delta?' &middot; '+ponct.delta:'')+'</div>';
+  }
+
+  // Décalage
+  if(t.decalage){
+    var dc=t.decalage;
+    var dNewStr=dc.dateNew?(dc.dateNew+(dc.creneauNew?' '+dc.creneauNew:'')):'';
+    html+='<div onclick="openDecalageModal(\''+t.id+'\')" style="cursor:pointer;margin-bottom:8px;font-size:11px;padding:5px 10px;background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.3);border-radius:8px;color:#e65100">';
+    html+='\u23F1 D\u00e9calage\u00a0: <b>'+dc.label+'</b>'+(dNewStr?' \u2192 '+dNewStr:'')+(dc.note?' &middot; '+dc.note.slice(0,40):'')+'</div>';
+  }
+
+  // Boutons d'action
+  html+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  html+='<button class="btn-sm btn-blue" style="font-size:11px" onclick="openSplitModal('+ti+')">Split</button>';
+  html+='<button class="btn-sm" style="font-size:11px;'+(t.locked?'background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:var(--amber)':'')+'" onclick="toggleTruckLock('+ti+');renderTrucks()">'+(t.locked?'\uD83D\uDD12':'\uD83D\uDD13')+'</button>';
+  html+='<button class="btn-sm" style="font-size:11px;color:var(--t2)" onclick="printTruckSheet(\''+t.id+'\')">\uD83D\uDDA8</button>';
+  html+='<button class="btn-sm" style="font-size:11px;'+(t.decalage?'background:rgba(255,100,0,.15);border-color:rgba(255,100,0,.4);color:#e65100':'')+'" onclick="openDecalageModal(\''+t.id+'\')" title="D\u00e9calage">\u23F1</button>';
+  html+='<button class="btn-sm btn-red" style="font-size:11px" onclick="delTruck('+ti+')">\u2715 Suppr.</button>';
+  html+='</div>';
+  html+='</div>'; // fin hdr
+
+  // Totaux livraisons
+  if(delivs.length){
+    html+='<div style="display:flex;gap:14px;align-items:center;padding:8px 18px;background:rgba(10,132,255,.05);border-bottom:1px solid rgba(255,255,255,.05)">';
+    html+='<span style="font-size:12px;font-weight:700;color:var(--blue)">\uD83D\uDCE6 '+delivs.length+' livraison'+(delivs.length>1?'s':'')+'</span>';
+    if(totPal) html+='<span style="font-size:12px;color:var(--t2)">\uD83C\uDFED '+Math.round(totPal)+'pal '+Math.round(totSilo).toLocaleString('fr')+'cs</span>';
+    if(totPick) html+='<span style="font-size:12px;color:var(--purple)">\u270B '+Math.round(totPick).toLocaleString('fr')+'pk</span>';
+    html+='</div>';
+  }
+
+  // ── Timestamps ──
+  html+='<div class="cam-lv-det-ts">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Timestamps</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">';
+  var tsSteps=[
+    {key:'arr',label:'Arriv\u00e9e',icon:'\uD83D\uDE9B'},
+    {key:'quai',label:'\u00C0 quai',icon:'\u2B21'},
+    {key:'chg',label:'Charg.',icon:'\uD83D\uDCE6'},
+    {key:'fin_chg',label:'Fin chg.',icon:'\u2705'},
+    {key:'dep',label:'D\u00e9part',icon:'\uD83D\uDE80'}
+  ];
+  tsSteps.forEach(function(step,si){
+    var val=ts[step.key];
+    var prev=si>0?ts[tsSteps[si-1].key]:true;
+    var isNext=!val&&!!prev;
+    var bg=val?'rgba(45,202,114,.1)':isNext?'rgba(10,132,255,.07)':'rgba(255,255,255,.02)';
+    var bd=val?'rgba(45,202,114,.35)':isNext?'rgba(10,132,255,.3)':'rgba(255,255,255,.05)';
+    html+='<div style="padding:8px 6px;border-radius:10px;background:'+bg+';border:1px solid '+bd+';text-align:center">';
+    html+='<div style="font-size:14px">'+step.icon+'</div>';
+    html+='<div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">'+step.label+'</div>';
+    if(val){
+      var d=new Date(val);
+      html+='<div style="font-size:14px;font-weight:800;color:#2dc272">'+d.toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit'})+'</div>';
+      html+='<div style="font-size:8px;color:var(--t3);margin-bottom:4px">'+d.toLocaleDateString('fr',{day:'2-digit',month:'2-digit'})+'</div>';
+      html+='<button onclick="clearTsFromDetail(\''+t.id+'\',\''+step.key+'\')" style="font-size:9px;padding:1px 5px;border-radius:6px;border:1px solid rgba(255,69,58,.3);background:transparent;color:#ff453a;cursor:pointer">\u2715</button>';
+    } else {
+      html+='<button onclick="stampFromDetail('+ti+',\''+step.key+'\')" style="font-size:10px;padding:3px 0;border-radius:7px;border:1px solid '+(isNext?'rgba(10,132,255,.4)':'rgba(255,255,255,.1)')+';background:'+(isNext?'rgba(10,132,255,.15)':'transparent')+';color:'+(isNext?'var(--blue)':'var(--t3)')+';cursor:pointer;width:100%">\u23F1 Maintenant</button>';
+      html+='<button onclick="openCamDetailManual('+ti+',\''+step.key+'\')" style="margin-top:2px;font-size:9px;padding:2px 0;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--t3);cursor:pointer;width:100%">\u270E Manuel</button>';
+    }
+    html+='</div>';
+  });
+  html+='</div></div>'; // grid + ts section
+
+  // Prochaine action
+  var nextAction='';
+  if(!ts.arr) nextAction='\u23F3 En attente d\u2019arriv\u00e9e';
+  else if(!ts.quai) nextAction='\uD83D\uDC49 Assigner un quai';
+  else if(!ts.chg) nextAction='\uD83D\uDCE6 Lancer chargement';
+  else if(!ts.fin_chg&&!ts.dep) nextAction='\u2705 Clore le chargement';
+  else if(!ts.dep) nextAction='\uD83D\uDE80 Pr\u00eat \u00e0 partir';
+  if(nextAction&&!ts.dep){
+    html+='<div style="padding:6px 18px;font-size:12px;color:var(--blue);font-weight:600;background:rgba(10,132,255,.05);border-bottom:1px solid rgba(255,255,255,.05)">'+nextAction+'</div>';
+  }
+
+  // ── Livraisons ──
+  if(delivs.length){
+    html+='<div class="cam-lv-det-delivs">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">\uD83D\uDCE6 Livraisons</div>';
+    delivs.forEach(function(d){
+      html+='<div style="padding:9px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-bottom:6px'+(isExport(d)?';border-color:rgba(255,140,66,.25)':'')+'">';
+      html+='<div style="font-size:12px;font-weight:700;color:var(--t1)">'+d.id+' \u2014 '+(d.dest||'\u2014')+'</div>';
+      html+='<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(d.ville||'')+(d.date?' &middot; '+d.date:'')+' &middot; '+badge(d.sp)+' / WM: '+badge(d.wm)+'</div>';
+      var pts=[];
+      if(d.palSilo) pts.push('<span class="di-silo">\uD83C\uDFED '+Math.round(d.palSilo)+'pal '+Math.round(d.colisSilo||0).toLocaleString('fr')+'cs</span>');
+      if(d.colisPick) pts.push('<span class="di-pick">\u270B '+Math.round(d.colisPick).toLocaleString('fr')+'pk</span>');
+      if(pts.length) html+='<div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">'+pts.join('')+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  el.innerHTML=html;
+}
+
+function stampFromDetail(ti,key){
+  stampNow(ti,key);
+  renderTrucks();
+}
+
+function clearTsFromDetail(id,key){
+  if(!timestamps[id])return;
+  delete timestamps[id][key];
+  save();renderTrucks();
+}
+
+function openCamDetailManual(ti,key){
+  var labels={arr:'Arriv\u00e9e',quai:'\u00C0 quai',chg:'D\u00e9but chargement',fin_chg:'Fin chargement',dep:'D\u00e9part'};
+  var now=new Date();
+  var hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
+  var v=prompt('Heure pour "'+labels[key]+'" (HH:MM)',hh+':'+mm);
+  if(!v) return;
+  var m=v.trim().match(/^(\d{1,2})[h:](\d{2})$/);
+  if(!m){alert('Format invalide \u2014 entrez HH:MM');return;}
+  var wd=getWorkingDate();
+  var iso=wd+'T'+String(parseInt(m[1],10)).padStart(2,'0')+':'+m[2]+':00';
+  var t=trucks[ti];
+  if(!timestamps[t.id])timestamps[t.id]={};
+  timestamps[t.id][key]=iso;
+  save();renderTrucks();
 }
 
 // ─── Mode Montage ─────────────────────────────────────────────────────────
