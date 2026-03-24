@@ -2058,7 +2058,6 @@ function renderKPIs(){
     {l:'Livraisons', v:s.total, acc:'var(--blue)',  sub:expNote||'total SAP', ico:'\uD83D\uDCE6', ibg:'rgba(10,132,255,.12)'},
     {l:'SGP \u2014 Pr\u00e9pa termin\u00e9e',v:s.sp_C,acc:'var(--green)',sub:Math.round(s.sp_C/(s.total||1)*100)+'% \u00b7 '+s.sp_A+' OT cr\u00e9\u00e9s \u00b7 '+s.sp_B+' commenc\u00e9es', ico:'\u2705', ibg:'rgba(48,209,88,.12)'},
     {l:'SWM \u2014 WM termin\u00e9e',v:s.wm_C,acc:'var(--teal)',sub:Math.round(s.wm_C/(s.total||1)*100)+'% \u00b7 '+s.wm_B+' OT transf\u00e9r\u00e9s', ico:'\uD83D\uDD04', ibg:'rgba(90,200,250,.12)'},
-    {l:'Camions',    v:trucks.length, acc:'var(--orange)', sub:'auto SAP', ico:'\uD83D\uDE9A', ibg:'rgba(255,159,10,.12)'},
   ].map(function(k){
     return '<div class="kpi" style="--acc:'+k.acc+'">'+
       '<div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div>'+
@@ -2068,7 +2067,7 @@ function renderKPIs(){
   var csHtml='<div class="kpi" style="--acc:var(--blue)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(10,132,255,.12)">\uD83D\uDCE6</div><div class="kpi-body"><div class="kpi-l">Colis Total</div>'+kpiDelta(s.colisSiloPrev,s.colisSiloRest,'var(--blue)',0)+'</div></div>';
   var pickHtml='<div class="kpi" style="--acc:var(--purple)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(191,90,242,.12)">\u270b</div><div class="kpi-body"><div class="kpi-l">Colis Picking</div>'+kpiDelta(s.colisPickPrev,s.colisPickRest,'var(--purple)',s.hrPick)+'</div></div>';
   document.getElementById('kpiRow').innerHTML=
-    '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'+simple+'</div>'+
+    '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+simple+'</div>'+
     '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+siloHtml+csHtml+pickHtml+'</div>';
 }
 
@@ -2307,7 +2306,6 @@ function renderDayDetail(date){
     {l:'Livraisons',v:total,acc:'var(--blue)',sub:(nExport?'dont '+nExport+' export':'total du jour'),ico:'\uD83D\uDCE6',ibg:'rgba(10,132,255,.12)'},
     {l:'SGP \u2014 Pr\u00e9pa termin\u00e9e',v:spC,acc:'var(--green)',sub:pct+'% \u00b7 '+spA+' en cours \u00b7 '+spB+' commenc.',ico:'\u2705',ibg:'rgba(48,209,88,.12)'},
     {l:'SWM \u2014 WM termin\u00e9e',v:wC,acc:'var(--teal)',sub:(total?Math.round(wC/total*100):0)+'% du jour',ico:'\uD83D\uDD04',ibg:'rgba(90,200,250,.12)'},
-    {l:'Camions',v:nbTrucks,acc:'var(--orange)',sub:tPctDone+'% partis \u00b7 '+tParti+'/'+nbTrucks,ico:'\uD83D\uDE9A',ibg:'rgba(255,159,10,.12)'},
   ].map(function(k){
     return '<div class="kpi" style="--acc:'+k.acc+'"><div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div><div class="kpi-body"><div class="kpi-l">'+k.l+'</div><div class="kpi-v">'+k.v+'</div><div class="kpi-s">'+k.sub+'</div></div></div>';
   }).join('');
@@ -2315,25 +2313,13 @@ function renderDayDetail(date){
     '<div class="kpi" style="--acc:var(--indigo)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(94,92,230,.12)">\uD83C\uDFED</div><div class="kpi-body"><div class="kpi-l">Palettes SILO</div>'+kpiDeltaDay(totPalSilo,restPalSilo,'var(--indigo)',restHrSilo)+'</div></div>'+
     '<div class="kpi" style="--acc:var(--blue)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(10,132,255,.12)">\uD83D\uDCE6</div><div class="kpi-body"><div class="kpi-l">Colis Total</div>'+kpiDeltaDay(totColSilo,restColSilo,'var(--blue)',0)+'</div></div>'+
     '<div class="kpi" style="--acc:var(--purple)"><div class="kpi-ico-circle" style="--kpi-ico-bg:rgba(191,90,242,.12)">\u270b</div><div class="kpi-body"><div class="kpi-l">Colis Picking</div>'+kpiDeltaDay(totColPick,restColPick,'var(--purple)',restHrPick)+'</div></div>';
-  // ── Compteurs temps réel → kpi-row identique Vue Semaine ──
-  var kpiRealtime='';
-  if(nbTrucks>0){
-    kpiRealtime=[
-      {l:'Sur site',      v:onSite,  acc:'var(--blue)',  sub:tAquai+' \u00e0 quai \u00b7 '+tEnChg+' en chg.',ico:'\uD83C\uDFED',ibg:'rgba(10,132,255,.12)'},
-      {l:'Arriv\u00e9s',  v:tArrive, acc:'var(--amber)', sub:'en attente de quai',              ico:'\u23F3',        ibg:'rgba(255,159,10,.12)'},
-      {l:'\u00c0 quai',   v:tAquai,  acc:'var(--indigo)',sub:'dock assign\u00e9',                ico:'\uD83D\uDEA7',  ibg:'rgba(94,92,230,.12)'},
-      {l:'En chargement', v:tEnChg,  acc:'var(--purple)',sub:'op\u00e9ration en cours',         ico:'\uD83D\uDCE6',  ibg:'rgba(191,90,242,.12)'},
-      {l:'Partis',        v:tParti,  acc:'var(--green)', sub:tPctDone+'% termin\u00e9s',        ico:'\uD83D\uDE80',  ibg:'rgba(48,209,88,.12)'},
-    ].map(function(k){return '<div class="kpi" style="--acc:'+k.acc+'"><div class="kpi-ico-circle" style="--kpi-ico-bg:'+k.ibg+'">'+k.ico+'</div><div class="kpi-body"><div class="kpi-l">'+k.l+'</div><div class="kpi-v">'+k.v+'</div><div class="kpi-s">'+k.sub+'</div></div></div>';}).join('');
-  }
   var blocKpi=
-    '<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'+kpiRow1+'</div>'+
-    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'')+
-    (kpiRealtime?'<div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">'+kpiRealtime+'</div>':'');
+    '<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow1+'</div>'+
+    ((totPalSilo||totColSilo||totColPick)?'<div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">'+kpiRow2+'</div>':'');
 
-  // ── Bloc 3 : Ponctualité cliquable (identique Vue Semaine) ──
+  // ── Bloc 3 : Ponctualité camions — retiré (voir onglet Statistiques) ──
   var blocPonct='';
-  if(nbTrucks>0){
+  if(false&&nbTrucks>0){
     function buildDayPonctPanel(arr){
       return arr.map(function(item){
         var t=item.t,p=item.p,ts2=timestamps[t.id]||{};
@@ -2391,19 +2377,17 @@ function renderDayDetail(date){
   var prepPct=total?Math.round(spC/total*100):0;
   var palPct=totPalSilo?Math.round(Math.max(0,totPalSilo-restPalSilo)/totPalSilo*100):0;
   var colPct=totColSilo?Math.round(Math.max(0,totColSilo-restColSilo)/totColSilo*100):0;
-  var trkPct=nbTrucks?Math.round(tParti/nbTrucks*100):0;
-  var advGlobal=Math.round((prepPct+trkPct+(totPalSilo?palPct:prepPct))/3);
+  var advGlobal=Math.round((prepPct+(totPalSilo?palPct:prepPct)+colPct)/3);
   var blocAvancement='';
-  if(nbTrucks>0||total>0){
+  if(total>0){
     function spcRing(pct2,lbl,col){return '<div class="spc" style="cursor:default;padding:14px 12px">'+progressRingSVG(pct2,col,48)+'<div class="spc-lbl" style="margin-top:6px">'+lbl+'</div></div>';}
-    var nRings=3+(totPalSilo?1:0);
+    var nRings=2+(totPalSilo?1:0);
     blocAvancement='<div class="syn-ponct">'+
       '<div class="syn-ponct-hdr"><span class="syn-ponct-title">\u2B55 Avancement global</span><span class="syn-ponct-sub">'+advGlobal+'% moyen</span></div>'+
       '<div class="syn-ponct-cards" style="grid-template-columns:repeat('+(nRings+1)+',1fr)">'+
         spcRing(prepPct,'Pr\u00e9pa SGP','var(--green)')+
         (totPalSilo?spcRing(palPct,'SILO Pal.','var(--indigo)'):'')+
         spcRing(colPct,'Colis','var(--blue)')+
-        spcRing(trkPct,'Camions','var(--orange)')+
         '<div class="spc" style="cursor:default;padding:14px 12px"><div class="spc-val" style="font-size:36px;color:'+(advGlobal>=80?'var(--green)':advGlobal>=40?'var(--amber)':'var(--red)')+'">'+advGlobal+'%</div><div class="spc-lbl" style="margin-top:6px">Avanc. global</div></div>'+
       '</div>'+
     '</div>';
@@ -3748,7 +3732,6 @@ function renderWeekSummary(){
     html+='<thead><tr style="border-bottom:2px solid rgba(160,210,255,.12);background:rgba(160,210,255,.04)">'+
       '<th style="text-align:left;padding:12px 14px;color:var(--t3);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">\uD83D\uDCC5 Date</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--blue);font-size:11px;font-weight:700;text-transform:uppercase">\uD83D\uDCE6 Livr.</th>'+
-      '<th style="text-align:center;padding:12px 8px;color:var(--orange);font-size:11px;font-weight:700;text-transform:uppercase">\uD83D\uDE9A Cam.</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--green);font-size:11px;font-weight:700;text-transform:uppercase">\u2705 C</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--amber);font-size:11px;font-weight:700;text-transform:uppercase">\u23F3 B</th>'+
       '<th style="text-align:center;padding:12px 8px;color:var(--t3);font-size:11px;font-weight:700;text-transform:uppercase">\uD83D\uDCDD A</th>'+
@@ -3768,7 +3751,6 @@ function renderWeekSummary(){
       html+='<tr onclick="selectDay(\''+d.date+'\')" style="cursor:pointer;border-bottom:1px solid var(--bd);transition:background .15s;'+rowBg+'" onmouseover="this.style.background=\'rgba(77,124,254,.08)\'" onmouseout="this.style.background=\''+(isToday?'rgba(10,132,255,.06)':idx%2===0?'rgba(255,255,255,.02)':'')+'\'">'+
         '<td style="padding:12px 14px;font-weight:800;color:var(--t1);white-space:nowrap">'+(isToday?'\uD83D\uDFE2 ':'')+dayLbl+'</td>'+
         '<td style="text-align:center;padding:12px 8px;font-weight:800;color:var(--blue)">'+d.total+'</td>'+
-        '<td style="text-align:center;padding:12px 8px;font-weight:800;color:var(--orange)">'+nT+'</td>'+
         '<td style="text-align:center;padding:12px 8px;font-weight:700;color:var(--green)">'+(d.sp_C||0)+'</td>'+
         '<td style="text-align:center;padding:12px 8px;font-weight:700;color:var(--amber)">'+(d.sp_B||0)+'</td>'+
         '<td style="text-align:center;padding:12px 8px;color:var(--t3)">'+(d.sp_A||0)+'</td>'+
