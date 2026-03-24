@@ -3649,13 +3649,13 @@ function switchSynView(view){
   var weekBtn=document.getElementById('synViewWeek');
   var dayDetailEl=document.getElementById('dayDetail');
   var weekSection=document.getElementById('weekSection');
-  // Also hide/show injected elements that belong to week global view
-  var weekExtras=['avgWaitBadge','goalsWrap'];
+  // Blocs masqués en vue semaine (compteurs + KPIs + objectifs)
+  var synWeekHidden=['avgWaitBadge','goalsWrap','rtCountersWrap','kpiRow'];
   if(view==='day'){
     dayBtn.classList.add('on');weekBtn.classList.remove('on');
     if(dayDetailEl) dayDetailEl.style.display='';
     if(weekSection) weekSection.style.display='none';
-    weekExtras.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
+    synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
     var todayISO=new Date().toISOString().slice(0,10);
     if(!_activeDay) _activeDay=todayISO;
     try{renderDayDetail(_activeDay);}catch(e){}
@@ -3663,9 +3663,10 @@ function switchSynView(view){
     weekBtn.classList.add('on');dayBtn.classList.remove('on');
     if(dayDetailEl) dayDetailEl.style.display='none';
     if(weekSection) weekSection.style.display='';
-    weekExtras.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
     try{renderSynPonct();}catch(e){}
     try{renderWeekSummary();}catch(e){}
+    // Vue semaine : uniquement le récapitulatif par jour, sans KPIs ni compteurs
+    synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
   }
 }
 // Auto-refresh active view on every renderAll
@@ -3694,6 +3695,8 @@ function patchRenderAllForSynView(){
       if(weekSection) weekSection.style.display='';
       try{renderSynPonct();}catch(e){}
       try{renderWeekSummary();}catch(e){}
+      // Vue semaine : masquer KPIs, compteurs et objectifs après re-render
+      ['avgWaitBadge','goalsWrap','rtCountersWrap','kpiRow'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
     }
   };
 }
