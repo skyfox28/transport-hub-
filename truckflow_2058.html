@@ -4617,20 +4617,28 @@ function exportExcel(){
   wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsCam, 'Camions');
 
-  var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.']];
+  var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','D\u00e9calage motif','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.','Note d\u00e9calage']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti];
+    var dcLbl=t.decalage?(t.decalage.label+(t.decalage.heure?' ('+t.decalage.heure+')':'')):'';
+    var dcNote=t.decalage?(t.decalage.note||''):'';
     (t.deliveries||[]).forEach(function(id){
       var d = getDeliv(id);
       if(!d) return;
-      livRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
+      livRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'', dcLbl,
         d.id, d.dest||'', d.ville||'',d.sp||'', d.wm||'',
-        d.pkg||0, d.palSilo||0, d.colisSilo||0, d.colisPick||0,d.hrSilo||0, d.hrPick||0]);
+        d.pkg||0, d.palSilo||0, d.colisSilo||0, d.colisPick||0, d.hrSilo||0, d.hrPick||0, dcNote]);
     });
-    livRows.push(['','','','','','','','','','','','','','']);
+    // Total par camion si plusieurs livraisons
+    if((t.deliveries||[]).length>1){
+      var tPkg=0,tPal=0,tCS=0,tCP=0;
+      (t.deliveries||[]).forEach(function(id){var d=getDeliv(id);if(d){tPkg+=d.pkg||0;tPal+=d.palSilo||0;tCS+=d.colisSilo||0;tCP+=d.colisPick||0;}});
+      livRows.push(['','','',dcLbl?'\u21b3 D\u00e9cal\u00e9':'','TOTAL '+(t.deliveries||[]).length+' livr.','','','','',tPkg,tPal,tCS,tCP,'','','']);
+    }
+    livRows.push(['','','','','','','','','','','','','','','','']);
   });
   var wsLiv = XLSX.utils.aoa_to_sheet(livRows);
-  wsLiv['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:12},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:11},{wch:11},{wch:9},{wch:9}];
+  wsLiv['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:24},{wch:12},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:11},{wch:11},{wch:9},{wch:9},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsLiv, 'Livraisons par camion');
 
   var byDate = getByDate();
@@ -5113,7 +5121,7 @@ function exportWeekExcel(weekKey){
   // ══════════════════════════════════════════════════════════
   // Feuille 2 : Timestamps détaillés
   // ══════════════════════════════════════════════════════════
-  var tsR=[['Date','Jour','Transporteur','Cr\u00e9neau','Quai','Arriv\u00e9e','\u00c0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','Att. quai','Pr\u00e9pa','Chargement','Total','D\u0394 Cr\u00e9neau','Ponctualit\u00e9']];
+  var tsR=[['Date','Jour','Transporteur','Cr\u00e9neau','Quai','Arriv\u00e9e','\u00c0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','Att. quai','Pr\u00e9pa','Chargement','Total','\u0394 Cr\u00e9neau','Ponctualit\u00e9','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouv. date / cr\u00e9neau','Note d\u00e9calage']];
   var lastD='';
   trucks_wk.forEach(function(ct){
     var ts=ct.timestamps||{};
@@ -5127,15 +5135,48 @@ function exportWeekExcel(weekKey){
         else if(am<=cw.end)delta='\u00c0 l\'heure';
         else delta='+'+fmtMinutes(Math.round(am-cw.end));}}
     var dW=dur(ts.arr,ts.quai),dP=dur(ts.quai,ts.chg),dL=dur(ts.chg,ts.fin_chg||ts.dep),dT=dur(ts.arr,ts.dep);
+    var dc=ct.decalage||null;
     tsR.push([ct.date,fmtS(ct.date),ct.transporteur||ct.itin||'',ct.creneau||'',ct.quai||'',
       fmtT(ts.arr),fmtT(ts.quai),fmtT(ts.chg),fmtT(ts.fin_chg),fmtT(ts.dep),
       dW!=null?fmtMinutes(dW):'\u2014',dP!=null?fmtMinutes(dP):'\u2014',
       dL!=null?fmtMinutes(dL):'\u2014',dT!=null?fmtMinutes(dT):'\u2014',
-      delta,(ct.ponctualite||{}).label||'']);
+      delta,(ct.ponctualite||{}).label||'',
+      dc?dc.label+(dc.heure?' ('+dc.heure+')':''):'',
+      dc?dc.dateOrig||'':'',
+      dc?dc.creneauOrig||'':'',
+      dc?(dc.dateNew||'')+(dc.creneauNew?' '+dc.creneauNew:''):'',
+      dc?dc.note||'':'']);
   });
   var wsTs=XLSX.utils.aoa_to_sheet(tsR);
-  wsTs['!cols']=[{wch:12},{wch:16},{wch:16},{wch:10},{wch:6},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:10},{wch:9},{wch:12},{wch:9},{wch:11},{wch:14}];
+  wsTs['!cols']=[{wch:12},{wch:16},{wch:16},{wch:10},{wch:6},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:10},{wch:9},{wch:12},{wch:9},{wch:11},{wch:14},{wch:22},{wch:12},{wch:13},{wch:20},{wch:30}];
   XLSX.utils.book_append_sheet(wb,wsTs,'Timestamps');
+
+  // ══════════════════════════════════════════════════════════
+  // Feuille 3 : Livraisons détaillées
+  // ══════════════════════════════════════════════════════════
+  var livR=[['Date','Transporteur','Cr\u00e9neau','Quai','D\u00e9calage','N\u00b0 Livraison','Destinataire','Ville','Statut Pr\u00e9pa','Statut WM','Colis SAP','Pal SILO','Colis SILO','Colis Pick.']];
+  var lastDL='';
+  trucks_wk.forEach(function(ct){
+    var dc2=ct.decalage||null;
+    var dcLbl2=dc2?dc2.label+(dc2.heure?' ('+dc2.heure+')':''):'';
+    if(ct.date!==lastDL&&lastDL!=='')livR.push(B);
+    lastDL=ct.date;
+    var dds=ct.deliveryDetails||[];
+    dds.forEach(function(dd){
+      livR.push([ct.date,ct.transporteur||ct.itin||'',ct.creneau||'',ct.quai||'',dcLbl2,
+        dd.id||'',dd.dest||'',dd.ville||'',dd.sp||'',dd.wm||'',
+        dd.pkg||0,dd.palSilo||0,dd.colisSilo||0,dd.colisPick||0]);
+    });
+    if(dds.length>1){
+      var tp=0,tpal=0,tcs=0,tcp=0;
+      dds.forEach(function(dd){tp+=dd.pkg||0;tpal+=dd.palSilo||0;tcs+=dd.colisSilo||0;tcp+=dd.colisPick||0;});
+      livR.push(['','','','',dcLbl2?'\u21b3 D\u00e9cal\u00e9':'','TOTAL '+dds.length+' livr.','','','','',tp,tpal,tcs,tcp]);
+    }
+    livR.push(B);
+  });
+  var wsLivW=XLSX.utils.aoa_to_sheet(livR);
+  wsLivW['!cols']=[{wch:12},{wch:16},{wch:10},{wch:6},{wch:22},{wch:14},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsLivW,'Livraisons');
 
   XLSX.writeFile(wb,'TruckFlow_'+weekKey+'.xlsx');
   showToast('\u2705 Export '+weekKey+' t\u00e9l\u00e9charg\u00e9');
