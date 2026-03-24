@@ -5452,21 +5452,17 @@ function confirmMontage(){
   if(!transp){showToast('\u26a0 Transporteur requis');return;}
   var selIds=Object.keys(_montageSelected);
   if(!selIds.length){closeMontageForm();return;}
-  // Convertir date ISO -> DD/MM/YYYY
-  var displayDate=dateVal;
-  if(/^\d{4}-\d{2}-\d{2}$/.test(dateVal)){
-    var pp=dateVal.split('-');displayDate=pp[2]+'/'+pp[1]+'/'+pp[0];
-  }
+  // L'app utilise le format ISO YYYY-MM-DD partout (xlDate, date tabs, input camion)
   var itin=(getDeliv(selIds[0])||{}).itin||transp;
   var newTruck={
     id:'mont_'+Date.now(),
     transporteur:transp,
     itin:itin,
-    date:displayDate,
+    date:dateVal,
     creneau:creneau,
     deliveries:selIds.slice(),
     lockedDeliveries:selIds.slice(),
-    lockedDate:displayDate,
+    lockedDate:dateVal,
     lockedCreneau:creneau,
     locked:true,
     _montage:true,
