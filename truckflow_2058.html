@@ -1645,10 +1645,16 @@ var _completedTrucks = [];
    d'écraser les données en diffusant de faux messages de sync.
    ─────────────────────────────────────────────────────────────────────── */
 var _tfSessionToken=(function(){
-  var k='tf_session_token';
-  var t=sessionStorage.getItem(k);
-  if(!t){t=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);sessionStorage.setItem(k,t);}
-  return t;
+  try{
+    var k='tf_session_token';
+    var t=sessionStorage.getItem(k);
+    if(!t){t=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);sessionStorage.setItem(k,t);}
+    return t;
+  }catch(e){
+    /* sessionStorage indisponible (iframe sandboxé, cookies bloqués, politique entreprise)
+       → token éphémère non persisté, valide pour la session en cours uniquement */
+    return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+  }
 })();
 // Date de saisie : null = aujourd'hui, sinon YYYY-MM-DD (mode saisie décalée)
 var _workingDate = null;
@@ -6306,7 +6312,7 @@ function globalSearch(q){
   // Search deliveries
   (APP.deliveries||[]).forEach(function(d){
     if((d.id+'').toLowerCase().indexOf(q)>=0||(d.dest||'').toLowerCase().indexOf(q)>=0||(d.ville||'').toLowerCase().indexOf(q)>=0)
-      results.push({type:'Livraison',label:escH(d.id)+' \u2014 '+escH(d.dest||'')+' ('+escH(d.ville||'')+')',tab:'liv'});
+      results.push({type:'Livraison',label:d.id+' \u2014 '+(d.dest||'')+' ('+(d.ville||'')+')',tab:'liv'});
   });
   // Search trucks
   trucks.forEach(function(t){
