@@ -1283,7 +1283,6 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   <!-- Vue Semaine: KPIs globaux + ponctualité + récap -->
   <div id="weekSection" style="display:none">
     <div id="kpiRow"></div>
-    <div id="synPonct" style="display:none"></div>
     <div class="card" id="weekCard">
       <div class="card-ttl">
         <span>&#x1F4C6; R&#xe9;capitulatif par jour</span>
@@ -3683,20 +3682,13 @@ function renderWeekSummary(){
   var el=document.getElementById('weekSummaryBody');
   if(!el) return;
   var bd=getByDate();
-  var totalLivs=0, totalTrucks=0, totalSpC=0, totalSpB=0;
+  var totalLivs=0, totalSpC=0, totalSpB=0;
   var totPalSilo=0, totPalSiloRest=0, totColisSilo=0, totColisSiloRest=0, totColisPick=0, totColisPickRest=0;
   bd.forEach(function(d){
     totalLivs+=d.total; totalSpC+=(d.sp_C||0); totalSpB+=(d.sp_B||0);
     totPalSilo+=(d.palSilo||0); totPalSiloRest+=(d.palSiloRest||0);
     totColisSilo+=(d.colisSilo||0); totColisSiloRest+=(d.colisSiloRest||0);
     totColisPick+=(d.colisPick||0); totColisPickRest+=(d.colisPickRest||0);
-  });
-  var trucksByDate={};
-  trucks.forEach(function(t){
-    var dt=t.date||'?';
-    if(!trucksByDate[dt]) trucksByDate[dt]=0;
-    trucksByDate[dt]++;
-    totalTrucks++;
   });
   var pctGlobal=totalLivs?Math.round(totalSpC/totalLivs*100):0;
 
@@ -3743,7 +3735,6 @@ function renderWeekSummary(){
     bd.forEach(function(d,idx){
       var dtObj=new Date(d.date+'T12:00:00');
       var dayLbl=dtObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
-      var nT=trucksByDate[d.date]||0;
       var pct=d.total?Math.round((d.sp_C||0)/d.total*100):0;
       var barCol=pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
       var isToday=(d.date===todayISO2);
