@@ -3761,7 +3761,7 @@ function switchSynView(view){
     synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
     var todayISO=new Date().toISOString().slice(0,10);
     if(!_activeDay) _activeDay=todayISO;
-    try{renderDayDetail(_activeDay);}catch(e){}
+    try{renderDayDetail(_activeDay);}catch(e){console.error('[TruckFlow] renderDayDetail error:',e);}
   } else {
     weekBtn.classList.add('on');dayBtn.classList.remove('on');
     if(dayDetailEl) dayDetailEl.style.display='none';
@@ -3779,7 +3779,7 @@ function patchRenderAllForSynView(){
   var _prev=renderAll;
   _origRenderAllSynView=_prev;
   renderAll=function(){
-    _prev();
+    try{_prev();}catch(e){console.error('[TruckFlow] renderAll internal error:',e);}
     // #6 Header progress bar + #2 badges + #3 summary
     try{updateHeaderProgress();}catch(e){}
     try{updateTabBadges();}catch(e){}
@@ -3792,7 +3792,7 @@ function patchRenderAllForSynView(){
       if(weekSection) weekSection.style.display='none';
       var todayISO=new Date().toISOString().slice(0,10);
       if(!_activeDay) _activeDay=todayISO;
-      try{renderDayDetail(_activeDay);}catch(e){}
+      try{renderDayDetail(_activeDay);}catch(e){console.error('[TruckFlow] renderDayDetail error:',e);}
     } else {
       if(dayDetailEl) dayDetailEl.style.display='none';
       if(weekSection) weekSection.style.display='';
@@ -9175,7 +9175,13 @@ patchRenderAllForSynView();
 (function(){
   var todayISO=new Date().toISOString().slice(0,10);
   _activeDay=todayISO;
-  try{renderDayDetail(todayISO);}catch(e){}
+  try{renderDayDetail(todayISO);}catch(e){
+    console.error('[TruckFlow] renderDayDetail startup error:',e);
+    // Retry after DOM settles
+    setTimeout(function(){
+      try{renderDayDetail(_activeDay||todayISO);}catch(e2){console.error('[TruckFlow] renderDayDetail retry error:',e2);}
+    },100);
+  }
 })();
 
 // Show welcome screen after init (data loaded from localStorage)
