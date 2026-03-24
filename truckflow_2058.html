@@ -1330,6 +1330,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
       <button class="btn-new" onclick="regenTrucks()">&#x21BB; Regenerer VL06O</button>
       <button class="btn-sm" onclick="var r=cleanCompletedTrucks();showToast(r?r+' camion(s) nettoye(s)':'Aucun camion termine')">&#128465; Nettoyer termines</button>
       <button class="btn-sm" id="groupCreneauBtn" onclick="toggleGroupCreneau()" title="Grouper par créneau">&#128336; Grouper</button>
+      <button class="btn-sm" id="montageModeBtn" onclick="enterMontageMode()" style="background:rgba(77,124,254,.12);border-color:rgba(77,124,254,.3);color:var(--blue);font-weight:700" title="Construire les camions manuellement par transporteur">&#128295; Montage</button>
       <span style="display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:4px 10px;border-radius:20px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)" title="Définir la date de saisie (utile le lendemain matin pour saisir des timestamps rétroactifs)">
         <span style="font-size:12px;color:#f59e0b">📅</span>
         <span style="font-size:11px;color:var(--t3)">Saisie du</span>
@@ -1353,6 +1354,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   <div id="ponctStats"></div>
   <div class="focus-bar" id="focusBar"><span style="font-size:14px">&#x1F50D;</span><span class="focus-bar-label" id="focusBarLabel">Mode focus</span><button class="focus-bar-close" onclick="exitFocusMode()">&#x2715; Quitter le focus</button></div>
   <div id="truckList"></div>
+  <div id="montagePanel" style="display:none"></div>
 </div>
 
 <!-- ── Panel: Planning (NEW) ── -->
@@ -5184,6 +5186,281 @@ function exportWeekExcel(weekKey){
   XLSX.writeFile(wb,'TruckFlow_'+weekKey+'.xlsx');
   showToast('\u2705 Export '+weekKey+' t\u00e9l\u00e9charg\u00e9');
   logActivity('\uD83D\uDCC5','Export semaine '+weekKey+' g\u00e9n\u00e9r\u00e9');
+}
+
+// ─── Mode Montage ─────────────────────────────────────────────────────────
+var _montageMode=false;
+var _montageSelected={};
+
+function enterMontageMode(){
+  _montageMode=true;
+  _montageSelected={};
+  document.getElementById('truckList').style.display='none';
+  var btn=document.getElementById('montageModeBtn');
+  if(btn){btn.style.background='rgba(77,124,254,.3)';btn.textContent='⬅ Retour camions';btn.onclick=exitMontageMode;}
+  document.getElementById('montagePanel').style.display='';
+  renderMontagePanel();
+}
+
+function exitMontageMode(){
+  _montageMode=false;
+  _montageSelected={};
+  document.getElementById('montagePanel').style.display='none';
+  document.getElementById('truckList').style.display='';
+  var btn=document.getElementById('montageModeBtn');
+  if(btn){btn.style.background='rgba(77,124,254,.12)';btn.innerHTML='&#128295; Montage';btn.onclick=enterMontageMode;}
+  renderTrucks();
+}
+
+function _montageAssigned(){
+  var s=new Set();
+  trucks.forEach(function(t){(t.lockedDeliveries||t.deliveries||[]).forEach(function(id){s.add(id);});});
+  return s;
+}
+
+function renderMontagePanel(){
+  var panel=document.getElementById('montagePanel');
+  if(!panel)return;
+  var assigned=_montageAssigned();
+  var unassigned=(APP.deliveries||[]).filter(function(d){return !assigned.has(d.id);});
+
+  // Group by itin
+  var groups={};
+  unassigned.forEach(function(d){
+    var k=d.itin||'?';
+    if(!groups[k])groups[k]=[];
+    groups[k].push(d);
+  });
+  var keys=Object.keys(groups).sort(function(a,b){return groups[b].length-groups[a].length;});
+
+  // Selection stats
+  var selIds=Object.keys(_montageSelected);
+  var selPal=0,selColis=0,selItins={};
+  selIds.forEach(function(id){var d=getDeliv(id);if(d){selPal+=d.palSilo||0;selColis+=d.colisPick||0;if(d.itin)selItins[d.itin]=true;}});
+  var selItinStr=Object.keys(selItins).join(' + ');
+
+  if(!unassigned.length){
+    panel.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--t3)">'+
+      '<div style="font-size:48px;margin-bottom:12px">&#10003;</div>'+
+      '<div style="font-size:16px;font-weight:700;color:var(--t1)">Toutes les livraisons sont mont\u00e9es</div>'+
+      '<div style="font-size:13px;color:var(--t3);margin-top:6px">Aucune livraison non assign\u00e9e</div>'+
+      '<button onclick="exitMontageMode()" style="margin-top:18px;padding:9px 24px;border-radius:20px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Retourner aux camions</button>'+
+    '</div>';
+    return;
+  }
+
+  var html='';
+
+  // ── En-tête mode montage ──
+  html+='<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(165deg,rgba(77,124,254,.08),rgba(77,124,254,.03));border-bottom:1px solid rgba(77,124,254,.18);margin-bottom:16px">'+
+    '<div style="width:34px;height:34px;border-radius:9px;background:rgba(77,124,254,.15);border:1px solid rgba(77,124,254,.25);display:flex;align-items:center;justify-content:center;font-size:17px">&#128295;</div>'+
+    '<div>'+
+      '<div style="font-size:15px;font-weight:800;color:var(--t1)">Mode Montage</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+unassigned.length+' livraison'+(unassigned.length>1?'s':'')+' \u00e0 monter &middot; '+keys.length+' transporteur'+(keys.length>1?'s':'')+' &middot; Camions verrouill\u00e9s auto</div>'+
+    '</div>'+
+    '<div style="margin-left:auto;display:flex;align-items:center;gap:8px">'+
+      '<button onclick="exitMontageMode()" style="padding:6px 16px;border-radius:20px;border:1px solid rgba(255,69,58,.3);background:rgba(255,69,58,.06);color:#ff453a;font-size:12px;font-weight:700;cursor:pointer">&#x2190; Retour</button>'+
+    '</div>'+
+  '</div>';
+
+  // ── Groupes par transporteur ──
+  html+='<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;padding-bottom:'+(selIds.length?'80px':'16px')+'">';
+
+  keys.forEach(function(itin){
+    var delivs=groups[itin];
+    var totPal=0,totColis=0,totPkg=0;
+    delivs.forEach(function(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;totPkg+=d.pkg||0;});
+    var selInGrp=delivs.filter(function(d){return !!_montageSelected[d.id];}).length;
+    var allSel=selInGrp===delivs.length;
+
+    html+='<div style="background:linear-gradient(165deg,rgba(160,210,255,.05),rgba(140,180,220,.02));border:1px solid rgba(160,210,255,.15);border-radius:14px;overflow:hidden">'+
+      // Group header
+      '<div onclick="toggleMontageGroup(\''+itin+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(160,210,255,.1)" onmouseover="this.style.background=\'rgba(77,124,254,.06)\'" onmouseout="this.style.background=\'\'">'+
+        '<div style="width:20px;height:20px;border-radius:5px;border:1.5px solid '+(allSel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(allSel?'#4d7cfe':'transparent')+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;flex-shrink:0">'+(allSel?'&#10003;':'')+'</div>'+
+        '<span style="font-size:15px">&#128666;</span>'+
+        '<div style="flex:1">'+
+          '<span style="font-size:14px;font-weight:800;color:var(--t1)">'+itin+'</span>'+
+          '<span style="font-size:11px;color:var(--t3);margin-left:8px">'+delivs.length+' livr.</span>'+
+          (totPal?'<span style="font-size:11px;background:rgba(45,202,114,.1);color:#2dc272;padding:2px 8px;border-radius:5px;margin-left:6px;font-weight:700">'+totPal+' pal SILO</span>':'')+
+          (totColis?'<span style="font-size:11px;background:rgba(155,109,255,.1);color:var(--purple);padding:2px 8px;border-radius:5px;margin-left:4px;font-weight:700">'+totColis+' colis pick</span>':'')+
+          (totPkg?'<span style="font-size:11px;color:var(--t3);margin-left:6px">'+totPkg+' colis SAP</span>':'')+
+        '</div>'+
+        '<span style="font-size:12px;font-weight:700;color:'+(selInGrp?'var(--blue)':'var(--t3)')+'">'+
+          (selInGrp?selInGrp+'/'+delivs.length+' \u2713':'Tout s\u00e9l.')+
+        '</span>'+
+      '</div>'+
+      // Delivery table
+      '<div style="overflow-x:auto">'+
+        '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+          '<thead><tr style="background:rgba(0,0,0,.12)">'+
+            '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600;width:32px">&bull;</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600;white-space:nowrap">N&#176; Livraison</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Destination</th>'+
+            '<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Ville</th>'+
+            '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600;white-space:nowrap">Pr\u00e9pa</th>'+
+            '<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600">WM</th>'+
+            '<th style="padding:6px 12px;text-align:right;color:var(--t3);font-weight:600;white-space:nowrap">Pal SILO</th>'+
+            '<th style="padding:6px 12px;text-align:right;color:var(--t3);font-weight:600;white-space:nowrap">Colis Pick</th>'+
+          '</tr></thead>'+
+          '<tbody>';
+
+    delivs.forEach(function(d){
+      var sel=!!_montageSelected[d.id];
+      var spCol=d.sp==='C'?'#2dc272':d.sp==='B'?'#ff9f0a':d.sp==='A'?'#ff453a':'var(--t3)';
+      var wmCol=d.wm==='C'?'#2dc272':d.wm==='B'?'#ff9f0a':'var(--t3)';
+      html+='<tr onclick="toggleMontageDelivery(\''+d.id+'\')" style="cursor:pointer;border-top:1px solid rgba(160,210,255,.06);background:'+(sel?'rgba(77,124,254,.1)':'')+'" onmouseover="this.style.background=\''+(sel?'rgba(77,124,254,.15)':'rgba(160,210,255,.04)')+'\'" onmouseout="this.style.background=\''+(sel?'rgba(77,124,254,.1)':'')+'\'">' +
+        '<td style="padding:7px 12px;text-align:center">'+
+          '<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(sel?'#4d7cfe':'rgba(160,210,255,.3)')+';background:'+(sel?'#4d7cfe':'transparent')+';display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">'+(sel?'&#10003;':'')+'</div>'+
+        '</td>'+
+        '<td style="padding:7px 12px;font-weight:700;color:var(--blue);font-family:monospace;white-space:nowrap">'+d.id+'</td>'+
+        '<td style="padding:7px 12px;color:var(--t1);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.dest||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;color:var(--t2);white-space:nowrap">'+(d.ville||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+spCol+'">'+(d.sp||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+wmCol+'">'+(d.wm||'\u2014')+'</td>'+
+        '<td style="padding:7px 12px;text-align:right;color:#2dc272;font-weight:700">'+(d.palSilo||0)+'</td>'+
+        '<td style="padding:7px 12px;text-align:right;color:var(--purple);font-weight:700">'+(d.colisPick||0)+'</td>'+
+      '</tr>';
+    });
+
+    html+='</tbody></table></div></div>';
+  });
+
+  html+='</div>';
+
+  // ── Barre de création sticky ──
+  if(selIds.length){
+    html+='<div id="montageBar" style="position:sticky;bottom:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:12px 18px;background:linear-gradient(165deg,rgba(10,10,20,.92),rgba(20,20,40,.88));backdrop-filter:saturate(200%) blur(28px);border-top:1px solid rgba(77,124,254,.3);z-index:20">'+
+      '<div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+        '<span style="font-size:14px;font-weight:800;color:var(--t1)">'+selIds.length+' livraison'+(selIds.length>1?'s':'')+' s\u00e9lectionn\u00e9e'+(selIds.length>1?'s':'')+'</span>'+
+        (selPal?'<span style="font-size:12px;background:rgba(45,202,114,.12);color:#2dc272;padding:3px 10px;border-radius:6px;font-weight:700">'+selPal+' pal SILO</span>':'')+
+        (selColis?'<span style="font-size:12px;background:rgba(155,109,255,.12);color:var(--purple);padding:3px 10px;border-radius:6px;font-weight:700">'+selColis+' colis pick</span>':'')+
+        (selItinStr?'<span style="font-size:11px;color:var(--t3)">&#x2022; '+selItinStr+'</span>':'')+
+      '</div>'+
+      '<button onclick="_montageSelected={};renderMontagePanel()" style="padding:7px 14px;border-radius:20px;border:1px solid rgba(160,210,255,.15);background:transparent;color:var(--t3);font-size:12px;cursor:pointer;flex-shrink:0">D\u00e9s\u00e9lectionner</button>'+
+      '<button onclick="openMontageForm()" style="padding:9px 22px;border-radius:20px;border:none;background:linear-gradient(135deg,#4d7cfe,#5e5ce6);color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 4px 14px rgba(77,124,254,.35)">&#128295; Cr\u00e9er le camion</button>'+
+    '</div>';
+  }
+
+  panel.innerHTML=html;
+}
+
+function toggleMontageDelivery(id){
+  if(_montageSelected[id])delete _montageSelected[id];else _montageSelected[id]=true;
+  renderMontagePanel();
+}
+
+function toggleMontageGroup(itin){
+  var assigned=_montageAssigned();
+  var delivs=(APP.deliveries||[]).filter(function(d){return d.itin===itin&&!assigned.has(d.id);});
+  var allSel=delivs.length&&delivs.every(function(d){return !!_montageSelected[d.id];});
+  if(allSel){delivs.forEach(function(d){delete _montageSelected[d.id];});}
+  else{delivs.forEach(function(d){_montageSelected[d.id]=true;});}
+  renderMontagePanel();
+}
+
+function openMontageForm(){
+  var selIds=Object.keys(_montageSelected);
+  if(!selIds.length)return;
+  // Détecter transporteur et date dominants
+  var itinCount={},dateCount={};
+  selIds.forEach(function(id){
+    var d=getDeliv(id);if(!d)return;
+    itinCount[d.itin||'']=(itinCount[d.itin||'']||0)+1;
+    dateCount[d.date||'']=(dateCount[d.date||'']||0)+1;
+  });
+  var mainItin=Object.keys(itinCount).sort(function(a,b){return itinCount[b]-itinCount[a];})[0]||'';
+  var mainDate=Object.keys(dateCount).sort(function(a,b){return dateCount[b]-dateCount[a];})[0]||new Date().toISOString().slice(0,10);
+  // Convertir date DD/MM/YYYY -> YYYY-MM-DD pour l'input
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(mainDate)){
+    var p=mainDate.split('/');mainDate=p[2]+'-'+p[1]+'-'+p[0];
+  }
+  var totPal=0,totColis=0;
+  selIds.forEach(function(id){var d=getDeliv(id);if(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;}});
+  // Plusieurs itins différents ?
+  var multiItin=Object.keys(itinCount).length>1;
+
+  var el=document.createElement('div');
+  el.id='montageFormBg';
+  el.onclick=function(e){if(e.target===el)closeMontageForm();};
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:saturate(180%) blur(20px);z-index:300;display:flex;align-items:center;justify-content:center';
+  el.innerHTML=
+    '<div style="width:min(460px,92vw);background:linear-gradient(165deg,rgba(160,210,255,.09),rgba(140,180,220,.04));backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(160,210,255,.22);border-radius:20px;padding:24px;box-shadow:0 0 0 1px rgba(160,210,255,.07) inset,0 24px 60px rgba(0,0,0,.45)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--t1)">&#128295; Cr\u00e9er le camion</h3>'+
+        '<button onclick="closeMontageForm()" style="background:none;border:none;color:var(--t3);font-size:24px;cursor:pointer;padding:0 6px;line-height:1">&#215;</button>'+
+      '</div>'+
+      '<div style="background:rgba(77,124,254,.08);border:1px solid rgba(77,124,254,.18);border-radius:10px;padding:10px 14px;margin-bottom:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+        '<span style="font-size:13px;font-weight:700;color:var(--t1)">'+selIds.length+' livraison'+(selIds.length>1?'s':'')+'</span>'+
+        (totPal?'<span style="font-size:12px;color:#2dc272;font-weight:700">'+totPal+' pal SILO</span>':'')+
+        (totColis?'<span style="font-size:12px;color:var(--purple);font-weight:700">'+totColis+' colis pick</span>':'')+
+        (multiItin?'<span style="font-size:11px;color:#ff9f0a">&#9888; Plusieurs transporteurs</span>':'')+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:14px">'+
+        '<div>'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur / Route</label>'+
+          '<input id="mcTransp" value="'+mainItin+'" placeholder="Nom du transporteur" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Date</label>'+
+            '<input id="mcDate" type="date" value="'+mainDate+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '</div>'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Cr\u00e9neau</label>'+
+            '<input id="mcCreneau" placeholder="ex: 07-09" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-top:20px">'+
+        '<button onclick="closeMontageForm()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Annuler</button>'+
+        '<button onclick="confirmMontage()" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#4d7cfe,#5e5ce6);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(77,124,254,.3)">&#10003; Cr\u00e9er et verrouiller</button>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">&#128274; Ce camion sera verrouill\u00e9 &mdash; les r\u00e9imports VL06O ne le modifieront pas</div>'+
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(function(){var i=document.getElementById('mcCreneau');if(i)i.focus();},100);
+}
+
+function closeMontageForm(){
+  var el=document.getElementById('montageFormBg');
+  if(el)el.remove();
+}
+
+function confirmMontage(){
+  var transp=(document.getElementById('mcTransp')||{}).value||'';
+  var dateVal=(document.getElementById('mcDate')||{}).value||'';
+  var creneau=(document.getElementById('mcCreneau')||{}).value||'';
+  if(!transp){showToast('\u26a0 Transporteur requis');return;}
+  var selIds=Object.keys(_montageSelected);
+  if(!selIds.length){closeMontageForm();return;}
+  // Convertir date ISO -> DD/MM/YYYY
+  var displayDate=dateVal;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(dateVal)){
+    var pp=dateVal.split('-');displayDate=pp[2]+'/'+pp[1]+'/'+pp[0];
+  }
+  var itin=(getDeliv(selIds[0])||{}).itin||transp;
+  var newTruck={
+    id:'mont_'+Date.now(),
+    transporteur:transp,
+    itin:itin,
+    date:displayDate,
+    creneau:creneau,
+    deliveries:selIds.slice(),
+    lockedDeliveries:selIds.slice(),
+    lockedDate:displayDate,
+    lockedCreneau:creneau,
+    locked:true,
+    _montage:true,
+    decalage:null,
+    notes:''
+  };
+  trucks.push(newTruck);
+  save();
+  try{logActivity('\uD83D\uDD27','Camion mont\u00e9 verrouill\u00e9 : '+transp+' \u00b7 '+selIds.length+' livraisons'+(creneau?' \u00b7 '+creneau:''));}catch(e){}
+  closeMontageForm();
+  _montageSelected={};
+  renderMontagePanel();
+  showToast('\u2705 Camion '+transp+' mont\u00e9 \u00b7 '+selIds.length+' livraison'+(selIds.length>1?'s':'')+' \u2022 \uD83D\uDD12 verrouill\u00e9');
 }
 
 // ─── Quai plan ────────────────────────────────────────────────────────────
