@@ -1402,7 +1402,6 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   </div>
 </div></div>
 <!-- ═══ WELCOME OVERLAY ═══ -->
-<div class="welcome-overlay" id="welcomeOverlay" style="display:none"></div>
 
 <!-- ═══ LIVE TICKER ═══ -->
 
@@ -8633,47 +8632,7 @@ document.addEventListener('keydown',function(e){
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #1 DASHBOARD D'ACCUEIL ──────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
-function showWelcomeScreen(){
-  var overlay=document.getElementById('welcomeOverlay');if(!overlay)return;
-  var now=new Date();
-  var timeStr=now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  var dateStr=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var todayISO=now.toISOString().slice(0,10);
-  var dayT=trucks.filter(function(t){return t.date===todayISO;});
-  var nComp=0,nLate=0;
-  dayT.forEach(function(t){
-    var ts=timestamps[t.id]||{};
-    if(ts.arr&&ts.quai&&ts.chg&&ts.dep)nComp++;
-    var p=getPonctualite(t,ts,Date.now());
-    if(p.status==='retard_reel'||p.status==='retard_auto')nLate++;
-  });
-  var alerts=[];
-  if(nLate>0)alerts.push('\u26a0 '+nLate+' camion'+(nLate>1?'s':'')+' en retard');
-  var overload=typeof detectSlotOverload==='function'?detectSlotOverload():[];
-  if(overload.length)alerts.push('\uD83D\uDD25 '+overload.length+' cr\u00e9neau'+(overload.length>1?'x':'')+' surcharg\u00e9'+(overload.length>1?'s':''));
-  var alertHtml='';
-  if(alerts.length){
-    alertHtml='<div class="welcome-alerts">';
-    alerts.forEach(function(a){alertHtml+='<div class="welcome-alert-item">'+a+'</div>';});
-    alertHtml+='</div>';
-  }else if(dayT.length){
-    alertHtml='<div class="welcome-alerts"><div class="welcome-ok-item">\u2714 Aucune alerte en cours</div></div>';
-  }
-  overlay.innerHTML='<div class="welcome-card">'+
-    '<div class="welcome-time">'+timeStr+'</div>'+
-    '<div class="welcome-date">'+dateStr+'</div>'+
-    '<div class="welcome-actions">'+
-      '<button class="welcome-btn primary" onclick="closeWelcome()">Commencer \u2192</button>'+
-      '<button class="welcome-btn secondary" onclick="closeWelcome();triggerVL06O()">\u2191 Importer VL06O</button>'+
-      '<button class="welcome-btn secondary" onclick="closeWelcome();document.getElementById(\'fi-session\').click()">\u2191 Reprendre session</button>'+
-    '</div></div>';
-  overlay.style.display='flex';
-}
-function closeWelcome(){
-  var o=document.getElementById('welcomeOverlay');if(!o)return;
-  o.classList.add('out');
-  setTimeout(function(){o.style.display='none';o.classList.remove('out');},500);
-}
+// (showWelcomeScreen / closeWelcome supprimés — remplacés par l'auth overlay)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ─── #2 BANDE COULEUR STATUT CAMION ─────────────────────────────────────
@@ -9406,8 +9365,7 @@ if(!sessionStorage.getItem('tf_auth')){
   }
 })();
 
-// Show welcome screen after init (data loaded from localStorage)
-setTimeout(function(){showWelcomeScreen();},200);
+// (welcome screen supprimé — remplacé par l'écran d'authentification)
 
 // ─── Protection fermeture / actualisation ─────────────────────────────────
 window.addEventListener('beforeunload', function(e){
