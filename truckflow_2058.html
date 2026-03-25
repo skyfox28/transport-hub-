@@ -4610,10 +4610,10 @@ function renderStats(){
 
   // Ponctualit\u00e9 cards
   html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex:1;min-width:280px">';
-  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--green)">'+st.ponct.heure+'</div><div class="stats-ponct-lbl">\uD83D\uDFE2 \u00c0 l\'heure</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pctH+'%</div></div>';
-  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--blue)">'+st.ponct.avance+'</div><div class="stats-ponct-lbl">\uD83D\uDD35 En avance</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pctA+'%</div></div>';
-  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--red)">'+st.ponct.retard+'</div><div class="stats-ponct-lbl">\uD83D\uDD34 En retard</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pctR+'%</div></div>';
-  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--amber)">'+st.ponct.attente+'</div><div class="stats-ponct-lbl">\uD83D\uDFE1 En attente</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pctW+'%</div></div>';
+  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--green)">'+pctH+'%</div><div class="stats-ponct-lbl">\uD83D\uDFE2 \u00c0 l\'heure</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+st.ponct.heure+' camion'+(st.ponct.heure>1?'s':'')+'</div></div>';
+  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--blue)">'+pctA+'%</div><div class="stats-ponct-lbl">\uD83D\uDD35 En avance</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+st.ponct.avance+' camion'+(st.ponct.avance>1?'s':'')+'</div></div>';
+  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--red)">'+pctR+'%</div><div class="stats-ponct-lbl">\uD83D\uDD34 En retard</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+st.ponct.retard+' camion'+(st.ponct.retard>1?'s':'')+'</div></div>';
+  html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--amber)">'+pctW+'%</div><div class="stats-ponct-lbl">\uD83D\uDFE1 En attente</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+st.ponct.attente+' camion'+(st.ponct.attente>1?'s':'')+'</div></div>';
   html+='</div>';
   html+='</div>';
   if(st.ponct.inconnu) html+='<div style="font-size:10px;color:var(--t3);margin-top:4px">'+st.ponct.inconnu+' camion'+(st.ponct.inconnu>1?'s':'')+' sans cr\u00e9neau</div>';
@@ -4645,21 +4645,43 @@ function renderStats(){
   });
   html+='</div>';
 
-  // Alerts
-  if(st.alerts.length){
-    html+='<div style="margin-top:12px">';
-    html+='<div style="font-size:11px;font-weight:800;color:var(--red);margin-bottom:8px">\u26A0\uFE0F Alertes chargement (&gt;1h) \u2014 '+st.alerts.length+' camion'+(st.alerts.length>1?'s':'')+'</div>';
-    html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Transporteur</th><th>Cr\u00e9neau</th><th>Dur\u00e9e chg.</th><th>D\u00e9passement</th></tr></thead><tbody>';
-    st.alerts.forEach(function(a){
-      html+='<tr>';
-      html+='<td>'+a.date+'</td>';
-      html+='<td style="font-weight:700">'+a.transporteur+'</td>';
-      html+='<td>'+a.creneau+'</td>';
-      html+='<td style="color:var(--red);font-weight:800">'+a.label+'</td>';
-      html+='<td style="color:var(--orange)">+'+fmtMinutes(a.overBy)+'</td>';
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
+  // ── Alertes temps longs ──
+  var slowWait=(st.intervals.wait&&st.intervals.wait.values||[]).filter(function(v){return v.minutes>30;});
+  var slowPrep=(st.intervals.prep&&st.intervals.prep.values||[]).filter(function(v){return v.minutes>30;});
+  if(slowWait.length||slowPrep.length||st.alerts.length){
+    html+='<div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">';
+    // Arrivée → Quai > 30 min
+    if(slowWait.length){
+      html+='<div>';
+      html+='<div style="font-size:11px;font-weight:800;color:var(--amber);margin-bottom:6px">\u23F3 Mise \u00e0 quai tardive (&gt;30 min) \u2014 '+slowWait.length+' camion'+(slowWait.length>1?'s':'')+'</div>';
+      html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e \u2192 Quai</th></tr></thead><tbody>';
+      slowWait.forEach(function(v){
+        var col=v.minutes>60?'var(--red)':'var(--amber)';
+        html+='<tr><td>'+v.date+'</td><td style="font-weight:700">'+v.transporteur+'</td><td>'+v.creneau+'</td><td style="color:'+col+';font-weight:800">'+fmtMinutes(v.minutes)+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+    }
+    // Quai → Début chgt > 30 min
+    if(slowPrep.length){
+      html+='<div>';
+      html+='<div style="font-size:11px;font-weight:800;color:var(--amber);margin-bottom:6px">\u23F3 D\u00e9but chargement tardif (&gt;30 min) \u2014 '+slowPrep.length+' camion'+(slowPrep.length>1?'s':'')+'</div>';
+      html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Transporteur</th><th>Cr\u00e9neau</th><th>Quai \u2192 D\u00e9but chgt</th></tr></thead><tbody>';
+      slowPrep.forEach(function(v){
+        var col=v.minutes>60?'var(--red)':'var(--amber)';
+        html+='<tr><td>'+v.date+'</td><td style="font-weight:700">'+v.transporteur+'</td><td>'+v.creneau+'</td><td style="color:'+col+';font-weight:800">'+fmtMinutes(v.minutes)+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+    }
+    // Chargement > 1h
+    if(st.alerts.length){
+      html+='<div>';
+      html+='<div style="font-size:11px;font-weight:800;color:var(--red);margin-bottom:6px">\uD83D\uDD34 Chargement d\u00e9pass\u00e9 (&gt;1h) \u2014 '+st.alerts.length+' camion'+(st.alerts.length>1?'s':'')+'</div>';
+      html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Transporteur</th><th>Cr\u00e9neau</th><th>Dur\u00e9e chg.</th><th>D\u00e9passement</th></tr></thead><tbody>';
+      st.alerts.forEach(function(a){
+        html+='<tr><td>'+a.date+'</td><td style="font-weight:700">'+a.transporteur+'</td><td>'+a.creneau+'</td><td style="color:var(--red);font-weight:800">'+a.label+'</td><td style="color:var(--orange)">+'+fmtMinutes(a.overBy)+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+    }
     html+='</div>';
   }
   html+='</div>';
@@ -7630,32 +7652,10 @@ renderTrucks=function(){
   });
 };
 
-// ─── Patch renderStats: add heatmap + scoring ─────────────────────────────
+// ─── Patch renderStats: heatmap (scoring supprimé) ────────────────────────
 var _origRenderStats2=renderStats;
 renderStats=function(){
   _origRenderStats2();
-  var el=document.getElementById('statsContent');
-  if(!el||!trucks.length) return;
-  // Add scoring stars to carrier table
-  var carriers=computeCarrierStats();
-  if(carriers.length>=2){
-    var rows=el.querySelectorAll('.stats-day-table:last-of-type tbody tr');
-    rows.forEach(function(tr,i){
-      if(carriers[i]){
-        var sc=carrierScore(carriers[i]);
-        var td=document.createElement('td');
-        td.innerHTML=starsHtml(sc)+' <span style="font-size:10px;color:var(--t3)">'+sc.toFixed(1)+'</span>';
-        tr.appendChild(td);
-      }
-    });
-    // Add header for score column
-    var ths=el.querySelectorAll('.stats-day-table:last-of-type thead th');
-    if(ths.length){
-      var lastTh=ths[ths.length-1];
-      var scoreTh=document.createElement('th');scoreTh.textContent='Score';
-      lastTh.parentNode.appendChild(scoreTh);
-    }
-  }
 };
 
 // ─── #2 Gantt: Enhance planning with real-time bars ───────────────────────
