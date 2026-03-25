@@ -1218,6 +1218,30 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 /* ── Quit confirmation modal ───────────────────────────────────── */
 #quit-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(8px)}
 .quit-card{background:linear-gradient(165deg,rgba(255,255,255,.08) 0%,rgba(15,40,100,.03) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:28px 32px;width:90%;max-width:400px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 20px 60px rgba(0,0,0,.45)}
+/* ── Badge Prêt/Pas prêt ───────────────────────────────────────── */
+.tc-pret-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;cursor:pointer}
+.tc-pret-ok{background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.3);color:var(--green)}
+.tc-pret-nok{background:rgba(255,159,10,.12);border:1px solid rgba(255,159,10,.35);color:var(--amber)}
+.tc-pret-nok.motif-silo{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red)}
+.tc-pret-nok.motif-prepa{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red)}
+/* ── Modal Prêt/Pas prêt ───────────────────────────────────────── */
+#arr-pret-modal{position:fixed;inset:0;z-index:9990;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(10px)}
+.arr-pret-card{background:linear-gradient(165deg,rgba(255,255,255,.08) 0%,rgba(15,40,100,.03) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:28px 32px;width:90%;max-width:420px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 20px 60px rgba(0,0,0,.45)}
+.arr-pret-title{font-size:16px;font-weight:900;color:var(--t1);margin-bottom:4px}
+.arr-pret-sub{font-size:12px;color:var(--t3);margin-bottom:20px;line-height:1.5}
+.arr-pret-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin-bottom:16px}
+.arr-pret-btns{display:flex;gap:10px;margin-bottom:0}
+.arr-pret-btn{flex:1;padding:14px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--t1);font-size:13px;font-weight:800;cursor:pointer;text-align:center;transition:background .15s,border-color .15s}
+.arr-pret-btn:hover{background:rgba(255,255,255,.1)}
+.arr-pret-btn.ok{border-color:rgba(48,209,88,.4);background:rgba(48,209,88,.08);color:var(--green)}
+.arr-pret-btn.ok:hover{background:rgba(48,209,88,.15)}
+.arr-pret-btn.nok{border-color:rgba(255,159,10,.4);background:rgba(255,159,10,.07);color:var(--amber)}
+.arr-pret-btn.nok:hover{background:rgba(255,159,10,.14)}
+.arr-pret-motif{margin-top:14px;display:none;flex-direction:column;gap:8px}
+.arr-pret-motif.show{display:flex}
+.arr-pret-motif-lbl{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.arr-pret-motif-btn{padding:12px 14px;border-radius:12px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.07);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;text-align:left;transition:background .15s}
+.arr-pret-motif-btn:hover{background:rgba(239,68,68,.14)}
 </style>
 </head>
 <body>
@@ -1291,6 +1315,26 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
         <span class="aib-ico">↩</span>
         <span class="aib-txt"><span class="aib-lbl">Annuler</span><span class="aib-sub">Rester sur TruckFlow</span></span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL PRÊT / PAS PRÊT (pointage arrivée) ═══ -->
+<div id="arr-pret-modal">
+  <div class="arr-pret-card">
+    <div class="arr-pret-title">🚛 Pointage Arrivée</div>
+    <div class="arr-pret-sub" id="arr-pret-sub">Vérification état marchandise</div>
+    <div class="arr-pret-status" id="arr-pret-status-badge"></div>
+    <div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:12px">Marchandise prête au chargement ?</div>
+    <div class="arr-pret-btns">
+      <button class="arr-pret-btn ok" onclick="tfArrPret(true)">✅ Prête</button>
+      <button class="arr-pret-btn nok" onclick="tfArrShowMotif()">❌ Pas prête</button>
+    </div>
+    <div class="arr-pret-motif" id="arr-pret-motif">
+      <div class="arr-pret-motif-lbl">Motif du retard marchandise</div>
+      <button class="arr-pret-motif-btn" onclick="tfArrPret(false,'retard_silo')">⏳ Retard silo — marchandise pas encore sortie</button>
+      <button class="arr-pret-motif-btn" onclick="tfArrPret(false,'retard_prepa')">🔧 Retard prépa — préparation en cours</button>
+      <button class="arr-pret-motif-btn" onclick="tfArrPret(false,'autre')" style="border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--t3)">⚪ Autre motif</button>
     </div>
   </div>
 </div>
@@ -3244,6 +3288,24 @@ function renderTrucks(){
       lBadge.innerHTML='\u26a0 Chg: '+loadAlert.label+' (+'+loadAlert.overBy+'min)';
       head.appendChild(lBadge);
     }
+    // Badge Prêt / Pas prêt (affiché dès que l'arrivée est stampée)
+    if(ts.arr&&ts.hasOwnProperty('arr_pret')){
+      var pretBadge=document.createElement('span');pretBadge.className='tc-pret-badge';
+      if(ts.arr_pret){
+        pretBadge.className+=' tc-pret-ok';
+        pretBadge.textContent='✅ Prête';
+        pretBadge.title='Marchandise prête à l\'arrivée';
+      }else{
+        var motifTxt=ts.arr_motif==='retard_silo'?'⏳ Retard silo':ts.arr_motif==='retard_prepa'?'🔧 Retard prépa':'⏳ Pas prête';
+        var motifCls=ts.arr_motif==='retard_silo'||ts.arr_motif==='retard_prepa'?' motif-'+ts.arr_motif:'';
+        pretBadge.className+=' tc-pret-nok'+motifCls;
+        pretBadge.textContent=motifTxt;
+        pretBadge.title='Marchandise non prête à l\'arrivée'+(ts.arr_motif?' — '+motifTxt:'');
+      }
+      // Clic pour modifier
+      (function(id){pretBadge.addEventListener('click',function(e){e.stopPropagation();tfEditPret(id);});})(t.id);
+      head.appendChild(pretBadge);
+    }
     // Live loading chrono + durée restante estimée
     if(ts.chg && !ts.dep){
       var chgMs=new Date(ts.chg).getTime();
@@ -4643,13 +4705,31 @@ function computeTimingStats(){
     d.avgLoad=d.loadN?Math.round(d.loadSum/d.loadN):null;
     d.avgTotal=d.totalN?Math.round(d.totalSum/d.totalN):null;
   });
+  // Prêt / Pas prêt à l'arrivée
+  var pretOk=0,pretNok=0,pretSilo=0,pretPrepa=0,pretAutre=0,pretND=0;
+  var pretNokList=[];
+  allTruckData.forEach(function(d){
+    var ts=d.ts;
+    if(!ts.arr) return;
+    if(!ts.hasOwnProperty('arr_pret')){pretND++;return;}
+    if(ts.arr_pret){pretOk++;}
+    else{
+      pretNok++;
+      var pm=ts.arr_motif||'';
+      if(pm==='retard_silo') pretSilo++;
+      else if(pm==='retard_prepa') pretPrepa++;
+      else pretAutre++;
+      pretNokList.push({transporteur:d.t.transporteur||d.t.itin||'?',creneau:d.t.creneau||'',date:d.t.date||'',motif:pm,ponct:d.p.label||''});
+    }
+  });
   return {
     ponct:{heure:cH, avance:cA, retard:cR, attente:cW, inconnu:cU},
     completion:{completed:nCompleted, active:nActive, pending:nPending},
     truckCount:allTruckData.length,
     intervals:intervals,
     alerts:alerts,
-    perDay:perDay
+    perDay:perDay,
+    pret:{ok:pretOk, nok:pretNok, silo:pretSilo, prepa:pretPrepa, autre:pretAutre, nd:pretND, nokList:pretNokList}
   };
 }
 
@@ -4710,7 +4790,34 @@ function renderStats(){
   if(st.ponct.inconnu) html+='<div style="font-size:10px;color:var(--t3);margin-top:4px">'+st.ponct.inconnu+' camion'+(st.ponct.inconnu>1?'s':'')+' sans cr\u00e9neau</div>';
   html+='</div>';
 
-  // ═══ SECTION 2: Temps entre \u00e9tapes ═══
+  // ═══ SECTION 1b: État marchandise à l'arrivée ═══
+  var pr=st.pret;
+  var pretTotal=pr.ok+pr.nok;
+  if(pretTotal>0){
+    var pctPretOk=pretTotal?Math.round(pr.ok/pretTotal*100):0;
+    html+='<div class="stats-section"><div class="stats-section-title">\uD83D\uDCE6 \u00c9tat marchandise \u00e0 l\'arriv\u00e9e</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px">';
+    html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--green)">'+pctPretOk+'%</div><div class="stats-ponct-lbl">\u2705 Pr\u00eate</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pr.ok+' camion'+(pr.ok>1?'s':'')+'</div></div>';
+    html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--amber)">'+(pretTotal?Math.round(pr.nok/pretTotal*100):0)+'%</div><div class="stats-ponct-lbl">\u23F3 Pas pr\u00eate</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+pr.nok+' camion'+(pr.nok>1?'s':'')+'</div></div>';
+    if(pr.silo) html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--red)">'+pr.silo+'</div><div class="stats-ponct-lbl">\u23F3 Retard silo</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+Math.round(pr.silo/pretTotal*100)+'%</div></div>';
+    if(pr.prepa) html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--red)">'+pr.prepa+'</div><div class="stats-ponct-lbl">\uD83D\uDD27 Retard pr\u00e9pa</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+Math.round(pr.prepa/pretTotal*100)+'%</div></div>';
+    if(pr.autre) html+='<div class="stats-ponct-card"><div class="stats-ponct-val" style="color:var(--t2)">'+pr.autre+'</div><div class="stats-ponct-lbl">\u26AA Autre motif</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+Math.round(pr.autre/pretTotal*100)+'%</div></div>';
+    html+='</div>';
+    if(pr.nokList.length){
+      html+='<div style="font-size:11px;font-weight:800;color:var(--amber);margin-bottom:6px">\u23F3 D\u00e9tail marchandise non pr\u00eate ('+pr.nokList.length+')</div>';
+      html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Transporteur</th><th>Cr\u00e9neau</th><th>Motif</th><th>Ponctualit\u00e9</th></tr></thead><tbody>';
+      pr.nokList.forEach(function(r){
+        var motifTxt=r.motif==='retard_silo'?'\u23F3 Retard silo':r.motif==='retard_prepa'?'\uD83D\uDD27 Retard pr\u00e9pa':'\u26AA Autre';
+        var motifCol=r.motif==='retard_silo'||r.motif==='retard_prepa'?'var(--red)':'var(--t3)';
+        html+='<tr><td>'+r.date+'</td><td style="font-weight:700">'+r.transporteur+'</td><td>'+r.creneau+'</td><td style="color:'+motifCol+';font-weight:700">'+motifTxt+'</td><td style="color:var(--t2)">'+r.ponct+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    }
+    if(pr.nd) html+='<div style="font-size:10px;color:var(--t3);margin-top:6px">'+pr.nd+' arriv\u00e9e'+(pr.nd>1?'s':'')+' sans saisie pr\u00eat/pas pr\u00eat.</div>';
+    html+='</div>';
+  }
+
+  // ═══ SECTION 2: Temps entre étapes ═══
   html+='<div class="stats-section"><div class="stats-section-title">\u23F1 Temps entre \u00e9tapes</div>';
 
   // Interval cards
@@ -4823,7 +4930,7 @@ function exportExcel(){
     return ts.arr && ts.quai && ts.chg && ts.dep;
   });
 
-  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouvelle date pr\u00e9vue','Note d\u00e9calage']];
+  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','Marchandise pr\u00eate','Motif non-pr\u00eate','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouvelle date pr\u00e9vue','Note d\u00e9calage']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti]; var ts = timestamps[t.id]||{};
     function fmtTs(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
@@ -4839,8 +4946,11 @@ function exportExcel(){
       }
     }
     var ponctX=getPonctualite(t,ts,Date.now());
+    var pretLabel=ts.hasOwnProperty('arr_pret')?(ts.arr_pret?'Oui':'Non'):'';
+    var motifLabel=ts.arr_motif==='retard_silo'?'Retard silo':ts.arr_motif==='retard_prepa'?'Retard prépa':ts.arr_motif==='autre'?'Autre':'';
     camRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',(t.deliveries||[]).length,
       fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'',
+      pretLabel,motifLabel,
       t.decalage?(t.decalage.label+(t.decalage.heure?' ('+t.decalage.heure+')':'')):'',
       t.decalage?(t.decalage.dateOrig||t.date||''):'',
       t.decalage?(t.decalage.creneauOrig||t.creneau||''):'',
@@ -4848,7 +4958,7 @@ function exportExcel(){
       t.decalage?(t.decalage.note||''):'']);
   });
   var wsCam = XLSX.utils.aoa_to_sheet(camRows);
-  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
+  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:12},{wch:16},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsCam, 'Camions');
 
   var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','D\u00e9calage motif','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.','Note d\u00e9calage']];
@@ -7369,10 +7479,12 @@ function _buildPDFReport(){
       var p=getPonctualite(x.t,x.ts,now);
       var pColor=x.ts.fin_chg?'green':x.ts.chg?'amber':'blue';
       var stat=x.ts.fin_chg?'<span class="tag bg-green">Charg\u00e9</span>':x.ts.chg?'<span class="tag bg-amber">En chgt</span>':x.ts.quai?'<span class="tag bg-blue">\u00c0 quai</span>':'<span class="tag bg-green">Arriv\u00e9</span>';
+      var pretHtml='';
+      if(x.ts.hasOwnProperty('arr_pret')){var pm=x.ts.arr_motif==='retard_silo'?'Retard silo':x.ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':x.ts.arr_motif==='autre'?'Autre motif':'';pretHtml='<br><span class="tag '+(x.ts.arr_pret?'bg-green':'bg-amber')+'">'+(x.ts.arr_pret?'\u2705 Pr\u00eate':'\u23F3 '+(pm||'Pas pr\u00eate'))+'</span>';}
       var livIdsCours=x.t.deliveries||[];
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
         '<td>'+(x.t.creneau||'—')+'</td>'+
-        '<td>'+ft(x.ts.arr)+'</td>'+
+        '<td>'+ft(x.ts.arr)+pretHtml+'</td>'+
         '<td>'+ft(x.ts.quai)+'</td>'+
         '<td>'+ft(x.ts.chg)+'</td>'+
         '<td>'+(x.ts.fin_chg?ft(x.ts.fin_chg):'—')+'</td>'+
@@ -7474,9 +7586,11 @@ function _buildPDFReport(){
         var d=getDeliv(lid);
         if(d){palT+=(d.palSilo||0);cpT+=(d.colisPick||0);}
       });
+      var pretHtmlP='';
+      if(x.ts.hasOwnProperty('arr_pret')){var pmP=x.ts.arr_motif==='retard_silo'?'Retard silo':x.ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':x.ts.arr_motif==='autre'?'Autre motif':'';pretHtmlP='<br><span class="tag '+(x.ts.arr_pret?'bg-green':'bg-amber')+'">'+(x.ts.arr_pret?'\u2705 Pr\u00eate':'\u23F3 '+(pmP||'Pas pr\u00eate'))+'</span>';}
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
         '<td>'+(x.t.creneau||'—')+'</td>'+
-        '<td>'+ft(x.ts.arr)+'</td>'+
+        '<td>'+ft(x.ts.arr)+pretHtmlP+'</td>'+
         '<td>'+ft(x.ts.chg)+'</td>'+
         '<td>'+finChgCell+'</td>'+
         '<td>'+ft(x.ts.dep)+'</td>'+
@@ -9567,6 +9681,84 @@ function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s===
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
 function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}}toast('⏱ '+kl(k)+' enregistré');render();}
 function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}catch(e){}}toast('✎ '+kl(k)+' modifié');render();}
+
+// ─── Pointage Arrivée : modal Prêt / Pas prêt ─────────────────────────────
+var _arrPretTid=null;
+function stampArr(tid){
+  // Trouver le camion et son statut ponctualité pour contextualiser le modal
+  var t=trucks.find(function(x){return x.id===tid;});
+  if(!t||!t.creneau||t.creneau==='libre'||t.creneau==='manuel'){
+    // Pas de créneau → stamp direct, pas de modal
+    stamp(tid,'arr');return;
+  }
+  var win=creWindow(t.creneau);
+  if(!win){stamp(tid,'arr');return;}
+  _arrPretTid=tid;
+  // Calcul statut
+  var now=new Date();var nowMin=now.getHours()*60+now.getMinutes();
+  var statusEl=document.getElementById('arr-pret-status-badge');
+  var subEl=document.getElementById('arr-pret-sub');
+  var motifEl=document.getElementById('arr-pret-motif');
+  motifEl.classList.remove('show');
+  if(nowMin<win.start){
+    var avMin=win.start-nowMin;
+    statusEl.style.cssText='background:rgba(90,200,250,.12);border:1px solid rgba(90,200,250,.3);color:var(--teal)';
+    statusEl.textContent='🔵 En avance — '+avMin+' min avant créneau';
+    subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
+  }else if(nowMin<=win.end){
+    var diffMin=nowMin-win.start;
+    statusEl.style.cssText='background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.3);color:var(--green)';
+    statusEl.textContent='🟢 Dans le créneau'+(diffMin>0?' +'+diffMin+'min':'');
+    subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
+  }else{
+    var retMin=nowMin-win.end;
+    statusEl.style.cssText='background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)';
+    statusEl.textContent='🔴 En retard — +'+retMin+' min après créneau';
+    subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
+  }
+  document.getElementById('arr-pret-modal').style.display='flex';
+}
+function tfArrShowMotif(){
+  document.getElementById('arr-pret-motif').classList.add('show');
+}
+function tfArrPret(pret,motif){
+  document.getElementById('arr-pret-modal').style.display='none';
+  if(!_arrPretTid) return;
+  var tid=_arrPretTid;_arrPretTid=null;
+  // Stamp l'arrivée
+  var m=getTs();if(!m[tid])m[tid]={};
+  m[tid].arr=new Date().toISOString();
+  m[tid].arr_pret=pret;
+  if(!pret&&motif) m[tid].arr_motif=motif;
+  else delete m[tid].arr_motif;
+  saveTs(m);
+  if(typeof timestamps!=='undefined') timestamps=m;
+  var label=pret?'✅ Arrivée — Prête':'⏳ Arrivée — '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête');
+  toast(label);
+  renderAll();
+}
+
+// Modifier le statut prêt après coup (clic sur le badge)
+function tfEditPret(tid){
+  _arrPretTid=tid;
+  var t=trucks.find(function(x){return x.id===tid;});
+  var ts=timestamps[tid]||{};
+  var statusEl=document.getElementById('arr-pret-status-badge');
+  var subEl=document.getElementById('arr-pret-sub');
+  subEl.textContent=(t?t.transporteur:'')+(t&&t.creneau?' · '+t.creneau:'');
+  statusEl.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--t2)';
+  statusEl.textContent='✏️ Modification du statut marchandise';
+  document.getElementById('arr-pret-motif').classList.remove('show');
+  document.getElementById('arr-pret-modal').style.display='flex';
+}
+
+// Override stamp() pour intercepter la clé 'arr'
+var _stampDirect=stamp;
+stamp=function(tid,k){
+  if(k==='arr'){stampArr(tid);}
+  else{_stampDirect(tid,k);}
+};
+
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
 function apM(tid,k){var inp=document.getElementById('ti_'+tid);if(inp&&inp.value){stampM(tid,k,inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');}}
 function togDep(){showDep=!showDep;document.getElementById('dtgl').textContent=showDep?'Masquer partis':'Afficher partis';render();}
