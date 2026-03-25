@@ -1201,9 +1201,121 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   .kpi-l,.ts-chip-lbl,.card-ttl{color:#333!important}
   .kpi-v,.tc-name,.ts-chip-time{color:#000!important}
 }
+/* ── Auth overlay ────────────────────────────────────────────────── */
+#auth-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);flex-direction:column;gap:0}
+#auth-overlay .auth-orb1{position:fixed;width:700px;height:700px;top:-20%;left:-15%;background:radial-gradient(circle,rgba(30,58,138,.25) 0%,rgba(59,130,246,.08) 30%,transparent 65%);filter:blur(70px);pointer-events:none}
+#auth-overlay .auth-orb2{position:fixed;width:600px;height:600px;bottom:-20%;right:-10%;background:radial-gradient(circle,rgba(185,28,28,.2) 0%,rgba(220,38,38,.06) 30%,transparent 65%);filter:blur(70px);pointer-events:none}
+.auth-card{background:linear-gradient(165deg,rgba(255,255,255,.06) 0%,rgba(15,40,100,.02) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:40px 44px;width:90%;max-width:420px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 24px 64px rgba(0,0,0,.5);position:relative;z-index:1}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 5%,rgba(59,130,246,.8) 30%,rgba(255,255,255,.9) 50%,rgba(239,68,68,.8) 70%,transparent 95%);border-radius:28px 28px 0 0;pointer-events:none}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo-ico{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1E3A8A,#3B82F6,#EF4444);display:inline-flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 20px rgba(59,130,246,.4);margin-bottom:12px}
+.auth-logo-name{font-size:22px;font-weight:900;color:var(--t1);letter-spacing:-.03em}
+.auth-logo-name span{color:var(--blue)}
+.auth-logo-sub{font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+.auth-field{margin-bottom:16px}
+.auth-field label{display:block;font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.auth-field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:11px 14px;color:var(--t1);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.auth-field input:focus{border-color:rgba(59,130,246,.6);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.auth-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,rgba(59,130,246,.8),rgba(37,99,235,.9));color:#fff;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.01em;transition:opacity .15s,transform .1s;margin-top:4px}
+.auth-btn:hover{opacity:.92;transform:translateY(-1px)}
+.auth-btn:active{transform:translateY(0)}
+.auth-error{font-size:11px;color:var(--red);text-align:center;margin-top:10px;min-height:16px;font-weight:600}
+.auth-footer{text-align:center;margin-top:18px;font-size:10px;color:var(--t3)}
+/* ── Import choice modal (post-login) ──────────────────────────── */
+#auth-import-modal{position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(8px)}
+.auth-import-card{background:linear-gradient(165deg,rgba(255,255,255,.08) 0%,rgba(15,40,100,.03) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:32px 36px;width:90%;max-width:480px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 20px 60px rgba(0,0,0,.45)}
+.auth-import-card::before{content:'';display:block;width:100%;height:1px;background:linear-gradient(90deg,transparent 5%,rgba(59,130,246,.7) 30%,rgba(255,255,255,.8) 50%,rgba(239,68,68,.7) 70%,transparent 95%);margin-bottom:22px}
+.auth-import-title{font-size:17px;font-weight:800;color:var(--t1);margin-bottom:6px}
+.auth-import-sub{font-size:12px;color:var(--t3);margin-bottom:22px;line-height:1.5}
+.auth-import-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--t1);font-size:13px;font-weight:700;cursor:pointer;text-align:left;transition:background .15s,border-color .15s;margin-bottom:10px}
+.auth-import-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22)}
+.auth-import-btn .aib-ico{font-size:22px;flex-shrink:0}
+.auth-import-btn .aib-txt{display:flex;flex-direction:column;gap:2px}
+.auth-import-btn .aib-lbl{font-size:13px;font-weight:800;color:var(--t1)}
+.auth-import-btn .aib-sub{font-size:10px;color:var(--t3);font-weight:400}
+/* ── Quitter button in header ──────────────────────────────────── */
+.btn-quit{padding:5px 12px;border-radius:8px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-quit:hover{background:rgba(239,68,68,.16)}
+/* ── Quit confirmation modal ───────────────────────────────────── */
+#quit-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(8px)}
+.quit-card{background:linear-gradient(165deg,rgba(255,255,255,.08) 0%,rgba(15,40,100,.03) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:28px 32px;width:90%;max-width:400px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 20px 60px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
+
+<!-- ═══ AUTH OVERLAY ═══ -->
+<div id="auth-overlay">
+  <div class="auth-orb1"></div>
+  <div class="auth-orb2"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-ico">🏭</div>
+      <div class="auth-logo-name">Truck<span>Flow</span></div>
+      <div class="auth-logo-sub">Hub de transport · Accès sécurisé</div>
+    </div>
+    <div class="auth-field">
+      <label>Utilisateur</label>
+      <input type="text" id="auth-user" placeholder="Identifiant" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('auth-pwd').focus()">
+    </div>
+    <div class="auth-field">
+      <label>Mot de passe</label>
+      <input type="password" id="auth-pwd" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')tfLogin()">
+    </div>
+    <button class="auth-btn" onclick="tfLogin()">Connexion</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-footer">TruckFlow — données purgées à chaque fermeture</div>
+  </div>
+</div>
+
+<!-- ═══ IMPORT CHOICE (post-login) ═══ -->
+<div id="auth-import-modal">
+  <div class="auth-import-card">
+    <div></div>
+    <div class="auth-import-title">Bienvenue 👋</div>
+    <div class="auth-import-sub">Choisissez comment démarrer votre session.<br>Les données sont chargées uniquement via import JSON ou VL06O.</div>
+    <button class="auth-import-btn" onclick="tfChooseImportSession()">
+      <span class="aib-ico">📂</span>
+      <span class="aib-txt">
+        <span class="aib-lbl">Importer une session</span>
+        <span class="aib-sub">Reprendre depuis un fichier .json exporté précédemment</span>
+      </span>
+    </button>
+    <button class="auth-import-btn" onclick="tfChooseImportVL06O()">
+      <span class="aib-ico">📊</span>
+      <span class="aib-txt">
+        <span class="aib-lbl">Importer VL06O</span>
+        <span class="aib-sub">Nouvelle journée — charger l'extraction SAP</span>
+      </span>
+    </button>
+    <button class="auth-import-btn" onclick="tfChooseFresh()">
+      <span class="aib-ico">🆕</span>
+      <span class="aib-txt">
+        <span class="aib-lbl">Session vierge</span>
+        <span class="aib-sub">Démarrer sans import (saisie manuelle)</span>
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ QUIT CONFIRMATION MODAL ═══ -->
+<div id="quit-modal">
+  <div class="quit-card">
+    <div style="font-size:20px;font-weight:900;color:var(--red);margin-bottom:8px">🚪 Quitter TruckFlow</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6">Les données du navigateur seront <b style="color:var(--red)">purgées</b> après fermeture.<br>Exportez la session si vous souhaitez la reprendre.</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="auth-btn" onclick="tfQuitWithExport()" style="background:linear-gradient(135deg,rgba(48,209,88,.8),rgba(34,197,94,.9))">💾 Exporter et quitter</button>
+      <button class="auth-import-btn" onclick="tfQuitNow()" style="border-color:rgba(239,68,68,.3);color:var(--red)">
+        <span class="aib-ico">🗑️</span>
+        <span class="aib-txt"><span class="aib-lbl">Quitter sans exporter</span><span class="aib-sub">Les données seront perdues définitivement</span></span>
+      </button>
+      <button class="auth-import-btn" onclick="document.getElementById('quit-modal').style.display='none'">
+        <span class="aib-ico">↩</span>
+        <span class="aib-txt"><span class="aib-lbl">Annuler</span><span class="aib-sub">Rester sur TruckFlow</span></span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ HEADER ═══ -->
 <div class="hdr"><div class="hdr-in">
   <div class="logo"><div class="logo-ico">🏭</div><span>TruckFlow</span></div>
@@ -1285,6 +1397,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
       <div class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
         &#x1F514;<span class="notif-badge" id="notifBadge"></span>
       </div>
+      <button class="btn-quit" onclick="tfShowQuitModal()" title="Quitter et purger">🚪 Quitter</button>
     </div>
   </div>
 </div></div>
@@ -9168,8 +9281,117 @@ trucks.forEach(function(t){
 });
 
 
-init();
-patchRenderAllForSynView();
+// ═══════════════════════════════════════════════════════════════════
+// ─── SYSTÈME D'AUTHENTIFICATION ───────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// Hash SHA-256 du mot de passe (jamais stocké en clair)
+var _TF_AUTH_USER='galaad';
+var _TF_AUTH_HASH='d5631a2fb97ae5408575b86e03687341629b9080f752ce64cc12da52adfa8f72';
+var _tfAuthReady=false;
+
+async function tfHashPwd(pwd){
+  try{
+    var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pwd));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }catch(e){return '';}
+}
+
+async function tfLogin(){
+  var userEl=document.getElementById('auth-user');
+  var pwdEl=document.getElementById('auth-pwd');
+  var errEl=document.getElementById('auth-error');
+  var user=(userEl.value||'').trim().toLowerCase();
+  var pwd=pwdEl.value||'';
+  errEl.textContent='';
+  if(!user||!pwd){errEl.textContent='Veuillez remplir tous les champs.';return;}
+  var hash=await tfHashPwd(pwd);
+  if(user===_TF_AUTH_USER&&hash===_TF_AUTH_HASH){
+    sessionStorage.setItem('tf_auth','1');
+    document.getElementById('auth-overlay').style.display='none';
+    document.getElementById('auth-import-modal').style.display='flex';
+  }else{
+    errEl.textContent='Identifiant ou mot de passe incorrect.';
+    pwdEl.value='';
+    pwdEl.focus();
+  }
+}
+
+function tfChooseImportSession(){
+  document.getElementById('auth-import-modal').style.display='none';
+  tfRunApp();
+  setTimeout(function(){document.getElementById('fi-session').click();},300);
+}
+
+function tfChooseImportVL06O(){
+  document.getElementById('auth-import-modal').style.display='none';
+  tfRunApp();
+  setTimeout(function(){triggerVL06O();},300);
+}
+
+function tfChooseFresh(){
+  document.getElementById('auth-import-modal').style.display='none';
+  tfRunApp();
+}
+
+function tfRunApp(){
+  if(_tfAuthReady) return;
+  _tfAuthReady=true;
+  init();
+  patchRenderAllForSynView();
+}
+
+function tfShowQuitModal(){
+  document.getElementById('quit-modal').style.display='flex';
+}
+
+function tfQuitWithExport(){
+  document.getElementById('quit-modal').style.display='none';
+  exportSession();
+  setTimeout(function(){
+    tfPurgeAndQuit();
+  },800);
+}
+
+function tfQuitNow(){
+  document.getElementById('quit-modal').style.display='none';
+  if(confirm('Quitter sans exporter ? Toutes les données seront perdues.')){
+    tfPurgeAndQuit();
+  }
+}
+
+function tfPurgeAndQuit(){
+  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('th10_')||k.startsWith('tf_');});
+  keys.forEach(function(k){localStorage.removeItem(k);});
+  sessionStorage.removeItem('tf_auth');
+  // Recharger pour afficher l'écran de connexion
+  location.reload();
+}
+
+// Avertissement natif du navigateur si fermeture sans passer par le bouton Quitter
+window.addEventListener('beforeunload',function(e){
+  if(sessionStorage.getItem('tf_auth')){
+    e.preventDefault();
+    e.returnValue='';
+  }
+});
+
+// Purge automatique à la fermeture réelle (si l'utilisateur quitte sans passer par le bouton)
+window.addEventListener('pagehide',function(e){
+  if(!e.persisted&&sessionStorage.getItem('tf_auth')){
+    var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('th10_')||k.startsWith('tf_');});
+    keys.forEach(function(k){localStorage.removeItem(k);});
+  }
+});
+
+// ─── Démarrage conditionnel ────────────────────────────────────────
+if(!sessionStorage.getItem('tf_auth')){
+  // Non authentifié — l'app ne démarre pas
+  // (init() sera appelé par tfRunApp() après login)
+}else{
+  // Session déjà active (refresh en cours de session)
+  tfRunApp();
+}
+// (patchRenderAllForSynView est appelé dans tfRunApp)
 
 // Auto-load today on startup (always, even if empty)
 (function(){
