@@ -2869,6 +2869,85 @@ function stampNow(ti,key){
   var lbl=(TS_DEFS.find(function(t){return t.key===key;})||{lbl:key}).lbl;
   showToast(lbl+' enregistr\u00e9e'+(key==='quai'?' \u2014 Quai '+q:''));
 }
+// ─── Pointage Arrivée : modal Prêt / Pas prêt ──────────────────────────────
+var _arrPretTi=null; // truck INDEX
+(function(){
+  var _origStampNow=stampNow;
+  stampNow=function(ti,key){
+    if(key==='arr'){_stampArrModal(ti);}
+    else{_origStampNow(ti,key);}
+  };
+})();
+function _nowIso(){
+  if(_workingDate){var b=new Date(_workingDate+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);if(!isNaN(b.getTime()))return b.toISOString();}
+  return new Date().toISOString();
+}
+function _stampArrDirect(ti){
+  var tid=trucks[ti].id;
+  if(!timestamps[tid])timestamps[tid]={};
+  timestamps[tid].arr=_nowIso();
+  save();renderTrucks();renderQuai();
+  if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}
+  showToast('Arrivée enregistrée');
+}
+function _stampArrModal(ti){
+  var t=trucks[ti];
+  if(!t){return;}
+  var win=creWindow(t.creneau||'');
+  if(!win){_stampArrDirect(ti);return;}
+  _arrPretTi=ti;
+  var now=new Date();var nowMin=now.getHours()*60+now.getMinutes();
+  var statusEl=document.getElementById('arr-pret-status-badge');
+  var subEl=document.getElementById('arr-pret-sub');
+  var motifEl=document.getElementById('arr-pret-motif');
+  if(motifEl)motifEl.classList.remove('show');
+  if(nowMin<win.start){
+    statusEl.style.cssText='background:rgba(90,200,250,.12);border:1px solid rgba(90,200,250,.3);color:var(--teal)';
+    statusEl.textContent='🔵 En avance — '+(win.start-nowMin)+' min avant créneau';
+  }else if(nowMin<=win.end){
+    var diffMin=nowMin-win.start;
+    statusEl.style.cssText='background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.3);color:var(--green)';
+    statusEl.textContent='🟢 Dans le créneau'+(diffMin>0?' +'+diffMin+'min':'');
+  }else{
+    statusEl.style.cssText='background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)';
+    statusEl.textContent='🔴 En retard — +'+(nowMin-win.end)+' min après créneau';
+  }
+  if(subEl)subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
+  document.getElementById('arr-pret-modal').style.display='flex';
+}
+function tfArrShowMotif(){
+  document.getElementById('arr-pret-motif').classList.add('show');
+}
+function tfArrPret(pret,motif){
+  document.getElementById('arr-pret-modal').style.display='none';
+  if(_arrPretTi===null)return;
+  var ti=_arrPretTi;_arrPretTi=null;
+  var tid=trucks[ti].id;
+  if(!timestamps[tid])timestamps[tid]={};
+  timestamps[tid].arr=_nowIso();
+  timestamps[tid].arr_pret=pret;
+  if(!pret&&motif)timestamps[tid].arr_motif=motif;
+  else delete timestamps[tid].arr_motif;
+  save();
+  showToast(pret?'✅ Arrivée — Prête':'⏳ Arrivée — '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête'));
+  renderAll();
+  if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}
+}
+function tfEditPret(tid){ // tid = truck ID (depuis le badge)
+  var idx=trucks.findIndex(function(x){return x.id===tid;});
+  if(idx<0)return;
+  _arrPretTi=idx;
+  var t=trucks[idx];
+  var statusEl=document.getElementById('arr-pret-status-badge');
+  var subEl=document.getElementById('arr-pret-sub');
+  if(subEl)subEl.textContent=(t?t.transporteur:'')+(t&&t.creneau?' · '+t.creneau:'');
+  statusEl.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--t2)';
+  statusEl.textContent='✏️ Modification du statut marchandise';
+  document.getElementById('arr-pret-motif').classList.remove('show');
+  document.getElementById('arr-pret-modal').style.display='flex';
+}
+// ───────────────────────────────────────────────────────────────────────────
+
 function clearTS(ti,key){
   if(timestamps[trucks[ti].id]) delete timestamps[trucks[ti].id][key];
   if(key==='quai'){
@@ -9681,83 +9760,6 @@ function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s===
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
 function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}}toast('⏱ '+kl(k)+' enregistré');render();}
 function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}catch(e){}}toast('✎ '+kl(k)+' modifié');render();}
-
-// ─── Pointage Arrivée : modal Prêt / Pas prêt ─────────────────────────────
-var _arrPretTid=null;
-function stampArr(tid){
-  // Trouver le camion et son statut ponctualité pour contextualiser le modal
-  var t=trucks.find(function(x){return x.id===tid;});
-  if(!t||!t.creneau||t.creneau==='libre'||t.creneau==='manuel'){
-    // Pas de créneau → stamp direct, pas de modal
-    stamp(tid,'arr');return;
-  }
-  var win=creWindow(t.creneau);
-  if(!win){stamp(tid,'arr');return;}
-  _arrPretTid=tid;
-  // Calcul statut
-  var now=new Date();var nowMin=now.getHours()*60+now.getMinutes();
-  var statusEl=document.getElementById('arr-pret-status-badge');
-  var subEl=document.getElementById('arr-pret-sub');
-  var motifEl=document.getElementById('arr-pret-motif');
-  motifEl.classList.remove('show');
-  if(nowMin<win.start){
-    var avMin=win.start-nowMin;
-    statusEl.style.cssText='background:rgba(90,200,250,.12);border:1px solid rgba(90,200,250,.3);color:var(--teal)';
-    statusEl.textContent='🔵 En avance — '+avMin+' min avant créneau';
-    subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
-  }else if(nowMin<=win.end){
-    var diffMin=nowMin-win.start;
-    statusEl.style.cssText='background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.3);color:var(--green)';
-    statusEl.textContent='🟢 Dans le créneau'+(diffMin>0?' +'+diffMin+'min':'');
-    subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
-  }else{
-    var retMin=nowMin-win.end;
-    statusEl.style.cssText='background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)';
-    statusEl.textContent='🔴 En retard — +'+retMin+' min après créneau';
-    subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
-  }
-  document.getElementById('arr-pret-modal').style.display='flex';
-}
-function tfArrShowMotif(){
-  document.getElementById('arr-pret-motif').classList.add('show');
-}
-function tfArrPret(pret,motif){
-  document.getElementById('arr-pret-modal').style.display='none';
-  if(!_arrPretTid) return;
-  var tid=_arrPretTid;_arrPretTid=null;
-  // Stamp l'arrivée
-  var m=getTs();if(!m[tid])m[tid]={};
-  m[tid].arr=new Date().toISOString();
-  m[tid].arr_pret=pret;
-  if(!pret&&motif) m[tid].arr_motif=motif;
-  else delete m[tid].arr_motif;
-  saveTs(m);
-  if(typeof timestamps!=='undefined') timestamps=m;
-  var label=pret?'✅ Arrivée — Prête':'⏳ Arrivée — '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête');
-  toast(label);
-  renderAll();
-}
-
-// Modifier le statut prêt après coup (clic sur le badge)
-function tfEditPret(tid){
-  _arrPretTid=tid;
-  var t=trucks.find(function(x){return x.id===tid;});
-  var ts=timestamps[tid]||{};
-  var statusEl=document.getElementById('arr-pret-status-badge');
-  var subEl=document.getElementById('arr-pret-sub');
-  subEl.textContent=(t?t.transporteur:'')+(t&&t.creneau?' · '+t.creneau:'');
-  statusEl.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--t2)';
-  statusEl.textContent='✏️ Modification du statut marchandise';
-  document.getElementById('arr-pret-motif').classList.remove('show');
-  document.getElementById('arr-pret-modal').style.display='flex';
-}
-
-// Override stamp() pour intercepter la clé 'arr'
-var _stampDirect=stamp;
-stamp=function(tid,k){
-  if(k==='arr'){stampArr(tid);}
-  else{_stampDirect(tid,k);}
-};
 
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
 function apM(tid,k){var inp=document.getElementById('ti_'+tid);if(inp&&inp.value){stampM(tid,k,inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');}}
