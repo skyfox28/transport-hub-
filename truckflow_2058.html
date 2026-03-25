@@ -9825,6 +9825,7 @@ function render(){
       +'<span class="shn" style="color:'+color+'">'+count+'</span>'
       +'</div>';
   }
+  try{
   var html='<div class="hyb">';
   var actifs=loading.concat(at_quai).concat(on_site);
   if(!late.length&&!actifs.length&&!waiting.length){
@@ -9859,6 +9860,7 @@ function render(){
   }
   html+='</div>';
   main.innerHTML=html;
+  }catch(e){main.innerHTML='<div style="color:#f87171;padding:20px;font-size:13px;font-family:monospace">ERREUR MONITOR: '+e.message+'<br><pre>'+e.stack+'</pre></div>';}
 }
 function tick(){
   var n=new Date();
