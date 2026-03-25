@@ -9394,6 +9394,7 @@ function saveTs(m){localStorage.setItem(LTS,JSON.stringify(m));if(_bc)_bc.postMe
 function ft(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
 function fm(m){if(m<1)return '<1min';if(m<60)return m+'min';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
 function kl(k){return k==='arr'?'Arrivée':k==='quai'?'Mise à quai':k==='chg'?'Début chgt':k==='fin_chg'?'Fin chgt':'Départ';}
+function escH(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function getStatus(ts){
   if(!ts||!ts.arr)return 'w';
   if(!ts.quai)return 'a';
