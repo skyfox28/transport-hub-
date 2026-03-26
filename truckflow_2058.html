@@ -1328,14 +1328,14 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
     <div class="arr-pret-status" id="arr-pret-status-badge"></div>
     <div style="font-size:13px;font-weight:800;color:var(--t2);margin-bottom:12px">Marchandise prête au chargement ?</div>
     <div class="arr-pret-btns">
-      <button class="arr-pret-btn ok" onclick="tfArrPret(true)">✅ Prête</button>
-      <button class="arr-pret-btn nok" onclick="tfArrShowMotif()">❌ Pas prête</button>
+      <button id="arr-pret-btn-ok" class="arr-pret-btn ok" onclick="tfArrPret(true)">✅ Prête</button>
+      <button id="arr-pret-btn-nok" class="arr-pret-btn nok" onclick="tfArrShowMotif()">❌ Pas prête</button>
     </div>
     <div class="arr-pret-motif" id="arr-pret-motif">
       <div class="arr-pret-motif-lbl">Motif du retard marchandise</div>
-      <button class="arr-pret-motif-btn" onclick="tfArrPret(false,'retard_silo')">⏳ Retard silo — marchandise pas encore sortie</button>
-      <button class="arr-pret-motif-btn" onclick="tfArrPret(false,'retard_prepa')">🔧 Retard prépa — préparation en cours</button>
-      <button class="arr-pret-motif-btn" onclick="tfArrPret(false,'autre')" style="border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--t3)">⚪ Autre motif</button>
+      <button id="arr-pret-motif-retard_silo" class="arr-pret-motif-btn" onclick="tfArrPret(false,'retard_silo')">⏳ Retard silo — marchandise pas encore sortie</button>
+      <button id="arr-pret-motif-retard_prepa" class="arr-pret-motif-btn" onclick="tfArrPret(false,'retard_prepa')">🔧 Retard prépa — préparation en cours</button>
+      <button id="arr-pret-motif-autre" class="arr-pret-motif-btn" onclick="tfArrPret(false,'autre')" style="border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--t3)">⚪ Autre motif</button>
       <button onclick="document.getElementById('arr-pret-motif').classList.remove('show')" style="margin-top:6px;width:100%;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--t3);font-size:12px;cursor:pointer">← Retour</button>
     </div>
   </div>
@@ -2873,6 +2873,7 @@ function stampNow(ti,key){
 }
 // ─── Pointage Arrivée : modal Prêt / Pas prêt ──────────────────────────────
 var _arrPretTi=null; // truck INDEX
+var _arrPretIsArrival=false; // true = pointage arrivée, false = correction badge
 (function(){
   var _origStampNow=stampNow;
   stampNow=function(ti,key){
@@ -2931,24 +2932,57 @@ function _stampArrDirect(ti){
   showToast(lbl);
 }
 function _stampArrModal(ti){
-  // Auto-détection basée sur les statuts livraisons (sp/wm)
-  _stampArrDirect(ti);
+  var t=trucks[ti];if(!t)return;
+  var ev=_autoEvalPretForTruck(t);
+  _arrPretTi=ti;_arrPretIsArrival=true;
+  // Sous-titre transporteur · créneau
+  var subEl=document.getElementById('arr-pret-sub');
+  var statusEl=document.getElementById('arr-pret-status-badge');
+  var motifEl=document.getElementById('arr-pret-motif');
+  if(subEl)subEl.textContent=t.transporteur+(t.creneau?' · Créneau '+t.creneau:'');
+  // Badge ponctualité
+  var win=creWindow(t.creneau||'');
+  if(win&&statusEl){
+    var nowMin=new Date().getHours()*60+new Date().getMinutes();
+    if(nowMin<win.start){statusEl.style.cssText='background:rgba(90,200,250,.12);border:1px solid rgba(90,200,250,.3);color:var(--teal)';statusEl.textContent='🔵 En avance — '+(win.start-nowMin)+' min avant créneau';}
+    else if(nowMin<=win.end){statusEl.style.cssText='background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.3);color:var(--green)';statusEl.textContent='🟢 Dans le créneau';}
+    else{statusEl.style.cssText='background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)';statusEl.textContent='🔴 En retard — +'+(nowMin-win.end)+' min';}
+  }else if(statusEl){statusEl.textContent='';statusEl.style.cssText='';}
+  // Reset surlignage
+  ['arr-pret-btn-ok','arr-pret-btn-nok','arr-pret-motif-retard_silo','arr-pret-motif-retard_prepa','arr-pret-motif-autre'].forEach(function(id){
+    var el=document.getElementById(id);if(el){el.style.boxShadow='';el.style.transform='';}
+  });
+  if(motifEl)motifEl.classList.remove('show');
+  // Pré-sélection selon auto-détection
+  if(ev&&ev.pret===true){
+    var btnOk=document.getElementById('arr-pret-btn-ok');
+    if(btnOk){btnOk.style.boxShadow='0 0 0 2px rgba(48,209,88,.7),0 0 12px rgba(48,209,88,.25)';btnOk.style.transform='scale(1.03)';}
+  }else if(ev&&ev.pret===false){
+    if(motifEl)motifEl.classList.add('show');
+    var motifBtn=document.getElementById('arr-pret-motif-'+(ev.motif||'autre'));
+    if(motifBtn){motifBtn.style.boxShadow='0 0 0 2px rgba(239,68,68,.6),0 0 10px rgba(239,68,68,.2)';motifBtn.style.transform='scale(1.02)';}
+  }
+  document.getElementById('arr-pret-modal').style.display='flex';
 }
 function tfArrShowMotif(){
   document.getElementById('arr-pret-motif').classList.add('show');
 }
 function tfArrPret(pret,motif){
-  // Utilisé uniquement pour override manuel (clic badge → tfEditPret)
   document.getElementById('arr-pret-modal').style.display='none';
   if(_arrPretTi===null)return;
   var ti=_arrPretTi;_arrPretTi=null;
+  var isArrival=_arrPretIsArrival;_arrPretIsArrival=false;
   var tid=trucks[ti].id;
   if(!timestamps[tid])timestamps[tid]={};
+  if(isArrival)timestamps[tid].arr=_nowIso(); // stamp arr uniquement au pointage arrivée
   timestamps[tid].arr_pret=pret;
   if(!pret&&motif)timestamps[tid].arr_motif=motif;
   else delete timestamps[tid].arr_motif;
   save();
-  showToast(pret?'✅ Marchandise prête':'⏳ '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête'));
+  var lbl=isArrival
+    ?(pret?'✅ Arrivée — Marchandise prête':'⏳ Arrivée — '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête'))
+    :(pret?'✅ Marchandise prête':'⏳ '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête'));
+  showToast(lbl);
   renderAll();
   if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}
 }
@@ -2968,6 +3002,7 @@ function tfEditPret(tid){ // tid = truck ID (depuis le badge) → override manue
 function tfClosePretModal(){
   document.getElementById('arr-pret-modal').style.display='none';
   _arrPretTi=null;
+  _arrPretIsArrival=false;
 }
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
