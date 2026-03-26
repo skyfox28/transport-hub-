@@ -9642,6 +9642,10 @@ header{position:relative;z-index:10;background:rgba(13,17,23,.92);backdrop-filte
 .blo{background:rgba(42,157,92,.2);color:#4ade80}.bp{background:rgba(255,255,255,.07);color:#6b7280}
 .bq{background:rgba(99,102,241,.2);color:#a5b4fc}.bc{background:rgba(255,255,255,.07);color:var(--t2)}
 .bpu{background:rgba(211,47,47,.2);color:#f87171}.bpn{background:rgba(245,158,11,.18);color:#fbbf24}.bpf{background:rgba(42,157,92,.18);color:#4ade80}
+.bpret-ok{background:rgba(48,209,88,.15);border:1px solid rgba(48,209,88,.35);color:#4ade80}
+.bpret-nok{background:rgba(255,159,10,.13);border:1px solid rgba(255,159,10,.38);color:#fb923c}
+.bpret-silo{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#f87171}
+.bpret-prepa{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#f87171}
 .bpt{background:rgba(251,191,36,.22);color:#fbbf24;animation:blink 2s infinite}
 .bpok{background:rgba(42,157,92,.2);color:#4ade80}
 .bpav{background:rgba(59,130,246,.2);color:#60a5fa}
@@ -9922,6 +9926,14 @@ function ponctBadge(t,ts){
   if(arrMin<=cr.e)return ongoing+'<span class="b bpok">✅ À l\'heure</span>';
   return ongoing+'<span class="b bprt">⚠️ Retard '+fm(arrMin-cr.e)+'</span>';
 }
+function pretBadgeMon(ts){
+  if(!ts.arr||!ts.hasOwnProperty('arr_pret')) return '';
+  if(ts.arr_pret) return '<span class="b bpret-ok" style="font-size:9px">✅ Prête</span>';
+  var m=ts.arr_motif;
+  var cls=m==='retard_silo'?'bpret-silo':m==='retard_prepa'?'bpret-prepa':'bpret-nok';
+  var lbl=m==='retard_silo'?'⏳ Retard silo':m==='retard_prepa'?'🔧 Retard prépa':'⚪ Pas prête';
+  return '<span class="b '+cls+'" style="font-size:9px">'+lbl+'</span>';
+}
 function isCrenNow(t){
   if(!t||!t.creneau)return false;
   var m=t.creneau.match(/(\d{1,2})[h:](\d{0,2})[-–](\d{1,2})[h:](\d{0,2})/);
@@ -9974,6 +9986,7 @@ function makeCard(t,ts,quai,prio){
   var nowT=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}).replace('h',':');
   var prB=prio==='urgent'?'<span class="b bpu">🔴 Urgent</span>':prio==='normal'?'<span class="b bpn">🟡 Normal</span>':prio==='flexible'?'<span class="b bpf">🟢 Flexible</span>':'';
   var ptB=ponctBadge(t,ts);
+  var pretB=pretBadgeMon(ts);
   var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
   var ab=nk
     ?'<button class="act '+ac+'" onclick="'+actOnclick+'">'+al+'</button>'
@@ -9991,7 +10004,7 @@ function makeCard(t,ts,quai,prio){
     +'<span class="b '+scls(s)+'">'+slbl(s)+'</span>'
     +(quai?'<span class="b bq">Q'+quai+'</span>':'')
     +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'">'+t.creneau+(cn?' ▶':'')+' </span>':'')
-    +prB+ptB
+    +prB+ptB+pretB
     +'<span style="margin-left:auto;font-size:10px;color:var(--t3)">📦 '+nDel+'</span>'
     +'</div>'
     +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
@@ -10001,6 +10014,7 @@ function makeCard(t,ts,quai,prio){
 }
 function makeCompact(t,ts){
   var pb=ponctBadge(t,ts);
+  var pretB=pretBadgeMon(ts);
   var cn=isCrenNow(t);
   var cls=pb.indexOf('bpav')>-1?'pa':pb.indexOf('bprt')>-1?'pr':'ph';
   var dur='';
@@ -10011,7 +10025,7 @@ function makeCompact(t,ts){
     +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'">'+t.creneau+'</span>':'')
     +'<span style="font-size:13px;font-weight:800;color:var(--t2)">🚀 '+ft(ts.dep)+'</span>'
     +(dur?'<span style="font-size:10px;color:var(--t3)">⏱ '+dur+'</span>':'')
-    +pb
+    +pb+pretB
     +'</div>'
     +'</div>';
 }
@@ -10110,6 +10124,7 @@ function makeActiveCard(t,ts,quai,prio){
     :'<button class="act-sm act-done" disabled>✅ Parti</button>';
   var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴 Urgent</span>':'';
   var ptB=ponctBadge(t,ts);
+  var pretB=pretBadgeMon(ts);
   var cn=isCrenNow(t);
   var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
   return '<div class="ac '+tcls(s)+(_isLate?' sretard':'')+(cn?' cren-now':'')+'">'
@@ -10117,7 +10132,7 @@ function makeActiveCard(t,ts,quai,prio){
     +'<span class="b '+scls(s)+'" style="font-size:9px">'+slbl(s)+'</span>'
     +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
     +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
-    +prB+ptB
+    +prB+ptB+pretB
     +'</div>'
     +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
     +'<div class="ac-sub">'+(t.dest||t.itin||'—')+'</div>'
@@ -10151,6 +10166,7 @@ function makeStrip(t,ts,quai,prio){
   var cn=isCrenNow(t);
   var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
   var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴</span>':'';
+  var pretB=pretBadgeMon(ts);
   var nDel=(t.deliveries||[]).length;
   var lk=lastFilledKey(ts);
   var cancelBtn=lk?'<button style="background:none;border:none;color:var(--t3);font-size:9px;cursor:pointer;text-decoration:underline;flex-shrink:0" onclick="cancelTs(\''+tid+'\',\''+lk+'\')">↩</button>':'';
@@ -10161,7 +10177,7 @@ function makeStrip(t,ts,quai,prio){
     +'<div class="strip-badges">'
     +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
     +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
-    +prB
+    +prB+pretB
     +'</div>'
     +prog
     +'<div class="strip-spacer"></div>'
