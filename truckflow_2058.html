@@ -205,7 +205,7 @@ html.light .main::before{opacity:.02}
 @keyframes hdrShimmer{0%{background-position:200% 0}50%{background-position:-200% 0}100%{background-position:200% 0}}
 .hdr-in{max-width:1920px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;gap:14px;position:relative;z-index:1}
 .logo{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;flex-shrink:0;letter-spacing:-.02em}
-.logo-ico{width:34px;height:34px;background:linear-gradient(135deg,#1E3A8A,#3B82F6,#EF4444);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 10px rgba(59,130,246,.4);animation:logoGlow 4s ease-in-out infinite alternate}
+.logo-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(59,130,246,.4);animation:logoGlow 4s ease-in-out infinite alternate;overflow:hidden;background:transparent;flex-shrink:0}
 @keyframes logoGlow{0%{box-shadow:0 2px 12px rgba(59,130,246,.5)}100%{box-shadow:0 2px 20px rgba(239,68,68,.5)}}
 .hdr-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .hdr-sep{width:1px;height:22px;background:var(--bd2);margin:0 4px;flex-shrink:0}
@@ -1187,7 +1187,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .auth-card{background:linear-gradient(165deg,rgba(255,255,255,.06) 0%,rgba(15,40,100,.02) 100%);backdrop-filter:saturate(200%) blur(40px);-webkit-backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:40px 44px;width:90%;max-width:420px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 24px 64px rgba(0,0,0,.5);position:relative;z-index:1}
 .auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 5%,rgba(59,130,246,.8) 30%,rgba(255,255,255,.9) 50%,rgba(239,68,68,.8) 70%,transparent 95%);border-radius:28px 28px 0 0;pointer-events:none}
 .auth-logo{text-align:center;margin-bottom:28px}
-.auth-logo-ico{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1E3A8A,#3B82F6,#EF4444);display:inline-flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 20px rgba(59,130,246,.4);margin-bottom:12px}
+.auth-logo-ico{width:80px;height:80px;border-radius:20px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(59,130,246,.4);margin-bottom:12px;overflow:hidden;background:transparent}
 .auth-logo-name{font-size:22px;font-weight:900;color:var(--t1);letter-spacing:-.03em}
 .auth-logo-name span{color:var(--blue)}
 .auth-logo-sub{font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
@@ -1252,7 +1252,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   <div class="auth-orb2"></div>
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-ico">🏭</div>
+      <div class="auth-logo-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80"><defs><linearGradient id="a-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f2f8ff"/><stop offset="100%" stop-color="#e8f0fd"/></linearGradient><linearGradient id="a-sL" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#2563EB" stop-opacity="0"/></linearGradient><linearGradient id="a-sR" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#DC2626" stop-opacity="0"/><stop offset="100%" stop-color="#DC2626"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="20" fill="url(#a-bg)" stroke="rgba(0,0,0,0.08)" stroke-width="1.5"/><rect x="2" y="44" width="30" height="7" fill="url(#a-sL)" rx="3.5"/><rect x="2" y="54" width="20" height="4" fill="url(#a-sL)" rx="2" opacity=".55"/><rect x="68" y="44" width="30" height="7" fill="url(#a-sR)" rx="3.5"/><rect x="78" y="54" width="20" height="4" fill="url(#a-sR)" rx="2" opacity=".55"/><rect x="12" y="24" width="50" height="30" rx="3" fill="#1D4ED8"/><rect x="12" y="24" width="50" height="10" rx="3" fill="#2563EB"/><rect x="12" y="34" width="50" height="10" fill="white" opacity=".82"/><rect x="12" y="44" width="50" height="10" fill="#DC2626" rx="0 0 3 3"/><path d="M62,27 L76,27 Q87,27 87,38 L87,54 L62,54 Z" fill="#1E3A8A"/><path d="M65,30 L76,30 Q83,30 83,38 L83,50 L65,50 Z" fill="#93C5FD" opacity=".88"/><rect x="12" y="53" width="76" height="3" rx="1.5" fill="#0F172A"/><circle cx="24" cy="64" r="8.5" fill="#1E293B"/><circle cx="24" cy="64" r="4" fill="#94A3B8"/><circle cx="24" cy="64" r="1.5" fill="#F1F5F9"/><circle cx="47" cy="64" r="8.5" fill="#1E293B"/><circle cx="47" cy="64" r="4" fill="#94A3B8"/><circle cx="47" cy="64" r="1.5" fill="#F1F5F9"/><circle cx="75" cy="64" r="8.5" fill="#1E293B"/><circle cx="75" cy="64" r="4" fill="#94A3B8"/><circle cx="75" cy="64" r="1.5" fill="#F1F5F9"/></svg></div>
       <div class="auth-logo-name">Truck<span>Flow</span></div>
       <div class="auth-logo-sub">Hub de transport · Accès sécurisé</div>
     </div>
@@ -1341,7 +1341,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 
 <!-- ═══ HEADER ═══ -->
 <div class="hdr"><div class="hdr-in">
-  <div class="logo"><div class="logo-ico">🏭</div><span>TruckFlow</span></div>
+  <div class="logo"><div class="logo-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="36" height="36"><defs><linearGradient id="h-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f2f8ff"/><stop offset="100%" stop-color="#e8f0fd"/></linearGradient><linearGradient id="h-sL" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#2563EB" stop-opacity="0"/></linearGradient><linearGradient id="h-sR" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#DC2626" stop-opacity="0"/><stop offset="100%" stop-color="#DC2626"/></linearGradient></defs><rect x="2" y="2" width="96" height="96" rx="20" fill="url(#h-bg)" stroke="rgba(0,0,0,0.08)" stroke-width="1.5"/><rect x="2" y="44" width="30" height="7" fill="url(#h-sL)" rx="3.5"/><rect x="2" y="54" width="20" height="4" fill="url(#h-sL)" rx="2" opacity=".55"/><rect x="68" y="44" width="30" height="7" fill="url(#h-sR)" rx="3.5"/><rect x="78" y="54" width="20" height="4" fill="url(#h-sR)" rx="2" opacity=".55"/><rect x="12" y="24" width="50" height="30" rx="3" fill="#1D4ED8"/><rect x="12" y="24" width="50" height="10" rx="3" fill="#2563EB"/><rect x="12" y="34" width="50" height="10" fill="white" opacity=".82"/><rect x="12" y="44" width="50" height="10" fill="#DC2626" rx="0 0 3 3"/><path d="M62,27 L76,27 Q87,27 87,38 L87,54 L62,54 Z" fill="#1E3A8A"/><path d="M65,30 L76,30 Q83,30 83,38 L83,50 L65,50 Z" fill="#93C5FD" opacity=".88"/><rect x="12" y="53" width="76" height="3" rx="1.5" fill="#0F172A"/><circle cx="24" cy="64" r="8.5" fill="#1E293B"/><circle cx="24" cy="64" r="4" fill="#94A3B8"/><circle cx="24" cy="64" r="1.5" fill="#F1F5F9"/><circle cx="47" cy="64" r="8.5" fill="#1E293B"/><circle cx="47" cy="64" r="4" fill="#94A3B8"/><circle cx="47" cy="64" r="1.5" fill="#F1F5F9"/><circle cx="75" cy="64" r="8.5" fill="#1E293B"/><circle cx="75" cy="64" r="4" fill="#94A3B8"/><circle cx="75" cy="64" r="1.5" fill="#F1F5F9"/></svg></div><span>TruckFlow</span></div>
   <div class="gs-wrap">
     <span class="gs-ico">&#x1F50D;</span>
     <input class="gs-inp" id="globalSearchInp" placeholder="Rechercher livraison, camion, ville..." oninput="globalSearch(this.value)">
@@ -2882,58 +2882,76 @@ function _nowIso(){
   if(_workingDate){var b=new Date(_workingDate+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);if(!isNaN(b.getTime()))return b.toISOString();}
   return new Date().toISOString();
 }
+// ─── Auto-évaluation Prêt depuis les statuts livraisons ─────────────────────
+function _autoEvalPretForTruck(t){
+  if(!t||!t.deliveries||!t.deliveries.length) return null;
+  var livs=(t.deliveries||[]).map(function(id){
+    return APP.deliveries.find(function(d){return d.id===id;});
+  }).filter(Boolean);
+  if(!livs.length) return null;
+  var pending=livs.filter(function(d){
+    return !(d.sp==='C'&&(d.wm==='C'||!d.wm));
+  });
+  if(!pending.length) return {pret:true,motif:null};
+  var hasSilo=pending.some(function(d){return (d.palSilo||0)>0;});
+  var hasPick=pending.some(function(d){return (d.colisPick||0)>0;});
+  var motif=hasSilo?'retard_silo':hasPick?'retard_prepa':'autre';
+  return {pret:false,motif:motif};
+}
+function autoUpdateAllPret(){
+  var changed=false;
+  trucks.forEach(function(t){
+    var ts=timestamps[t.id]||{};
+    if(!ts.arr) return;
+    var ev=_autoEvalPretForTruck(t);
+    if(!ev) return;
+    if(ts.arr_pret===ev.pret&&ts.arr_motif===ev.motif) return;
+    if(!timestamps[t.id]) timestamps[t.id]={};
+    timestamps[t.id].arr_pret=ev.pret;
+    if(!ev.pret&&ev.motif) timestamps[t.id].arr_motif=ev.motif;
+    else delete timestamps[t.id].arr_motif;
+    changed=true;
+  });
+  if(changed){save();renderTrucks();}
+}
 function _stampArrDirect(ti){
-  var tid=trucks[ti].id;
+  var t=trucks[ti];var tid=t.id;
   if(!timestamps[tid])timestamps[tid]={};
   timestamps[tid].arr=_nowIso();
+  var ev=_autoEvalPretForTruck(t);
+  if(ev){
+    timestamps[tid].arr_pret=ev.pret;
+    if(!ev.pret&&ev.motif)timestamps[tid].arr_motif=ev.motif;
+    else delete timestamps[tid].arr_motif;
+  }
   save();renderTrucks();renderQuai();
   if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}
-  showToast('Arrivée enregistrée');
+  var lbl=!ev?'Arrivée enregistrée':ev.pret?'✅ Arrivée — Marchandise prête':'⏳ Arrivée — '+(ev.motif==='retard_silo'?'Retard silo':ev.motif==='retard_prepa'?'Retard prépa':'Pas prête');
+  showToast(lbl);
 }
 function _stampArrModal(ti){
-  var t=trucks[ti];
-  if(!t){return;}
-  var win=creWindow(t.creneau||'');
-  if(!win){_stampArrDirect(ti);return;}
-  _arrPretTi=ti;
-  var now=new Date();var nowMin=now.getHours()*60+now.getMinutes();
-  var statusEl=document.getElementById('arr-pret-status-badge');
-  var subEl=document.getElementById('arr-pret-sub');
-  var motifEl=document.getElementById('arr-pret-motif');
-  if(motifEl)motifEl.classList.remove('show');
-  if(nowMin<win.start){
-    statusEl.style.cssText='background:rgba(90,200,250,.12);border:1px solid rgba(90,200,250,.3);color:var(--teal)';
-    statusEl.textContent='🔵 En avance — '+(win.start-nowMin)+' min avant créneau';
-  }else if(nowMin<=win.end){
-    var diffMin=nowMin-win.start;
-    statusEl.style.cssText='background:rgba(48,209,88,.12);border:1px solid rgba(48,209,88,.3);color:var(--green)';
-    statusEl.textContent='🟢 Dans le créneau'+(diffMin>0?' +'+diffMin+'min':'');
-  }else{
-    statusEl.style.cssText='background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)';
-    statusEl.textContent='🔴 En retard — +'+(nowMin-win.end)+' min après créneau';
-  }
-  if(subEl)subEl.textContent=t.transporteur+' · Créneau '+t.creneau;
-  document.getElementById('arr-pret-modal').style.display='flex';
+  // Auto-détection basée sur les statuts livraisons (sp/wm)
+  _stampArrDirect(ti);
 }
 function tfArrShowMotif(){
   document.getElementById('arr-pret-motif').classList.add('show');
 }
 function tfArrPret(pret,motif){
+  // Utilisé uniquement pour override manuel (clic badge → tfEditPret)
   document.getElementById('arr-pret-modal').style.display='none';
   if(_arrPretTi===null)return;
   var ti=_arrPretTi;_arrPretTi=null;
   var tid=trucks[ti].id;
   if(!timestamps[tid])timestamps[tid]={};
-  timestamps[tid].arr=_nowIso();
   timestamps[tid].arr_pret=pret;
   if(!pret&&motif)timestamps[tid].arr_motif=motif;
   else delete timestamps[tid].arr_motif;
   save();
-  showToast(pret?'✅ Arrivée — Prête':'⏳ Arrivée — '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête'));
+  showToast(pret?'✅ Marchandise prête':'⏳ '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard prépa':'Pas prête'));
   renderAll();
   if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}
 }
-function tfEditPret(tid){ // tid = truck ID (depuis le badge)
+function tfEditPret(tid){ // tid = truck ID (depuis le badge) → override manuel
   var idx=trucks.findIndex(function(x){return x.id===tid;});
   if(idx<0)return;
   _arrPretTi=idx;
@@ -2942,7 +2960,7 @@ function tfEditPret(tid){ // tid = truck ID (depuis le badge)
   var subEl=document.getElementById('arr-pret-sub');
   if(subEl)subEl.textContent=(t?t.transporteur:'')+(t&&t.creneau?' · '+t.creneau:'');
   statusEl.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--t2)';
-  statusEl.textContent='✏️ Modification du statut marchandise';
+  statusEl.textContent='✏️ Override manuel du statut marchandise';
   document.getElementById('arr-pret-motif').classList.remove('show');
   document.getElementById('arr-pret-modal').style.display='flex';
 }
@@ -6442,6 +6460,7 @@ function doImportVL06O(event){
       APP.articles=artLines;
       save();
       autoGenTrucks();
+      try{autoUpdateAllPret();}catch(e){}
       _activeDay=null;
       var dd=document.getElementById('dayDetail');if(dd)dd.innerHTML='';
       document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
@@ -6523,6 +6542,7 @@ function init(){
     if(cleaned>0) renderAll();
     updatePonctStats();
     renderSynPonct();
+    try{autoUpdateAllPret();}catch(e){}
   },30000);
   // Fast color update every 5s (no DOM rebuild, just CSS classes)
   if(window._colorTimer) clearInterval(window._colorTimer);
