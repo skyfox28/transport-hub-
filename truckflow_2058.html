@@ -2904,7 +2904,6 @@ function autoUpdateAllPret(){
   var changed=false;
   trucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
-    if(!ts.arr) return;
     var ev=_autoEvalPretForTruck(t);
     if(!ev) return;
     if(ts.arr_pret===ev.pret&&ts.arr_motif===ev.motif) return;
@@ -3397,8 +3396,8 @@ function renderTrucks(){
       lBadge.innerHTML='\u26a0 Chg: '+loadAlert.label+' (+'+loadAlert.overBy+'min)';
       head.appendChild(lBadge);
     }
-    // Badge Prêt / Pas prêt (affiché dès que l'arrivée est stampée)
-    if(ts.arr&&ts.hasOwnProperty('arr_pret')){
+    // Badge Prêt / Pas prêt (affiché dès que les livraisons sont connues)
+    if(ts.hasOwnProperty('arr_pret')){
       var pretBadge=document.createElement('span');pretBadge.className='tc-pret-badge';
       if(ts.arr_pret){
         pretBadge.className+=' tc-pret-ok';
@@ -9501,6 +9500,7 @@ function tfRunApp(){
   _tfAuthReady=true;
   init();
   patchRenderAllForSynView();
+  setTimeout(function(){try{autoUpdateAllPret();}catch(e){}},500);
 }
 
 function tfShowQuitModal(){
@@ -9927,7 +9927,7 @@ function ponctBadge(t,ts){
   return ongoing+'<span class="b bprt">⚠️ Retard '+fm(arrMin-cr.e)+'</span>';
 }
 function pretBadgeMon(ts){
-  if(!ts.arr||!ts.hasOwnProperty('arr_pret')) return '';
+  if(!ts.hasOwnProperty('arr_pret')) return '';
   if(ts.arr_pret) return '<span class="b bpret-ok" style="font-size:9px">✅ Prête</span>';
   var m=ts.arr_motif;
   var cls=m==='retard_silo'?'bpret-silo':m==='retard_prepa'?'bpret-prepa':'bpret-nok';
