@@ -5404,7 +5404,7 @@ function exportExcel(){
     function fmtA(v){return v?new Date(v).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
     function durMin(a,b){return (a&&b)?Math.round((new Date(b)-new Date(a))/60000):null;}
     // ─── Feuille 1 : Timestamps détaillés par semaine ───
-    var weekTsRows=[['Semaine','Date','Transporteur','Créneau','Arrivée','À quai','Début chgt','Fin chgt','Départ','Durée totale','Durée chgt','Δ Créneau','Ponctualité','Livraisons']];
+    var weekTsRows=[['Semaine','Date','Transporteur','Créneau','Arrivée','À quai','Début chgt','Fin chgt','Départ','Durée totale','Durée chgt','Δ Créneau','Ponctualité','Marchandise prête','Motif non-prête','Livraisons']];
     // trier par semaine puis date
     var sorted=allArchived.slice().sort(function(a,b){
       return (a.date||'').localeCompare(b.date||'');
@@ -5425,13 +5425,15 @@ function exportExcel(){
           else delta='+'+fmtMinutes(Math.round(aM-cw.end));}
       }
       var ponct=ct.ponctualite?ct.ponctualite.label:(getPonctualite({id:ct.id,creneau:ct.creneau,date:ct.date},ts,Date.now()).label||'');
+      var pretWk=ts.hasOwnProperty('arr_pret')?(ts.arr_pret?'Oui':'Non'):'';
+      var motifWk=ts.arr_motif==='retard_silo'?'Retard silo':ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':ts.arr_motif==='autre'?'Autre':'';
       weekTsRows.push([wk,ct.date,ct.transporteur||ct.itin||'',ct.creneau||'',
         fmtA(ts.arr),fmtA(ts.quai),fmtA(ts.chg),fmtA(ts.fin_chg),fmtA(ts.dep),
         durTot!=null?fmtMinutes(durTot):'—',durChg!=null?fmtMinutes(durChg):'—',
-        delta,ponct,(ct.deliveries||[]).length]);
+        delta,ponct,pretWk,motifWk,(ct.deliveries||[]).length]);
     });
     var wsWkTs=XLSX.utils.aoa_to_sheet(weekTsRows);
-    wsWkTs['!cols']=[{wch:11},{wch:12},{wch:16},{wch:10},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:13},{wch:11},{wch:11},{wch:14},{wch:11}];
+    wsWkTs['!cols']=[{wch:11},{wch:12},{wch:16},{wch:10},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:13},{wch:11},{wch:11},{wch:14},{wch:12},{wch:14},{wch:11}];
     XLSX.utils.book_append_sheet(wb,wsWkTs,'Archive par semaine');
     // ─── Feuille 2 : Analyse agrégée par semaine ───
     var wkMap={};
@@ -5439,7 +5441,8 @@ function exportExcel(){
       var wk=isoWeek(ct.date);
       var ts=ct.timestamps||{};
       if(!wkMap[wk])wkMap[wk]={wk:wk,count:0,ponct_h:0,ponct_a:0,ponct_r:0,ponct_w:0,
-        waitN:0,waitS:0,prepN:0,prepS:0,loadN:0,loadS:0,totN:0,totS:0};
+        waitN:0,waitS:0,prepN:0,prepS:0,loadN:0,loadS:0,totN:0,totS:0,
+        pretOk:0,pretNok:0,pretSilo:0,pretPrepa:0,pretAutre:0};
       var e=wkMap[wk];e.count++;
       var p=ct.ponctualite?ct.ponctualite.status:(getPonctualite({id:ct.id,creneau:ct.creneau,date:ct.date},ts,Date.now()).status||'');
       if(p==='heure')e.ponct_h++;else if(p==='avance')e.ponct_a++;
@@ -5448,8 +5451,9 @@ function exportExcel(){
       var dPrep=durMin(ts.quai,ts.chg);if(dPrep!=null&&dPrep>=0){e.prepN++;e.prepS+=dPrep;}
       var dLoad=durMin(ts.chg,ts.fin_chg||ts.dep);if(dLoad!=null&&dLoad>=0){e.loadN++;e.loadS+=dLoad;}
       var dTot=durMin(ts.arr,ts.dep);if(dTot!=null&&dTot>=0){e.totN++;e.totS+=dTot;}
+      if(ts.hasOwnProperty('arr_pret')){if(ts.arr_pret){e.pretOk++;}else{e.pretNok++;var m=ts.arr_motif||'autre';if(m==='retard_silo')e.pretSilo++;else if(m==='retard_prepa')e.pretPrepa++;else e.pretAutre++;}}
     });
-    var wkRows=[['Semaine','Nb camions','À l\'heure','En avance','En retard','% ponctualité','Moy. attente','Moy. prépa','Moy. chargement','Moy. total']];
+    var wkRows=[['Semaine','Nb camions','À l\'heure','En avance','En retard','% ponctualité','Moy. attente','Moy. prépa','Moy. chargement','Moy. total','Marchandise prête','Pas prête','Retard silo','Retard prépa','Autre motif']];
     Object.keys(wkMap).sort().forEach(function(wk){
       var e=wkMap[wk];
       var pct=e.count?Math.round((e.ponct_h+e.ponct_a)/e.count*100):0;
@@ -5457,10 +5461,11 @@ function exportExcel(){
         e.waitN?fmtMinutes(Math.round(e.waitS/e.waitN)):'—',
         e.prepN?fmtMinutes(Math.round(e.prepS/e.prepN)):'—',
         e.loadN?fmtMinutes(Math.round(e.loadS/e.loadN)):'—',
-        e.totN?fmtMinutes(Math.round(e.totS/e.totN)):'—']);
+        e.totN?fmtMinutes(Math.round(e.totS/e.totN)):'—',
+        e.pretOk,e.pretNok,e.pretSilo,e.pretPrepa,e.pretAutre]);
     });
     var wsWkAnal=XLSX.utils.aoa_to_sheet(wkRows);
-    wsWkAnal['!cols']=[{wch:11},{wch:13},{wch:11},{wch:11},{wch:11},{wch:16},{wch:14},{wch:13},{wch:17},{wch:13}];
+    wsWkAnal['!cols']=[{wch:11},{wch:13},{wch:11},{wch:11},{wch:11},{wch:16},{wch:14},{wch:13},{wch:17},{wch:13},{wch:16},{wch:12},{wch:14},{wch:14},{wch:13}];
     XLSX.utils.book_append_sheet(wb,wsWkAnal,'Analyse semaine');
   }
 
@@ -5610,6 +5615,7 @@ function exportWeekExcel(weekKey){
   // Aggregates
   var N=trucks_wk.length,ph=0,pa=0,pr=0,pw=0;
   var wN=0,wS=0,pN=0,pS=0,lN=0,lS=0,tN=0,tS=0;
+  var pretOkW=0,pretNokW=0,pretSiloW=0,pretPrepaW=0,pretAutreW=0;
   var dayMap={},carrMap={};
   trucks_wk.forEach(function(ct){
     var ts=ct.timestamps||{};
@@ -5628,6 +5634,7 @@ function exportWeekExcel(weekKey){
     var ce=carrMap[nm];ce.n++;
     if(p==='heure')ce.ph++;else if(p==='avance')ce.pa++;else if(p==='retard_reel'||p==='retard_auto')ce.pr++;
     if(dL!=null&&dL>=0){ce.lN++;ce.lS+=dL;}
+    if(ts.hasOwnProperty('arr_pret')){if(ts.arr_pret){pretOkW++;}else{pretNokW++;var mW=ts.arr_motif||'autre';if(mW==='retard_silo')pretSiloW++;else if(mW==='retard_prepa')pretPrepaW++;else pretAutreW++;}}
   });
   var days=Object.keys(dayMap).sort();
   var carriers=Object.values(carrMap).sort(function(a,b){return b.n-a.n;});
@@ -5681,6 +5688,20 @@ function exportWeekExcel(weekKey){
     var pct=c.n?Math.round((c.ph+c.pa)/c.n*100):0;
     syn.push([c.name,c.n,c.ph,c.pa,c.pr,pct+'%',c.lN?fmtMinutes(Math.round(c.lS/c.lN)):'\u2014']);
   });
+  var pretTotW=pretOkW+pretNokW;
+  if(pretTotW>0){
+    syn.push(B);syn.push(SEP);
+    syn.push(['\u00c9TAT MARCHANDISE \u00c0 L\'ARRIV\u00c9E']);
+    syn.push(SEP);
+    syn.push(['\u2705 Pr\u00eate','',pretOkW,pretTotW?Math.round(pretOkW/pretTotW*100)+'%':'']);
+    syn.push(['\u274c Pas pr\u00eate','',pretNokW,pretTotW?Math.round(pretNokW/pretTotW*100)+'%':'']);
+    syn.push(['Total avec statut','',pretTotW,'']);
+    syn.push(B);
+    syn.push(['D\u00e9tail motifs non-pr\u00eates']);
+    syn.push(['\u23F3 Retard silo','',pretSiloW,'']);
+    syn.push(['\uD83D\uDD27 Retard pr\u00e9pa','',pretPrepaW,'']);
+    syn.push(['\u26AA Autre motif','',pretAutreW,'']);
+  }
   var wsSyn=XLSX.utils.aoa_to_sheet(syn);
   wsSyn['!cols']=[{wch:40},{wch:18},{wch:14},{wch:28}];
   XLSX.utils.book_append_sheet(wb,wsSyn,'Synth\u00e8se');
@@ -5688,7 +5709,7 @@ function exportWeekExcel(weekKey){
   // ══════════════════════════════════════════════════════════
   // Feuille 2 : Timestamps détaillés
   // ══════════════════════════════════════════════════════════
-  var tsR=[['Date','Jour','Transporteur','Cr\u00e9neau','Quai','Arriv\u00e9e','\u00c0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','Att. quai','Pr\u00e9pa','Chargement','Total','\u0394 Cr\u00e9neau','Ponctualit\u00e9','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouv. date / cr\u00e9neau','Note d\u00e9calage']];
+  var tsR=[['Date','Jour','Transporteur','Cr\u00e9neau','Quai','Arriv\u00e9e','\u00c0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','Att. quai','Pr\u00e9pa','Chargement','Total','\u0394 Cr\u00e9neau','Ponctualit\u00e9','Marchandise pr\u00eate','Motif non-pr\u00eate','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouv. date / cr\u00e9neau','Note d\u00e9calage']];
   var lastD='';
   trucks_wk.forEach(function(ct){
     var ts=ct.timestamps||{};
@@ -5708,6 +5729,8 @@ function exportWeekExcel(weekKey){
       dW!=null?fmtMinutes(dW):'\u2014',dP!=null?fmtMinutes(dP):'\u2014',
       dL!=null?fmtMinutes(dL):'\u2014',dT!=null?fmtMinutes(dT):'\u2014',
       delta,(ct.ponctualite||{}).label||'',
+      ts.hasOwnProperty('arr_pret')?(ts.arr_pret?'Oui':'Non'):'',
+      ts.arr_motif==='retard_silo'?'Retard silo':ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':ts.arr_motif==='autre'?'Autre':'',
       dc?dc.label+(dc.heure?' ('+dc.heure+')':''):'',
       dc?dc.dateOrig||'':'',
       dc?dc.creneauOrig||'':'',
@@ -5715,7 +5738,7 @@ function exportWeekExcel(weekKey){
       dc?dc.note||'':'']);
   });
   var wsTs=XLSX.utils.aoa_to_sheet(tsR);
-  wsTs['!cols']=[{wch:12},{wch:16},{wch:16},{wch:10},{wch:6},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:10},{wch:9},{wch:12},{wch:9},{wch:11},{wch:14},{wch:22},{wch:12},{wch:13},{wch:20},{wch:30}];
+  wsTs['!cols']=[{wch:12},{wch:16},{wch:16},{wch:10},{wch:6},{wch:9},{wch:9},{wch:11},{wch:11},{wch:9},{wch:10},{wch:9},{wch:12},{wch:9},{wch:11},{wch:14},{wch:12},{wch:14},{wch:22},{wch:12},{wch:13},{wch:20},{wch:30}];
   XLSX.utils.book_append_sheet(wb,wsTs,'Timestamps');
 
   // ══════════════════════════════════════════════════════════
