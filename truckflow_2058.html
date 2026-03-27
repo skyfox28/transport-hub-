@@ -5073,7 +5073,7 @@ function exportExcel(){
     return ts.arr && ts.quai && ts.chg && ts.dep;
   });
 
-  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','Marchandise pr\u00eate','Motif non-pr\u00eate','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouvelle date pr\u00e9vue','Note d\u00e9calage']];
+  var camRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','ETA d\u00e9part estim\u00e9','\u0394 Arriv\u00e9e/Cr\u00e9neau','Ponctualit\u00e9','D\u00e9tail ponctualit\u00e9','Marchandise pr\u00eate','Motif non-pr\u00eate','D\u00e9calage motif','Date orig.','Cr\u00e9neau orig.','Nouvelle date pr\u00e9vue','Note d\u00e9calage']];
   activeTruckIdxs.forEach(function(ti){
     var t = trucks[ti]; var ts = timestamps[t.id]||{};
     function fmtTs(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
@@ -5091,8 +5091,9 @@ function exportExcel(){
     var ponctX=getPonctualite(t,ts,Date.now());
     var pretLabel=ts.hasOwnProperty('arr_pret')?(ts.arr_pret?'Oui':'Non'):'';
     var motifLabel=ts.arr_motif==='retard_silo'?'Retard silo':ts.arr_motif==='retard_prepa'?'Retard prépa':ts.arr_motif==='autre'?'Autre':'';
+    var etaX=computeETA(t);var etaLabel=etaX?etaX.label:(ts.dep?'Parti':'—');
     camRows.push([t.date||'',t.transporteur||t.itin||'',t.creneau||'',(t.deliveries||[]).length,
-      fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),delta,ponctX.label||'',ponctX.delta||'',
+      fmtTs('arr'), fmtTs('quai'), fmtTs('chg'), fmtTs('fin_chg'), fmtTs('dep'),etaLabel,delta,ponctX.label||'',ponctX.delta||'',
       pretLabel,motifLabel,
       t.decalage?(t.decalage.label+(t.decalage.heure?' ('+t.decalage.heure+')':'')):'',
       t.decalage?(t.decalage.dateOrig||t.date||''):'',
@@ -5101,7 +5102,7 @@ function exportExcel(){
       t.decalage?(t.decalage.note||''):'']);
   });
   var wsCam = XLSX.utils.aoa_to_sheet(camRows);
-  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:16},{wch:25},{wch:12},{wch:16},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
+  wsCam['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:14},{wch:16},{wch:16},{wch:25},{wch:12},{wch:16},{wch:16},{wch:12},{wch:14},{wch:18},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsCam, 'Camions');
 
   var livRows = [['Date Camion','Transporteur','Cr\u00e9neau','D\u00e9calage motif','Livraison','Destinataire','Ville','Statut Pr\u00e9l.','Statut WM','Colis SAP','Pal SILO','Colis Total','Colis Pick.','Hr SILO','Hr Pick.','Note d\u00e9calage']];
@@ -5207,6 +5208,20 @@ function exportExcel(){
       var dec=c.decalage||{mtx3:0,transporteur:0,pas_venu:0,total:0};
       statRows.push([c.name,c.count,c.heure,c.avance,c.retard,c.attente,pct+'%',avgLoad,avgWait,dec.total||0,dec.mtx3||0,dec.transporteur||0,dec.pas_venu||0]);
     });
+  }
+  // ═══ Section ETA ═══
+  var etaActiveList=[];
+  activeTruckIdxs.forEach(function(ti){
+    var t=trucks[ti];var ts=timestamps[t.id]||{};
+    if(ts.dep) return;
+    var etaR=computeETA(t);if(!etaR) return;
+    var stage=ts.chg?'En chargement':ts.quai?'\u00c0 quai':ts.arr?'Arriv\u00e9':'En attente';
+    etaActiveList.push([t.transporteur||t.itin||'',t.creneau||'',stage,etaR.label]);
+  });
+  if(etaActiveList.length){
+    statRows.push([''],['=== ETA D\u00c9PARTS ESTIM\u00c9S ==='],[''],
+      ['Transporteur','Cr\u00e9neau','Statut','ETA d\u00e9part estim\u00e9']);
+    etaActiveList.forEach(function(r){statRows.push(r);});
   }
   // ═══ Section Décalages ═══
   var decRows=[['Date orig.','Cr\u00e9neau orig.','Transporteur','Motif d\u00e9calage','Nouvelle date pr\u00e9vue','Nouveau cr\u00e9neau','Note','Enregistr\u00e9 le']];
@@ -7618,7 +7633,7 @@ function _buildPDFReport(){
   // Créneaux en cours
   if(nCours){
     html+='<h2>\uD83D\uDEA7 Cr\u00e9neaux en cours \u2014 sur site ('+nCours+')</h2>';
-    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>D\u00e9but chgt</th><th>Fin chgt</th><th>Statut</th><th>Livraisons</th></tr>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Arriv\u00e9e</th><th>\u00c0 quai</th><th>D\u00e9but chgt</th><th>Fin chgt</th><th>ETA d\u00e9part</th><th>Statut</th><th>Livraisons</th></tr>';
     trucksEnCours.sort(function(a,b){return creToMinutes(a.t.creneau||'')-creToMinutes(b.t.creneau||'');});
     trucksEnCours.forEach(function(x){
       var p=getPonctualite(x.t,x.ts,now);
@@ -7627,12 +7642,14 @@ function _buildPDFReport(){
       var pretHtml='';
       if(x.ts.hasOwnProperty('arr_pret')){var pm=x.ts.arr_motif==='retard_silo'?'Retard silo':x.ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':x.ts.arr_motif==='autre'?'Autre motif':'';pretHtml='<br><span class="tag '+(x.ts.arr_pret?'bg-green':'bg-amber')+'">'+(x.ts.arr_pret?'\u2705 Pr\u00eate':'\u23F3 '+(pm||'Pas pr\u00eate'))+'</span>';}
       var livIdsCours=x.t.deliveries||[];
+      var etaCours=computeETA(x.t);var etaLblC=etaCours?'<b style="color:#1565c0">'+etaCours.label+'</b>':'<span style="color:#999">\u2014</span>';
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
         '<td>'+(x.t.creneau||'—')+'</td>'+
         '<td>'+ft(x.ts.arr)+pretHtml+'</td>'+
         '<td>'+ft(x.ts.quai)+'</td>'+
         '<td>'+ft(x.ts.chg)+'</td>'+
         '<td>'+(x.ts.fin_chg?ft(x.ts.fin_chg):'—')+'</td>'+
+        '<td style="text-align:center">'+etaLblC+'</td>'+
         '<td>'+stat+' <span class="'+pColor+'">'+p.label+'</span></td>'+
         '<td style="text-align:center">'+livIdsCours.length+'</td></tr>';
       if(livIdsCours.length){
@@ -7655,13 +7672,15 @@ function _buildPDFReport(){
   // Camions en attente
   if(nAtt){
     html+='<h2>\uD83D\uDD52 En attente d\'arriv\u00e9e ('+nAtt+')</h2>';
-    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>Ponctualit\u00e9</th><th>Livraisons</th></tr>';
+    html+='<table><tr><th>Transporteur</th><th>Cr\u00e9neau</th><th>ETA d\u00e9part</th><th>Ponctualit\u00e9</th><th>Livraisons</th></tr>';
     trucksAttente.sort(function(a,b){return creToMinutes(a.t.creneau||'')-creToMinutes(b.t.creneau||'');});
     trucksAttente.forEach(function(x){
       var p=getPonctualite(x.t,x.ts,now);
       var pColor=p.status==='retard_reel'||p.status==='retard_auto'?'red':p.status==='avance'?'blue':'grey';
+      var etaAtt=computeETA(x.t);var etaLblA=etaAtt?'<b style="color:#1565c0">'+etaAtt.label+'</b>':'<span style="color:#999">\u2014</span>';
       html+='<tr><td><b>'+(x.t.transporteur||x.t.itin||'?')+'</b></td>'+
         '<td>'+(x.t.creneau||'—')+'</td>'+
+        '<td style="text-align:center">'+etaLblA+'</td>'+
         '<td class="'+pColor+'"><b>'+p.label+'</b></td>'+
         '<td style="text-align:center">'+(x.t.deliveries||[]).length+'</td></tr>';
     });
