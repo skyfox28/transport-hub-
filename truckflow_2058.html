@@ -5140,7 +5140,7 @@ function exportExcel(){
   XLSX.utils.book_append_sheet(wb, wsDay, 'R\u00e9cap journalier');
 
   if(archivedTruckIdxs.length){
-    var archRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau']];
+    var archRows = [['Date','Transporteur','Cr\u00e9neau','Livraisons','Arriv\u00e9e','Mise \u00e0 quai','D\u00e9but chgt','Fin chgt','D\u00e9part','\u0394 Arriv\u00e9e/Cr\u00e9neau','Marchandise pr\u00eate','Motif non-pr\u00eate']];
     archivedTruckIdxs.forEach(function(ti){
       var t = trucks[ti]; var ts = timestamps[t.id]||{};
       function fmtA(k){ return ts[k]?ts[k].replace('T',' ').slice(0,16):''; }
@@ -5155,11 +5155,13 @@ function exportExcel(){
           else{deltaA='+'+Math.round(aMins2-cwin2.end)+' min';}
         }
       }
+      var pretA=ts.hasOwnProperty('arr_pret')?(ts.arr_pret?'Oui':'Non'):'';
+      var motifA=ts.arr_motif==='retard_silo'?'Retard silo':ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':ts.arr_motif==='autre'?'Autre':'';
       archRows.push([t.date||'', t.transporteur||t.itin||'', t.creneau||'',
-        (t.deliveries||[]).length, fmtA('arr'), fmtA('quai'), fmtA('chg'), fmtA('fin_chg'), fmtA('dep'), deltaA]);
+        (t.deliveries||[]).length, fmtA('arr'), fmtA('quai'), fmtA('chg'), fmtA('fin_chg'), fmtA('dep'), deltaA, pretA, motifA]);
     });
     var wsArch = XLSX.utils.aoa_to_sheet(archRows);
-    wsArch['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16}];
+    wsArch['!cols'] = [{wch:12},{wch:14},{wch:10},{wch:11},{wch:18},{wch:18},{wch:18},{wch:18},{wch:18},{wch:16},{wch:14},{wch:16}];
     XLSX.utils.book_append_sheet(wb, wsArch, 'Camions archiv\u00e9s');
   }
 
@@ -5208,6 +5210,37 @@ function exportExcel(){
       var dec=c.decalage||{mtx3:0,transporteur:0,pas_venu:0,total:0};
       statRows.push([c.name,c.count,c.heure,c.avance,c.retard,c.attente,pct+'%',avgLoad,avgWait,dec.total||0,dec.mtx3||0,dec.transporteur||0,dec.pas_venu||0]);
     });
+  }
+  // ═══ Section État d'arrivée (Prêt / Pas prêt) ═══
+  var pretStats={total:0,pret:0,nok:0,retard_silo:0,retard_prepa:0,autre:0};
+  var pretDetail=[];
+  function _collectPret(t,ts){
+    if(!ts.hasOwnProperty('arr_pret')) return;
+    pretStats.total++;
+    if(ts.arr_pret){pretStats.pret++;}
+    else{pretStats.nok++;var m=ts.arr_motif||'autre';pretStats[m]=(pretStats[m]||0)+1;}
+    var etaR2=computeETA(t);
+    pretDetail.push([t.transporteur||t.itin||'',t.date||'',t.creneau||'',
+      ts.arr?ts.arr.replace('T',' ').slice(0,16):'',
+      ts.arr_pret?'Oui':'Non',
+      ts.arr_motif==='retard_silo'?'Retard silo':ts.arr_motif==='retard_prepa'?'Retard pr\u00e9pa':ts.arr_motif==='autre'?'Autre motif':'',
+      etaR2?etaR2.label:'']);
+  }
+  trucks.forEach(function(t){_collectPret(t,timestamps[t.id]||{});});
+  (_completedTrucks||[]).forEach(function(c){_collectPret(c,c.timestamps||{});});
+  if(pretStats.total){
+    var pPct=Math.round(pretStats.pret/pretStats.total*100);
+    statRows.push([''],['=== \u00c9TAT D\'ARRIV\u00c9E — MARCHANDISE PR\u00caTE ==='],[''],
+      ['Statut','Nombre','%']);
+    statRows.push(['\u2705 Pr\u00eate',pretStats.pret,pPct+'%']);
+    statRows.push(['\u274c Pas pr\u00eate',pretStats.nok,Math.round(pretStats.nok/pretStats.total*100)+'%']);
+    statRows.push(['Total avec statut',pretStats.total,'']);
+    statRows.push([''],['D\u00e9tail motifs non-pr\u00eates'],['Motif','Nb']);
+    statRows.push(['\u23F3 Retard silo',pretStats.retard_silo]);
+    statRows.push(['\uD83D\uDD27 Retard pr\u00e9pa',pretStats.retard_prepa]);
+    statRows.push(['\u26AA Autre motif',pretStats.autre]);
+    statRows.push([''],['D\u00e9tail par camion'],['Transporteur','Date','Cr\u00e9neau','Arriv\u00e9e','Pr\u00eate ?','Motif','ETA d\u00e9part']);
+    pretDetail.forEach(function(r){statRows.push(r);});
   }
   // ═══ Section ETA ═══
   var etaActiveList=[];
