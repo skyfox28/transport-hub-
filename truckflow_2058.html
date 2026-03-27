@@ -1508,6 +1508,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 
       <button class="btn-sm" id="groupCreneauBtn" onclick="toggleGroupCreneau()" title="Grouper par créneau">&#128336; Grouper</button>
       <button class="btn-sm" id="montageModeBtn" onclick="enterMontageMode()" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:var(--blue);font-weight:700" title="Construire les camions manuellement par transporteur">&#128295; Montage</button>
+      <button class="btn-sm" id="noAutoGenBtn" onclick="toggleNoAutoGen()" title="Désactiver la création automatique de camions à l'import VL06O">&#128683; Auto</button>
       <button class="btn-sm" id="camViewBtn" onclick="toggleCamView()" style="background:rgba(45,202,114,.1);border-color:rgba(45,202,114,.25);color:#2dc272;font-weight:700" title="Basculer vue liste / cartes">&#9783; Liste</button>
       <span style="display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:4px 10px;border-radius:20px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)" title="Définir la date de saisie (utile le lendemain matin pour saisir des timestamps rétroactifs)">
         <span style="font-size:12px;color:#f59e0b">📅</span>
@@ -3272,6 +3273,7 @@ function getLoadingAlert(ts){
 
 function renderTrucks(){
   updatePonctStats();
+  _applyNoAutoGenBtn();
   if(_camListMode&&!_montageMode){renderCamListView();return;}
   var container=document.getElementById('truckList');
   var indices=sortedIdx();
@@ -4518,22 +4520,24 @@ function autoGenTrucks(){
     });
   });
   var newTrucks = [];
-  Object.keys(sapMap).forEach(function(key){
-    var orphans = sapMap[key].filter(function(id){
-      return !assigned.has(id) && !reserved.has(id);
+  if(!_noAutoGen){
+    Object.keys(sapMap).forEach(function(key){
+      var orphans = sapMap[key].filter(function(id){
+        return !assigned.has(id) && !reserved.has(id);
+      });
+      if(!orphans.length) return;
+      var parts = key.split(':');
+      var itin = parts[0], date = parts.slice(1).join(':');
+      var nt = {
+        id: 'sap_'+key.replace(/[^a-z0-9]/gi,'_')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+        itin:itin, transporteur:ITIN_MAP[itin]||itin,
+        creneau:CRENEAU_MAP[itin]||'', date:date,
+        deliveries:orphans.slice(), locked:false
+      };
+      orphans.forEach(function(id){ assigned.add(id); });
+      newTrucks.push(nt);
     });
-    if(!orphans.length) return;
-    var parts = key.split(':');
-    var itin = parts[0], date = parts.slice(1).join(':');
-    var nt = {
-      id: 'sap_'+key.replace(/[^a-z0-9]/gi,'_')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
-      itin:itin, transporteur:ITIN_MAP[itin]||itin,
-      creneau:CRENEAU_MAP[itin]||'', date:date,
-      deliveries:orphans.slice(), locked:false
-    };
-    orphans.forEach(function(id){ assigned.add(id); });
-    newTrucks.push(nt);
-  });
+  }
   trucks = trucks.filter(function(t){
     if(t.locked) return true;
     var hasLivs = (t.deliveries||[]).some(function(id){ return allLivIds.has(id); });
@@ -6039,6 +6043,27 @@ function openCamDetailManual(ti,key){
 
 // ─── Mode Montage ─────────────────────────────────────────────────────────
 var _montageMode=false;
+var _noAutoGen=(function(){try{return localStorage.getItem('tf_no_auto_gen')==='1';}catch(e){return false;}})();
+function toggleNoAutoGen(){
+  _noAutoGen=!_noAutoGen;
+  try{localStorage.setItem('tf_no_auto_gen',_noAutoGen?'1':'0');}catch(e){}
+  var btn=document.getElementById('noAutoGenBtn');
+  if(btn){
+    btn.style.background=_noAutoGen?'rgba(255,69,58,.18)':'rgba(59,130,246,.12)';
+    btn.style.borderColor=_noAutoGen?'rgba(255,69,58,.45)':'rgba(59,130,246,.25)';
+    btn.style.color=_noAutoGen?'#ff453a':'var(--blue)';
+    btn.title=_noAutoGen?'Création auto désactivée — cliquer pour réactiver':'Désactiver la création automatique de camions à l\'import VL06O';
+  }
+  showToast(_noAutoGen?'🚫 Création auto camions désactivée':'✅ Création auto camions activée');
+}
+function _applyNoAutoGenBtn(){
+  var btn=document.getElementById('noAutoGenBtn');
+  if(!btn)return;
+  btn.style.background=_noAutoGen?'rgba(255,69,58,.18)':'rgba(59,130,246,.12)';
+  btn.style.borderColor=_noAutoGen?'rgba(255,69,58,.45)':'rgba(59,130,246,.25)';
+  btn.style.color=_noAutoGen?'#ff453a':'var(--blue)';
+  btn.title=_noAutoGen?'Création auto désactivée — cliquer pour réactiver':'Désactiver la création automatique de camions à l\'import VL06O';
+}
 var _montageSelected={};
 
 // Retourne le nom transporteur depuis les camions existants ayant le même itin, sinon l'itin lui-même
