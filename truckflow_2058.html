@@ -5167,7 +5167,39 @@ function exportExcel(){
 
   // ═══ Feuille Statistiques ═══
   var st=computeTimingStats();
-  var statRows=[['=== PONCTUALIT\u00c9 CAMIONS ==='],[''],['Statut','Nombre','%']];
+  // Ponctualité réelle à l'arrivée (uniquement camions avec ts.arr enregistré)
+  var arrPonct={heure:0,avance:0,retard:0,total:0,sumRetardMin:0,sumAvanceMin:0};
+  var arrPonctDetail=[];
+  function _collectArrPonct(t,ts){
+    if(!ts.arr) return;
+    var p=getPonctualite(t,ts,Date.now());
+    arrPonct.total++;
+    var deltaMin=0;
+    if(ts.arr&&t.creneau){var cw=creWindow(t.creneau);if(cw){var aM=new Date(ts.arr);var aMin=aM.getHours()*60+aM.getMinutes();if(aMin<cw.start){deltaMin=-(cw.start-aMin);}else if(aMin<=cw.end){deltaMin=0;}else{deltaMin=aMin-cw.end;}}}
+    if(p.status==='heure'){arrPonct.heure++;}
+    else if(p.status==='avance'){arrPonct.avance++;arrPonct.sumAvanceMin+=Math.abs(deltaMin);}
+    else if(p.status==='retard_reel'){arrPonct.retard++;arrPonct.sumRetardMin+=deltaMin;}
+    arrPonctDetail.push([t.transporteur||t.itin||'',t.date||'',t.creneau||'',
+      ts.arr?ts.arr.replace('T',' ').slice(0,16):'',
+      p.label,deltaMin===0?'Pile':(deltaMin>0?'+':'')+deltaMin+' min',p.delta||'']);
+  }
+  trucks.forEach(function(t){_collectArrPonct(t,timestamps[t.id]||{});});
+  (_completedTrucks||[]).forEach(function(c){_collectArrPonct(c,c.timestamps||{});});
+  var statRows=[['=== PONCTUALIT\u00c9 R\u00c9ELLE \u00c0 L\'ARRIV\u00c9E ==='],[''],
+    ['Statut','Nombre','%','Moyenne d\u00e9calage']];
+  var arrTot=arrPonct.total||1;
+  statRows.push(['\u00c0 l\'heure',arrPonct.heure,Math.round(arrPonct.heure/arrTot*100)+'%','—']);
+  statRows.push(['En avance',arrPonct.avance,Math.round(arrPonct.avance/arrTot*100)+'%',
+    arrPonct.avance?'-'+Math.round(arrPonct.sumAvanceMin/arrPonct.avance)+' min':'—']);
+  statRows.push(['En retard',arrPonct.retard,Math.round(arrPonct.retard/arrTot*100)+'%',
+    arrPonct.retard?'+'+Math.round(arrPonct.sumRetardMin/arrPonct.retard)+' min':'—']);
+  statRows.push(['Total arriv\u00e9s',arrPonct.total,'','']);
+  if(arrPonctDetail.length){
+    statRows.push([''],['D\u00e9tail par camion'],
+      ['Transporteur','Date','Cr\u00e9neau','Arriv\u00e9e r\u00e9elle','Statut','Delta','D\u00e9tail']);
+    arrPonctDetail.forEach(function(r){statRows.push(r);});
+  }
+  statRows.push([''],['=== PONCTUALIT\u00c9 GLOBALE (estim\u00e9e + r\u00e9elle) ==='],[''],['Statut','Nombre','%']);
   var stTotal=st.truckCount||1;
   statRows.push(['\u00c0 l\'heure',st.ponct.heure,Math.round(st.ponct.heure/stTotal*100)+'%']);
   statRows.push(['En avance',st.ponct.avance,Math.round(st.ponct.avance/stTotal*100)+'%']);
@@ -5269,7 +5301,7 @@ function exportExcel(){
     if(idxCarr>=0) statRows[idxCarr+1]=['Transporteur','Camions','\u00c0 l\'heure','En avance','En retard','En attente','% Ponctualit\u00e9','Moy. chargement','Moy. attente','D\u00e9calages total','MTX3','Transporteur','Pas venu'];
   }
   var wsStat=XLSX.utils.aoa_to_sheet(statRows);
-  wsStat['!cols']=[{wch:30},{wch:14},{wch:12},{wch:12},{wch:14},{wch:12},{wch:14},{wch:16},{wch:16}];
+  wsStat['!cols']=[{wch:32},{wch:14},{wch:12},{wch:16},{wch:14},{wch:12},{wch:14},{wch:16},{wch:16},{wch:25}];
   XLSX.utils.book_append_sheet(wb,wsStat,'Statistiques');
 
   // ═══ Feuille Historique (données cumulées) ═══
