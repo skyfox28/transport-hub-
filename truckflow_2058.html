@@ -2887,6 +2887,37 @@ function _nowIso(){
   if(_workingDate){var b=new Date(_workingDate+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);if(!isNaN(b.getTime()))return b.toISOString();}
   return new Date().toISOString();
 }
+// Picker quai sans re-pointer l'heure (saisie manuelle)
+function _pickQuaiAssignOnly(ti){
+  var tid=trucks[ti].id;
+  var ov=document.getElementById('_qassign');if(ov)ov.remove();
+  ov=document.createElement('div');ov.id='_qassign';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)';
+  var curQ=null;Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===tid)curQ=Number(q);});
+  var btns=[2,3,4,5,6,7,8,9,10,11].map(function(q){
+    var occ=quaiAssign[q]&&quaiAssign[q]!==tid;var isCur=q===curQ;
+    var bd=occ?'rgba(255,255,255,.07)':(isCur?'rgba(76,110,245,.5)':'rgba(59,130,246,.35)');
+    var bg=occ?'rgba(255,255,255,.03)':(isCur?'rgba(76,110,245,.28)':'rgba(59,130,246,.14)');
+    var tx=occ?'#484f57':(isCur?'#818cf8':'#60a5fa');
+    return '<button data-q="'+q+'" '+(occ?'disabled':'')+' style="padding:11px 0;border-radius:10px;border:1px solid '+bd+';background:'+bg+';color:'+tx+';font-size:15px;font-weight:800;cursor:'+(occ?'default':'pointer')+';width:100%">'+(occ?'<span style="font-size:8px;display:block;color:#484f57;margin-bottom:1px">Occup\u00e9</span>':'')+' Q'+q+(isCur?' \u2713':'')+' </button>';
+  }).join('');
+  ov.innerHTML='<div style="background:rgba(13,17,23,.96);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:24px;max-width:400px;width:92%;backdrop-filter:blur(24px)">'
+    +'<div style="font-size:15px;font-weight:800;margin-bottom:3px;color:#f0f6fc">\uD83D\uDD04 Assignation quai</div>'
+    +'<div style="font-size:11px;color:#8b949e;margin-bottom:16px">Heure d\u00e9j\u00e0 enregistr\u00e9e \u2014 s\u00e9lectionner le quai</div>'
+    +'<div id="_qassign_grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">'+btns+'</div>'
+    +'<button id="_qassign_skip" style="width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#8b949e;font-size:12px;cursor:pointer">Passer (sans quai)</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#_qassign_grid').addEventListener('click',function(e){
+    var btn=e.target.closest('[data-q]');if(!btn||btn.disabled)return;
+    var q=Number(btn.getAttribute('data-q'));
+    Object.keys(quaiAssign).forEach(function(k){if(quaiAssign[k]===tid)delete quaiAssign[k];});
+    quaiAssign[q]=tid;saveQuaiAssign();ov.remove();renderTrucks();renderQuai();showToast('Quai '+q+' assign\u00e9');
+  });
+  ov.querySelector('#_qassign_skip').addEventListener('click',function(){ov.remove();renderTrucks();});
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+}
+
 // ─── Auto-évaluation Prêt depuis les statuts livraisons ─────────────────────
 function _autoEvalPretForTruck(t){
   if(!t||!t.deliveries||!t.deliveries.length) return null;
@@ -3077,6 +3108,8 @@ function makeTsCell(def,real,deb,ti){
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=now.toISOString();
       save();
+      if(def.key==='arr'){editRow.style.display='none';renderTrucks();_stampArrModal(ti);_arrPretIsArrival=false;return;}
+      if(def.key==='quai'){editRow.style.display='none';renderTrucks();_pickQuaiAssignOnly(ti);return;}
       if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);return;}}
       renderTrucks();showToast(def.lbl+' point\u00e9 manuellement \u2192 '+inp.value);
     });
@@ -3193,6 +3226,8 @@ function makeTsChip(def,real,deb,ti,isNext,fullTs){
       if(!timestamps[trucks[ti].id])timestamps[trucks[ti].id]={};
       timestamps[trucks[ti].id][def.key]=nd.toISOString();
       save();
+      if(def.key==='arr'){editArea.classList.remove('open');renderTrucks();_stampArrModal(ti);_arrPretIsArrival=false;return;}
+      if(def.key==='quai'){editArea.classList.remove('open');renderTrucks();_pickQuaiAssignOnly(ti);return;}
       if(def.key==='dep'){var archived=cleanCompletedTrucks();if(archived>0){renderTrucks();renderAll();if(_activeDay)try{renderDayDetail(_activeDay);}catch(e){}showToast(def.lbl+' \u2192 '+inp.value);return;}}
       renderTrucks();showToast(def.lbl+' \u2192 '+inp.value);
     });
