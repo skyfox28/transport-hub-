@@ -6190,82 +6190,78 @@ function _buildPickingRouteHTML(selDate){
     if(!truckGroups[key]){
       truckGroups[key]=[];
       if(t){var w=creWindow(t.creneau||'')||{start:9999};
-        truckMeta[key]={start:w.start,creneau:t.creneau||'?',transporteur:t.transporteur||t.itin||'?'};
-      }else{truckMeta[key]={start:99999,creneau:'',transporteur:''};}
+        truckMeta[key]={start:w.start,creneau:t.creneau||'',transporteur:t.transporteur||t.itin||'—'};
+      }else{truckMeta[key]={start:99999,creneau:'',transporteur:'Sans camion'};}
     }
     truckGroups[key].push(d);
   });
   var sortedKeys=Object.keys(truckGroups).sort(function(a,b){return truckMeta[a].start-truckMeta[b].start;});
   var totalPick=0;pickDelivs.forEach(function(d){totalPick+=(d.colisPick||0);});
   var nbTrucks=sortedKeys.filter(function(k){return k!=='__sans__';}).length;
-  var html='<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">'
-    +'<div style="padding:9px 16px;background:rgba(191,90,242,.12);border:1px solid rgba(191,90,242,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">&#9995; '+totalPick+' colis picking</div>'
-    +'<div style="padding:9px 16px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--blue)">'+pickDelivs.length+' livraison'+(pickDelivs.length>1?'s':'')+'</div>'
-    +'<div style="padding:9px 16px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.3);border-radius:10px;font-size:13px;font-weight:800;color:#2dc272">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+'</div>'
-  +'</div>';
+  var html='<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">'
+    +'<div style="padding:7px 14px;background:rgba(191,90,242,.12);border:1px solid rgba(191,90,242,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">&#9995; '+totalPick+' colis picking</div>'
+    +'<div style="padding:7px 14px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--blue)">'+pickDelivs.length+' livraison'+(pickDelivs.length>1?'s':'')+'</div>'
+    +'<div style="padding:7px 14px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.3);border-radius:10px;font-size:13px;font-weight:800;color:#2dc272">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+'</div>'
+  +'</div>'
+  +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'
+  +'<thead><tr style="background:rgba(255,255,255,.06);border-bottom:2px solid rgba(255,255,255,.12)">'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600;width:40px">#</th>'
+  +'<th style="padding:9px 14px;text-align:left;font-size:11px;color:var(--t3);font-weight:600">Transporteur</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">Cr\u00e9neau</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">Livraisons</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--purple);font-weight:700">Colis picking</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">&#10003; Pr\u00e9par\u00e9</th>'
+  +'</tr></thead><tbody>';
   sortedKeys.forEach(function(key,idx){
     var meta=truckMeta[key];var delivs=truckGroups[key];
     var grpPick=0;delivs.forEach(function(d){grpPick+=(d.colisPick||0);});
     var isSans=key==='__sans__';
-    var rankStr=isSans?'?':String(idx+1);
-    var borderC=isSans?'rgba(245,158,11,.3)':'rgba(59,130,246,.25)';
-    var bgHdr=isSans?'rgba(245,158,11,.08)':'rgba(59,130,246,.07)';
-    var rankBg=isSans?'rgba(245,158,11,.2)':'rgba(59,130,246,.2)';
-    var rankCol=isSans?'#f59e0b':'var(--blue)';
-    html+='<div style="margin-bottom:14px;border:1px solid '+borderC+';border-radius:14px;overflow:hidden">'
-      +'<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:'+bgHdr+';border-bottom:1px solid rgba(255,255,255,.08)">'
-      +'<div style="width:28px;height:28px;border-radius:7px;background:'+rankBg+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:'+rankCol+'">'+rankStr+'</div>'
-      +'<div style="flex:1">'
-      +(isSans?'<span style="font-size:13px;font-weight:700;color:var(--amber)">Sans camion assign\u00e9</span>'
-        :'<span style="font-size:13px;font-weight:800;color:var(--t1)">\uD83D\uDE9B '+escH(meta.transporteur)+'</span>'
-        +(meta.creneau&&meta.creneau!=='?'?'<span style="font-size:12px;font-weight:700;color:var(--blue);margin-left:10px;padding:2px 10px;background:rgba(59,130,246,.15);border-radius:10px">\u23F0 '+meta.creneau+'</span>':''))
-      +'</div>'
-      +'<span style="font-size:13px;font-weight:900;color:var(--purple)">'+grpPick+' pk</span>'
-      +'<span style="font-size:11px;color:var(--t3)">'+delivs.length+' livr.</span>'
-      +'</div>'
-      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:rgba(0,0,0,.1)">'
-      +'<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">N\u00b0 Livraison</th>'
-      +'<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Destinataire</th>'
-      +'<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Ville</th>'
-      +'<th style="padding:6px 12px;text-align:center;color:var(--purple);font-weight:700">Colis Pick</th>'
-      +'<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600">Pr\u00e9pa</th>'
-      +'<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600">&#9989; Fait</th>'
-      +'</tr></thead><tbody>';
-    delivs.sort(function(a,b){return (b.colisPick||0)-(a.colisPick||0);});
-    delivs.forEach(function(d){
-      var spCol=d.sp==='C'?'#2dc272':d.sp==='B'?'#ff9f0a':d.sp==='A'?'#ff453a':'var(--t3)';
-      html+='<tr style="border-bottom:1px solid rgba(255,255,255,.05)">'
-        +'<td style="padding:7px 12px;font-weight:700;color:var(--t1)">'+escH(d.id)+'</td>'
-        +'<td style="padding:7px 12px">'+escH(d.dest||'\u2014')+'</td>'
-        +'<td style="padding:7px 12px;color:var(--t3)">'+escH(d.ville||'\u2014')+'</td>'
-        +'<td style="padding:7px 12px;text-align:center;font-weight:900;color:var(--purple)">\u270b '+Math.round(d.colisPick)+'</td>'
-        +'<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+spCol+'">'+escH(d.sp||'\u2014')+'</td>'
-        +'<td style="padding:7px 12px;text-align:center"><span style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-radius:4px"></span></td>'
-      +'</tr>';
-    });
-    html+='</tbody></table></div></div>';
+    var rowBg=idx%2===0?'rgba(255,255,255,.02)':'transparent';
+    html+='<tr style="border-bottom:1px solid rgba(255,255,255,.06);background:'+rowBg+'">'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:900;color:var(--blue)">'+(isSans?'—':idx+1)+'</td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:var(--t1)">'+escH(meta.transporteur)+'</td>'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--blue)">'+(meta.creneau?'\u23F0 '+escH(meta.creneau):'—')+'</td>'
+      +'<td style="padding:10px 14px;text-align:center;color:var(--t2)">'+delivs.length+'</td>'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:900;font-size:15px;color:var(--purple)">\u270b '+Math.round(grpPick)+'</td>'
+      +'<td style="padding:10px 14px;text-align:center"><span style="display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.25);border-radius:5px"></span></td>'
+    +'</tr>';
   });
-  html+='<div style="margin-top:12px;font-size:10px;color:var(--t3);text-align:right">G\u00e9n\u00e9r\u00e9 le '+new Date().toLocaleString('fr-FR')+' \u2014 TruckFlow '+APP_VERSION+'</div>';
+  html+='<tr style="background:rgba(191,90,242,.08);border-top:2px solid rgba(191,90,242,.3);font-weight:900">'
+    +'<td colspan="4" style="padding:10px 14px;text-align:right;color:var(--t3);font-size:12px">TOTAL</td>'
+    +'<td style="padding:10px 14px;text-align:center;font-size:16px;color:var(--purple)">\u270b '+totalPick+'</td>'
+    +'<td></td></tr>';
+  html+='</tbody></table></div>'
+    +'<div style="margin-top:10px;font-size:10px;color:var(--t3);text-align:right">G\u00e9n\u00e9r\u00e9 le '+new Date().toLocaleString('fr-FR')+' \u2014 TruckFlow '+APP_VERSION+'</div>';
   return html;
 }
 function printPickingRoute(){
   var body=document.getElementById('_pickingRouteBody');
   if(!body)return;
-  var w=window.open('','_blank','width=960,height=750');
+  var dateEl=document.querySelector('#_pickingRouteModal select');
+  var dateLabel=dateEl?dateEl.value:'';
+  var w=window.open('','_blank','width=820,height=700');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Feuille Picking TruckFlow</title>'
-    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:16px 20px}'
-    +'table{width:100%;border-collapse:collapse}th{background:#f0f0f0;border:1px solid #ccc;padding:5px 10px;text-align:left;font-weight:700}'
-    +'td{border:1px solid #e0e0e0;padding:5px 10px}.pick-count{font-weight:900;color:#6d28d9;text-align:center}'
-    +'@media print{.no-print{display:none!important}body{padding:8px}}'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:18px 22px}'
+    +'h2{font-size:17px;font-weight:900;margin-bottom:2px}p.sub{color:#555;font-size:10px;margin-bottom:14px}'
+    +'table{width:100%;border-collapse:collapse;margin-top:4px}'
+    +'th{background:#ececec;border:1px solid #bbb;padding:7px 12px;text-align:left;font-size:11px;font-weight:700}'
+    +'th.center{text-align:center}td{border:1px solid #ddd;padding:8px 12px}'
+    +'td.center{text-align:center}td.pick{text-align:center;font-weight:900;font-size:15px;color:#6d28d9}'
+    +'td.rank{text-align:center;font-weight:900;color:#1d4ed8}tr.total{background:#f3e8ff;font-weight:900}'
+    +'tr.total td{border-top:2px solid #9333ea}.chk{display:inline-block;width:22px;height:22px;border:2px solid #999;border-radius:4px}'
+    +'.summary{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}'
+    +'.badge{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:800}'
+    +'@media print{.no-print{display:none!important}body{padding:10px}}'
     +'</style></head><body>');
   w.document.write('<div class="no-print" style="margin-bottom:12px"><button onclick="window.print()" style="padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #333;border-radius:6px">&#128438; Imprimer / PDF</button></div>');
-  w.document.write('<h2 style="font-size:16px;font-weight:900;margin-bottom:4px">&#9995; Feuille de route Picking</h2>');
-  w.document.write('<p style="color:#666;font-size:10px;margin-bottom:12px">'+new Date().toLocaleString('fr-FR')+'</p>');
+  w.document.write('<h2>&#9995; Feuille de route Picking</h2>');
+  w.document.write('<p class="sub">'+(dateLabel?'Date : '+dateLabel+' &mdash; ':'')+new Date().toLocaleString('fr-FR')+'</p>');
   var src=body.innerHTML;
+  // Strip CSS vars for print
   src=src.replace(/color:var\(--t[0-9]\)/g,'color:#333').replace(/color:var\(--purple\)/g,'color:#6d28d9')
-    .replace(/color:var\(--blue\)/g,'color:#1d4ed8').replace(/color:var\(--amber\)/g,'color:#92400e')
-    .replace(/color:var\(--red\)/g,'color:#dc2626').replace(/color:var\(--green\)/g,'color:#16a34a')
-    .replace(/background:rgba\([^)]+\)/g,'').replace(/border:[^;]*rgba\([^)]+\)[^;]*/g,'border:1px solid #ccc');
+    .replace(/color:var\(--blue\)/g,'color:#1d4ed8').replace(/color:var\(--t2\)/g,'color:#555')
+    .replace(/color:var\(--t3\)/g,'color:#777')
+    .replace(/background:[^;]+rgba\([^)]+\)[^;]*/g,'').replace(/border:[^;]*rgba\([^)]+\)[^;]*/g,'border:1px solid #ccc');
   w.document.write(src);
   w.document.write('</body></html>');
   w.document.close();
@@ -9688,7 +9684,7 @@ function renderArchive(){
     allWeeks.forEach(function(wk){
       var isAct=wk===_archiveWeekFilter;
       var wkNum=wk.split('-S')[1]||wk;
-      html+='<button onclick="setArchiveWeekFilter(\"'+(wk)+'\")" style="padding:4px 12px;border-radius:14px;border:1px solid '+(isAct?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isAct?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isAct?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">S'+(wkNum)+' <span style="font-size:10px;opacity:.7">('+(weekMap[wk])+')</span></button>';
+      html+='<button onclick="setArchiveWeekFilter(\''+wk+'\')" style="padding:4px 12px;border-radius:14px;border:1px solid '+(isAct?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isAct?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isAct?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">S'+(wkNum)+' <span style="font-size:10px;opacity:.7">('+(weekMap[wk])+')</span></button>';
     });
     html+='</div>';
   }
@@ -9814,7 +9810,7 @@ renderStats=function(){
     var isAct=wk===_statWeekFilter;
     var wkNum=wk.split('-S')[1]||wk;
     var yr=wk.split('-S')[0]||'';
-    html+='<button onclick="setStatWeekFilter(\"'+(wk)+'\")" style="padding:4px 12px;border-radius:14px;border:1px solid '+(isAct?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isAct?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isAct?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">S'+(wkNum)+' '+(yr)+'</button>';
+    html+='<button onclick="setStatWeekFilter(\''+wk+'\')" style="padding:4px 12px;border-radius:14px;border:1px solid '+(isAct?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isAct?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isAct?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">S'+(wkNum)+' '+(yr)+'</button>';
   });
   bar.innerHTML=html;
   el.insertBefore(bar,el.firstChild);
