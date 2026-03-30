@@ -9948,19 +9948,24 @@ async function tfLogin(){
   var userEl=document.getElementById('auth-user');
   var pwdEl=document.getElementById('auth-pwd');
   var errEl=document.getElementById('auth-error');
-  var user=(userEl.value||'').trim().toLowerCase();
-  var pwd=pwdEl.value||'';
-  errEl.textContent='';
-  if(!user||!pwd){errEl.textContent='Veuillez remplir tous les champs.';return;}
-  var hash=await tfHashPwd(pwd);
-  if(_TF_AUTH_USERS[user]&&hash===_TF_AUTH_USERS[user]){
-    sessionStorage.setItem('tf_auth','1');
-    document.getElementById('auth-overlay').style.display='none';
-    document.getElementById('auth-import-modal').style.display='flex';
-  }else{
-    errEl.textContent='Identifiant ou mot de passe incorrect.';
-    pwdEl.value='';
-    pwdEl.focus();
+  try{
+    var user=(userEl?userEl.value||'':'').trim().toLowerCase();
+    var pwd=pwdEl?pwdEl.value||'':'';
+    if(errEl)errEl.textContent='';
+    if(!user||!pwd){if(errEl)errEl.textContent='Veuillez remplir tous les champs.';return;}
+    var hash=await tfHashPwd(pwd);
+    var users=typeof _TF_AUTH_USERS!=='undefined'?_TF_AUTH_USERS:{};
+    if(users[user]&&hash===users[user]){
+      sessionStorage.setItem('tf_auth','1');
+      document.getElementById('auth-overlay').style.display='none';
+      document.getElementById('auth-import-modal').style.display='flex';
+    }else{
+      if(errEl){errEl.textContent='Identifiant ou mot de passe incorrect.';}
+      if(pwdEl){pwdEl.value='';pwdEl.focus();}
+    }
+  }catch(err){
+    if(errEl)errEl.textContent='Erreur: '+err.message;
+    console.error('[tfLogin]',err);
   }
 }
 
