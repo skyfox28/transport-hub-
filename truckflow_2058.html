@@ -1761,7 +1761,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.3';
+var APP_VERSION = 'v1.4';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -1890,7 +1890,7 @@ function saveManual(){ localStorage.setItem('th10_manual', JSON.stringify(quaiMa
 function saveCompleted(){ try{localStorage.setItem('tf_completed',JSON.stringify(_completedTrucks));}catch(e){} }
 function loadCompleted(){ try{var s=localStorage.getItem('tf_completed');if(s)_completedTrucks=JSON.parse(s);}catch(e){} }
 function purgeOldCompleted(){
-  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-10);
+  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-90);
   var cutoffStr=cutoff.toISOString();
   _completedTrucks=_completedTrucks.filter(function(c){return c.completedAt>cutoffStr;});
 }
@@ -9432,7 +9432,7 @@ function renderArchive(){
   var el=document.getElementById('archiveContent');
   if(!el) return;
   if(!_completedTrucks.length){
-    el.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">\uD83D\uDCC1</div><p>Aucun camion archiv\u00e9.<br>Les camions marqu\u00e9s "Parti" sont archiv\u00e9s ici automatiquement (10 jours de r\u00e9tention).</p></div>';
+    el.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">\uD83D\uDCC1</div><p>Aucun camion archiv\u00e9.<br>Les camions marqu\u00e9s "Parti" sont archiv\u00e9s ici automatiquement (90 jours de r\u00e9tention).</p></div>';
     return;
   }
   // Group by date
