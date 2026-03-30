@@ -1761,7 +1761,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.2';
+var APP_VERSION = 'v1.3';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6060,6 +6060,7 @@ function openCamDetailManual(ti,key){
 
 // ─── Mode Montage ─────────────────────────────────────────────────────────
 var _montageMode=false;
+var _montageDateFilter=null; // null = toutes dates, sinon 'dd/mm/yyyy'
 
 var _montageSelected={};
 
@@ -6073,6 +6074,15 @@ function _transp4itin(itin){
 function enterMontageMode(){
   _montageMode=true;
   _montageSelected={};
+  // Initialiser le filtre sur la date du jour si elle existe dans les livraisons
+  var today=new Date();
+  var dd=String(today.getDate()).padStart(2,'0');
+  var mm=String(today.getMonth()+1).padStart(2,'0');
+  var todayStr=dd+'/'+mm+'/'+today.getFullYear();
+  var assigned=_montageAssigned();
+  var unassigned=(APP.deliveries||[]).filter(function(d){return !assigned.has(d.id);});
+  var hasTodayDelivs=unassigned.some(function(d){return d.date===todayStr;});
+  _montageDateFilter=hasTodayDelivs?todayStr:null;
   document.getElementById('truckList').style.display='none';
   var btn=document.getElementById('montageModeBtn');
   if(btn){btn.style.background='rgba(59,130,246,.3)';btn.textContent='⬅ Retour camions';btn.onclick=exitMontageMode;}
@@ -6096,11 +6106,31 @@ function _montageAssigned(){
   return s;
 }
 
+function setMontageDate(date){
+  _montageDateFilter=(date===_montageDateFilter)?null:date;
+  _montageSelected={};
+  renderMontagePanel();
+}
+
 function renderMontagePanel(){
   var panel=document.getElementById('montagePanel');
   if(!panel)return;
   var assigned=_montageAssigned();
-  var unassigned=(APP.deliveries||[]).filter(function(d){return !assigned.has(d.id);});
+  var allUnassigned=(APP.deliveries||[]).filter(function(d){return !assigned.has(d.id);});
+
+  // Collect all available dates for filter buttons
+  var dateSet={};
+  allUnassigned.forEach(function(d){if(d.date)dateSet[d.date]=true;});
+  var allDates=Object.keys(dateSet).sort(function(a,b){
+    var da=a.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1');
+    var db=b.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1');
+    return da.localeCompare(db);
+  });
+
+  // Apply date filter
+  var unassigned=_montageDateFilter
+    ?allUnassigned.filter(function(d){return d.date===_montageDateFilter;})
+    :allUnassigned;
 
   // Group by itin
   var groups={};
@@ -6138,15 +6168,31 @@ function renderMontagePanel(){
   var html='';
 
   // ── En-tête mode montage ──
-  html+='<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(165deg,rgba(59,130,246,.08),rgba(59,130,246,.03));border-bottom:1px solid rgba(59,130,246,.18);margin-bottom:16px">'+
-    '<div style="width:34px;height:34px;border-radius:9px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);display:flex;align-items:center;justify-content:center;font-size:17px">&#128295;</div>'+
-    '<div>'+
-      '<div style="font-size:15px;font-weight:800;color:var(--t1)">Mode Montage</div>'+
-      '<div style="font-size:11px;color:var(--t3)">'+unassigned.length+' livraison'+(unassigned.length>1?'s':'')+' \u00e0 monter &middot; '+keys.length+' transporteur'+(keys.length>1?'s':'')+' &middot; Camions verrouill\u00e9s auto</div>'+
+  // Filtre date
+  var dateBtns='';
+  if(allDates.length>1){
+    if(_montageDateFilter){
+      dateBtns+='<button onclick="setMontageDate(null)" style="padding:5px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:var(--t3);font-size:11px;font-weight:700;cursor:pointer">Toutes</button>';
+    }
+    allDates.forEach(function(dt){
+      var isActive=dt===_montageDateFilter;
+      dateBtns+='<button onclick="setMontageDate(\''+dt+'\')" style="padding:5px 12px;border-radius:16px;border:1px solid '+(isActive?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isActive?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isActive?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">'+dt+'</button>';
+    });
+  }
+  var filterLine=dateBtns?'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">&#128197; '+dateBtns+'</div>':'';
+
+  html+='<div style="padding:14px 18px;background:linear-gradient(165deg,rgba(59,130,246,.08),rgba(59,130,246,.03));border-bottom:1px solid rgba(59,130,246,.18);margin-bottom:16px">'+
+    '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:34px;height:34px;border-radius:9px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">&#128295;</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:15px;font-weight:800;color:var(--t1)">Mode Montage</div>'+
+        '<div style="font-size:11px;color:var(--t3)">'+unassigned.length+' livraison'+(unassigned.length>1?'s':'')+(_montageDateFilter?' pour le '+_montageDateFilter:'')+' &middot; '+keys.length+' transporteur'+(keys.length>1?'s':'')+' &middot; Camions verrouill\u00e9s auto</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+
+        '<button onclick="exitMontageMode()" style="padding:6px 16px;border-radius:20px;border:1px solid rgba(255,69,58,.3);background:rgba(255,69,58,.06);color:#ff453a;font-size:12px;font-weight:700;cursor:pointer">&#x2190; Retour</button>'+
+      '</div>'+
     '</div>'+
-    '<div style="margin-left:auto;display:flex;align-items:center;gap:8px">'+
-      '<button onclick="exitMontageMode()" style="padding:6px 16px;border-radius:20px;border:1px solid rgba(255,69,58,.3);background:rgba(255,69,58,.06);color:#ff453a;font-size:12px;font-weight:700;cursor:pointer">&#x2190; Retour</button>'+
-    '</div>'+
+    (filterLine?'<div style="margin-top:8px">'+filterLine+'</div>':'')+
   '</div>';
 
   // ── Groupes par transporteur ──
