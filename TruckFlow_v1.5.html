@@ -1762,7 +1762,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.5';
+var APP_VERSION = 'v1.6';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6217,15 +6217,30 @@ function _buildPickingRouteHTML(selDate){
     var meta=truckMeta[key];var delivs=truckGroups[key];
     var grpPick=0;delivs.forEach(function(d){grpPick+=(d.colisPick||0);});
     var isSans=key==='__sans__';
-    var rowBg=idx%2===0?'rgba(255,255,255,.02)':'transparent';
-    html+='<tr style="border-bottom:1px solid rgba(255,255,255,.06);background:'+rowBg+'">'
-      +'<td style="padding:10px 14px;text-align:center;font-weight:900;color:var(--blue)">'+(isSans?'—':idx+1)+'</td>'
-      +'<td style="padding:10px 14px;font-weight:700;color:var(--t1)">'+escH(meta.transporteur)+'</td>'
-      +'<td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--blue)">'+(meta.creneau?'\u23F0 '+escH(meta.creneau):'—')+'</td>'
-      +'<td style="padding:10px 14px;text-align:center;color:var(--t2)">'+delivs.length+'</td>'
-      +'<td style="padding:10px 14px;text-align:center;font-weight:900;font-size:15px;color:var(--purple)">\u270b '+Math.round(grpPick)+'</td>'
-      +'<td style="padding:10px 14px;text-align:center"><span style="display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.25);border-radius:5px"></span></td>'
+    // Header row for this truck
+    html+='<tr style="background:rgba(59,130,246,.07);border-top:2px solid rgba(59,130,246,.18)">'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:900;color:var(--blue)">'+(isSans?'—':idx+1)+'</td>'
+      +'<td style="padding:9px 14px;font-weight:800;color:var(--t1)">\uD83D\uDE9B '+escH(meta.transporteur)+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:800;color:var(--blue)">'+(meta.creneau?'\u23F0 '+escH(meta.creneau):'—')+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--t2)">'+delivs.length+' livr.</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:900;font-size:15px;color:var(--purple)">\u270b '+Math.round(grpPick)+'</td>'
+      +'<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.25);border-radius:5px"></span></td>'
     +'</tr>';
+    // Detail rows per delivery, sorted by picking qty desc
+    delivs.sort(function(a,b){return (b.colisPick||0)-(a.colisPick||0);});
+    delivs.forEach(function(d){
+      html+='<tr style="border-bottom:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01)">'
+        +'<td style="padding:5px 14px 5px 28px;color:var(--t3);font-size:11px">\u21B3</td>'
+        +'<td style="padding:5px 14px;font-size:12px;color:var(--t2)">'+escH(d.id)
+          +(d.dest?'<span style="color:var(--t3);margin-left:8px">'+escH(d.dest)+'</span>':'')
+          +(d.ville?'<span style="color:var(--t3);font-size:11px;margin-left:6px">('+escH(d.ville)+')</span>':'')
+        +'</td>'
+        +'<td></td>'
+        +'<td style="padding:5px 14px;text-align:center;font-size:11px;color:var(--t3)">'+(d.sp||'')+'</td>'
+        +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--purple)">'+Math.round(d.colisPick)+'</td>'
+        +'<td style="padding:5px 14px;text-align:center"><span style="display:inline-block;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.2);border-radius:3px"></span></td>'
+      +'</tr>';
+    });
   });
   html+='<tr style="background:rgba(191,90,242,.08);border-top:2px solid rgba(191,90,242,.3);font-weight:900">'
     +'<td colspan="4" style="padding:10px 14px;text-align:right;color:var(--t3);font-size:12px">TOTAL</td>'
