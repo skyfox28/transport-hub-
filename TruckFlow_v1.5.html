@@ -6169,7 +6169,7 @@ function _openPickingRouteModal(selDate,availDates){
     +'<div style="font-size:11px;color:var(--t3)">Colis picking \u00e0 pr\u00e9parer \u2014 tri cr\u00e9neau camion croissant</div></div>'
     +'<select onchange="_openPickingRouteModal(this.value,JSON.parse(this.dataset.av))" data-av="'+avJson+'" style="padding:6px 12px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700">'+dateOpts+'</select>'
     +'<button onclick="printPickingRoute()" style="padding:7px 16px;border-radius:10px;background:rgba(45,202,114,.15);border:1px solid rgba(45,202,114,.4);color:#2dc272;font-size:12px;font-weight:700;cursor:pointer">&#128438; Imprimer</button>'
-    +'<button onclick="document.getElementById('_pickingRouteModal').remove()" style="padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--t3);font-size:12px;cursor:pointer">&#10005;</button>'
+    +'<button onclick="document.getElementById(&quot;_pickingRouteModal&quot;).remove()" style="padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--t3);font-size:12px;cursor:pointer">&#10005;</button>'
     +'</div>'
     +'<div id="_pickingRouteBody" style="padding:18px 22px">'+_buildPickingRouteHTML(selDate)+'</div>'
   +'</div>';
