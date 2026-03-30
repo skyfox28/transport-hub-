@@ -1492,6 +1492,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
     <div id="statusChips" style="display:flex;gap:4px;flex-wrap:wrap"></div>
     <button class="toggle-btn" id="exportToggle2" onclick="toggleExport2()">&#128230; Exports</button>
     <button class="toggle-btn" onclick="showPickingRoute()" style="background:rgba(191,90,242,.12);border-color:rgba(191,90,242,.3);color:var(--purple);font-weight:700" title="Feuille de route picking à imprimer">&#9995; Feuille Picking</button>
+    <button class="toggle-btn" onclick="showSiloRoute()" style="background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--indigo);font-weight:700" title="Feuille de route silo à imprimer">&#127981; Feuille Silo</button>
   </div>
   <div class="tbl-wrap"><div class="scroll"><table><thead><tr>
     <th>Livraison</th><th>Date</th><th>Destinataire</th><th>Ville</th><th>Transp.</th><th>Prelev.</th><th>WM</th><th>Pkg SAP</th><th title="Identifiant SAP — Donnée personnelle (RGPD Art.4) — Pseudonymisée à l'affichage">Créé par ⚿</th>
@@ -1762,7 +1763,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.6';
+var APP_VERSION = 'v1.7';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6275,6 +6276,149 @@ function printPickingRoute(){
   var src=body.innerHTML;
   // Strip CSS vars for print
   src=src.replace(/color:var\(--t[0-9]\)/g,'color:#333').replace(/color:var\(--purple\)/g,'color:#6d28d9')
+    .replace(/color:var\(--blue\)/g,'color:#1d4ed8').replace(/color:var\(--t2\)/g,'color:#555')
+    .replace(/color:var\(--t3\)/g,'color:#777')
+    .replace(/background:[^;]+rgba\([^)]+\)[^;]*/g,'').replace(/border:[^;]*rgba\([^)]+\)[^;]*/g,'border:1px solid #ccc');
+  w.document.write(src);
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(function(){w.focus();},200);
+}
+
+// ─── Feuille de route Silo ────────────────────────────────────────────────
+function showSiloRoute(){
+  var fDate=document.getElementById('fDate');
+  var defaultDate=fDate&&fDate.value?fDate.value:'';
+  if(!defaultDate){
+    var today=new Date();
+    defaultDate=String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+today.getFullYear();
+  }
+  var dateSet={};
+  (APP.deliveries||[]).forEach(function(d){if((d.palSilo||0)>0&&d.date)dateSet[d.date]=true;});
+  var availDates=Object.keys(dateSet).sort(function(a,b){
+    return a.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1').localeCompare(b.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1'));
+  });
+  if(!availDates.length){showToast('Aucune livraison avec palettes silo');return;}
+  var selDate=availDates.indexOf(defaultDate)>=0?defaultDate:availDates[availDates.length-1];
+  _openSiloRouteModal(selDate,availDates);
+}
+function _openSiloRouteModal(selDate,availDates){
+  var ex=document.getElementById('_siloRouteModal');if(ex)ex.remove();
+  var ov=document.createElement('div');
+  ov.id='_siloRouteModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9990;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px';
+  var dateOpts=availDates.map(function(d){return '<option value="'+d+'"'+(d===selDate?' selected':'')+'>'+d+'</option>';}).join('');
+  var avJson=JSON.stringify(availDates).replace(/"/g,'&quot;');
+  ov.innerHTML='<div style="background:var(--sf1);border:1px solid rgba(255,255,255,.15);border-radius:20px;width:100%;max-width:900px">'
+    +'<div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1)">'
+    +'<span style="font-size:22px">&#127981;</span>'
+    +'<div style="flex:1"><div style="font-size:16px;font-weight:800;color:var(--t1)">Feuille de route Silo</div>'
+    +'<div style="font-size:11px;color:var(--t3)">Palettes silo \u00e0 pr\u00e9parer \u2014 tri cr\u00e9neau camion croissant</div></div>'
+    +'<select onchange="_openSiloRouteModal(this.value,JSON.parse(this.dataset.av))" data-av="'+avJson+'" style="padding:6px 12px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700">'+dateOpts+'</select>'
+    +'<button onclick="printSiloRoute()" style="padding:7px 16px;border-radius:10px;background:rgba(45,202,114,.15);border:1px solid rgba(45,202,114,.4);color:#2dc272;font-size:12px;font-weight:700;cursor:pointer">&#128438; Imprimer</button>'
+    +'<button onclick="document.getElementById(&quot;_siloRouteModal&quot;).remove()" style="padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--t3);font-size:12px;cursor:pointer">&#10005;</button>'
+    +'</div>'
+    +'<div id="_siloRouteBody" style="padding:18px 22px">'+_buildSiloRouteHTML(selDate)+'</div>'
+  +'</div>';
+  document.body.appendChild(ov);
+}
+function _buildSiloRouteHTML(selDate){
+  var deliv2truck={};
+  trucks.forEach(function(t){
+    (t.deliveries||[]).forEach(function(id){deliv2truck[id]=t;});
+    (t.lockedDeliveries||[]).forEach(function(id){deliv2truck[id]=t;});
+  });
+  var siloDelivs=(APP.deliveries||[]).filter(function(d){return d.date===selDate&&(d.palSilo||0)>0;});
+  if(!siloDelivs.length)return '<div style="text-align:center;padding:40px;color:var(--t3)">Aucune palette silo pour cette date.</div>';
+  var truckGroups={};var truckMeta={};
+  siloDelivs.forEach(function(d){
+    var t=deliv2truck[d.id];
+    var key=t?t.id:'__sans__';
+    if(!truckGroups[key]){
+      truckGroups[key]=[];
+      if(t){var w=creWindow(t.creneau||'')||{start:9999};
+        truckMeta[key]={start:w.start,creneau:t.creneau||'',transporteur:t.transporteur||t.itin||'—'};
+      }else{truckMeta[key]={start:99999,creneau:'',transporteur:'Sans camion'};}
+    }
+    truckGroups[key].push(d);
+  });
+  var sortedKeys=Object.keys(truckGroups).sort(function(a,b){return truckMeta[a].start-truckMeta[b].start;});
+  var totalPal=0,totalCs=0;
+  siloDelivs.forEach(function(d){totalPal+=(d.palSilo||0);totalCs+=(d.colisSilo||0);});
+  var nbTrucks=sortedKeys.filter(function(k){return k!=='__sans__';}).length;
+  var html='<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">'
+    +'<div style="padding:7px 14px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--indigo)">&#127981; '+Math.round(totalPal)+' pal silo</div>'
+    +'<div style="padding:7px 14px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--blue)">'+Math.round(totalCs).toLocaleString('fr')+' cs silo</div>'
+    +'<div style="padding:7px 14px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.3);border-radius:10px;font-size:13px;font-weight:800;color:#2dc272">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+'</div>'
+  +'</div>'
+  +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'
+  +'<thead><tr style="background:rgba(255,255,255,.06);border-bottom:2px solid rgba(255,255,255,.12)">'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600;width:40px">#</th>'
+  +'<th style="padding:9px 14px;text-align:left;font-size:11px;color:var(--t3);font-weight:600">Transporteur</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">Cr\u00e9neau</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">Livraisons</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--indigo);font-weight:700">Palettes</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--blue);font-weight:700">Colis silo</th>'
+  +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">&#10003; Sorti</th>'
+  +'</tr></thead><tbody>';
+  sortedKeys.forEach(function(key,idx){
+    var meta=truckMeta[key];var delivs=truckGroups[key];
+    var grpPal=0,grpCs=0;
+    delivs.forEach(function(d){grpPal+=(d.palSilo||0);grpCs+=(d.colisSilo||0);});
+    var isSans=key==='__sans__';
+    html+='<tr style="background:rgba(99,102,241,.07);border-top:2px solid rgba(99,102,241,.18)">'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:900;color:var(--indigo)">'+(isSans?'—':idx+1)+'</td>'
+      +'<td style="padding:9px 14px;font-weight:800;color:var(--t1)">\uD83D\uDE9B '+escH(meta.transporteur)+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:800;color:var(--blue)">'+(meta.creneau?'\u23F0 '+escH(meta.creneau):'—')+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--t2)">'+delivs.length+' livr.</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:900;font-size:15px;color:var(--indigo)">&#127981; '+Math.round(grpPal)+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--blue)">'+Math.round(grpCs).toLocaleString('fr')+'</td>'
+      +'<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.25);border-radius:5px"></span></td>'
+    +'</tr>';
+    delivs.sort(function(a,b){return (b.palSilo||0)-(a.palSilo||0);});
+    delivs.forEach(function(d){
+      html+='<tr style="border-bottom:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01)">'
+        +'<td style="padding:5px 14px 5px 28px;color:var(--t3);font-size:11px">\u21B3</td>'
+        +'<td style="padding:5px 14px;font-size:12px;color:var(--t2)">'+escH(d.id)
+          +(d.dest?'<span style="color:var(--t3);margin-left:8px">'+escH(d.dest)+'</span>':'')
+          +(d.ville?'<span style="color:var(--t3);font-size:11px;margin-left:6px">('+escH(d.ville)+')</span>':'')
+        +'</td>'
+        +'<td></td><td></td>'
+        +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--indigo)">'+Math.round(d.palSilo||0)+'</td>'
+        +'<td style="padding:5px 14px;text-align:center;color:var(--t3);font-size:12px">'+Math.round(d.colisSilo||0).toLocaleString('fr')+'</td>'
+        +'<td style="padding:5px 14px;text-align:center"><span style="display:inline-block;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.2);border-radius:3px"></span></td>'
+      +'</tr>';
+    });
+  });
+  html+='<tr style="background:rgba(99,102,241,.08);border-top:2px solid rgba(99,102,241,.3);font-weight:900">'
+    +'<td colspan="4" style="padding:10px 14px;text-align:right;color:var(--t3);font-size:12px">TOTAL</td>'
+    +'<td style="padding:10px 14px;text-align:center;font-size:16px;color:var(--indigo)">&#127981; '+Math.round(totalPal)+'</td>'
+    +'<td style="padding:10px 14px;text-align:center;font-size:14px;color:var(--blue)">'+Math.round(totalCs).toLocaleString('fr')+'</td>'
+    +'<td></td></tr>';
+  html+='</tbody></table></div>'
+    +'<div style="margin-top:10px;font-size:10px;color:var(--t3);text-align:right">G\u00e9n\u00e9r\u00e9 le '+new Date().toLocaleString('fr-FR')+' \u2014 TruckFlow '+APP_VERSION+'</div>';
+  return html;
+}
+function printSiloRoute(){
+  var body=document.getElementById('_siloRouteBody');
+  if(!body)return;
+  var dateEl=document.querySelector('#_siloRouteModal select');
+  var dateLabel=dateEl?dateEl.value:'';
+  var w=window.open('','_blank','width=820,height=700');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Feuille Silo TruckFlow</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:18px 22px}'
+    +'h2{font-size:17px;font-weight:900;margin-bottom:2px}p.sub{color:#555;font-size:10px;margin-bottom:14px}'
+    +'table{width:100%;border-collapse:collapse;margin-top:4px}'
+    +'th{background:#ececec;border:1px solid #bbb;padding:7px 12px;font-size:11px;font-weight:700}'
+    +'td{border:1px solid #ddd;padding:7px 12px}tr.total{background:#ede9fe;font-weight:900}'
+    +'tr.total td{border-top:2px solid #6d28d9}'
+    +'@media print{.no-print{display:none!important}body{padding:10px}}'
+    +'</style></head><body>');
+  w.document.write('<div class="no-print" style="margin-bottom:12px"><button onclick="window.print()" style="padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #333;border-radius:6px">&#128438; Imprimer / PDF</button></div>');
+  w.document.write('<h2>&#127981; Feuille de route Silo</h2>');
+  w.document.write('<p class="sub">'+(dateLabel?'Date : '+dateLabel+' &mdash; ':'')+new Date().toLocaleString('fr-FR')+'</p>');
+  var src=body.innerHTML;
+  src=src.replace(/color:var\(--t[0-9]\)/g,'color:#333').replace(/color:var\(--indigo\)/g,'color:#4338ca')
     .replace(/color:var\(--blue\)/g,'color:#1d4ed8').replace(/color:var\(--t2\)/g,'color:#555')
     .replace(/color:var\(--t3\)/g,'color:#777')
     .replace(/background:[^;]+rgba\([^)]+\)[^;]*/g,'').replace(/border:[^;]*rgba\([^)]+\)[^;]*/g,'border:1px solid #ccc');
