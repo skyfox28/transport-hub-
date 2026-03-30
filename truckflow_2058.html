@@ -1761,7 +1761,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.1';
+var APP_VERSION = 'v1.2';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -10473,6 +10473,92 @@ setInterval(function(){render();autoFit();},10000);
 setInterval(checkAlerts,30000);
 window.addEventListener('resize',autoFit);
 window.addEventListener('storage',function(e){if(e.key===LT||e.key===LTS||e.key===LQ){render();autoFit();}});
+// Modal Pret Monitor
+function monArrModal(tid,alreadyStamped){
+  var autoEv=null;
+  try{
+    var allDelivs=JSON.parse(localStorage.getItem(LD)||'[]');
+    var t=(getData()||[]).find(function(x){return x.id===tid;});
+    if(t&&t.deliveries&&allDelivs.length){
+      var livs=t.deliveries.map(function(id){return allDelivs.find(function(d){return d.id===id;});}).filter(Boolean);
+      if(livs.length){
+        var pending=livs.filter(function(d){return !(d.sp==='C'&&(d.wm==='C'||!d.wm));});
+        if(!pending.length){autoEv={pret:true};}
+        else{var hasSilo=pending.some(function(d){return (d.palSilo||0)>0;});var hasPick=pending.some(function(d){return (d.colisPick||0)>0;});autoEv={pret:false,motif:hasSilo?'retard_silo':hasPick?'retard_prepa':'autre'};}
+      }
+    }
+  }catch(e){}
+  var ov=document.getElementById('_monarr');if(ov)ov.remove();
+  ov=document.createElement('div');ov.id='_monarr';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px)';
+  ov.innerHTML='<div style="background:rgba(13,17,23,.96);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:24px;max-width:380px;width:92%;backdrop-filter:blur(24px)">'
+    +'<div style="font-size:15px;font-weight:800;margin-bottom:4px;color:#f0f6fc">\uD83D\uDE9B Arriv\u00e9e \u2014 Marchandise pr\u00eate ?</div>'
+    +'<div style="font-size:11px;color:#8b949e;margin-bottom:16px">Confirmer l\u2019\u00e9tat avant mise \u00e0 quai</div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:12px">'
+    +'<button id="_maOk" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(48,209,88,.4);background:rgba(48,209,88,.12);color:#30d158;font-size:13px;font-weight:800;cursor:pointer">\u2705 Pr\u00eate</button>'
+    +'<button id="_maNok" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,69,58,.4);background:rgba(255,69,58,.08);color:#ff453a;font-size:13px;font-weight:800;cursor:pointer">\u274c Pas pr\u00eate</button>'
+    +'</div>'
+    +'<div id="_maMotifs" style="display:none;flex-wrap:wrap;gap:8px;margin-bottom:8px">'
+    +'<button data-motif="retard_silo" style="padding:7px 14px;border-radius:20px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-size:12px;cursor:pointer;font-weight:700">\u23F3 Retard silo</button>'
+    +'<button data-motif="retard_prepa" style="padding:7px 14px;border-radius:20px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:#f87171;font-size:12px;cursor:pointer;font-weight:700">\uD83D\uDD27 Retard pr\u00e9pa</button>'
+    +'<button data-motif="autre" style="padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#8b949e;font-size:12px;cursor:pointer;font-weight:700">\u26AA Autre</button>'
+    +'</div>'
+    +'<button id="_maSkip" style="width:100%;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8b949e;font-size:11px;cursor:pointer">Passer</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  var okBtn=ov.querySelector('#_maOk');var nokBtn=ov.querySelector('#_maNok');var motifsDiv=ov.querySelector('#_maMotifs');
+  if(autoEv){
+    if(autoEv.pret){okBtn.style.boxShadow='0 0 0 2px rgba(48,209,88,.7)';okBtn.style.transform='scale(1.03)';}
+    else{nokBtn.style.boxShadow='0 0 0 2px rgba(255,69,58,.7)';nokBtn.style.transform='scale(1.03)';motifsDiv.style.display='flex';var mBtn=motifsDiv.querySelector('[data-motif="'+autoEv.motif+'"]');if(mBtn){mBtn.style.boxShadow='0 0 0 2px rgba(255,255,255,.5)';mBtn.style.transform='scale(1.05)';}}
+  }
+  function savePret(pret,motif){
+    if(!alreadyStamped){var mm=getTs();if(!mm[tid])mm[tid]={};mm[tid].arr=new Date().toISOString();saveTs(mm);}
+    var mm=getTs();if(!mm[tid])mm[tid]={};mm[tid].arr_pret=pret;
+    if(!pret&&motif)mm[tid].arr_motif=motif;else delete mm[tid].arr_motif;
+    saveTs(mm);ov.remove();
+    toast(pret?'\u2705 Pr\u00eate':'\u26A0 Pas pr\u00eate'+(motif?' \u2014 '+(motif==='retard_silo'?'Retard silo':motif==='retard_prepa'?'Retard pr\u00e9pa':'Autre motif'):''));
+    render();
+  }
+  nokBtn.addEventListener('click',function(){nokBtn.style.boxShadow='0 0 0 2px rgba(255,69,58,.7)';nokBtn.style.transform='scale(1.03)';okBtn.style.boxShadow='';okBtn.style.transform='';motifsDiv.style.display='flex';});
+  okBtn.addEventListener('click',function(){savePret(true,null);});
+  motifsDiv.addEventListener('click',function(e){var b=e.target.closest('[data-motif]');if(!b)return;var mo=b.getAttribute('data-motif');motifsDiv.querySelectorAll('[data-motif]').forEach(function(x){x.style.boxShadow='';x.style.transform='';});b.style.boxShadow='0 0 0 2px rgba(255,255,255,.5)';b.style.transform='scale(1.05)';savePret(false,mo);});
+  ov.querySelector('#_maSkip').addEventListener('click',function(){if(!alreadyStamped){var mm=getTs();if(!mm[tid])mm[tid]={};mm[tid].arr=new Date().toISOString();saveTs(mm);}ov.remove();render();});
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+}
+function monPickQuaiOnly(tid){
+  var existing=getQ();var curQ=null;Object.keys(existing).forEach(function(q){if(existing[q]===tid)curQ=Number(q);});
+  var ov=document.getElementById('_monqpick');if(ov)ov.remove();
+  ov=document.createElement('div');ov.id='_monqpick';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)';
+  var btns=[2,3,4,5,6,7,8,9,10,11].map(function(q){
+    var occ=existing[q]&&existing[q]!==tid;var isCur=q===curQ;
+    var bd=occ?'rgba(255,255,255,.07)':(isCur?'rgba(76,110,245,.5)':'rgba(59,130,246,.35)');
+    var bg=occ?'rgba(255,255,255,.03)':(isCur?'rgba(76,110,245,.28)':'rgba(59,130,246,.14)');
+    var tx=occ?'#484f57':(isCur?'#818cf8':'#60a5fa');
+    return '<button data-q="'+q+'" '+(occ?'disabled':'')+' style="padding:11px 0;border-radius:10px;border:1px solid '+bd+';background:'+bg+';color:'+tx+';font-size:15px;font-weight:800;cursor:'+(occ?'default':'pointer')+';width:100%">'+(occ?'<span style="font-size:8px;display:block;color:#484f57;margin-bottom:1px">Occup\u00e9</span>':'')+' Q'+q+(isCur?' \u2713':'')+' </button>';
+  }).join('');
+  ov.innerHTML='<div style="background:rgba(13,17,23,.96);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:24px;max-width:400px;width:92%;backdrop-filter:blur(24px)">'
+    +'<div style="font-size:15px;font-weight:800;margin-bottom:3px;color:#f0f6fc">\uD83D\uDD04 Assignation quai</div>'
+    +'<div style="font-size:11px;color:#8b949e;margin-bottom:16px">Heure d\u00e9j\u00e0 enregistr\u00e9e \u2014 s\u00e9lectionner le quai</div>'
+    +'<div id="_monqgrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">'+btns+'</div>'
+    +'<button id="_monqskip" style="width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#8b949e;font-size:12px;cursor:pointer">Passer (sans quai)</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#_monqgrid').addEventListener('click',function(e){var btn=e.target.closest('[data-q]');if(!btn||btn.disabled)return;var q=Number(btn.getAttribute('data-q'));saveQ(tid,q);ov.remove();render();toast('Quai '+q+' assign\u00e9');});
+  ov.querySelector('#_monqskip').addEventListener('click',function(){ov.remove();render();});
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+}
+var _origStampMon=stamp;
+stamp=function(tid,k){if(k==='arr'){monArrModal(tid,false);return;}_origStampMon(tid,k);};
+var _origApM=apM;
+apM=function(tid,k){
+  var inp=document.getElementById('ti_'+tid);
+  if(inp&&inp.value){
+    if(k==='arr'){stampM(tid,'arr',inp.value);var el=document.getElementById('m_'+tid);if(el)el.classList.remove('show');monArrModal(tid,true);return;}
+    if(k==='quai'){stampM(tid,'quai',inp.value);var el2=document.getElementById('m_'+tid);if(el2)el2.classList.remove('show');monPickQuaiOnly(tid);return;}
+  }
+  _origApM(tid,k);
+};
   */}).toString().match(/\/\*([\s\S]*)\*\//)[1];
 
   var _body=
