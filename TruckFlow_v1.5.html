@@ -1491,6 +1491,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
     <select class="fsel" id="fDate" onchange="renderTable()"><option value="">Toutes dates</option></select>
     <div id="statusChips" style="display:flex;gap:4px;flex-wrap:wrap"></div>
     <button class="toggle-btn" id="exportToggle2" onclick="toggleExport2()">&#128230; Exports</button>
+    <button class="toggle-btn" onclick="showPickingRoute()" style="background:rgba(191,90,242,.12);border-color:rgba(191,90,242,.3);color:var(--purple);font-weight:700" title="Feuille de route picking à imprimer">&#9995; Feuille Picking</button>
   </div>
   <div class="tbl-wrap"><div class="scroll"><table><thead><tr>
     <th>Livraison</th><th>Date</th><th>Destinataire</th><th>Ville</th><th>Transp.</th><th>Prelev.</th><th>WM</th><th>Pkg SAP</th><th title="Identifiant SAP — Donnée personnelle (RGPD Art.4) — Pseudonymisée à l'affichage">Créé par ⚿</th>
