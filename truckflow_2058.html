@@ -1761,7 +1761,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.4';
+var APP_VERSION = 'v1.5';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -1890,9 +1890,81 @@ function saveManual(){ localStorage.setItem('th10_manual', JSON.stringify(quaiMa
 function saveCompleted(){ try{localStorage.setItem('tf_completed',JSON.stringify(_completedTrucks));}catch(e){} }
 function loadCompleted(){ try{var s=localStorage.getItem('tf_completed');if(s)_completedTrucks=JSON.parse(s);}catch(e){} }
 function purgeOldCompleted(){
+  if(_purgePaused)return;
   var cutoff=new Date();cutoff.setDate(cutoff.getDate()-90);
   var cutoffStr=cutoff.toISOString();
   _completedTrucks=_completedTrucks.filter(function(c){return c.completedAt>cutoffStr;});
+}
+
+function _archWeekKey(dateStr){
+  var d;
+  if(dateStr&&/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)){
+    var pts=dateStr.split('/');d=new Date(pts[2]+'-'+pts[1]+'-'+pts[0]+'T12:00:00');
+  } else { d=new Date((dateStr||'')+'T12:00:00'); }
+  if(isNaN(d))return dateStr||'?';
+  var day=d.getDay();if(day===0)day=7;
+  d.setDate(d.getDate()+4-day);
+  var y=d.getFullYear();
+  var jan1=new Date(y,0,1);
+  var wk=Math.ceil(((d-jan1)/86400000+1)/7);
+  return y+'-S'+String(wk).padStart(2,'0');
+}
+
+function setArchiveWeekFilter(wk){
+  _archiveWeekFilter=(_archiveWeekFilter===wk)?null:wk;
+  _archiveExpandedIds={};
+  renderArchive();
+}
+
+function _checkArchivePurge(){
+  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-90);
+  var cutoffStr=cutoff.toISOString();
+  var toDelete=(_completedTrucks||[]).filter(function(c){return c.completedAt<=cutoffStr;});
+  if(!toDelete.length){ purgeOldCompleted(); return; }
+  var today=new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('tf_purge_warned')===today){
+    purgeOldCompleted(); saveCompleted(); return;
+  }
+  localStorage.setItem('tf_purge_warned',today);
+  _purgePaused=true;
+  setTimeout(function(){_showPurgeModal(toDelete,cutoffStr);},900);
+}
+
+function _showPurgeModal(toDelete,cutoffStr){
+  var existing=document.getElementById('_purgeWarnModal');if(existing)existing.remove();
+  var dates=[...new Set(toDelete.map(function(c){return c.date||'?';}))].sort();
+  var count=toDelete.length;
+  var ov=document.createElement('div');
+  ov.id='_purgeWarnModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:flex;align-items:center;justify-content:center';
+  var cutoffEnc=cutoffStr.replace(/'/g,'\\x27');
+  ov.innerHTML='<div style="background:var(--sf1);border:1.5px solid rgba(255,100,60,.35);border-radius:20px;padding:28px 32px;max-width:440px;width:90%;box-shadow:0 32px 90px rgba(0,0,0,.6)">'
+    +'<div style="font-size:28px;margin-bottom:10px">&#128193;</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:6px">'+count+' camion'+(count>1?'s ':' ')+'atteignent les 90\u00a0jours</div>'
+    +'<div style="font-size:12px;color:var(--t3);margin-bottom:6px">Ces enregistrements vont \u00eatre supprim\u00e9s de l\u2019archive.</div>'
+    +'<div style="font-size:11px;color:var(--t3);background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin-bottom:20px">P\u00e9riodes : '+dates.slice(0,6).join(', ')+(dates.length>6?'\u2026':'')+'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:10px">'
+    +'<button onclick="_exportAndPurge(\"'+(cutoffEnc)+'\")" style="padding:12px 20px;border-radius:12px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">&#128229; Exporter l\u2019archive puis purger</button>'
+    +'<button onclick="_doPurge(\"'+(cutoffEnc)+'\")" style="padding:12px 20px;border-radius:12px;background:rgba(255,69,58,.08);border:1px solid rgba(255,69,58,.3);color:var(--red);font-size:13px;font-weight:700;cursor:pointer">&#128465; Purger sans exporter</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+}
+
+function _exportAndPurge(cutoffStr){
+  var ov=document.getElementById('_purgeWarnModal');if(ov)ov.remove();
+  _purgePaused=false;
+  try{exportExcel();}catch(e2){console.error('export:',e2);}
+  setTimeout(function(){_doPurge(cutoffStr);},700);
+}
+
+function _doPurge(cutoffStr){
+  var ov=document.getElementById('_purgeWarnModal');if(ov)ov.remove();
+  _purgePaused=false;
+  var before=(_completedTrucks||[]).length;
+  _completedTrucks=(_completedTrucks||[]).filter(function(c){return c.completedAt>cutoffStr;});
+  var purged=before-_completedTrucks.length;
+  saveCompleted();renderArchive();
+  showToast(purged+' camion'+(purged>1?'s':'')+' purg\u00e9'+(purged>1?'s':'')+' de l\u2019archive');
 }
 
 // ─── UI Helpers ───────────────────────────────────────────────────────────
@@ -4782,14 +4854,21 @@ function renderPlanningForDate(date){
 }
 
 // ─── Timing stats helper (shared by renderStats & exportExcel) ────────────
+var _statWeekFilter=null;
+function setStatWeekFilter(wk){
+  _statWeekFilter=(_statWeekFilter===wk)?null:wk;
+  renderStats();
+}
 function computeTimingStats(){
   var now=Date.now();
   // Build combined list: live trucks + completed archive trucks
   var allTruckData=[];
   trucks.forEach(function(t){
+    if(_statWeekFilter&&_archWeekKey(t.date||'?')!==_statWeekFilter)return;
     allTruckData.push({t:t, ts:timestamps[t.id]||{}, p:getPonctualite(t,timestamps[t.id]||{},now)});
   });
   (_completedTrucks||[]).forEach(function(ct){
+    if(_statWeekFilter&&_archWeekKey(ct.date||'?')!==_statWeekFilter)return;
     allTruckData.push({t:ct, ts:ct.timestamps||{}, p:ct.ponctualite||{status:'inconnu'}});
   });
   // Ponctualité
@@ -5494,7 +5573,7 @@ function exportExcel(){
   archiveSession();
 
   var todayStr = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, 'TruckFlow_'+todayStr+'.xlsx');
+  XLSX.writeFile(wb, 'TruckFlow_'+(typeof APP_VERSION!=='undefined'?APP_VERSION+'_':'')+todayStr+'.xlsx');
 
   var livMap2={};
   (APP.deliveries||[]).forEach(function(d){livMap2[d.id]=d;});
@@ -5789,7 +5868,7 @@ function exportWeekExcel(weekKey){
   wsLivW['!cols']=[{wch:12},{wch:16},{wch:10},{wch:6},{wch:22},{wch:14},{wch:30},{wch:20},{wch:13},{wch:12},{wch:10},{wch:10},{wch:12},{wch:12}];
   XLSX.utils.book_append_sheet(wb,wsLivW,'Livraisons');
 
-  XLSX.writeFile(wb,'TruckFlow_'+weekKey+'.xlsx');
+  XLSX.writeFile(wb,'TruckFlow_'+(typeof APP_VERSION!=='undefined'?APP_VERSION+'_':'')+weekKey+'.xlsx');
   showToast('\u2705 Export '+weekKey+' t\u00e9l\u00e9charg\u00e9');
   logActivity('\uD83D\uDCC5','Export semaine '+weekKey+' g\u00e9n\u00e9r\u00e9');
 }
@@ -6056,6 +6135,141 @@ function openCamDetailManual(ti,key){
   if(!timestamps[t.id])timestamps[t.id]={};
   timestamps[t.id][key]=iso;
   save();renderTrucks();
+}
+
+
+// ─── Feuille de route Picking ───────────────────────
+function showPickingRoute(){
+  var fDate=document.getElementById('fDate');
+  var defaultDate=fDate&&fDate.value?fDate.value:'';
+  if(!defaultDate){
+    var today=new Date();
+    defaultDate=String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+today.getFullYear();
+  }
+  var dateSet={};
+  (APP.deliveries||[]).forEach(function(d){if((d.colisPick||0)>0&&d.date)dateSet[d.date]=true;});
+  var availDates=Object.keys(dateSet).sort(function(a,b){
+    return a.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1').localeCompare(b.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1'));
+  });
+  if(!availDates.length){showToast('Aucune livraison avec colis picking');return;}
+  var selDate=availDates.indexOf(defaultDate)>=0?defaultDate:availDates[availDates.length-1];
+  _openPickingRouteModal(selDate,availDates);
+}
+function _openPickingRouteModal(selDate,availDates){
+  var ex=document.getElementById('_pickingRouteModal');if(ex)ex.remove();
+  var ov=document.createElement('div');
+  ov.id='_pickingRouteModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9990;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px';
+  var dateOpts=availDates.map(function(d){return '<option value="'+d+'"'+(d===selDate?' selected':'')+'>'+d+'</option>';}).join('');
+  var avJson=JSON.stringify(availDates).replace(/"/g,'&quot;');
+  ov.innerHTML='<div style="background:var(--sf1);border:1px solid rgba(255,255,255,.15);border-radius:20px;width:100%;max-width:900px">'
+    +'<div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1)">'
+    +'<span style="font-size:22px">&#9995;</span>'
+    +'<div style="flex:1"><div style="font-size:16px;font-weight:800;color:var(--t1)">Feuille de route Picking</div>'
+    +'<div style="font-size:11px;color:var(--t3)">Colis picking \u00e0 pr\u00e9parer \u2014 tri cr\u00e9neau camion croissant</div></div>'
+    +'<select onchange="_openPickingRouteModal(this.value,JSON.parse(this.dataset.av))" data-av="'+avJson+'" style="padding:6px 12px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700">'+dateOpts+'</select>'
+    +'<button onclick="printPickingRoute()" style="padding:7px 16px;border-radius:10px;background:rgba(45,202,114,.15);border:1px solid rgba(45,202,114,.4);color:#2dc272;font-size:12px;font-weight:700;cursor:pointer">&#128438; Imprimer</button>'
+    +'<button onclick="document.getElementById('_pickingRouteModal').remove()" style="padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--t3);font-size:12px;cursor:pointer">&#10005;</button>'
+    +'</div>'
+    +'<div id="_pickingRouteBody" style="padding:18px 22px">'+_buildPickingRouteHTML(selDate)+'</div>'
+  +'</div>';
+  document.body.appendChild(ov);
+}
+function _buildPickingRouteHTML(selDate){
+  var deliv2truck={};
+  trucks.forEach(function(t){
+    (t.deliveries||[]).forEach(function(id){deliv2truck[id]=t;});
+    (t.lockedDeliveries||[]).forEach(function(id){deliv2truck[id]=t;});
+  });
+  var pickDelivs=(APP.deliveries||[]).filter(function(d){return d.date===selDate&&(d.colisPick||0)>0;});
+  if(!pickDelivs.length)return '<div style="text-align:center;padding:40px;color:var(--t3)">Aucun colis picking pour cette date.</div>';
+  var truckGroups={};var truckMeta={};
+  pickDelivs.forEach(function(d){
+    var t=deliv2truck[d.id];
+    var key=t?t.id:'__sans__';
+    if(!truckGroups[key]){
+      truckGroups[key]=[];
+      if(t){var w=creWindow(t.creneau||'')||{start:9999};
+        truckMeta[key]={start:w.start,creneau:t.creneau||'?',transporteur:t.transporteur||t.itin||'?'};
+      }else{truckMeta[key]={start:99999,creneau:'',transporteur:''};}
+    }
+    truckGroups[key].push(d);
+  });
+  var sortedKeys=Object.keys(truckGroups).sort(function(a,b){return truckMeta[a].start-truckMeta[b].start;});
+  var totalPick=0;pickDelivs.forEach(function(d){totalPick+=(d.colisPick||0);});
+  var nbTrucks=sortedKeys.filter(function(k){return k!=='__sans__';}).length;
+  var html='<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">'
+    +'<div style="padding:9px 16px;background:rgba(191,90,242,.12);border:1px solid rgba(191,90,242,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">&#9995; '+totalPick+' colis picking</div>'
+    +'<div style="padding:9px 16px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;font-size:13px;font-weight:800;color:var(--blue)">'+pickDelivs.length+' livraison'+(pickDelivs.length>1?'s':'')+'</div>'
+    +'<div style="padding:9px 16px;background:rgba(45,202,114,.1);border:1px solid rgba(45,202,114,.3);border-radius:10px;font-size:13px;font-weight:800;color:#2dc272">'+nbTrucks+' camion'+(nbTrucks>1?'s':'')+'</div>'
+  +'</div>';
+  sortedKeys.forEach(function(key,idx){
+    var meta=truckMeta[key];var delivs=truckGroups[key];
+    var grpPick=0;delivs.forEach(function(d){grpPick+=(d.colisPick||0);});
+    var isSans=key==='__sans__';
+    var rankStr=isSans?'?':String(idx+1);
+    var borderC=isSans?'rgba(245,158,11,.3)':'rgba(59,130,246,.25)';
+    var bgHdr=isSans?'rgba(245,158,11,.08)':'rgba(59,130,246,.07)';
+    var rankBg=isSans?'rgba(245,158,11,.2)':'rgba(59,130,246,.2)';
+    var rankCol=isSans?'#f59e0b':'var(--blue)';
+    html+='<div style="margin-bottom:14px;border:1px solid '+borderC+';border-radius:14px;overflow:hidden">'
+      +'<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:'+bgHdr+';border-bottom:1px solid rgba(255,255,255,.08)">'
+      +'<div style="width:28px;height:28px;border-radius:7px;background:'+rankBg+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:'+rankCol+'">'+rankStr+'</div>'
+      +'<div style="flex:1">'
+      +(isSans?'<span style="font-size:13px;font-weight:700;color:var(--amber)">Sans camion assign\u00e9</span>'
+        :'<span style="font-size:13px;font-weight:800;color:var(--t1)">\uD83D\uDE9B '+escH(meta.transporteur)+'</span>'
+        +(meta.creneau&&meta.creneau!=='?'?'<span style="font-size:12px;font-weight:700;color:var(--blue);margin-left:10px;padding:2px 10px;background:rgba(59,130,246,.15);border-radius:10px">\u23F0 '+meta.creneau+'</span>':''))
+      +'</div>'
+      +'<span style="font-size:13px;font-weight:900;color:var(--purple)">'+grpPick+' pk</span>'
+      +'<span style="font-size:11px;color:var(--t3)">'+delivs.length+' livr.</span>'
+      +'</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:rgba(0,0,0,.1)">'
+      +'<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">N\u00b0 Livraison</th>'
+      +'<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Destinataire</th>'
+      +'<th style="padding:6px 12px;text-align:left;color:var(--t3);font-weight:600">Ville</th>'
+      +'<th style="padding:6px 12px;text-align:center;color:var(--purple);font-weight:700">Colis Pick</th>'
+      +'<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600">Pr\u00e9pa</th>'
+      +'<th style="padding:6px 12px;text-align:center;color:var(--t3);font-weight:600">&#9989; Fait</th>'
+      +'</tr></thead><tbody>';
+    delivs.sort(function(a,b){return (b.colisPick||0)-(a.colisPick||0);});
+    delivs.forEach(function(d){
+      var spCol=d.sp==='C'?'#2dc272':d.sp==='B'?'#ff9f0a':d.sp==='A'?'#ff453a':'var(--t3)';
+      html+='<tr style="border-bottom:1px solid rgba(255,255,255,.05)">'
+        +'<td style="padding:7px 12px;font-weight:700;color:var(--t1)">'+escH(d.id)+'</td>'
+        +'<td style="padding:7px 12px">'+escH(d.dest||'\u2014')+'</td>'
+        +'<td style="padding:7px 12px;color:var(--t3)">'+escH(d.ville||'\u2014')+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;font-weight:900;color:var(--purple)">\u270b '+Math.round(d.colisPick)+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;font-weight:700;color:'+spCol+'">'+escH(d.sp||'\u2014')+'</td>'
+        +'<td style="padding:7px 12px;text-align:center"><span style="display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-radius:4px"></span></td>'
+      +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+  });
+  html+='<div style="margin-top:12px;font-size:10px;color:var(--t3);text-align:right">G\u00e9n\u00e9r\u00e9 le '+new Date().toLocaleString('fr-FR')+' \u2014 TruckFlow '+APP_VERSION+'</div>';
+  return html;
+}
+function printPickingRoute(){
+  var body=document.getElementById('_pickingRouteBody');
+  if(!body)return;
+  var w=window.open('','_blank','width=960,height=750');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Feuille Picking TruckFlow</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:16px 20px}'
+    +'table{width:100%;border-collapse:collapse}th{background:#f0f0f0;border:1px solid #ccc;padding:5px 10px;text-align:left;font-weight:700}'
+    +'td{border:1px solid #e0e0e0;padding:5px 10px}.pick-count{font-weight:900;color:#6d28d9;text-align:center}'
+    +'@media print{.no-print{display:none!important}body{padding:8px}}'
+    +'</style></head><body>');
+  w.document.write('<div class="no-print" style="margin-bottom:12px"><button onclick="window.print()" style="padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #333;border-radius:6px">&#128438; Imprimer / PDF</button></div>');
+  w.document.write('<h2 style="font-size:16px;font-weight:900;margin-bottom:4px">&#9995; Feuille de route Picking</h2>');
+  w.document.write('<p style="color:#666;font-size:10px;margin-bottom:12px">'+new Date().toLocaleString('fr-FR')+'</p>');
+  var src=body.innerHTML;
+  src=src.replace(/color:var\(--t[0-9]\)/g,'color:#333').replace(/color:var\(--purple\)/g,'color:#6d28d9')
+    .replace(/color:var\(--blue\)/g,'color:#1d4ed8').replace(/color:var\(--amber\)/g,'color:#92400e')
+    .replace(/color:var\(--red\)/g,'color:#dc2626').replace(/color:var\(--green\)/g,'color:#16a34a')
+    .replace(/background:rgba\([^)]+\)/g,'').replace(/border:[^;]*rgba\([^)]+\)[^;]*/g,'border:1px solid #ccc');
+  w.document.write(src);
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(function(){w.focus();},200);
 }
 
 // ─── Mode Montage ─────────────────────────────────────────────────────────
@@ -6733,7 +6947,7 @@ function init(){
   }catch(e){ console.warn('init() load error:', e); }
   loadQuaiAssign();
   loadCompleted();
-  purgeOldCompleted();
+  _checkArchivePurge();
   cleanCompletedTrucks(); // archiver les camions avec ts.dep présent dès le chargement
   // Initialiser le datepicker "Date de saisie" avec aujourd'hui
   setTimeout(function(){
@@ -9387,6 +9601,8 @@ function renderMonthlyChart(el){
 // ─── ONGLET ARCHIVE — Camions terminés (10 jours) ───────────────────────
 // ═══════════════════════════════════════════════════════════════════════════
 var _archiveExpandedIds={};
+var _archiveWeekFilter=null;
+var _purgePaused=false;
 function toggleArchiveDetail(cid){_archiveExpandedIds[cid]=!_archiveExpandedIds[cid];renderArchive();}
 function clearCompletedArchive(){
   if(!confirm('Vider l\u2019archive des camions termin\u00e9s ?')) return;
@@ -9435,20 +9651,47 @@ function renderArchive(){
     el.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">\uD83D\uDCC1</div><p>Aucun camion archiv\u00e9.<br>Les camions marqu\u00e9s "Parti" sont archiv\u00e9s ici automatiquement (90 jours de r\u00e9tention).</p></div>';
     return;
   }
+  // Semaines disponibles
+  var weekMap={};
+  _completedTrucks.forEach(function(ct){
+    var wk=_archWeekKey(ct.date||'?');
+    if(!weekMap[wk])weekMap[wk]=0;
+    weekMap[wk]++;
+  });
+  var allWeeks=Object.keys(weekMap).sort().reverse();
+  if(_archiveWeekFilter&&!weekMap[_archiveWeekFilter])_archiveWeekFilter=null;
+  // Filtrage
+  var filtered=_archiveWeekFilter
+    ?_completedTrucks.filter(function(ct){return _archWeekKey(ct.date||'?')===_archiveWeekFilter;})
+    :_completedTrucks;
   // Group by date
   var byDate={};
-  _completedTrucks.forEach(function(ct){
+  filtered.forEach(function(ct){
     var d=ct.date||'?';
     if(!byDate[d]) byDate[d]=[];
     byDate[d].push(ct);
   });
   var dates=Object.keys(byDate).sort().reverse();
   var totalDays=dates.length;
-  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">';
+  var html='';
+  // En-t\u00eate
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">';
   html+='<div><span style="font-size:20px;font-weight:800;color:var(--t1)">\uD83D\uDCC1 Archive</span>';
-  html+=' <span style="font-size:13px;color:var(--t3);margin-left:8px">'+_completedTrucks.length+' camion'+ (_completedTrucks.length>1?'s':'')+' sur '+totalDays+' jour'+(totalDays>1?'s':'')+'</span></div>';
+  html+=' <span style="font-size:13px;color:var(--t3);margin-left:8px">'+filtered.length+' camion'+(filtered.length>1?'s':'')+' &middot; '+totalDays+' jour'+(totalDays>1?'s':'')+(_archiveWeekFilter?' (sem. '+_archiveWeekFilter.split('-S')[1]+')':'')+'</span></div>';
   html+='<button class="btn-sm" style="color:var(--red);border-color:rgba(255,69,58,.3)" onclick="clearCompletedArchive()">\uD83D\uDDD1 Vider l\u2019archive</button>';
   html+='</div>';
+  // Filtre par semaine
+  if(allWeeks.length>1){
+    html+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.08)">';
+    html+='<span style="font-size:11px;color:var(--t3);font-weight:600;margin-right:4px">\uD83D\uDCC5 Semaine :</span>';
+    if(_archiveWeekFilter)html+='<button onclick="setArchiveWeekFilter(null)" style="padding:4px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:var(--t1);font-size:11px;font-weight:700;cursor:pointer">Toutes</button>';
+    allWeeks.forEach(function(wk){
+      var isAct=wk===_archiveWeekFilter;
+      var wkNum=wk.split('-S')[1]||wk;
+      html+='<button onclick="setArchiveWeekFilter(\"'+(wk)+'\")" style="padding:4px 12px;border-radius:14px;border:1px solid '+(isAct?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isAct?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isAct?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">S'+(wkNum)+' <span style="font-size:10px;opacity:.7">('+(weekMap[wk])+')</span></button>';
+    });
+    html+='</div>';
+  }
   dates.forEach(function(date){
     var list=byDate[date];
     html+='<div style="margin-bottom:20px">';
@@ -9549,6 +9792,38 @@ renderStats=function(){
   var el=document.getElementById('statsContent');if(!el)return;
 try{renderMonthlyChart(el);}catch(e){console.warn('monthly:',e);}
   try{renderDecalageStats(el);}catch(e){console.warn('decalage-stats:',e);}
+};
+
+// ─── Patch renderStats: week filter bar ───────────────────────
+var _origRenderStats6=renderStats;
+renderStats=function(){
+  _origRenderStats6();
+  var el=document.getElementById('statsContent');
+  if(!el)return;
+  // Collect available weeks from live + archive
+  var wkSet={};
+  trucks.forEach(function(t){var w=_archWeekKey(t.date||'?');if(w&&w!=='?')wkSet[w]=true;});
+  (_completedTrucks||[]).forEach(function(ct){var w=_archWeekKey(ct.date||'?');if(w&&w!=='?')wkSet[w]=true;});
+  var allWks=Object.keys(wkSet).sort().reverse();
+  if(allWks.length<2)return;
+  var bar=document.createElement('div');
+  bar.style.cssText='display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.08);margin-bottom:14px';
+  var html='<span style="font-size:11px;color:var(--t3);font-weight:600;margin-right:4px">&#128197; Semaine :</span>';
+  if(_statWeekFilter)html+='<button onclick="setStatWeekFilter(null)" style="padding:4px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:var(--t1);font-size:11px;font-weight:700;cursor:pointer">Toutes</button>';
+  allWks.forEach(function(wk){
+    var isAct=wk===_statWeekFilter;
+    var wkNum=wk.split('-S')[1]||wk;
+    var yr=wk.split('-S')[0]||'';
+    html+='<button onclick="setStatWeekFilter(\"'+(wk)+'\")" style="padding:4px 12px;border-radius:14px;border:1px solid '+(isAct?'rgba(59,130,246,.7)':'rgba(59,130,246,.25)')+';background:'+(isAct?'rgba(59,130,246,.25)':'rgba(59,130,246,.06)')+';color:'+(isAct?'#60a5fa':'var(--t3)')+';font-size:11px;font-weight:700;cursor:pointer">S'+(wkNum)+' '+(yr)+'</button>';
+  });
+  bar.innerHTML=html;
+  el.insertBefore(bar,el.firstChild);
+  if(_statWeekFilter){
+    var badge=document.createElement('div');
+    badge.style.cssText='display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);border-radius:20px;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:10px';
+    badge.textContent='Semaine '+_statWeekFilter.split('-S')[1]+' '+_statWeekFilter.split('-S')[0];
+    el.insertBefore(badge,el.children[1]);
+  }
 };
 
 // ─── Section Suivi des Décalages ──────────────────────────────────────────
@@ -9659,6 +9934,7 @@ trucks.forEach(function(t){
 // Hash SHA-256 du mot de passe (jamais stocké en clair)
 var _TF_AUTH_USER='galaad';
 var _TF_AUTH_HASH='d5631a2fb97ae5408575b86e03687341629b9080f752ce64cc12da52adfa8f72';
+var _TF_AUTH_USERS={'galaad':'d5631a2fb97ae5408575b86e03687341629b9080f752ce64cc12da52adfa8f72','caserta':'59279341ea59fbf34025024596b670b6df2c9f80e71b9ad19aea71ba43b083fc'};
 var _tfAuthReady=false;
 
 async function tfHashPwd(pwd){
@@ -9677,7 +9953,7 @@ async function tfLogin(){
   errEl.textContent='';
   if(!user||!pwd){errEl.textContent='Veuillez remplir tous les champs.';return;}
   var hash=await tfHashPwd(pwd);
-  if(user===_TF_AUTH_USER&&hash===_TF_AUTH_HASH){
+  if(_TF_AUTH_USERS[user]&&hash===_TF_AUTH_USERS[user]){
     sessionStorage.setItem('tf_auth','1');
     document.getElementById('auth-overlay').style.display='none';
     document.getElementById('auth-import-modal').style.display='flex';
