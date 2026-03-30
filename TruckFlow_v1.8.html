@@ -1763,7 +1763,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.7';
+var APP_VERSION = 'v1.8';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6214,10 +6214,17 @@ function _buildPickingRouteHTML(selDate){
   +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--purple);font-weight:700">Colis picking</th>'
   +'<th style="padding:9px 14px;text-align:center;font-size:11px;color:var(--t3);font-weight:600">&#10003; Pr\u00e9par\u00e9</th>'
   +'</tr></thead><tbody>';
+  function _chkBox(done,big){
+    var s=big?'width:22px;height:22px;border:2px solid':'width:16px;height:16px;border:1.5px solid';
+    var r=big?'5px':'3px';
+    if(done)return '<span style="display:inline-block;'+s+' #2dc272;border-radius:'+r+';background:rgba(45,202,114,.2);text-align:center;line-height:'+(big?'20px':'14px')+';font-size:'+(big?'13px':'10px')+';color:#2dc272">\u2713</span>';
+    return '<span style="display:inline-block;'+s+' rgba(255,255,255,.25);border-radius:'+r+'"></span>';
+  }
   sortedKeys.forEach(function(key,idx){
     var meta=truckMeta[key];var delivs=truckGroups[key];
     var grpPick=0;delivs.forEach(function(d){grpPick+=(d.colisPick||0);});
     var isSans=key==='__sans__';
+    var allDone=delivs.every(function(d){return d.sp==='C';});
     // Header row for this truck
     html+='<tr style="background:rgba(59,130,246,.07);border-top:2px solid rgba(59,130,246,.18)">'
       +'<td style="padding:9px 14px;text-align:center;font-weight:900;color:var(--blue)">'+(isSans?'—':idx+1)+'</td>'
@@ -6225,7 +6232,7 @@ function _buildPickingRouteHTML(selDate){
       +'<td style="padding:9px 14px;text-align:center;font-weight:800;color:var(--blue)">'+(meta.creneau?'\u23F0 '+escH(meta.creneau):'—')+'</td>'
       +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--t2)">'+delivs.length+' livr.</td>'
       +'<td style="padding:9px 14px;text-align:center;font-weight:900;font-size:15px;color:var(--purple)">\u270b '+Math.round(grpPick)+'</td>'
-      +'<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.25);border-radius:5px"></span></td>'
+      +'<td style="padding:9px 14px;text-align:center">'+_chkBox(allDone,true)+'</td>'
     +'</tr>';
     // Detail rows per delivery, sorted by picking qty desc
     delivs.sort(function(a,b){return (b.colisPick||0)-(a.colisPick||0);});
@@ -6239,7 +6246,7 @@ function _buildPickingRouteHTML(selDate){
         +'<td></td>'
         +'<td style="padding:5px 14px;text-align:center;font-size:11px;color:var(--t3)">'+(d.sp||'')+'</td>'
         +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--purple)">'+Math.round(d.colisPick)+'</td>'
-        +'<td style="padding:5px 14px;text-align:center"><span style="display:inline-block;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.2);border-radius:3px"></span></td>'
+        +'<td style="padding:5px 14px;text-align:center">'+_chkBox(d.sp==='C',false)+'</td>'
       +'</tr>';
     });
   });
@@ -6366,6 +6373,13 @@ function _buildSiloRouteHTML(selDate){
     var grpPal=0,grpCs=0;
     delivs.forEach(function(d){grpPal+=(d.palSilo||0);grpCs+=(d.colisSilo||0);});
     var isSans=key==='__sans__';
+    var allDoneS=delivs.every(function(d){return d.sp==='C';});
+    function _chkS(done,big){
+      var s=big?'width:22px;height:22px;border:2px solid':'width:16px;height:16px;border:1.5px solid';
+      var r=big?'5px':'3px';
+      if(done)return '<span style="display:inline-block;'+s+' #2dc272;border-radius:'+r+';background:rgba(45,202,114,.2);text-align:center;line-height:'+(big?'20px':'14px')+';font-size:'+(big?'13px':'10px')+';color:#2dc272">\u2713</span>';
+      return '<span style="display:inline-block;'+s+' rgba(255,255,255,.25);border-radius:'+r+'"></span>';
+    }
     html+='<tr style="background:rgba(99,102,241,.07);border-top:2px solid rgba(99,102,241,.18)">'
       +'<td style="padding:9px 14px;text-align:center;font-weight:900;color:var(--indigo)">'+(isSans?'—':idx+1)+'</td>'
       +'<td style="padding:9px 14px;font-weight:800;color:var(--t1)">\uD83D\uDE9B '+escH(meta.transporteur)+'</td>'
@@ -6373,7 +6387,7 @@ function _buildSiloRouteHTML(selDate){
       +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--t2)">'+delivs.length+' livr.</td>'
       +'<td style="padding:9px 14px;text-align:center;font-weight:900;font-size:15px;color:var(--indigo)">&#127981; '+Math.round(grpPal)+'</td>'
       +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--blue)">'+Math.round(grpCs).toLocaleString('fr')+'</td>'
-      +'<td style="padding:9px 14px;text-align:center"><span style="display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.25);border-radius:5px"></span></td>'
+      +'<td style="padding:9px 14px;text-align:center">'+_chkS(allDoneS,true)+'</td>'
     +'</tr>';
     delivs.sort(function(a,b){return (b.palSilo||0)-(a.palSilo||0);});
     delivs.forEach(function(d){
@@ -6386,7 +6400,7 @@ function _buildSiloRouteHTML(selDate){
         +'<td></td><td></td>'
         +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--indigo)">'+Math.round(d.palSilo||0)+'</td>'
         +'<td style="padding:5px 14px;text-align:center;color:var(--t3);font-size:12px">'+Math.round(d.colisSilo||0).toLocaleString('fr')+'</td>'
-        +'<td style="padding:5px 14px;text-align:center"><span style="display:inline-block;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.2);border-radius:3px"></span></td>'
+        +'<td style="padding:5px 14px;text-align:center">'+_chkS(d.sp==='C',false)+'</td>'
       +'</tr>';
     });
   });
