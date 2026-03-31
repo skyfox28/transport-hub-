@@ -1763,7 +1763,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.8';
+var APP_VERSION = 'v1.9';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6224,7 +6224,7 @@ function _buildPickingRouteHTML(selDate){
     var meta=truckMeta[key];var delivs=truckGroups[key];
     var grpPick=0;delivs.forEach(function(d){grpPick+=(d.colisPick||0);});
     var isSans=key==='__sans__';
-    var allDone=delivs.every(function(d){return d.sp==='C';});
+    var allDone=delivs.every(function(d){return d.sp==='C'&&d.wm==='C';});
     // Header row for this truck
     html+='<tr style="background:rgba(59,130,246,.07);border-top:2px solid rgba(59,130,246,.18)">'
       +'<td style="padding:9px 14px;text-align:center;font-weight:900;color:var(--blue)">'+(isSans?'—':idx+1)+'</td>'
@@ -6246,7 +6246,7 @@ function _buildPickingRouteHTML(selDate){
         +'<td></td>'
         +'<td style="padding:5px 14px;text-align:center;font-size:11px;color:var(--t3)">'+(d.sp||'')+'</td>'
         +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--purple)">'+Math.round(d.colisPick)+'</td>'
-        +'<td style="padding:5px 14px;text-align:center">'+_chkBox(d.sp==='C',false)+'</td>'
+        +'<td style="padding:5px 14px;text-align:center">'+_chkBox(d.sp==='C'&&d.wm==='C',false)+'</td>'
       +'</tr>';
     });
   });
@@ -6373,7 +6373,7 @@ function _buildSiloRouteHTML(selDate){
     var grpPal=0,grpCs=0;
     delivs.forEach(function(d){grpPal+=(d.palSilo||0);grpCs+=(d.colisSilo||0);});
     var isSans=key==='__sans__';
-    var allDoneS=delivs.every(function(d){return d.sp==='C';});
+    var allDoneS=delivs.every(function(d){return d.sp==='C'&&d.wm==='C';});
     function _chkS(done,big){
       var s=big?'width:22px;height:22px;border:2px solid':'width:16px;height:16px;border:1.5px solid';
       var r=big?'5px':'3px';
@@ -6400,7 +6400,7 @@ function _buildSiloRouteHTML(selDate){
         +'<td></td><td></td>'
         +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--indigo)">'+Math.round(d.palSilo||0)+'</td>'
         +'<td style="padding:5px 14px;text-align:center;color:var(--t3);font-size:12px">'+Math.round(d.colisSilo||0).toLocaleString('fr')+'</td>'
-        +'<td style="padding:5px 14px;text-align:center">'+_chkS(d.sp==='C',false)+'</td>'
+        +'<td style="padding:5px 14px;text-align:center">'+_chkS(d.sp==='C'&&d.wm==='C',false)+'</td>'
       +'</tr>';
     });
   });
