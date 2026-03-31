@@ -1763,7 +1763,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.11';
+var APP_VERSION = 'v1.12';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -7447,9 +7447,10 @@ function validateVL06OColumns(allKeys){
 // ─── #8 Carrier Comparison Stats ──────────────────────────────────────────
 function computeCarrierStats(){
   var carriers={};
+  function _carrierKey(t){return ITIN_MAP[t.itin]||t.itin||t.transporteur||'?';}
   // Live trucks
   trucks.forEach(function(t){
-    var name=t.transporteur||t.itin||'?';
+    var name=_carrierKey(t);
     if(!carriers[name]) carriers[name]={name:name,count:0,heure:0,avance:0,retard:0,attente:0,totalLoadMin:0,loadCount:0,totalWaitMin:0,waitCount:0};
     var c=carriers[name];c.count++;
     var ts=timestamps[t.id]||{};
@@ -7469,7 +7470,7 @@ function computeCarrierStats(){
   });
   // Archived completed trucks
   (_completedTrucks||[]).forEach(function(ct){
-    var name=ct.transporteur||ct.itin||'?';
+    var name=ITIN_MAP[ct.itin]||ct.itin||ct.transporteur||'?';
     if(!carriers[name]) carriers[name]={name:name,count:0,heure:0,avance:0,retard:0,attente:0,totalLoadMin:0,loadCount:0,totalWaitMin:0,waitCount:0};
     var c=carriers[name];c.count++;
     var p=ct.ponctualite||{};
@@ -11334,8 +11335,8 @@ computeCarrierStats=function(){
       decalMap[name].total++;
     });
   }
-  countDecal(trucks,function(t){return t.transporteur||t.itin||'?';},function(t){return t.decalage;});
-  countDecal(_completedTrucks||[],function(ct){return ct.transporteur||ct.itin||'?';},function(ct){return ct.decalage;});
+  countDecal(trucks,function(t){return ITIN_MAP[t.itin]||t.itin||t.transporteur||'?';},function(t){return t.decalage;});
+  countDecal(_completedTrucks||[],function(ct){return ITIN_MAP[ct.itin]||ct.itin||ct.transporteur||'?';},function(ct){return ct.decalage;});
   carriers.forEach(function(c){c.decalage=decalMap[c.name]||{mtx3:0,transporteur:0,pas_venu:0,total:0};});
   return carriers;
 };
