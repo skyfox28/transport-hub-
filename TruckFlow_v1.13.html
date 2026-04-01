@@ -1465,6 +1465,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
     <div class="syn-view-toggle">
       <button class="syn-view-btn on" id="synViewDay" onclick="switchSynView('day')">&#x1F4C5; Vue Jour</button>
       <button class="syn-view-btn" id="synViewWeek" onclick="switchSynView('week')">&#x1F4CA; Vue Semaine</button>
+      <button class="syn-view-btn" id="synViewPrev" onclick="switchSynView('prev')">&#x1F52E; Pr&#xe9;visions</button>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <button class="toggle-btn on" id="exportToggle" onclick="toggleExport()">&#128230; Inclure exports</button>
@@ -1481,6 +1482,10 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
       </div>
       <div id="weekSummaryBody" style="padding:14px"></div>
     </div>
+  </div>
+  <!-- Vue Prévisions -->
+  <div id="prevSection" style="display:none">
+    <div id="prevBody"></div>
   </div>
 </div>
 
@@ -1763,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.12';
+var APP_VERSION = 'v1.13';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -4157,26 +4162,31 @@ function switchSynView(view){
   _synView=view;
   var dayBtn=document.getElementById('synViewDay');
   var weekBtn=document.getElementById('synViewWeek');
+  var prevBtn=document.getElementById('synViewPrev');
   var dayDetailEl=document.getElementById('dayDetail');
   var weekSection=document.getElementById('weekSection');
-  // Blocs masqués en vue semaine (compteurs + KPIs + objectifs)
+  var prevSection=document.getElementById('prevSection');
   var synWeekHidden=['avgWaitBadge','goalsWrap','rtCountersWrap','kpiRow'];
+  [dayBtn,weekBtn,prevBtn].forEach(function(b){if(b)b.classList.remove('on');});
+  [dayDetailEl,weekSection,prevSection].forEach(function(el){if(el)el.style.display='none';});
   if(view==='day'){
-    dayBtn.classList.add('on');weekBtn.classList.remove('on');
-    if(dayDetailEl) dayDetailEl.style.display='';
-    if(weekSection) weekSection.style.display='none';
+    if(dayBtn)dayBtn.classList.add('on');
+    if(dayDetailEl)dayDetailEl.style.display='';
     synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='';});
     var todayISO=new Date().toISOString().slice(0,10);
-    if(!_activeDay) _activeDay=todayISO;
+    if(!_activeDay)_activeDay=todayISO;
     try{renderDayDetail(_activeDay);}catch(e){console.error('[TruckFlow] renderDayDetail error:',e);}
-  } else {
-    weekBtn.classList.add('on');dayBtn.classList.remove('on');
-    if(dayDetailEl) dayDetailEl.style.display='none';
-    if(weekSection) weekSection.style.display='';
+  } else if(view==='week'){
+    if(weekBtn)weekBtn.classList.add('on');
+    if(weekSection)weekSection.style.display='';
     try{renderSynPonct();}catch(e){}
     try{renderWeekSummary();}catch(e){}
-    // Vue semaine : uniquement le récapitulatif par jour, sans KPIs ni compteurs
     synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
+  } else if(view==='prev'){
+    if(prevBtn)prevBtn.classList.add('on');
+    if(prevSection)prevSection.style.display='';
+    synWeekHidden.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});
+    try{renderPrevisions();}catch(e){console.error('[TruckFlow] renderPrevisions error:',e);}
   }
 }
 // Auto-refresh active view on every renderAll
@@ -6440,6 +6450,171 @@ function printSiloRoute(){
   w.document.write('</body></html>');
   w.document.close();
   setTimeout(function(){w.focus();},200);
+}
+
+// ─── Prévisions ───────────────────────────────────────────────────────────
+var _PREV_CFG_KEY='tf_prev_config';
+var _prevCfgDefault={
+  pickCadence:600,pickMatinPersons:2,pickAMPersons:2,
+  siloCadence:18,siloMatinPersons:2,siloAMPersons:2,
+  shiftH:7
+};
+function _getPrevCfg(){
+  try{var s=localStorage.getItem(_PREV_CFG_KEY);if(s)return Object.assign({},_prevCfgDefault,JSON.parse(s));}catch(e){}
+  return Object.assign({},_prevCfgDefault);
+}
+function _savePrevCfg(cfg){try{localStorage.setItem(_PREV_CFG_KEY,JSON.stringify(cfg));}catch(e){}}
+function _prevShift(startMin){
+  // Matin 5h-12h = 300-719min, AM 12h-19h = 720-1139min
+  if(startMin===undefined||startMin===null)return 'nonAssigne';
+  if(startMin<300)return 'nonAssigne';
+  if(startMin<720)return 'matin';
+  if(startMin<1140)return 'am';
+  return 'nonAssigne';
+}
+function renderPrevisions(){
+  var el=document.getElementById('prevBody');
+  if(!el)return;
+  var cfg=_getPrevCfg();
+  // Collect available dates from deliveries
+  var dateSet={};
+  (APP.deliveries||[]).forEach(function(d){if(d.date)dateSet[d.date]=true;});
+  var dates=Object.keys(dateSet).sort(function(a,b){
+    return a.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1').localeCompare(b.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1'));
+  });
+  if(!dates.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">Aucune livraison import\u00e9e.</div>';return;}
+  // Determine default selected date
+  var todayFR=new Date();
+  var todayStr=String(todayFR.getDate()).padStart(2,'0')+'/'+String(todayFR.getMonth()+1).padStart(2,'0')+'/'+todayFR.getFullYear();
+  var selDate=window._prevSelDate||(dates.indexOf(todayStr)>=0?todayStr:dates[dates.length-1]);
+  window._prevSelDate=selDate;
+  // Build truck→shift map
+  var truck2shift={};
+  trucks.forEach(function(t){
+    var w=creWindow(t.creneau||'');
+    var sh=_prevShift(w?w.start:null);
+    (t.deliveries||[]).concat(t.lockedDeliveries||[]).forEach(function(id){truck2shift[id]=sh;});
+  });
+  // Volumes per shift
+  var vols={matin:{pick:0,palSilo:0,csSilo:0},am:{pick:0,palSilo:0,csSilo:0},nonAssigne:{pick:0,palSilo:0,csSilo:0}};
+  var totalPick=0,totalPal=0,totalCs=0;
+  (APP.deliveries||[]).filter(function(d){return d.date===selDate;}).forEach(function(d){
+    var sh=truck2shift[d.id]||'nonAssigne';
+    vols[sh].pick+=(d.colisPick||0);
+    vols[sh].palSilo+=(d.palSilo||0);
+    vols[sh].csSilo+=(d.colisSilo||0);
+    totalPick+=(d.colisPick||0);totalPal+=(d.palSilo||0);totalCs+=(d.colisSilo||0);
+  });
+  // Capacity per shift
+  var H=cfg.shiftH;
+  var capPM=cfg.pickCadence*cfg.pickMatinPersons*H;
+  var capPA=cfg.pickCadence*cfg.pickAMPersons*H;
+  var capSM=cfg.siloCadence*cfg.siloMatinPersons*H;
+  var capSA=cfg.siloCadence*cfg.siloAMPersons*H;
+  function _pct(v,cap){return cap>0?Math.round(v/cap*100):0;}
+  function _status(pct){
+    if(pct<80)return {col:'#2dc272',bg:'rgba(45,202,114,.12)',bd:'rgba(45,202,114,.3)',ico:'\u2705',lbl:'OK'};
+    if(pct<=100)return {col:'#f59e0b',bg:'rgba(245,158,11,.12)',bd:'rgba(245,158,11,.3)',ico:'\u26a0\ufe0f',lbl:'Flux tendu'};
+    return {col:'#ff453a',bg:'rgba(255,69,58,.12)',bd:'rgba(255,69,58,.3)',ico:'\uD83D\uDD34',lbl:'D\u00e9caler livraisons'};
+  }
+  function _bar(pct,col){
+    var w=Math.min(pct,120);
+    return '<div style="background:rgba(255,255,255,.07);border-radius:6px;height:10px;overflow:hidden;margin-top:6px">'
+      +'<div style="height:10px;width:'+w+'%;max-width:100%;background:'+col+';border-radius:6px;transition:width .5s"></div></div>';
+  }
+  function _shiftCard(label,hours,pickVol,capPick,palVol,csSilo,capSilo){
+    var ppct=_pct(pickVol,capPick),spct=_pct(palVol,capSilo);
+    var ps=_status(ppct),ss=_status(spct);
+    var timePickH=cfg.pickCadence>0?(pickVol/cfg.pickCadence).toFixed(1):0;
+    var timeSiloH=cfg.siloCadence>0?(palVol/cfg.siloCadence).toFixed(1):0;
+    return '<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px 20px;flex:1;min-width:260px">'
+      +'<div style="font-size:14px;font-weight:800;color:var(--t1);margin-bottom:14px">'+label+' <span style="font-size:11px;font-weight:500;color:var(--t3)">'+hours+'</span></div>'
+      // Picking block
+      +'<div style="background:rgba(191,90,242,.07);border:1px solid rgba(191,90,242,.2);border-radius:12px;padding:12px 14px;margin-bottom:10px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--purple)">\u270b Picking</span>'
+      +'<span style="font-size:11px;padding:2px 10px;border-radius:20px;background:'+ps.bg+';border:1px solid '+ps.bd+';color:'+ps.col+';font-weight:700">'+ps.ico+' '+ps.lbl+'</span>'
+      +'</div>'
+      +'<div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">'
+      +'<span style="font-size:13px;font-weight:900;color:var(--purple)">'+Math.round(pickVol)+' cs</span>'
+      +'<span style="font-size:11px;color:var(--t3)">Capacit\u00e9 '+Math.round(capPick)+' cs</span>'
+      +'<span style="font-size:11px;color:var(--t3)">Temps n\u00e9c. ~'+timePickH+'h</span>'
+      +'</div>'
+      +_bar(ppct,ps.col)
+      +'<div style="font-size:10px;color:'+ps.col+';margin-top:4px;font-weight:700">'+ppct+'% de la capacit\u00e9</div>'
+      +'</div>'
+      // Silo block
+      +'<div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:12px 14px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--indigo)">\uD83C\uDFED Silo</span>'
+      +'<span style="font-size:11px;padding:2px 10px;border-radius:20px;background:'+ss.bg+';border:1px solid '+ss.bd+';color:'+ss.col+';font-weight:700">'+ss.ico+' '+ss.lbl+'</span>'
+      +'</div>'
+      +'<div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">'
+      +'<span style="font-size:13px;font-weight:900;color:var(--indigo)">'+Math.round(palVol)+' pal</span>'
+      +'<span style="font-size:11px;color:var(--t3)">'+Math.round(csSilo)+' cs \u00b7 Capacit\u00e9 '+Math.round(capSilo)+' pal</span>'
+      +'<span style="font-size:11px;color:var(--t3)">Temps n\u00e9c. ~'+timeSiloH+'h</span>'
+      +'</div>'
+      +_bar(spct,ss.col)
+      +'<div style="font-size:10px;color:'+ss.col+';margin-top:4px;font-weight:700">'+spct+'% de la capacit\u00e9</div>'
+      +'</div>'
+    +'</div>';
+  }
+  // Date selector options
+  var dateOpts=dates.map(function(d){return '<option value="'+escH(d)+'"'+(d===selDate?' selected':'')+'>'+d+'</option>';}).join('');
+  var html=''
+  // ── Header
+  +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px">'
+  +'<span style="font-size:20px">\uD83D\uDD2E</span>'
+  +'<div><div style="font-size:17px;font-weight:800;color:var(--t1)">Pr\u00e9visions charge</div>'
+  +'<div style="font-size:11px;color:var(--t3)">Estimation flux selon volumes import\u00e9s et cadences</div></div>'
+  +'<select onchange="window._prevSelDate=this.value;renderPrevisions()" style="margin-left:auto;padding:7px 14px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700">'+dateOpts+'</select>'
+  +'</div>'
+  // ── Totaux du jour
+  +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">'
+  +'<div style="padding:8px 16px;background:rgba(191,90,242,.1);border:1px solid rgba(191,90,242,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">\u270b '+Math.round(totalPick)+' cs picking total</div>'
+  +'<div style="padding:8px 16px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--indigo)">\uD83C\uDFED '+Math.round(totalPal)+' pal silo \u2014 '+Math.round(totalCs)+' cs</div>'
+  +'</div>'
+  // ── Shifts
+  +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px">'
+  +_shiftCard('\uD83C\uDF05 Matin','5h\u201312h',vols.matin.pick,capPM,vols.matin.palSilo,vols.matin.csSilo,capSM)
+  +_shiftCard('\uD83C\uDF07 Apr\u00e8s-midi','12h\u201319h',vols.am.pick,capPA,vols.am.palSilo,vols.am.csSilo,capSA)
+  +(vols.nonAssigne.pick>0||vols.nonAssigne.palSilo>0
+    ?'<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:14px 18px;min-width:200px">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px">\u26a0\ufe0f Sans cr\u00e9neau assign\u00e9</div>'
+    +'<div style="font-size:13px;color:var(--t2)">\u270b '+Math.round(vols.nonAssigne.pick)+' cs picking</div>'
+    +'<div style="font-size:13px;color:var(--t2)">\uD83C\uDFED '+Math.round(vols.nonAssigne.palSilo)+' pal silo</div>'
+    +'</div>':'')
+  +'</div>'
+  // ── Config panel
+  +'<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 20px">'
+  +'<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px">\u2699\ufe0f Configuration cadences &amp; \u00e9quipes</div>'
+  +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">'
+  +_cfgField('Cadence picking (cs/h/pers)','prevCfgPickCad',cfg.pickCadence)
+  +_cfgField('Picking matin (personnes)','prevCfgPickMat',cfg.pickMatinPersons)
+  +_cfgField('Picking AM (personnes)','prevCfgPickAM',cfg.pickAMPersons)
+  +_cfgField('Cadence silo (pal/h/pers)','prevCfgSiloCad',cfg.siloCadence)
+  +_cfgField('Silo matin (personnes)','prevCfgSiloMat',cfg.siloMatinPersons)
+  +_cfgField('Silo AM (personnes)','prevCfgSiloAM',cfg.siloAMPersons)
+  +_cfgField('Dur\u00e9e shift (heures)','prevCfgH',cfg.shiftH)
+  +'</div>'
+  +'<button onclick="_savePrevFromUI()" style="margin-top:14px;padding:8px 20px;border-radius:10px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">\u2714 Appliquer</button>'
+  +'</div>';
+  el.innerHTML=html;
+}
+function _cfgField(label,id,val){
+  return '<div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">'+label+'</div>'
+    +'<input id="'+id+'" type="number" value="'+val+'" min="0" step="1" style="width:100%;padding:6px 10px;border-radius:8px;background:var(--sf1);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700"></div>';
+}
+function _savePrevFromUI(){
+  function _v(id){var e=document.getElementById(id);return e?Math.max(0,parseFloat(e.value)||0):0;}
+  var cfg={
+    pickCadence:_v('prevCfgPickCad'),pickMatinPersons:_v('prevCfgPickMat'),pickAMPersons:_v('prevCfgPickAM'),
+    siloCadence:_v('prevCfgSiloCad'),siloMatinPersons:_v('prevCfgSiloMat'),siloAMPersons:_v('prevCfgSiloAM'),
+    shiftH:_v('prevCfgH')
+  };
+  _savePrevCfg(cfg);
+  renderPrevisions();
+  showToast('Configuration sauvegard\u00e9e');
 }
 
 // ─── Mode Montage ─────────────────────────────────────────────────────────
