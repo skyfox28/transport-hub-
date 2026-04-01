@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.14';
+var APP_VERSION = 'v1.15';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6499,7 +6499,9 @@ function renderPrevisions(){
     var sh=_prevShift(w?w.start:null);
     var tPick=0,tPal=0,tCs=0;
     var tDelivs=[];
+    var seenIds={};
     (t.deliveries||[]).concat(t.lockedDeliveries||[]).forEach(function(id){
+      if(seenIds[id])return;seenIds[id]=true;
       var d=delivIdx[id];if(!d)return;
       tPick+=(d.colisPick||0);tPal+=(d.palSilo||0);tCs+=(d.colisSilo||0);
       if((d.colisPick||0)>0||(d.palSilo||0)>0)tDelivs.push(d);
