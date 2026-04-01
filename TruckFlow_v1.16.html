@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.15';
+var APP_VERSION = 'v1.16';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6601,16 +6601,34 @@ function renderPrevisions(){
   }
   var dateOpts=dates.map(function(d){return '<option value="'+escH(d)+'"'+(d===selDate?' selected':'')+'>'+d+'</option>';}).join('');
   var html=''
-  +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px">'
+  // ── Header + date selector
+  +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">'
   +'<span style="font-size:20px">\uD83D\uDD2E</span>'
   +'<div><div style="font-size:17px;font-weight:800;color:var(--t1)">Pr\u00e9visions charge</div>'
   +'<div style="font-size:11px;color:var(--t3)">Estimation flux selon volumes import\u00e9s et cadences</div></div>'
   +'<select onchange="window._prevSelDate=this.value;renderPrevisions()" style="margin-left:auto;padding:7px 14px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700">'+dateOpts+'</select>'
   +'</div>'
+  // ── Config panel (top)
+  +'<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;margin-bottom:18px">'
+  +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+  +'<span style="font-size:12px;font-weight:700;color:var(--t3);">\u2699\ufe0f</span>'
+  +_cfgFieldInline('Pick cad.','prevCfgPickCad',cfg.pickCadence,'cs/h')
+  +_cfgFieldInline('Pick matin','prevCfgPickMat',cfg.pickMatinPersons,'pers')
+  +_cfgFieldInline('Pick AM','prevCfgPickAM',cfg.pickAMPersons,'pers')
+  +'<span style="width:1px;height:28px;background:rgba(255,255,255,.1);margin:0 4px"></span>'
+  +_cfgFieldInline('Silo cad.','prevCfgSiloCad',cfg.siloCadence,'pal/h')
+  +_cfgFieldInline('Silo matin','prevCfgSiloMat',cfg.siloMatinPersons,'pers')
+  +_cfgFieldInline('Silo AM','prevCfgSiloAM',cfg.siloAMPersons,'pers')
+  +'<span style="width:1px;height:28px;background:rgba(255,255,255,.1);margin:0 4px"></span>'
+  +_cfgFieldInline('Shift','prevCfgH',cfg.shiftH,'h')
+  +'<button onclick="_savePrevFromUI()" style="padding:6px 16px;border-radius:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">\u2714 Appliquer</button>'
+  +'</div></div>'
+  // ── Totaux
   +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">'
   +'<div style="padding:8px 16px;background:rgba(191,90,242,.1);border:1px solid rgba(191,90,242,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">\u270b '+Math.round(totalPick)+' cs picking</div>'
   +'<div style="padding:8px 16px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--indigo)">\uD83C\uDFED '+Math.round(totalPal)+' pal \u2014 '+Math.round(totalCs)+' cs silo</div>'
   +'</div>'
+  // ── Shifts
   +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px">'
   +_shiftSection('\uD83C\uDF05 Matin','5h\u201312h','matin',capPM,capSM,{pick:cfg.pickMatinPersons,silo:cfg.siloMatinPersons})
   +_shiftSection('\uD83C\uDF07 Apr\u00e8s-midi','12h\u201319h','am',capPA,capSA,{pick:cfg.pickAMPersons,silo:cfg.siloAMPersons})
@@ -6621,25 +6639,20 @@ function renderPrevisions(){
     +'<div style="font-size:13px;color:var(--t2);margin-bottom:10px">\uD83C\uDFED '+Math.round(vols.nonAssigne.palSilo)+' pal silo</div>'
     +_truckDetail(truckRows.nonAssigne)
     +'</div>':'')
-  +'</div>'
-  +'<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 20px">'
-  +'<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px">\u2699\ufe0f Configuration</div>'
-  +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">'
-  +_cfgField('Cadence picking (cs/h/pers)','prevCfgPickCad',cfg.pickCadence)
-  +_cfgField('Picking matin (pers)','prevCfgPickMat',cfg.pickMatinPersons)
-  +_cfgField('Picking AM (pers)','prevCfgPickAM',cfg.pickAMPersons)
-  +_cfgField('Cadence silo (pal/h/pers)','prevCfgSiloCad',cfg.siloCadence)
-  +_cfgField('Silo matin (pers)','prevCfgSiloMat',cfg.siloMatinPersons)
-  +_cfgField('Silo AM (pers)','prevCfgSiloAM',cfg.siloAMPersons)
-  +_cfgField('Dur\u00e9e shift (h)','prevCfgH',cfg.shiftH)
-  +'</div>'
-  +'<button onclick="_savePrevFromUI()" style="margin-top:14px;padding:8px 20px;border-radius:10px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">\u2714 Appliquer</button>'
   +'</div>';
   el.innerHTML=html;
 }
 function _cfgField(label,id,val){
   return '<div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">'+label+'</div>'
     +'<input id="'+id+'" type="number" value="'+val+'" min="0" step="1" style="width:100%;padding:6px 10px;border-radius:8px;background:var(--sf1);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700"></div>';
+}
+function _cfgFieldInline(label,id,val,unit){
+  return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<span style="font-size:10px;color:var(--t3);white-space:nowrap">'+label+'</span>'
+    +'<div style="display:flex;align-items:center;gap:3px">'
+    +'<input id="'+id+'" type="number" value="'+val+'" min="0" step="1" style="width:52px;padding:4px 6px;border-radius:7px;background:var(--sf1);border:1px solid var(--bd2);color:var(--t1);font-size:12px;font-weight:700;text-align:center">'
+    +'<span style="font-size:10px;color:var(--t3)">'+unit+'</span>'
+    +'</div></div>';
 }
 function _savePrevFromUI(){
   function _v(id){var e=document.getElementById(id);return e?Math.max(0,parseFloat(e.value)||0):0;}
