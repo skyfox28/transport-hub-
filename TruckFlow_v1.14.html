@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.13';
+var APP_VERSION = 'v1.14';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6456,7 +6456,7 @@ function printSiloRoute(){
 var _PREV_CFG_KEY='tf_prev_config';
 var _prevCfgDefault={
   pickCadence:600,pickMatinPersons:2,pickAMPersons:2,
-  siloCadence:18,siloMatinPersons:2,siloAMPersons:2,
+  siloCadence:18,siloMatinPersons:1,siloAMPersons:1,
   shiftH:7
 };
 function _getPrevCfg(){
@@ -6476,41 +6476,52 @@ function renderPrevisions(){
   var el=document.getElementById('prevBody');
   if(!el)return;
   var cfg=_getPrevCfg();
-  // Collect available dates from deliveries
   var dateSet={};
   (APP.deliveries||[]).forEach(function(d){if(d.date)dateSet[d.date]=true;});
   var dates=Object.keys(dateSet).sort(function(a,b){
     return a.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1').localeCompare(b.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3$2$1'));
   });
   if(!dates.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--t3)">Aucune livraison import\u00e9e.</div>';return;}
-  // Determine default selected date
   var todayFR=new Date();
   var todayStr=String(todayFR.getDate()).padStart(2,'0')+'/'+String(todayFR.getMonth()+1).padStart(2,'0')+'/'+todayFR.getFullYear();
   var selDate=window._prevSelDate||(dates.indexOf(todayStr)>=0?todayStr:dates[dates.length-1]);
   window._prevSelDate=selDate;
-  // Build truck→shift map
-  var truck2shift={};
+  // Deliveries for selected date, indexed by id
+  var dayDelivs=(APP.deliveries||[]).filter(function(d){return d.date===selDate;});
+  var delivIdx={};dayDelivs.forEach(function(d){delivIdx[d.id]=d;});
+  // Per-truck volumes + shift assignment
+  var shiftKeys=['matin','am','nonAssigne'];
+  var vols={matin:{pick:0,palSilo:0,csSilo:0},am:{pick:0,palSilo:0,csSilo:0},nonAssigne:{pick:0,palSilo:0,csSilo:0}};
+  var truckRows={matin:[],am:[],nonAssigne:[]};
+  var totalPick=0,totalPal=0,totalCs=0;
   trucks.forEach(function(t){
     var w=creWindow(t.creneau||'');
     var sh=_prevShift(w?w.start:null);
-    (t.deliveries||[]).concat(t.lockedDeliveries||[]).forEach(function(id){truck2shift[id]=sh;});
+    var tPick=0,tPal=0,tCs=0;
+    var tDelivs=[];
+    (t.deliveries||[]).concat(t.lockedDeliveries||[]).forEach(function(id){
+      var d=delivIdx[id];if(!d)return;
+      tPick+=(d.colisPick||0);tPal+=(d.palSilo||0);tCs+=(d.colisSilo||0);
+      if((d.colisPick||0)>0||(d.palSilo||0)>0)tDelivs.push(d);
+    });
+    if(tPick>0||tPal>0){
+      vols[sh].pick+=tPick;vols[sh].palSilo+=tPal;vols[sh].csSilo+=tCs;
+      totalPick+=tPick;totalPal+=tPal;totalCs+=tCs;
+      tDelivs.sort(function(a,b){return (b.colisPick||0)+(b.palSilo||0)*5-(a.colisPick||0)-(a.palSilo||0)*5;});
+      truckRows[sh].push({t:t,pick:tPick,palSilo:tPal,csSilo:tCs,creneau:t.creneau||'',
+        name:ITIN_MAP[t.itin]||t.itin||t.transporteur||'?',delivs:tDelivs});
+    }
   });
-  // Volumes per shift
-  var vols={matin:{pick:0,palSilo:0,csSilo:0},am:{pick:0,palSilo:0,csSilo:0},nonAssigne:{pick:0,palSilo:0,csSilo:0}};
-  var totalPick=0,totalPal=0,totalCs=0;
-  (APP.deliveries||[]).filter(function(d){return d.date===selDate;}).forEach(function(d){
-    var sh=truck2shift[d.id]||'nonAssigne';
-    vols[sh].pick+=(d.colisPick||0);
-    vols[sh].palSilo+=(d.palSilo||0);
-    vols[sh].csSilo+=(d.colisSilo||0);
-    totalPick+=(d.colisPick||0);totalPal+=(d.palSilo||0);totalCs+=(d.colisSilo||0);
+  shiftKeys.forEach(function(sh){
+    truckRows[sh].sort(function(a,b){
+      var wa=creWindow(a.creneau)||{start:9999};var wb=creWindow(b.creneau)||{start:9999};
+      return wa.start-wb.start;
+    });
   });
-  // Capacity per shift
+  // Helpers
   var H=cfg.shiftH;
-  var capPM=cfg.pickCadence*cfg.pickMatinPersons*H;
-  var capPA=cfg.pickCadence*cfg.pickAMPersons*H;
-  var capSM=cfg.siloCadence*cfg.siloMatinPersons*H;
-  var capSA=cfg.siloCadence*cfg.siloAMPersons*H;
+  var capPM=cfg.pickCadence*cfg.pickMatinPersons*H,capPA=cfg.pickCadence*cfg.pickAMPersons*H;
+  var capSM=cfg.siloCadence*cfg.siloMatinPersons*H,capSA=cfg.siloCadence*cfg.siloAMPersons*H;
   function _pct(v,cap){return cap>0?Math.round(v/cap*100):0;}
   function _status(pct){
     if(pct<80)return {col:'#2dc272',bg:'rgba(45,202,114,.12)',bd:'rgba(45,202,114,.3)',ico:'\u2705',lbl:'OK'};
@@ -6518,84 +6529,107 @@ function renderPrevisions(){
     return {col:'#ff453a',bg:'rgba(255,69,58,.12)',bd:'rgba(255,69,58,.3)',ico:'\uD83D\uDD34',lbl:'D\u00e9caler livraisons'};
   }
   function _bar(pct,col){
-    var w=Math.min(pct,120);
-    return '<div style="background:rgba(255,255,255,.07);border-radius:6px;height:10px;overflow:hidden;margin-top:6px">'
-      +'<div style="height:10px;width:'+w+'%;max-width:100%;background:'+col+';border-radius:6px;transition:width .5s"></div></div>';
+    return '<div style="background:rgba(255,255,255,.07);border-radius:6px;height:8px;overflow:hidden;margin-top:5px">'
+      +'<div style="height:8px;width:'+Math.min(pct,100)+'%;background:'+col+';border-radius:6px;transition:width .5s"></div></div>'
+      +'<div style="font-size:10px;color:'+col+';margin-top:3px;font-weight:700">'+pct+'%</div>';
   }
-  function _shiftCard(label,hours,pickVol,capPick,palVol,csSilo,capSilo){
-    var ppct=_pct(pickVol,capPick),spct=_pct(palVol,capSilo);
+  function _truckDetail(rows){
+    if(!rows.length)return '<div style="font-size:11px;color:var(--t3);padding:6px 0">Aucun camion assign\u00e9</div>';
+    var h='<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,.07);padding-top:8px">';
+    rows.forEach(function(r){
+      h+='<div style="margin-bottom:8px;background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+        +'<span style="font-size:12px;font-weight:800;color:var(--t1)">\uD83D\uDE9B '+escH(r.name)+'</span>'
+        +(r.creneau?'<span style="font-size:11px;color:var(--blue);background:rgba(59,130,246,.12);padding:1px 8px;border-radius:8px">\u23F0 '+escH(r.creneau)+'</span>':'')
+        +'</div>'
+        +'<div style="display:flex;gap:10px;flex-wrap:wrap">';
+      if(r.pick>0)h+='<span style="font-size:11px;color:var(--purple);font-weight:700">\u270b '+Math.round(r.pick)+' cs pick</span>';
+      if(r.palSilo>0)h+='<span style="font-size:11px;color:var(--indigo);font-weight:700">\uD83C\uDFED '+Math.round(r.palSilo)+' pal ('+Math.round(r.csSilo)+' cs)</span>';
+      h+='</div>';
+      // delivery lines
+      r.delivs.forEach(function(d){
+        h+='<div style="font-size:11px;color:var(--t3);margin-top:3px;padding-left:10px">\u21B3 '+escH(d.id)
+          +(d.dest?'<span style="margin-left:6px">'+escH(d.dest)+'</span>':'');
+        if((d.colisPick||0)>0)h+='<span style="color:var(--purple);margin-left:8px">\u270b '+Math.round(d.colisPick)+'cs</span>';
+        if((d.palSilo||0)>0)h+='<span style="color:var(--indigo);margin-left:8px">\uD83C\uDFED '+Math.round(d.palSilo)+'pal</span>';
+        h+='</div>';
+      });
+      h+='</div>';
+    });
+    return h+'</div>';
+  }
+  function _shiftSection(label,hours,shKey,capPick,capSilo,persons){
+    var v=vols[shKey],rows=truckRows[shKey];
+    var ppct=_pct(v.pick,capPick),spct=_pct(v.palSilo,capSilo);
     var ps=_status(ppct),ss=_status(spct);
-    var timePickH=cfg.pickCadence>0?(pickVol/cfg.pickCadence).toFixed(1):0;
-    var timeSiloH=cfg.siloCadence>0?(palVol/cfg.siloCadence).toFixed(1):0;
-    return '<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px 20px;flex:1;min-width:260px">'
-      +'<div style="font-size:14px;font-weight:800;color:var(--t1);margin-bottom:14px">'+label+' <span style="font-size:11px;font-weight:500;color:var(--t3)">'+hours+'</span></div>'
-      // Picking block
+    var timePickH=cfg.pickCadence>0?(v.pick/(cfg.pickCadence*persons.pick)).toFixed(1):'—';
+    var timeSiloH=cfg.siloCadence>0?(v.palSilo/(cfg.siloCadence*persons.silo)).toFixed(1):'—';
+    return '<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px 20px;flex:1;min-width:300px">'
+      +'<div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:14px">'+label
+      +'<span style="font-size:11px;font-weight:500;color:var(--t3);margin-left:8px">'+hours+'</span></div>'
+      // Picking gauge
       +'<div style="background:rgba(191,90,242,.07);border:1px solid rgba(191,90,242,.2);border-radius:12px;padding:12px 14px;margin-bottom:10px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
-      +'<span style="font-size:12px;font-weight:700;color:var(--purple)">\u270b Picking</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--purple)">\u270b Picking \u00b7 '+persons.pick+'\u00a0pers</span>'
       +'<span style="font-size:11px;padding:2px 10px;border-radius:20px;background:'+ps.bg+';border:1px solid '+ps.bd+';color:'+ps.col+';font-weight:700">'+ps.ico+' '+ps.lbl+'</span>'
       +'</div>'
-      +'<div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">'
-      +'<span style="font-size:13px;font-weight:900;color:var(--purple)">'+Math.round(pickVol)+' cs</span>'
-      +'<span style="font-size:11px;color:var(--t3)">Capacit\u00e9 '+Math.round(capPick)+' cs</span>'
-      +'<span style="font-size:11px;color:var(--t3)">Temps n\u00e9c. ~'+timePickH+'h</span>'
+      +'<div style="margin-top:6px;display:flex;gap:14px;flex-wrap:wrap">'
+      +'<span style="font-size:14px;font-weight:900;color:var(--purple)">'+Math.round(v.pick)+' cs</span>'
+      +'<span style="font-size:11px;color:var(--t3)">cap. '+Math.round(capPick)+' cs</span>'
+      +'<span style="font-size:11px;color:var(--t3)">~'+timePickH+'h</span>'
       +'</div>'
       +_bar(ppct,ps.col)
-      +'<div style="font-size:10px;color:'+ps.col+';margin-top:4px;font-weight:700">'+ppct+'% de la capacit\u00e9</div>'
       +'</div>'
-      // Silo block
-      +'<div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:12px 14px">'
+      // Silo gauge
+      +'<div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:12px 14px;margin-bottom:10px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
-      +'<span style="font-size:12px;font-weight:700;color:var(--indigo)">\uD83C\uDFED Silo</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--indigo)">\uD83C\uDFED Silo \u00b7 '+persons.silo+'\u00a0pers</span>'
       +'<span style="font-size:11px;padding:2px 10px;border-radius:20px;background:'+ss.bg+';border:1px solid '+ss.bd+';color:'+ss.col+';font-weight:700">'+ss.ico+' '+ss.lbl+'</span>'
       +'</div>'
-      +'<div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">'
-      +'<span style="font-size:13px;font-weight:900;color:var(--indigo)">'+Math.round(palVol)+' pal</span>'
-      +'<span style="font-size:11px;color:var(--t3)">'+Math.round(csSilo)+' cs \u00b7 Capacit\u00e9 '+Math.round(capSilo)+' pal</span>'
-      +'<span style="font-size:11px;color:var(--t3)">Temps n\u00e9c. ~'+timeSiloH+'h</span>'
+      +'<div style="margin-top:6px;display:flex;gap:14px;flex-wrap:wrap">'
+      +'<span style="font-size:14px;font-weight:900;color:var(--indigo)">'+Math.round(v.palSilo)+' pal</span>'
+      +'<span style="font-size:11px;color:var(--t3)">'+Math.round(v.csSilo)+' cs \u00b7 cap. '+Math.round(capSilo)+' pal</span>'
+      +'<span style="font-size:11px;color:var(--t3)">~'+timeSiloH+'h</span>'
       +'</div>'
       +_bar(spct,ss.col)
-      +'<div style="font-size:10px;color:'+ss.col+';margin-top:4px;font-weight:700">'+spct+'% de la capacit\u00e9</div>'
       +'</div>'
+      // Truck detail
+      +_truckDetail(rows)
     +'</div>';
   }
-  // Date selector options
   var dateOpts=dates.map(function(d){return '<option value="'+escH(d)+'"'+(d===selDate?' selected':'')+'>'+d+'</option>';}).join('');
   var html=''
-  // ── Header
   +'<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px">'
   +'<span style="font-size:20px">\uD83D\uDD2E</span>'
   +'<div><div style="font-size:17px;font-weight:800;color:var(--t1)">Pr\u00e9visions charge</div>'
   +'<div style="font-size:11px;color:var(--t3)">Estimation flux selon volumes import\u00e9s et cadences</div></div>'
   +'<select onchange="window._prevSelDate=this.value;renderPrevisions()" style="margin-left:auto;padding:7px 14px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);color:var(--t1);font-size:13px;font-weight:700">'+dateOpts+'</select>'
   +'</div>'
-  // ── Totaux du jour
   +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">'
-  +'<div style="padding:8px 16px;background:rgba(191,90,242,.1);border:1px solid rgba(191,90,242,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">\u270b '+Math.round(totalPick)+' cs picking total</div>'
-  +'<div style="padding:8px 16px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--indigo)">\uD83C\uDFED '+Math.round(totalPal)+' pal silo \u2014 '+Math.round(totalCs)+' cs</div>'
+  +'<div style="padding:8px 16px;background:rgba(191,90,242,.1);border:1px solid rgba(191,90,242,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--purple)">\u270b '+Math.round(totalPick)+' cs picking</div>'
+  +'<div style="padding:8px 16px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:10px;font-size:13px;font-weight:800;color:var(--indigo)">\uD83C\uDFED '+Math.round(totalPal)+' pal \u2014 '+Math.round(totalCs)+' cs silo</div>'
   +'</div>'
-  // ── Shifts
   +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px">'
-  +_shiftCard('\uD83C\uDF05 Matin','5h\u201312h',vols.matin.pick,capPM,vols.matin.palSilo,vols.matin.csSilo,capSM)
-  +_shiftCard('\uD83C\uDF07 Apr\u00e8s-midi','12h\u201319h',vols.am.pick,capPA,vols.am.palSilo,vols.am.csSilo,capSA)
+  +_shiftSection('\uD83C\uDF05 Matin','5h\u201312h','matin',capPM,capSM,{pick:cfg.pickMatinPersons,silo:cfg.siloMatinPersons})
+  +_shiftSection('\uD83C\uDF07 Apr\u00e8s-midi','12h\u201319h','am',capPA,capSA,{pick:cfg.pickAMPersons,silo:cfg.siloAMPersons})
   +(vols.nonAssigne.pick>0||vols.nonAssigne.palSilo>0
-    ?'<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:14px 18px;min-width:200px">'
-    +'<div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px">\u26a0\ufe0f Sans cr\u00e9neau assign\u00e9</div>'
-    +'<div style="font-size:13px;color:var(--t2)">\u270b '+Math.round(vols.nonAssigne.pick)+' cs picking</div>'
-    +'<div style="font-size:13px;color:var(--t2)">\uD83C\uDFED '+Math.round(vols.nonAssigne.palSilo)+' pal silo</div>'
+    ?'<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:16px 18px;min-width:220px">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:10px">\u26a0\ufe0f Sans cr\u00e9neau</div>'
+    +'<div style="font-size:13px;color:var(--t2);margin-bottom:4px">\u270b '+Math.round(vols.nonAssigne.pick)+' cs picking</div>'
+    +'<div style="font-size:13px;color:var(--t2);margin-bottom:10px">\uD83C\uDFED '+Math.round(vols.nonAssigne.palSilo)+' pal silo</div>'
+    +_truckDetail(truckRows.nonAssigne)
     +'</div>':'')
   +'</div>'
-  // ── Config panel
   +'<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 20px">'
-  +'<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px">\u2699\ufe0f Configuration cadences &amp; \u00e9quipes</div>'
-  +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">'
+  +'<div style="font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px">\u2699\ufe0f Configuration</div>'
+  +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">'
   +_cfgField('Cadence picking (cs/h/pers)','prevCfgPickCad',cfg.pickCadence)
-  +_cfgField('Picking matin (personnes)','prevCfgPickMat',cfg.pickMatinPersons)
-  +_cfgField('Picking AM (personnes)','prevCfgPickAM',cfg.pickAMPersons)
+  +_cfgField('Picking matin (pers)','prevCfgPickMat',cfg.pickMatinPersons)
+  +_cfgField('Picking AM (pers)','prevCfgPickAM',cfg.pickAMPersons)
   +_cfgField('Cadence silo (pal/h/pers)','prevCfgSiloCad',cfg.siloCadence)
-  +_cfgField('Silo matin (personnes)','prevCfgSiloMat',cfg.siloMatinPersons)
-  +_cfgField('Silo AM (personnes)','prevCfgSiloAM',cfg.siloAMPersons)
-  +_cfgField('Dur\u00e9e shift (heures)','prevCfgH',cfg.shiftH)
+  +_cfgField('Silo matin (pers)','prevCfgSiloMat',cfg.siloMatinPersons)
+  +_cfgField('Silo AM (pers)','prevCfgSiloAM',cfg.siloAMPersons)
+  +_cfgField('Dur\u00e9e shift (h)','prevCfgH',cfg.shiftH)
   +'</div>'
   +'<button onclick="_savePrevFromUI()" style="margin-top:14px;padding:8px 20px;border-radius:10px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">\u2714 Appliquer</button>'
   +'</div>';
