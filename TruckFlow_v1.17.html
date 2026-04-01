@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.16';
+var APP_VERSION = 'v1.17';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -6560,12 +6560,20 @@ function renderPrevisions(){
     });
     return h+'</div>';
   }
-  function _shiftSection(label,hours,shKey,capPick,capSilo,persons){
+  function _eta(startH,durH){
+    if(!durH||durH==='—'||isNaN(durH))return '—';
+    var totalMin=startH*60+Math.round(parseFloat(durH)*60);
+    var h=Math.floor(totalMin/60)%24,m=totalMin%60;
+    return String(h).padStart(2,'0')+'h'+String(m).padStart(2,'0');
+  }
+  function _shiftSection(label,hours,shKey,capPick,capSilo,persons,startH){
     var v=vols[shKey],rows=truckRows[shKey];
     var ppct=_pct(v.pick,capPick),spct=_pct(v.palSilo,capSilo);
     var ps=_status(ppct),ss=_status(spct);
-    var timePickH=cfg.pickCadence>0?(v.pick/(cfg.pickCadence*persons.pick)).toFixed(1):'—';
-    var timeSiloH=cfg.siloCadence>0?(v.palSilo/(cfg.siloCadence*persons.silo)).toFixed(1):'—';
+    var durPickH=cfg.pickCadence>0&&persons.pick>0?v.pick/(cfg.pickCadence*persons.pick):null;
+    var durSiloH=cfg.siloCadence>0&&persons.silo>0?v.palSilo/(cfg.siloCadence*persons.silo):null;
+    var etaPick=_eta(startH,durPickH);
+    var etaSilo=_eta(startH,durSiloH);
     return '<div style="background:var(--sf2);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px 20px;flex:1;min-width:300px">'
       +'<div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:14px">'+label
       +'<span style="font-size:11px;font-weight:500;color:var(--t3);margin-left:8px">'+hours+'</span></div>'
@@ -6575,10 +6583,10 @@ function renderPrevisions(){
       +'<span style="font-size:12px;font-weight:700;color:var(--purple)">\u270b Picking \u00b7 '+persons.pick+'\u00a0pers</span>'
       +'<span style="font-size:11px;padding:2px 10px;border-radius:20px;background:'+ps.bg+';border:1px solid '+ps.bd+';color:'+ps.col+';font-weight:700">'+ps.ico+' '+ps.lbl+'</span>'
       +'</div>'
-      +'<div style="margin-top:6px;display:flex;gap:14px;flex-wrap:wrap">'
+      +'<div style="margin-top:6px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">'
       +'<span style="font-size:14px;font-weight:900;color:var(--purple)">'+Math.round(v.pick)+' cs</span>'
       +'<span style="font-size:11px;color:var(--t3)">cap. '+Math.round(capPick)+' cs</span>'
-      +'<span style="font-size:11px;color:var(--t3)">~'+timePickH+'h</span>'
+      +(durPickH!==null?'<span style="font-size:12px;font-weight:700;color:'+ps.col+'">Fin ~\u00a0'+etaPick+'</span>':'')
       +'</div>'
       +_bar(ppct,ps.col)
       +'</div>'
@@ -6588,10 +6596,10 @@ function renderPrevisions(){
       +'<span style="font-size:12px;font-weight:700;color:var(--indigo)">\uD83C\uDFED Silo \u00b7 '+persons.silo+'\u00a0pers</span>'
       +'<span style="font-size:11px;padding:2px 10px;border-radius:20px;background:'+ss.bg+';border:1px solid '+ss.bd+';color:'+ss.col+';font-weight:700">'+ss.ico+' '+ss.lbl+'</span>'
       +'</div>'
-      +'<div style="margin-top:6px;display:flex;gap:14px;flex-wrap:wrap">'
+      +'<div style="margin-top:6px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">'
       +'<span style="font-size:14px;font-weight:900;color:var(--indigo)">'+Math.round(v.palSilo)+' pal</span>'
       +'<span style="font-size:11px;color:var(--t3)">'+Math.round(v.csSilo)+' cs \u00b7 cap. '+Math.round(capSilo)+' pal</span>'
-      +'<span style="font-size:11px;color:var(--t3)">~'+timeSiloH+'h</span>'
+      +(durSiloH!==null?'<span style="font-size:12px;font-weight:700;color:'+ss.col+'">Fin ~\u00a0'+etaSilo+'</span>':'')
       +'</div>'
       +_bar(spct,ss.col)
       +'</div>'
@@ -6630,8 +6638,8 @@ function renderPrevisions(){
   +'</div>'
   // ── Shifts
   +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px">'
-  +_shiftSection('\uD83C\uDF05 Matin','5h\u201312h','matin',capPM,capSM,{pick:cfg.pickMatinPersons,silo:cfg.siloMatinPersons})
-  +_shiftSection('\uD83C\uDF07 Apr\u00e8s-midi','12h\u201319h','am',capPA,capSA,{pick:cfg.pickAMPersons,silo:cfg.siloAMPersons})
+  +_shiftSection('\uD83C\uDF05 Matin','5h\u201312h','matin',capPM,capSM,{pick:cfg.pickMatinPersons,silo:cfg.siloMatinPersons},5)
+  +_shiftSection('\uD83C\uDF07 Apr\u00e8s-midi','12h\u201319h','am',capPA,capSA,{pick:cfg.pickAMPersons,silo:cfg.siloAMPersons},12)
   +(vols.nonAssigne.pick>0||vols.nonAssigne.palSilo>0
     ?'<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:16px 18px;min-width:220px">'
     +'<div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:10px">\u26a0\ufe0f Sans cr\u00e9neau</div>'
