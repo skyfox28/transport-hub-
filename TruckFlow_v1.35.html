@@ -1805,7 +1805,7 @@ select.emb-form-input option{background:#161b22;color:#e6edf3}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.34';
+var APP_VERSION = 'v1.35';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -10923,8 +10923,17 @@ function getStatus(ts){
 function slbl(s){return s==='w'?'⏳ En attente':s==='a'?'🚛 Sur site':s==='d'?'🔄 À quai':s==='l'?'📦 En chargement':s==='lo'?'✅ Chargé':'🚀 Parti';}
 function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s==='lo'?'blo':'bp';}
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
-function _stampDepNow(tid){var m=getTs();if(!m[tid])m[tid]={};m[tid]['dep']=new Date().toISOString();saveTs(m);try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}toast('⏱ Départ enregistré');render();}
-function stamp(tid,k){if(k==='dep'){var mt=typeof trucks!=='undefined'?trucks.find(function(t){return t.id===tid;}):null;_showPaletteModal(mt||{id:tid},function(pal){_stampDepNow(tid);_savePaletteEntry(mt||{id:tid},pal);});return;}var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);toast('⏱ '+kl(k)+' enregistré');render();}
+function _stampDepNow(tid){var m=getTs();if(!m[tid])m[tid]={};m[tid]['dep']=new Date().toISOString();saveTs(m);toast('🚀 Départ enregistré');render();try{if(window.opener&&window.opener.cleanCompletedTrucks){window.opener.timestamps=m;window.opener.cleanCompletedTrucks();window.opener.renderAll();}}catch(e){}}
+function stamp(tid,k){
+  if(k==='dep'){
+    var mt=getData().find(function(t){return t.id===tid;})||{id:tid};
+    var _pm=window.opener&&window.opener._showPaletteModal;
+    if(_pm){_pm.call(window.opener,mt,function(pal){_stampDepNow(tid);try{if(window.opener&&window.opener._savePaletteEntry)window.opener._savePaletteEntry(mt,pal);}catch(e){}});}
+    else{_stampDepNow(tid);}
+    return;
+  }
+  var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);toast('⏱ '+kl(k)+' enregistré');render();
+}
 function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}catch(e){}}toast('✎ '+kl(k)+' modifié');render();}
 
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
@@ -11931,7 +11940,10 @@ function renderEmballages(){
       +'<td class="num" style="color:'+sc+'">'+(s>0?'+':'')+s+'</td>'
       +'<td style="font-size:10px;color:var(--t3)">'+(typeLabel[e.type]||e.type)+'</td>'
       +'<td style="font-size:11px;color:var(--t2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(e.commentaire||'')+'">'+(e.commentaire||'')+'</td>'
-      +'<td><button class="emb-del-btn" onclick="_embDelete(\''+e.id+'\')" title="Supprimer">\uD83D\uDDD1</button></td>'
+      +'<td style="white-space:nowrap">'
+      +'<button class="emb-del-btn" onclick="_embEdit(\''+e.id+'\')" title="Modifier" style="color:var(--blue)">&#9998;</button>'
+      +'<button class="emb-del-btn" onclick="_embDelete(\''+e.id+'\')" title="Supprimer">\uD83D\uDDD1</button>'
+      +'</td>'
       +'</tr>';
   }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--t3);padding:20px">Aucune entr\u00e9e sur cette p\u00e9riode</td></tr>';
 
@@ -11990,6 +12002,52 @@ function _embDelete(id){
   if(!confirm('Supprimer cette entr\u00e9e ?')) return;
   _palettes=(_palettes||[]).filter(function(e){return e.id!==id;});
   savePalettes();renderEmballages();
+}
+
+function _embEdit(id){
+  var e=(_palettes||[]).find(function(x){return x.id===id;});
+  if(!e) return;
+  var existing=document.getElementById('_embEditModal');if(existing)existing.remove();
+  var ov=document.createElement('div');ov.id='_embEditModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px)';
+  var inpS='width:100%;box-sizing:border-box;padding:9px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.18);background:#161b22;color:#e6edf3;font-size:13px;outline:none';
+  var selS=inpS+';-webkit-appearance:none;appearance:none';
+  var carrierOpts=_embAllCarriers().map(function(c){return '<option value="'+c+'"'+(c===e.transporteur?' selected':'')+'>'+c+'</option>';}).join('');
+  ov.innerHTML='<div style="background:rgba(13,17,23,.97);border:1.5px solid rgba(255,255,255,.15);border-radius:18px;padding:24px;max-width:400px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.6)">'
+    +'<div style="font-size:15px;font-weight:800;color:#f0f6fc;margin-bottom:18px">&#9998; Modifier l\'entr\u00e9e</div>'
+    +'<div style="display:grid;gap:12px">'
+    +'<div><label style="font-size:10px;font-weight:700;color:#8b949e;display:block;margin-bottom:5px;text-transform:uppercase">Transporteur</label>'
+    +'<select id="_eeCarrier" style="'+selS+'"><option value="">-- Choisir --</option>'+carrierOpts+'</select></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
+    +'<div><label style="font-size:10px;font-weight:700;color:#8b949e;display:block;margin-bottom:5px;text-transform:uppercase">Pal. Sol</label><input id="_eeSol" type="number" min="0" value="'+e.palSol+'" style="'+inpS+'"></div>'
+    +'<div><label style="font-size:10px;font-weight:700;color:#8b949e;display:block;margin-bottom:5px;text-transform:uppercase">Prises</label><input id="_eePrise" type="number" min="0" value="'+e.palPrise+'" style="'+inpS+'"></div>'
+    +'<div><label style="font-size:10px;font-weight:700;color:#8b949e;display:block;margin-bottom:5px;text-transform:uppercase">Pos\u00e9es</label><input id="_eePosee" type="number" min="0" value="'+e.palPosee+'" style="'+inpS+'"></div>'
+    +'</div>'
+    +'<div><label style="font-size:10px;font-weight:700;color:#8b949e;display:block;margin-bottom:5px;text-transform:uppercase">Commentaire</label>'
+    +'<input id="_eeCom" type="text" value="'+(e.commentaire||'')+'" style="'+inpS+'" placeholder="Optionnel\u2026"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:18px">'
+    +'<button onclick="document.getElementById(\'_embEditModal\').remove()" style="flex:1;padding:10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#8b949e;cursor:pointer">Annuler</button>'
+    +'<button onclick="_embSaveEdit(\''+id+'\')" style="flex:2;padding:10px;border-radius:9px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:13px;font-weight:800;cursor:pointer">\u2705 Enregistrer</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(ev){if(ev.target===ov)ov.remove();});
+}
+
+function _embSaveEdit(id){
+  var e=(_palettes||[]).find(function(x){return x.id===id;});
+  if(!e) return;
+  var carrier=document.getElementById('_eeCarrier').value;
+  if(!carrier){alert('Transporteur obligatoire');return;}
+  e.transporteur=carrier;
+  e.palSol=parseInt(document.getElementById('_eeSol').value,10)||0;
+  e.palPrise=parseInt(document.getElementById('_eePrise').value,10)||0;
+  e.palPosee=parseInt(document.getElementById('_eePosee').value,10)||0;
+  e.commentaire=(document.getElementById('_eeCom').value||'').trim();
+  document.getElementById('_embEditModal').remove();
+  savePalettes();renderEmballages();
+  if(typeof showToast==='function') showToast('Entr\u00e9e modifi\u00e9e \u2705');
 }
 
 function _embAddManual(){
