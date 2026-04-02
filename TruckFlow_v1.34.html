@@ -1805,7 +1805,7 @@ select.emb-form-input option{background:#161b22;color:#e6edf3}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.33';
+var APP_VERSION = 'v1.34';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -3034,7 +3034,9 @@ function _showPaletteModal(truck,onConfirm){
     +'<div><label style="font-size:11px;color:#8b949e;display:block;margin-bottom:6px;font-weight:600">\uD83D\uDCE5 Palettes POS\u00c9ES <span style="color:var(--t3);font-weight:400">(Euro laiss\u00e9es par le transporteur)</span></label><input id="_palPosee" type="number" min="0" value="0" style="'+inputStyle+'"></div>'
     +'</div>'
     +'<div id="_palSolde" style="margin-top:14px;text-align:center;font-size:12px;color:#8b949e"></div>'
-    +'<div style="display:flex;gap:10px;margin-top:20px">'
+    +'<div style="margin-top:14px"><label style="font-size:11px;color:#8b949e;display:block;margin-bottom:6px;font-weight:600">\uD83D\uDCAC Commentaire <span style="color:var(--t3);font-weight:400">(optionnel)</span></label>'
+    +'<textarea id="_palComment" rows="2" placeholder="Ex\u00e9mple : palette abîm\u00e9e, \u00e9change refus\u00e9..." style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#f0f6fc;font-size:13px;resize:vertical;outline:none;font-family:inherit"></textarea></div>'
+    +'<div style="display:flex;gap:10px;margin-top:16px">'
     +'<button id="_palCancel" style="flex:1;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#8b949e;font-size:13px;cursor:pointer">Annuler</button>'
     +'<button id="_palConfirm" style="flex:2;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:14px;font-weight:800;cursor:pointer">\u2705 Confirmer le d\u00e9part</button>'
     +'</div>'
@@ -3054,8 +3056,9 @@ function _showPaletteModal(truck,onConfirm){
     var sol=parseInt(document.getElementById('_palSol').value,10)||0;
     var prise=parseInt(document.getElementById('_palPrise').value,10)||0;
     var posee=parseInt(document.getElementById('_palPosee').value,10)||0;
+    var comment=(document.getElementById('_palComment').value||'').trim();
     ov.remove();
-    onConfirm({palSol:sol,palPrise:prise,palPosee:posee});
+    onConfirm({palSol:sol,palPrise:prise,palPosee:posee,commentaire:comment});
   });
 }
 function _savePaletteEntry(truck,pal){
@@ -3070,6 +3073,7 @@ function _savePaletteEntry(truck,pal){
     palSol:pal.palSol||0,
     palPrise:pal.palPrise||0,
     palPosee:pal.palPosee||0,
+    commentaire:pal.commentaire||'',
     type:'depart'
   };
   _palettes.push(entry);
@@ -11926,12 +11930,13 @@ function renderEmballages(){
       +'<td class="num" style="color:#4ade80">'+e.palPosee+'</td>'
       +'<td class="num" style="color:'+sc+'">'+(s>0?'+':'')+s+'</td>'
       +'<td style="font-size:10px;color:var(--t3)">'+(typeLabel[e.type]||e.type)+'</td>'
+      +'<td style="font-size:11px;color:var(--t2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(e.commentaire||'')+'">'+(e.commentaire||'')+'</td>'
       +'<td><button class="emb-del-btn" onclick="_embDelete(\''+e.id+'\')" title="Supprimer">\uD83D\uDDD1</button></td>'
       +'</tr>';
   }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--t3);padding:20px">Aucune entr\u00e9e sur cette p\u00e9riode</td></tr>';
 
   var tableHtml='<div style="overflow-x:auto"><table class="emb-table">'
-    +'<thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th><th>Type</th><th></th></tr></thead>'
+    +'<thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th><th>Type</th><th>Commentaire</th><th></th></tr></thead>'
     +'<tbody>'+rows+'</tbody>'
     +'</table></div>';
 
@@ -11953,6 +11958,8 @@ function renderEmballages(){
     +'<div class="emb-form-field"><label class="emb-form-label">\uD83D\uDCE5 Pal. Pos\u00e9es</label><input class="emb-form-input" id="embPosee" type="number" min="0" value="0"></div>'
     +'<div class="emb-form-field"><label class="emb-form-label">Type</label>'
     +'<select class="emb-form-input" id="embType"><option value="manuel">Saisie manuelle</option><option value="correction">Correction</option></select></div>'
+    +'<div class="emb-form-field" style="grid-column:1/-1"><label class="emb-form-label">\uD83D\uDCAC Commentaire</label>'
+    +'<input class="emb-form-input" id="embComment" type="text" placeholder="Optionnel\u2026"></div>'
     +'<div class="emb-form-field" style="justify-content:flex-end"><button onclick="_embAddManual()" style="padding:9px 18px;border-radius:9px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer">+ Ajouter</button></div>'
     +'</div>';
 
@@ -11994,8 +12001,9 @@ function _embAddManual(){
   var prise=parseInt(document.getElementById('embPrise').value,10)||0;
   var posee=parseInt(document.getElementById('embPosee').value,10)||0;
   var type=document.getElementById('embType').value;
+  var comment=(document.getElementById('embComment').value||'').trim();
   if(!date||!carrier){alert('Date et transporteur obligatoires');return;}
-  _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:_normalizeCarrier(carrier),livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,type:type});
+  _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:_normalizeCarrier(carrier),livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,commentaire:comment,type:type});
   savePalettes();renderEmballages();
   if(typeof showToast==='function') showToast('Entr\u00e9e ajout\u00e9e \u2705');
 }
@@ -12064,8 +12072,8 @@ function _embExportExcel(period){
     var allC=[...new Set((_palettes||[]).map(function(e){return e.transporteur;}).filter(Boolean))].sort();
     allC.forEach(function(c){
       var rows=_embGetByRef('all',ref,c).sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
-      var data=[['Date','Heure','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type']];
-      rows.forEach(function(e){data.push([e.date,e.heure,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type]);});
+      var data=[['Date','Heure','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type','Commentaire']];
+      rows.forEach(function(e){data.push([e.date,e.heure,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type,e.commentaire||'']);});
       XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),c.slice(0,31));
     });
     var sumData=[['Transporteur','Prises Total','Pos\u00e9es Total','Solde','Mouvements']];
@@ -12078,8 +12086,8 @@ function _embExportExcel(period){
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumData),'Soldes');
   } else {
     var entries=_embGetByRef(period,ref,'').sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
-    var data=[['Date','Heure','Transporteur','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type']];
-    entries.forEach(function(e){data.push([e.date,e.heure,e.transporteur,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type]);});
+    var data=[['Date','Heure','Transporteur','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type','Commentaire']];
+    entries.forEach(function(e){data.push([e.date,e.heure,e.transporteur,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type,e.commentaire||'']);});
     var lbl={day:'Jour_'+ref,week:'Sem_'+ref,month:'Mois_'+ref.slice(0,7),all:'Historique'}[period]||period;
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),lbl.slice(0,31));
   }
@@ -12101,7 +12109,8 @@ function _embExportPDF(period){
         +'<td style="text-align:right">'+e.palSol+'</td>'
         +'<td style="text-align:right;color:#dc2626">'+e.palPrise+'</td>'
         +'<td style="text-align:right;color:#16a34a">'+e.palPosee+'</td>'
-        +'<td style="text-align:right;color:'+(s>0?'#16a34a':s<0?'#dc2626':'#666')+';font-weight:bold">'+(s>0?'+':'')+s+'</td></tr>';
+        +'<td style="text-align:right;color:'+(s>0?'#16a34a':s<0?'#dc2626':'#666')+';font-weight:bold">'+(s>0?'+':'')+s+'</td>'
+        +'<td style="color:#555;font-size:10px">'+(e.commentaire||'')+'</td></tr>';
     }).join('');
   var balRows=carriers.map(function(c){
     var es=sourceEntries.filter(function(e){return e.transporteur===c;});
@@ -12120,7 +12129,7 @@ function _embExportPDF(period){
     +'<h2>Soldes par transporteur</h2>'
     +'<table><thead><tr><th>Transporteur</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th><th style="text-align:right">Mvts</th></tr></thead><tbody>'+balRows+'</tbody></table>'
     +'<h2>D\u00e9tail (300 max)</h2>'
-    +'<table><thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<table><thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th><th>Commentaire</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'</body></html>';
   var w=window.open('','_blank','width=1000,height=700');
   if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},400);}
