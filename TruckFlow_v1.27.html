@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.26';
+var APP_VERSION = 'v1.27';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -2339,14 +2339,10 @@ function computeSummary(){
   });
   (APP.articles||[]).forEach(function(a){
     if(!livIds.has(a.liv)) return;
-    // a.vp = "Validat. prélèvement" — statut AU NIVEAU ARTICLE (granulaire)
-    // a.vp='C' = cet article est terminé (préparé/sorti), quelle que soit la livraison
-    // séparation silo/picking par les champs volume : a.pal/a.silo vs a.pick
-    if(a.vp!=='C'){
-      s.palSiloRest  +=(a.pal||0);
-      s.colisSiloRest+=(a.silo||0);
-      s.colisPickRest+=(a.pick||0);
-    }
+    // Silo : a.vp (Validat. prélèvement) — statut ARTICLE, granulaire
+    if(a.vp!=='C'){ s.palSiloRest+=(a.pal||0); s.colisSiloRest+=(a.silo||0); }
+    // Picking : a.wm (Statut WM) — livraison entière jusqu'à wm=C (ne sous-compte jamais)
+    if(a.wm!=='C'){ s.colisPickRest+=(a.pick||0); }
   });
   s.hrSilo = CADENCE_SILO>0 ? s.palSiloRest/CADENCE_SILO : 0;
   s.hrPick = CADENCE_PICK>0 ? s.colisPickRest/CADENCE_PICK : 0;
@@ -2431,11 +2427,8 @@ function getByDate(){
   });
   (APP.articles||[]).forEach(function(a){
     var dt=livToDate[a.liv]; if(!dt||!m[dt]) return;
-    if(a.vp!=='C'){
-      m[dt].palSiloRest  +=(a.pal||0);
-      m[dt].colisSiloRest+=(a.silo||0);
-      m[dt].colisPickRest+=(a.pick||0);
-    }
+    if(a.vp!=='C'){ m[dt].palSiloRest+=(a.pal||0); m[dt].colisSiloRest+=(a.silo||0); }
+    if(a.wm!=='C'){ m[dt].colisPickRest+=(a.pick||0); }
   });
   Object.values(m).forEach(function(d){
     d.hrSilo = CADENCE_SILO>0 ? d.palSiloRest/CADENCE_SILO : 0;
@@ -2541,10 +2534,8 @@ function renderDayDetail(date){
   livIds.forEach(function(id){livRestMap[id]={pal:0,silo:0,pick:0};});
   (APP.articles||[]).forEach(function(a){
     if(!livIds.has(a.liv))return;
-    if(a.vp!=='C'){
-      restPalSilo+=(a.pal||0);restColSilo+=(a.silo||0);restColPick+=(a.pick||0);
-      livRestMap[a.liv].pal+=(a.pal||0);livRestMap[a.liv].silo+=(a.silo||0);livRestMap[a.liv].pick+=(a.pick||0);
-    }
+    if(a.vp!=='C'){ restPalSilo+=(a.pal||0);restColSilo+=(a.silo||0); livRestMap[a.liv].pal+=(a.pal||0);livRestMap[a.liv].silo+=(a.silo||0); }
+    if(a.wm!=='C'){ restColPick+=(a.pick||0); livRestMap[a.liv].pick+=(a.pick||0); }
   });
   var restHrSilo=CADENCE_SILO>0?restPalSilo/CADENCE_SILO:0;
   var restHrPick=CADENCE_PICK>0?restColPick/CADENCE_PICK:0;
@@ -6495,7 +6486,8 @@ function renderPrevisions(){
   (APP.articles||[]).forEach(function(a){
     if(!delivIdx[a.liv])return;// article d'une autre date → ignorer
     if(!artRem[a.liv])artRem[a.liv]={pick:0,palSilo:0};
-    if(a.vp!=='C'){artRem[a.liv].pick+=(a.pick||0);artRem[a.liv].palSilo+=(a.pal||0);}
+    if(a.vp!=='C'){artRem[a.liv].palSilo+=(a.pal||0);}
+    if(a.wm!=='C'){artRem[a.liv].pick+=(a.pick||0);}
   });
   // Per-truck volumes + shift assignment
   var shiftKeys=['matin','am','nonAssigne'];
@@ -8446,7 +8438,8 @@ function _buildPDFReport(){
   });
   (APP.articles||[]).forEach(function(a){
     if(!allLivIds.has(a.liv))return;
-    if(a.vp!=='C'){volRest.pal+=(a.pal||0);volRest.cs+=(a.silo||0);volRest.cp+=(a.pick||0);}
+    if(a.vp!=='C'){volRest.pal+=(a.pal||0);volRest.cs+=(a.silo||0);}
+    if(a.wm!=='C'){volRest.cp+=(a.pick||0);}
   });
   var nTotal=allDay.length,nPart=trucksPartis.length,nCours=trucksEnCours.length,nAtt=trucksAttente.length;
   // Open window
