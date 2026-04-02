@@ -1242,6 +1242,35 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
 .arr-pret-motif-lbl{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .arr-pret-motif-btn{padding:12px 14px;border-radius:12px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.07);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;text-align:left;transition:background .15s}
 .arr-pret-motif-btn:hover{background:rgba(239,68,68,.14)}
+/* ── Emballages ──────────────────────────────────────────────────────────── */
+.emb-section{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px;margin-bottom:18px}
+.emb-section-ttl{font-size:13px;font-weight:800;color:var(--t1);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.emb-balance-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.emb-balance-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px}
+.emb-balance-name{font-size:11px;color:var(--t3);margin-bottom:4px;font-weight:600}
+.emb-balance-val{font-size:22px;font-weight:800}
+.emb-balance-sub{font-size:10px;color:var(--t3);margin-top:2px}
+.emb-balance-pos{color:#22c55e}
+.emb-balance-neg{color:#ef4444}
+.emb-balance-zero{color:#8b949e}
+.emb-table{width:100%;border-collapse:collapse;font-size:12px}
+.emb-table th{text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);color:var(--t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.emb-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--t1)}
+.emb-table tr:hover td{background:rgba(255,255,255,.03)}
+.emb-table td.num{text-align:right;font-weight:700;font-size:13px}
+.emb-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.emb-stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;text-align:center}
+.emb-stat-val{font-size:20px;font-weight:800;color:var(--t1)}
+.emb-stat-lbl{font-size:10px;color:var(--t3);margin-top:2px}
+.emb-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;align-items:end}
+.emb-form-field{display:flex;flex-direction:column;gap:5px}
+.emb-form-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
+.emb-form-input{padding:9px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:var(--t1);font-size:13px;outline:none}
+.emb-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+.emb-period-btn{padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .15s}
+.emb-period-btn.on{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.4);color:#22c55e;font-weight:700}
+.emb-del-btn{background:transparent;border:none;color:var(--t3);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:6px}
+.emb-del-btn:hover{color:#ef4444;background:rgba(239,68,68,.1)}
 </style>
 </head>
 <body>
@@ -1454,6 +1483,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   <button class="tab" onclick="switchTab('quai',this)" style="--tab-glow:rgba(191,90,242,.2)"><span class="tab-ico">&#x1F3D7;</span>Plan de quai</button>
   <button class="tab" onclick="switchTab('stat',this)" style="--tab-glow:rgba(90,200,250,.2)"><span class="tab-ico">&#x1F4C8;</span>Statistiques</button>
   <button class="tab" onclick="switchTab('arch',this)" style="--tab-glow:rgba(255,159,10,.2)"><span class="tab-ico">&#x1F4C1;</span>Archive</button>
+  <button class="tab" onclick="switchTab('emb',this)" style="--tab-glow:rgba(34,197,94,.2)"><span class="tab-ico">&#x1F4E6;</span>Emballages</button>
 </div></div>
 
 <!-- ═══ MAIN ═══ -->
@@ -1659,6 +1689,11 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
   <div id="archiveContent"></div>
 </div>
 
+<!-- ── Panel: Emballages ── -->
+<div class="panel" id="tab-emb">
+  <div id="embContent"></div>
+</div>
+
 <!-- ═══ ACTIVITY LOG MODAL ═══ -->
 <div class="actlog-modal-bg" id="actlogBg" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="actlog-modal">
@@ -1768,7 +1803,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.28';
+var APP_VERSION = 'v1.29';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -1784,6 +1819,10 @@ var fTruckPonct = '';
 var fTruckPeriod = '';
 var fTruckStatus = '';
 var _completedTrucks = [];
+// ─── Palettes ─────────────────────────────────────────────────────────────
+var _palettes = []; // [{id,date,heure,camionId,transporteur,livraisons,palSol,palPrise,palPosee,type}]
+function savePalettes(){try{localStorage.setItem('tf_palettes',JSON.stringify(_palettes));}catch(e){}}
+function loadPalettes(){try{var s=localStorage.getItem('tf_palettes');if(s)_palettes=JSON.parse(s);}catch(e){}}
 /* ── AUDIT 2026-03 — Correctif I3 (OWASP A04, BroadcastChannel token) ─────
    Jeton de session aléatoire partagé entre les onglets TruckFlow de la même
    origine. Les messages BroadcastChannel sans ce jeton sont ignorés.
@@ -1987,6 +2026,7 @@ function switchTab(id,btn){
   if(id==='plan') renderPlanning();
   if(id==='stat') renderStats();
   if(id==='arch') renderArchive();
+  if(id==='emb') renderEmballages();
   // #5 Stagger animation on panel children
   applyStagger('tab-'+id);
 }
@@ -2951,12 +2991,71 @@ var _arrPretIsArrival=false; // true = pointage arrivée, false = correction bad
   var _origStampNow=stampNow;
   stampNow=function(ti,key){
     if(key==='arr'){_stampArrModal(ti);}
+    else if(key==='dep'){_showPaletteModal(trucks[ti],function(pal){_origStampNow(ti,key);_savePaletteEntry(trucks[ti],pal);});}
     else{_origStampNow(ti,key);}
   };
 })();
 function _nowIso(){
   if(_workingDate){var b=new Date(_workingDate+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);if(!isNaN(b.getTime()))return b.toISOString();}
   return new Date().toISOString();
+}
+// ─── Palette modal (blocking at departure) ─────────────────────────────────
+function _showPaletteModal(truck,onConfirm){
+  var existing=document.getElementById('_palModal');if(existing)existing.remove();
+  var ov=document.createElement('div');ov.id='_palModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(14px)';
+  var tname=(truck&&(truck.transporteur||truck.itin||truck.id))||'—';
+  var inputStyle='width:100%;box-sizing:border-box;padding:11px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#f0f6fc;font-size:18px;font-weight:800;text-align:center;outline:none';
+  ov.innerHTML='<div style="background:rgba(13,17,23,.97);border:1.5px solid rgba(255,255,255,.15);border-radius:22px;padding:28px 28px 24px;max-width:420px;width:92%;box-shadow:0 24px 80px rgba(0,0,0,.7)">'
+    +'<div style="font-size:17px;font-weight:800;color:#f0f6fc;margin-bottom:3px">\uD83D\uDE80 D\u00e9part \u2014 Suivi palettes</div>'
+    +'<div style="font-size:12px;color:#8b949e;margin-bottom:22px">'+tname+'</div>'
+    +'<div style="display:grid;gap:16px">'
+    +'<div><label style="font-size:11px;color:#8b949e;display:block;margin-bottom:6px;font-weight:600">\uD83D\uDCE6 Palettes SOL <span style="color:var(--t3);font-weight:400">(emplacements au sol utilis\u00e9s)</span></label><input id="_palSol" type="number" min="0" value="0" style="'+inputStyle+'"></div>'
+    +'<div><label style="font-size:11px;color:#8b949e;display:block;margin-bottom:6px;font-weight:600">\uD83D\uDCE4 Palettes PRISES <span style="color:var(--t3);font-weight:400">(Euro emport\u00e9es par le camion)</span></label><input id="_palPrise" type="number" min="0" value="0" style="'+inputStyle+'"></div>'
+    +'<div><label style="font-size:11px;color:#8b949e;display:block;margin-bottom:6px;font-weight:600">\uD83D\uDCE5 Palettes POS\u00c9ES <span style="color:var(--t3);font-weight:400">(Euro laiss\u00e9es par le transporteur)</span></label><input id="_palPosee" type="number" min="0" value="0" style="'+inputStyle+'"></div>'
+    +'</div>'
+    +'<div id="_palSolde" style="margin-top:14px;text-align:center;font-size:12px;color:#8b949e"></div>'
+    +'<div style="display:flex;gap:10px;margin-top:20px">'
+    +'<button id="_palCancel" style="flex:1;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#8b949e;font-size:13px;cursor:pointer">Annuler</button>'
+    +'<button id="_palConfirm" style="flex:2;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:14px;font-weight:800;cursor:pointer">\u2705 Confirmer le d\u00e9part</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  function updSolde(){
+    var p=parseInt(document.getElementById('_palPrise').value,10)||0;
+    var pos=parseInt(document.getElementById('_palPosee').value,10)||0;
+    var s=pos-p;var sc=s>0?'#22c55e':s<0?'#ef4444':'#8b949e';
+    document.getElementById('_palSolde').innerHTML='Solde : <span style="font-weight:800;color:'+sc+'">'+(s>0?'+':'')+s+' palette'+(Math.abs(s)>1?'s':'')+' Euro</span>'+(s>0?' (vous r\u00e9cup\u00e9rez)':s<0?' (vous devez)':'');
+  }
+  ov.querySelector('#_palPrise').addEventListener('input',updSolde);
+  ov.querySelector('#_palPosee').addEventListener('input',updSolde);
+  updSolde();
+  ov.querySelector('#_palCancel').addEventListener('click',function(){ov.remove();});
+  ov.querySelector('#_palConfirm').addEventListener('click',function(){
+    var sol=parseInt(document.getElementById('_palSol').value,10)||0;
+    var prise=parseInt(document.getElementById('_palPrise').value,10)||0;
+    var posee=parseInt(document.getElementById('_palPosee').value,10)||0;
+    ov.remove();
+    onConfirm({palSol:sol,palPrise:prise,palPosee:posee});
+  });
+}
+function _savePaletteEntry(truck,pal){
+  var now=new Date();
+  var entry={
+    id:'pal_'+Date.now(),
+    date:getWorkingDate(),
+    heure:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),
+    camionId:(truck&&truck.id)||'',
+    transporteur:(truck&&(truck.transporteur||truck.itin||truck.id))||'',
+    livraisons:(truck&&truck.deliveries)||[],
+    palSol:pal.palSol||0,
+    palPrise:pal.palPrise||0,
+    palPosee:pal.palPosee||0,
+    type:'depart'
+  };
+  _palettes.push(entry);
+  savePalettes();
+  if(typeof renderEmballages==='function'){try{var tb=document.getElementById('tab-emb');if(tb&&tb.classList.contains('on'))renderEmballages();}catch(e){}}
 }
 // Picker quai sans re-pointer l'heure (saisie manuelle)
 function _pickQuaiAssignOnly(ti){
@@ -3990,7 +4089,8 @@ function exportSession(){
     trucks: trucks, timestamps: timestamps,
     quai: quaiAssign, manual: quaiManual,
     archive: _dailyArchive||[],
-    completed: _completedTrucks||[]
+    completed: _completedTrucks||[],
+    palettes: _palettes||[]
   };
   var blob = new Blob([JSON.stringify(session)], {type:'application/json'});
   var url  = URL.createObjectURL(blob);
@@ -4032,6 +4132,12 @@ function importSession(event){
         _completedTrucks=s.completed;
         purgeOldCompleted();
         saveCompleted();
+      }
+      // Restore palettes (merge by id)
+      if(s.palettes&&Array.isArray(s.palettes)){
+        var existPalIds=new Set((_palettes||[]).map(function(e){return e.id;}));
+        s.palettes.forEach(function(e){if(e.id&&!existPalIds.has(e.id))_palettes.push(e);});
+        savePalettes();
       }
       // Archive any trucks with dep timestamp that weren't archived yet
       cleanCompletedTrucks();
@@ -7446,6 +7552,7 @@ function init(){
   }catch(e){ console.warn('init() load error:', e); }
   loadQuaiAssign();
   loadCompleted();
+  loadPalettes();
   _checkArchivePurge();
   cleanCompletedTrucks(); // archiver les camions avec ts.dep présent dès le chargement
   // Initialiser le datepicker "Date de saisie" avec aujourd'hui
@@ -10793,7 +10900,8 @@ function getStatus(ts){
 function slbl(s){return s==='w'?'⏳ En attente':s==='a'?'🚛 Sur site':s==='d'?'🔄 À quai':s==='l'?'📦 En chargement':s==='lo'?'✅ Chargé':'🚀 Parti';}
 function scls(s){return s==='w'?'bw':s==='a'?'ba':s==='d'?'bd':s==='l'?'bl':s==='lo'?'blo':'bp';}
 function tcls(s){return s==='w'?'sw':s==='a'?'sa':s==='d'?'sd':s==='l'?'sl':s==='lo'?'slo':'sp';}
-function stamp(tid,k){var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}}toast('⏱ '+kl(k)+' enregistré');render();}
+function _stampDepNow(tid){var m=getTs();if(!m[tid])m[tid]={};m[tid]['dep']=new Date().toISOString();saveTs(m);try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ — archivé ✓');return;}}catch(e){}toast('⏱ Départ enregistré');render();}
+function stamp(tid,k){if(k==='dep'){var mt=typeof trucks!=='undefined'?trucks.find(function(t){return t.id===tid;}):null;_showPaletteModal(mt||{id:tid},function(pal){_stampDepNow(tid);_savePaletteEntry(mt||{id:tid},pal);});return;}var m=getTs();if(!m[tid])m[tid]={};m[tid][k]=new Date().toISOString();saveTs(m);toast('⏱ '+kl(k)+' enregistré');render();}
 function stampM(tid,k,tv){var m=getTs();if(!m[tid])m[tid]={};var d=new Date().toISOString().slice(0,10);m[tid][k]=d+'T'+tv+':00';saveTs(m);if(k==='dep'){try{if(typeof timestamps!=='undefined')timestamps=m;var ar=cleanCompletedTrucks();if(ar>0){renderAll();toast('🚀 Départ manuel — archivé ✓');return;}}catch(e){}}toast('✎ '+kl(k)+' modifié');render();}
 
 function togM(tid){var el=document.getElementById('m_'+tid);if(el)el.classList.toggle('show');}
@@ -11677,6 +11785,278 @@ if('serviceWorker' in navigator){
       .then(function(r){console.log('[TruckFlow SW] Enregistré :',r.scope);})
       .catch(function(e){console.warn('[TruckFlow SW] Échec enregistrement :',e);});
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ONGLET EMBALLAGES — Suivi palettes Euro
+// ═══════════════════════════════════════════════════════════════════════════
+var _embPeriod='month'; // 'day','week','month','all'
+var _embCarrier=''; // filtre transporteur
+
+function _embFilteredEntries(){
+  var now=new Date();
+  var todayISO=now.toISOString().slice(0,10);
+  return (_palettes||[]).filter(function(e){
+    if(_embCarrier&&e.transporteur!==_embCarrier) return false;
+    if(_embPeriod==='day') return e.date===todayISO;
+    if(_embPeriod==='week'){
+      var d=new Date(e.date);
+      var day=now.getDay()||7;
+      var mon=new Date(now);mon.setDate(now.getDate()-day+1);mon.setHours(0,0,0,0);
+      return d>=mon;
+    }
+    if(_embPeriod==='month'){
+      return e.date&&e.date.slice(0,7)===todayISO.slice(0,7);
+    }
+    return true;
+  }).sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
+}
+
+function renderEmballages(){
+  var el=document.getElementById('embContent');
+  if(!el) return;
+
+  // ── carriers list for filter ──────────────────────────────────────────
+  var carriers=[...new Set((_palettes||[]).map(function(e){return e.transporteur;}).filter(Boolean))].sort();
+
+  // ── filter bar ────────────────────────────────────────────────────────
+  var periods=[['day','Aujourd\'hui'],['week','Semaine'],['month','Mois'],['all','Tout']];
+  var filterBar='<div class="emb-filter-bar">'
+    +periods.map(function(p){return '<button class="emb-period-btn'+(_embPeriod===p[0]?' on':'')+'" onclick="_embPeriod=\''+p[0]+'\';renderEmballages()">'+p[1]+'</button>';}).join('')
+    +'<select onchange="_embCarrier=this.value;renderEmballages()" style="padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--t1);font-size:11px;margin-left:8px">'
+    +'<option value="">Tous transporteurs</option>'
+    +carriers.map(function(c){return '<option value="'+c+'"'+(_embCarrier===c?' selected':'')+'>'+c+'</option>';}).join('')
+    +'</select>'
+    +'</div>';
+
+  var entries=_embFilteredEntries();
+  var allEntries=_palettes||[];
+
+  // ── Carrier balances (all-time) ──────────────────────────────────────
+  var balMap={};
+  allEntries.forEach(function(e){
+    var k=e.transporteur||'—';
+    if(!balMap[k]) balMap[k]={prise:0,posee:0,count:0};
+    balMap[k].prise+=e.palPrise||0;
+    balMap[k].posee+=e.palPosee||0;
+    balMap[k].count++;
+  });
+  var balCards=Object.keys(balMap).sort().map(function(k){
+    var b=balMap[k];var s=b.posee-b.prise;
+    var cls=s>0?'emb-balance-pos':s<0?'emb-balance-neg':'emb-balance-zero';
+    return '<div class="emb-balance-card">'
+      +'<div class="emb-balance-name">'+k+'</div>'
+      +'<div class="emb-balance-val '+cls+'">'+(s>0?'+':'')+s+'</div>'
+      +'<div class="emb-balance-sub">Prises '+b.prise+' · Pos\u00e9es '+b.posee+' · '+b.count+' mvt</div>'
+      +'</div>';
+  }).join('');
+
+  // ── Stats on filtered period ──────────────────────────────────────────
+  var totSol=0,totPrise=0,totPosee=0;
+  entries.forEach(function(e){totSol+=e.palSol||0;totPrise+=e.palPrise||0;totPosee+=e.palPosee||0;});
+  var solde=totPosee-totPrise;
+  var avgSol=entries.length?Math.round(totSol/entries.length*10)/10:0;
+  var soldeCls=solde>0?'#22c55e':solde<0?'#ef4444':'#8b949e';
+  var statsHtml='<div class="emb-stat-grid">'
+    +'<div class="emb-stat-card"><div class="emb-stat-val">'+entries.length+'</div><div class="emb-stat-lbl">D\u00e9parts saisis</div></div>'
+    +'<div class="emb-stat-card"><div class="emb-stat-val">'+totSol+'</div><div class="emb-stat-lbl">Pal. Sol total</div></div>'
+    +'<div class="emb-stat-card"><div class="emb-stat-val" style="color:#f87171">'+totPrise+'</div><div class="emb-stat-lbl">Prises (sorties)</div></div>'
+    +'<div class="emb-stat-card"><div class="emb-stat-val" style="color:#4ade80">'+totPosee+'</div><div class="emb-stat-lbl">Pos\u00e9es (entr\u00e9es)</div></div>'
+    +'<div class="emb-stat-card"><div class="emb-stat-val" style="color:'+soldeCls+'">'+(solde>0?'+':'')+solde+'</div><div class="emb-stat-lbl">Solde p\u00e9riode</div></div>'
+    +'<div class="emb-stat-card"><div class="emb-stat-val">'+avgSol+'</div><div class="emb-stat-lbl">Moy. Pal. Sol</div></div>'
+    +'</div>';
+
+  // ── Entries table ──────────────────────────────────────────────────────
+  var typeLabel={depart:'\uD83D\uDE80 D\u00e9part',manuel:'\u270F Manuel',correction:'\uD83D\uDD04 Correction'};
+  var rows=entries.length?entries.map(function(e){
+    var s=(e.palPosee||0)-(e.palPrise||0);var sc=s>0?'#22c55e':s<0?'#ef4444':'#8b949e';
+    return '<tr>'
+      +'<td>'+e.date+'</td>'
+      +'<td>'+e.heure+'</td>'
+      +'<td style="font-weight:700">'+e.transporteur+'</td>'
+      +'<td>'+e.camionId+'</td>'
+      +'<td class="num">'+e.palSol+'</td>'
+      +'<td class="num" style="color:#f87171">'+e.palPrise+'</td>'
+      +'<td class="num" style="color:#4ade80">'+e.palPosee+'</td>'
+      +'<td class="num" style="color:'+sc+'">'+(s>0?'+':'')+s+'</td>'
+      +'<td style="font-size:10px;color:var(--t3)">'+(typeLabel[e.type]||e.type)+'</td>'
+      +'<td><button class="emb-del-btn" onclick="_embDelete(\''+e.id+'\')" title="Supprimer">\uD83D\uDDD1</button></td>'
+      +'</tr>';
+  }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--t3);padding:20px">Aucune entr\u00e9e sur cette p\u00e9riode</td></tr>';
+
+  var tableHtml='<div style="overflow-x:auto"><table class="emb-table">'
+    +'<thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th><th>Type</th><th></th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'</table></div>';
+
+  // ── Manual entry form ─────────────────────────────────────────────────
+  var carrierOpts='<option value="">-- Transporteur --</option>'+carriers.map(function(c){return '<option>'+c+'</option>';}).join('');
+  var now2=new Date();
+  var todayVal=now2.toISOString().slice(0,10);
+  var hhmm=String(now2.getHours()).padStart(2,'0')+':'+String(now2.getMinutes()).padStart(2,'0');
+  var manualForm='<div class="emb-form">'
+    +'<div class="emb-form-field"><label class="emb-form-label">Date</label><input class="emb-form-input" id="embDate" type="date" value="'+todayVal+'"></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">Heure</label><input class="emb-form-input" id="embHeure" type="time" value="'+hhmm+'"></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">Transporteur</label><input class="emb-form-input" id="embCarrierInput" list="embCarrierList" placeholder="Transporteur"><datalist id="embCarrierList">'+carriers.map(function(c){return '<option>'+c+'</option>';}).join('')+'</datalist></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">Camion</label><input class="emb-form-input" id="embCamion" placeholder="ID camion"></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">\uD83D\uDCE6 Pal. Sol</label><input class="emb-form-input" id="embSol" type="number" min="0" value="0"></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">\uD83D\uDCE4 Pal. Prises</label><input class="emb-form-input" id="embPrise" type="number" min="0" value="0"></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">\uD83D\uDCE5 Pal. Pos\u00e9es</label><input class="emb-form-input" id="embPosee" type="number" min="0" value="0"></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">Type</label>'
+    +'<select class="emb-form-input" id="embType"><option value="manuel">Saisie manuelle</option><option value="correction">Correction</option></select></div>'
+    +'<div class="emb-form-field" style="justify-content:flex-end"><button onclick="_embAddManual()" style="padding:9px 18px;border-radius:9px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer">+ Ajouter</button></div>'
+    +'</div>';
+
+  // ── Export buttons ────────────────────────────────────────────────────
+  var exportBtns='<div style="display:flex;flex-wrap:wrap;gap:8px">'
+    +'<button onclick="_embExportExcel(\'day\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Jour</button>'
+    +'<button onclick="_embExportExcel(\'week\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Semaine</button>'
+    +'<button onclick="_embExportExcel(\'month\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Mois</button>'
+    +'<button onclick="_embExportExcel(\'all\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Tout</button>'
+    +'<button onclick="_embExportExcel(\'carrier\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.1);color:#818cf8;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel / Transporteur</button>'
+    +'<button onclick="_embExportPDF()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.1);color:#fbbf24;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC4 PDF Bilan</button>'
+    +'<button onclick="_embExportJson()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC2 Export JSON archive</button>'
+    +'<label style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);font-size:12px;font-weight:700;cursor:pointer">'
+    +'\uD83D\uDCC2 Import JSON archive<input type="file" accept=".json" style="display:none" onchange="_embImportJson(event)"></label>'
+    +'</div>';
+
+  el.innerHTML='<div style="padding:0 4px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">'
+    +'<h2 style="font-size:18px;font-weight:800;color:var(--t1);margin:0">\uD83D\uDCE6 Suivi Emballages \u2014 Palettes Euro</h2>'
+    +exportBtns
+    +'</div>'
+    +filterBar
+    +'<div class="emb-section"><div class="emb-section-ttl">\uD83C\uDFC6 Soldes par transporteur (cumul total)</div><div class="emb-balance-grid">'+(balCards||'<span style="color:var(--t3);font-size:12px">Aucune donn\u00e9e</span>')+'</div></div>'
+    +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDCCA Statistiques \u2014 '+(['day','week','month'].indexOf(_embPeriod)>=0?['Aujourd\'hui','Semaine en cours','Mois en cours','Tout l\'historique'][['day','week','month','all'].indexOf(_embPeriod)]:'Tout l\'historique')+'</div>'+statsHtml+'</div>'
+    +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDCDD Saisie manuelle / Correction</div>'+manualForm+'</div>'
+    +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDDC2 Historique des mouvements</div>'+tableHtml+'</div>'
+    +'</div>';
+}
+
+function _embDelete(id){
+  if(!confirm('Supprimer cette entr\u00e9e ?')) return;
+  _palettes=(_palettes||[]).filter(function(e){return e.id!==id;});
+  savePalettes();renderEmballages();
+}
+
+function _embAddManual(){
+  var date=document.getElementById('embDate').value;
+  var heure=document.getElementById('embHeure').value;
+  var carrier=document.getElementById('embCarrierInput').value.trim();
+  var camion=document.getElementById('embCamion').value.trim();
+  var sol=parseInt(document.getElementById('embSol').value,10)||0;
+  var prise=parseInt(document.getElementById('embPrise').value,10)||0;
+  var posee=parseInt(document.getElementById('embPosee').value,10)||0;
+  var type=document.getElementById('embType').value;
+  if(!date||!carrier){alert('Date et transporteur obligatoires');return;}
+  _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:carrier,livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,type:type});
+  savePalettes();renderEmballages();
+  if(typeof showToast==='function') showToast('Entr\u00e9e ajout\u00e9e \u2705');
+}
+
+function _embGetByPeriod(period){
+  var now=new Date();var todayISO=now.toISOString().slice(0,10);
+  return (_palettes||[]).filter(function(e){
+    if(period==='day') return e.date===todayISO;
+    if(period==='week'){var d=new Date(e.date);var day=now.getDay()||7;var mon=new Date(now);mon.setDate(now.getDate()-day+1);mon.setHours(0,0,0,0);return d>=mon;}
+    if(period==='month') return e.date&&e.date.slice(0,7)===todayISO.slice(0,7);
+    return true;
+  });
+}
+
+function _embExportExcel(period){
+  if(typeof XLSX==='undefined'){alert('SheetJS non charg\u00e9');return;}
+  var now=new Date();var todayISO=now.toISOString().slice(0,10);
+  var wb=XLSX.utils.book_new();
+  if(period==='carrier'){
+    var carriers=[...new Set((_palettes||[]).map(function(e){return e.transporteur;}).filter(Boolean))].sort();
+    carriers.forEach(function(c){
+      var rows=(_palettes||[]).filter(function(e){return e.transporteur===c;})
+        .sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure)});
+      var data=[['Date','Heure','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type']];
+      rows.forEach(function(e){data.push([e.date,e.heure,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type]);});
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),c.slice(0,31));
+    });
+    // Summary sheet
+    var sumData=[['Transporteur','Prises Total','Pos\u00e9es Total','Solde','Mouvements']];
+    carriers.forEach(function(c){
+      var es=(_palettes||[]).filter(function(e){return e.transporteur===c;});
+      var p=es.reduce(function(s,e){return s+(e.palPrise||0);},0);
+      var pos=es.reduce(function(s,e){return s+(e.palPosee||0);},0);
+      sumData.push([c,p,pos,pos-p,es.length]);
+    });
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumData),'Soldes');
+  } else {
+    var entries=_embGetByPeriod(period);
+    entries.sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
+    var data=[['Date','Heure','Transporteur','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type']];
+    entries.forEach(function(e){data.push([e.date,e.heure,e.transporteur,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type]);});
+    var ws=XLSX.utils.aoa_to_sheet(data);
+    var lbl={day:'Jour_'+todayISO,week:'Semaine',month:'Mois_'+todayISO.slice(0,7),all:'Historique'}[period]||period;
+    XLSX.utils.book_append_sheet(wb,ws,lbl);
+  }
+  var fname='palettes_'+(period==='carrier'?'transporteurs':period)+'_'+todayISO+'.xlsx';
+  XLSX.writeFile(wb,fname);
+}
+
+function _embExportPDF(){
+  var now=new Date();var todayISO=now.toISOString().slice(0,10);
+  var allE=_palettes||[];
+  var carriers=[...new Set(allE.map(function(e){return e.transporteur;}).filter(Boolean))].sort();
+  var rows=allE.sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);})
+    .slice(0,200).map(function(e){
+      var s=(e.palPosee||0)-(e.palPrise||0);
+      return '<tr><td>'+e.date+'</td><td>'+e.heure+'</td><td><b>'+e.transporteur+'</b></td><td>'+e.camionId+'</td>'
+        +'<td style="text-align:right">'+e.palSol+'</td>'
+        +'<td style="text-align:right;color:#dc2626">'+e.palPrise+'</td>'
+        +'<td style="text-align:right;color:#16a34a">'+e.palPosee+'</td>'
+        +'<td style="text-align:right;color:'+(s>0?'#16a34a':s<0?'#dc2626':'#666')+';font-weight:bold">'+(s>0?'+':'')+s+'</td></tr>';
+    }).join('');
+  var balRows=carriers.map(function(c){
+    var es=allE.filter(function(e){return e.transporteur===c;});
+    var p=es.reduce(function(s,e){return s+(e.palPrise||0);},0);
+    var pos=es.reduce(function(s,e){return s+(e.palPosee||0);},0);
+    var s=pos-p;
+    return '<tr><td><b>'+c+'</b></td><td style="text-align:right">'+p+'</td><td style="text-align:right">'+pos+'</td>'
+      +'<td style="text-align:right;font-weight:bold;color:'+(s>0?'#16a34a':s<0?'#dc2626':'#666')+'">'+(s>0?'+':'')+s+'</td><td style="text-align:right">'+es.length+'</td></tr>';
+  }).join('');
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Palettes '+todayISO+'</title>'
+    +'<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111}h1{font-size:16px}h2{font-size:13px;margin-top:22px;border-bottom:1px solid #ccc;padding-bottom:4px}'
+    +'table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#f0f0f0;padding:5px 8px;text-align:left;font-size:10px;border:1px solid #ddd}'
+    +'td{padding:4px 8px;border:1px solid #eee}tr:nth-child(even)td{background:#fafafa}'
+    +'</style></head><body>'
+    +'<h1>📦 Bilan Palettes Euro — '+todayISO+'</h1>'
+    +'<h2>Soldes par transporteur</h2>'
+    +'<table><thead><tr><th>Transporteur</th><th style="text-align:right">Prises</th><th style="text-align:right">Posées</th><th style="text-align:right">Solde</th><th style="text-align:right">Mvts</th></tr></thead><tbody>'+balRows+'</tbody></table>'
+    +'<h2>Historique (200 derniers)</h2>'
+    +'<table><thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Posées</th><th style="text-align:right">Solde</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'</body></html>';
+  var w=window.open('','_blank','width=1000,height=700');
+  if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},400);}
+}
+
+function _embExportJson(){
+  var blob=new Blob([JSON.stringify({palettes:_palettes||[],exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');
+  a.href=url;a.download='palettes_archive_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);
+}
+
+function _embImportJson(event){
+  var file=event.target.files[0];event.target.value='';if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      var imported=Array.isArray(d)?d:(d.palettes||[]);
+      var existIds=new Set((_palettes||[]).map(function(e){return e.id;}));
+      var added=0;
+      imported.forEach(function(e){if(e.id&&!existIds.has(e.id)){_palettes.push(e);added++;}});
+      savePalettes();renderEmballages();
+      if(typeof showToast==='function') showToast(added+' entr\u00e9e(s) import\u00e9e(s) \u2705');
+    }catch(e){alert('Fichier invalide');}
+  };
+  reader.readAsText(file);
 }
 </script>
 </body>
