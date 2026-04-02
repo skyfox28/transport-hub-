@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.27';
+var APP_VERSION = 'v1.28';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -3901,31 +3901,39 @@ function renderArtList(livId, container){
     '<span style="text-align:center">Empl.</span><span style="text-align:center">Type</span>'+
     '<span style="text-align:center">Pr\u00e9l.</span>';
   container.appendChild(hdr);
-  var totalColis=0,totalPal=0,totalSilo=0,totalPick=0,nbRamasser=0;
+  var totalColis=0,totalPal=0,totalSilo=0,totalPick=0,nbRamasser=0,colisRestants=0;
   arts.forEach(function(a){
     totalColis+=a.pkg||0;totalPal+=a.pal||0;totalSilo+=a.silo||0;totalPick+=a.pick||0;
-    if(a.vp!=='C')nbRamasser++;
+    // SILO: terminé quand vp=C (article-level) | PICK: terminé quand wm=C (delivery-level)
+    var isSilo=(a.type==='silo')||(a.pal>0&&!a.pick);
+    var artDone=isSilo?(a.vp==='C'):(a.wm==='C');
+    if(!artDone){nbRamasser++;colisRestants+=(a.pkg||0);}
     var row=document.createElement('div');row.className='art-row';
     var typeHtml='<span class="art-type '+(a.type||'pick')+'">'+(a.type==='silo'?'SILO':a.type==='mix'?'MIX':'PICK')+'</span>';
-    var spCol=a.vp==='C'?'var(--green)':a.vp==='B'?'var(--amber)':'var(--t3)';
-    var spBadge='<span style="font-size:11px;color:'+spCol+';font-weight:700">'+(a.vp||'\u2014')+'</span>';
+    // Badge Prél.: pour SILO → a.vp, pour PICK → a.wm
+    var spVal=isSilo?(a.vp||'—'):(a.wm||'—');
+    var spCol=spVal==='C'?'var(--green)':spVal==='B'?'var(--amber)':'var(--t3)';
+    var spBadge='<span style="font-size:11px;color:'+spCol+';font-weight:700">'+spVal+'</span>';
     var palStr=a.pal>0?('<span style="font-weight:800;color:var(--indigo)">'+a.pal+'</span>'):
                '<span style="color:var(--t3)">\u2014</span>';
-    var vpDone=(a.vp==='C');
-    var empStr=(a.emp)?('<span class="art-emp'+(vpDone?' done':'')+'">'+a.emp+'</span>'):
+    var empStr=(a.emp)?('<span class="art-emp'+(artDone?' done':'')+'">'+a.emp+'</span>'):
                '<span style="color:var(--t3);font-size:10px">\u2014</span>';
+    // Colis restants à ramasser pour cet article
+    var pkgRestStr=artDone?
+      '<span style="color:var(--green);font-size:10px">\u2713</span>':
+      '<span style="color:var(--amber);font-weight:800">'+Math.round(a.pkg).toLocaleString('fr')+'</span>';
     row.innerHTML=
       '<span class="art-code">'+a.art+'</span>'+
-      '<span class="art-desig" title="'+a.desig+'">'+(vpDone?'<s style=\"opacity:.5\">':'')+a.desig+(vpDone?'</s>':'')+'</span>'+
-      '<span class="art-pkg" style="text-align:right'+(vpDone?';opacity:.4':'')+'">'+Math.round(a.pkg).toLocaleString('fr')+'</span>'+
-      '<span style="text-align:right;font-size:11px'+(vpDone?';opacity:.4':'')+'">'+palStr+'</span>'+
+      '<span class="art-desig" title="'+a.desig+'">'+(artDone?'<s style=\"opacity:.5\">':'')+a.desig+(artDone?'</s>':'')+'</span>'+
+      '<span class="art-pkg" style="text-align:right'+(artDone?';opacity:.4':'')+'">'+pkgRestStr+'<span style="color:var(--t3);font-size:10px;margin-left:2px">/'+Math.round(a.pkg).toLocaleString('fr')+'</span></span>'+
+      '<span style="text-align:right;font-size:11px'+(artDone?';opacity:.4':'')+'">'+palStr+'</span>'+
       '<span style="text-align:center">'+empStr+'</span>'+
       '<span>'+typeHtml+'</span>'+
       '<span class="art-sp">'+spBadge+'</span>';
     container.appendChild(row);
   });
   var recap=document.createElement('div');recap.className='art-recap';
-  var warn=nbRamasser>0?'\u26a0 '+nbRamasser+' article'+(nbRamasser>1?'s':'')+' \u00e0 ramasser':'\u2705 Tout pr\u00e9lev\u00e9';
+  var warn=nbRamasser>0?'\u26a0 '+nbRamasser+' art. \u2022 <span style="color:var(--amber);font-weight:800">'+Math.round(colisRestants).toLocaleString('fr')+' colis restants</span>':'\u2705 Tout pr\u00e9lev\u00e9';
   var warnColor=nbRamasser>0?'var(--amber)':'var(--green)';
   recap.innerHTML='<span class="art-recap-item"><span style="color:var(--t3)">Colis total</span><span class="art-recap-val">'+Math.round(totalColis).toLocaleString('fr')+'</span></span>'+
     '<span class="art-recap-item"><span style="color:var(--t3)">Pal. SILO</span><span class="art-recap-val" style="color:var(--indigo)">'+Math.round(totalPal)+'</span></span>'+
@@ -3937,9 +3945,10 @@ function renderArtList(livId, container){
 function makeArtToggle(livId,parentEl){
   var arts=(APP.articles||[]).filter(function(a){return a.liv===livId;});
   if(!arts.length) return;
-  var nbRam=arts.filter(function(a){return a.vp!=='C';}).length;
+  var nbRam=arts.filter(function(a){var isSilo=(a.type==='silo')||(a.pal>0&&!a.pick);return isSilo?(a.vp!=='C'):(a.wm!=='C');}).length;
+  var colisRam=arts.filter(function(a){var isSilo=(a.type==='silo')||(a.pal>0&&!a.pick);return isSilo?(a.vp!=='C'):(a.wm!=='C');}).reduce(function(s,a){return s+(a.pkg||0);},0);
   var label='\uD83D\uDCCB '+arts.length+' article'+(arts.length>1?'s':'')+
-    (nbRam>0?' \u00b7 <span style="color:var(--amber)">'+nbRam+' \u00e0 ramasser</span>':'\u00b7 <span style="color:var(--green)">\u2705 tout pr\u00e9lev\u00e9</span>');
+    (nbRam>0?' \u00b7 <span style="color:var(--amber)">'+Math.round(colisRam).toLocaleString('fr')+' colis \u00e0 ramasser</span>':' \u00b7 <span style="color:var(--green)">\u2705 tout pr\u00e9lev\u00e9</span>');
   var toggle=document.createElement('div');toggle.className='art-toggle';
   toggle.innerHTML='\u25b6 '+label;
   var list=document.createElement('div');list.className='art-list';
