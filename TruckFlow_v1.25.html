@@ -1768,7 +1768,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.23';
+var APP_VERSION = 'v1.25';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -2339,11 +2339,11 @@ function computeSummary(){
   });
   (APP.articles||[]).forEach(function(a){
     if(!livIds.has(a.liv)) return;
-    if(a.vp!=='C'){
+    // a.wm = vrai statut WM (A/B/C) — silo ET picking utilisent le même champ
+    // séparation par volume : a.pal/a.silo = partie silo, a.pick = partie picking
+    if(a.wm!=='C'){
       s.palSiloRest  +=(a.pal||0);
       s.colisSiloRest+=(a.silo||0);
-    }
-    if(a.wm!=='C'){
       s.colisPickRest+=(a.pick||0);
     }
   });
@@ -2430,11 +2430,9 @@ function getByDate(){
   });
   (APP.articles||[]).forEach(function(a){
     var dt=livToDate[a.liv]; if(!dt||!m[dt]) return;
-    if(a.vp!=='C'){
+    if(a.wm!=='C'){
       m[dt].palSiloRest  +=(a.pal||0);
       m[dt].colisSiloRest+=(a.silo||0);
-    }
-    if(a.wm!=='C'){
       m[dt].colisPickRest+=(a.pick||0);
     }
   });
@@ -2542,8 +2540,10 @@ function renderDayDetail(date){
   livIds.forEach(function(id){livRestMap[id]={pal:0,silo:0,pick:0};});
   (APP.articles||[]).forEach(function(a){
     if(!livIds.has(a.liv))return;
-    if(a.vp!=='C'){restPalSilo+=(a.pal||0);restColSilo+=(a.silo||0);livRestMap[a.liv].pal+=(a.pal||0);livRestMap[a.liv].silo+=(a.silo||0);}
-    if(a.wm!=='C'){restColPick+=(a.pick||0);livRestMap[a.liv].pick+=(a.pick||0);}
+    if(a.wm!=='C'){
+      restPalSilo+=(a.pal||0);restColSilo+=(a.silo||0);restColPick+=(a.pick||0);
+      livRestMap[a.liv].pal+=(a.pal||0);livRestMap[a.liv].silo+=(a.silo||0);livRestMap[a.liv].pick+=(a.pick||0);
+    }
   });
   var restHrSilo=CADENCE_SILO>0?restPalSilo/CADENCE_SILO:0;
   var restHrPick=CADENCE_PICK>0?restColPick/CADENCE_PICK:0;
@@ -6383,7 +6383,7 @@ function _buildSiloRouteHTML(selDate){
     var grpPal=0,grpCs=0;
     delivs.forEach(function(d){grpPal+=(d.palSilo||0);grpCs+=(d.colisSilo||0);});
     var isSans=key==='__sans__';
-    var allDoneS=delivs.every(function(d){return d.sp==='C';});
+    var allDoneS=delivs.every(function(d){return d.wm==='C';});
     function _chkS(done,big){
       var s=big?'width:22px;height:22px;border:2px solid':'width:16px;height:16px;border:1.5px solid';
       var r=big?'5px':'3px';
@@ -6410,7 +6410,7 @@ function _buildSiloRouteHTML(selDate){
         +'<td></td><td></td>'
         +'<td style="padding:5px 14px;text-align:center;font-weight:700;color:var(--indigo)">'+Math.round(d.palSilo||0)+'</td>'
         +'<td style="padding:5px 14px;text-align:center;color:var(--t3);font-size:12px">'+Math.round(d.colisSilo||0).toLocaleString('fr')+'</td>'
-        +'<td style="padding:5px 14px;text-align:center">'+_chkS(d.sp==='C',false)+'</td>'
+        +'<td style="padding:5px 14px;text-align:center">'+_chkS(d.wm==='C',false)+'</td>'
       +'</tr>';
     });
   });
@@ -6494,8 +6494,7 @@ function renderPrevisions(){
   (APP.articles||[]).forEach(function(a){
     if(!delivIdx[a.liv])return;// article d'une autre date → ignorer
     if(!artRem[a.liv])artRem[a.liv]={pick:0,palSilo:0};
-    if(a.wm!=='C')artRem[a.liv].pick+=(a.pick||0);
-    if(a.vp!=='C')artRem[a.liv].palSilo+=(a.pal||0);
+    if(a.wm!=='C'){artRem[a.liv].pick+=(a.pick||0);artRem[a.liv].palSilo+=(a.pal||0);}
   });
   // Per-truck volumes + shift assignment
   var shiftKeys=['matin','am','nonAssigne'];
@@ -8446,8 +8445,7 @@ function _buildPDFReport(){
   });
   (APP.articles||[]).forEach(function(a){
     if(!allLivIds.has(a.liv))return;
-    if(a.vp!=='C'){volRest.pal+=(a.pal||0);volRest.cs+=(a.silo||0);}
-    if(a.wm!=='C')volRest.cp+=(a.pick||0);
+    if(a.wm!=='C'){volRest.pal+=(a.pal||0);volRest.cs+=(a.silo||0);volRest.cp+=(a.pick||0);}
   });
   var nTotal=allDay.length,nPart=trucksPartis.length,nCours=trucksEnCours.length,nAtt=trucksAttente.length;
   // Open window
