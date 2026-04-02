@@ -1803,7 +1803,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.31';
+var APP_VERSION = 'v1.32';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -11941,7 +11941,10 @@ function renderEmballages(){
   var manualForm='<div class="emb-form">'
     +'<div class="emb-form-field"><label class="emb-form-label">Date</label><input class="emb-form-input" id="embDate" type="date" value="'+todayVal+'"></div>'
     +'<div class="emb-form-field"><label class="emb-form-label">Heure</label><input class="emb-form-input" id="embHeure" type="time" value="'+hhmm+'"></div>'
-    +'<div class="emb-form-field"><label class="emb-form-label">Transporteur</label><input class="emb-form-input" id="embCarrierInput" list="embCarrierList" placeholder="Transporteur"><datalist id="embCarrierList">'+carriers.map(function(c){return '<option>'+c+'</option>';}).join('')+'</datalist></div>'
+    +'<div class="emb-form-field"><label class="emb-form-label">Transporteur</label>'
+    +'<select class="emb-form-input" id="embCarrierInput"><option value="">-- Choisir --</option>'
+    +_embAllCarriers().map(function(c){return '<option>'+c+'</option>';}).join('')
+    +'</select></div>'
     +'<div class="emb-form-field"><label class="emb-form-label">Camion</label><input class="emb-form-input" id="embCamion" placeholder="ID camion"></div>'
     +'<div class="emb-form-field"><label class="emb-form-label">\uD83D\uDCE6 Pal. Sol</label><input class="emb-form-input" id="embSol" type="number" min="0" value="0"></div>'
     +'<div class="emb-form-field"><label class="emb-form-label">\uD83D\uDCE4 Pal. Prises</label><input class="emb-form-input" id="embPrise" type="number" min="0" value="0"></div>'
@@ -11993,6 +11996,14 @@ function _embAddManual(){
   _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:_normalizeCarrier(carrier),livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,type:type});
   savePalettes();renderEmballages();
   if(typeof showToast==='function') showToast('Entr\u00e9e ajout\u00e9e \u2705');
+}
+
+// Liste consolidée transporteurs : liste fixe + tous ceux déjà en base
+var _EMB_CARRIERS_BASE=['BERNARD','CEVA','COQUELLE','DISPAM','DTS','OMNITRANS','PERRENOT','SLT','TAB','XPO'];
+function _embAllCarriers(){
+  var known=new Set(_EMB_CARRIERS_BASE);
+  (_palettes||[]).forEach(function(e){if(e.transporteur)known.add(e.transporteur);});
+  return [...known].sort();
 }
 
 function _embOpenExportPanel(fmt,btn){
