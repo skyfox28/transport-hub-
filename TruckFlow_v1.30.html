@@ -1803,7 +1803,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.29';
+var APP_VERSION = 'v1.30';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -2999,7 +2999,24 @@ function _nowIso(){
   if(_workingDate){var b=new Date(_workingDate+'T00:00:00'),n=new Date();b.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0);if(!isNaN(b.getTime()))return b.toISOString();}
   return new Date().toISOString();
 }
-// ─── Palette modal (blocking at departure) ─────────────────────────────────
+// ─── Carrier normalization (SAP codes → nom réel) ─────────────────────────
+function _normalizeCarrier(raw){
+  if(!raw) return raw;
+  var s=String(raw).toUpperCase().trim();
+  if(/^FRBERN/.test(s)) return 'BERNARD';
+  if(/^FRDIS/.test(s)) return 'DISPAM';
+  if(/^FRXPO/.test(s)) return 'XPO';
+  if(/^FRDTS/.test(s)) return 'DTS';
+  if(/^FRCOQUE/.test(s)) return 'COQUELLE';
+  if(/^FROMNI/.test(s)) return 'OMNITRANS';
+  if(/^FRCEVA/.test(s)) return 'CEVA';
+  if(/^FRTAB/.test(s)) return 'TAB';
+  if(/^FRPERR/.test(s)) return 'PERRENOT';
+  if(/^FRSLT/.test(s)) return 'SLT';
+  // FRENLE + chiffres = transporteurs distincts (RAPITEAU, P38, AUTRE…) → conserver tel quel
+  return raw;
+}
+// Palette modal (blocking at departure) ─────────────────────────────────────
 function _showPaletteModal(truck,onConfirm){
   var existing=document.getElementById('_palModal');if(existing)existing.remove();
   var ov=document.createElement('div');ov.id='_palModal';
@@ -3046,7 +3063,7 @@ function _savePaletteEntry(truck,pal){
     date:getWorkingDate(),
     heure:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),
     camionId:(truck&&truck.id)||'',
-    transporteur:(truck&&(truck.transporteur||truck.itin||truck.id))||'',
+    transporteur:_normalizeCarrier((truck&&(truck.transporteur||truck.itin||truck.id))||''),
     livraisons:(truck&&truck.deliveries)||[],
     palSol:pal.palSol||0,
     palPrise:pal.palPrise||0,
@@ -11792,24 +11809,43 @@ if('serviceWorker' in navigator){
 // ═══════════════════════════════════════════════════════════════════════════
 var _embPeriod='month'; // 'day','week','month','all'
 var _embCarrier=''; // filtre transporteur
+var _embDateSel=new Date().toISOString().slice(0,10); // date de référence filtre
+
+// Helper: date YYYY-MM-DD → valeur input[type=week] YYYY-Www
+function _embDateToWeek(ds){
+  var d=new Date(ds+'T12:00:00');
+  var day=d.getDay()||7;d.setDate(d.getDate()-day+4);
+  var jan4=new Date(d.getFullYear(),0,4);
+  var w=Math.ceil(((d-jan4)/86400000+1)/7);
+  return d.getFullYear()+'-W'+String(w).padStart(2,'0');
+}
+// Helper: YYYY-Www → lundi de la semaine YYYY-MM-DD
+function _embWeekToDate(ws){
+  var m=ws.match(/(\d{4})-W(\d{2})/);if(!m)return new Date().toISOString().slice(0,10);
+  var jan4=new Date(Number(m[1]),0,4);
+  var mon=new Date(jan4.getTime()+(Number(m[2])-1)*7*86400000);
+  var day=mon.getDay()||7;mon.setDate(mon.getDate()-day+1);
+  return mon.toISOString().slice(0,10);
+}
+
+function _embGetByRef(period,dateRef,carrier){
+  return (_palettes||[]).filter(function(e){
+    if(carrier&&e.transporteur!==carrier) return false;
+    if(period==='day') return e.date===dateRef;
+    if(period==='week'){
+      var ref=new Date(dateRef+'T12:00:00');var day=ref.getDay()||7;
+      var mon=new Date(ref);mon.setDate(ref.getDate()-day+1);mon.setHours(0,0,0,0);
+      var sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);
+      var d=new Date(e.date+'T12:00:00');return d>=mon&&d<=sun;
+    }
+    if(period==='month') return e.date&&e.date.slice(0,7)===dateRef.slice(0,7);
+    return true;
+  });
+}
 
 function _embFilteredEntries(){
-  var now=new Date();
-  var todayISO=now.toISOString().slice(0,10);
-  return (_palettes||[]).filter(function(e){
-    if(_embCarrier&&e.transporteur!==_embCarrier) return false;
-    if(_embPeriod==='day') return e.date===todayISO;
-    if(_embPeriod==='week'){
-      var d=new Date(e.date);
-      var day=now.getDay()||7;
-      var mon=new Date(now);mon.setDate(now.getDate()-day+1);mon.setHours(0,0,0,0);
-      return d>=mon;
-    }
-    if(_embPeriod==='month'){
-      return e.date&&e.date.slice(0,7)===todayISO.slice(0,7);
-    }
-    return true;
-  }).sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
+  return _embGetByRef(_embPeriod,_embDateSel,_embCarrier)
+    .sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
 }
 
 function renderEmballages(){
@@ -11820,10 +11856,18 @@ function renderEmballages(){
   var carriers=[...new Set((_palettes||[]).map(function(e){return e.transporteur;}).filter(Boolean))].sort();
 
   // ── filter bar ────────────────────────────────────────────────────────
-  var periods=[['day','Aujourd\'hui'],['week','Semaine'],['month','Mois'],['all','Tout']];
+  var todayISO=new Date().toISOString().slice(0,10);
+  if(!_embDateSel) _embDateSel=todayISO;
+  var periods=[['day','Jour'],['week','Semaine'],['month','Mois'],['all','Tout']];
+  var inpStyle='padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:var(--t1);font-size:11px;outline:none';
+  var datePicker='';
+  if(_embPeriod==='day') datePicker='<input type="date" value="'+_embDateSel+'" onchange="_embDateSel=this.value;renderEmballages()" style="'+inpStyle+'">';
+  else if(_embPeriod==='week') datePicker='<input type="week" value="'+_embDateToWeek(_embDateSel)+'" onchange="_embDateSel=_embWeekToDate(this.value);renderEmballages()" style="'+inpStyle+'">';
+  else if(_embPeriod==='month') datePicker='<input type="month" value="'+_embDateSel.slice(0,7)+'" onchange="_embDateSel=this.value+\'-01\';renderEmballages()" style="'+inpStyle+'">';
   var filterBar='<div class="emb-filter-bar">'
     +periods.map(function(p){return '<button class="emb-period-btn'+(_embPeriod===p[0]?' on':'')+'" onclick="_embPeriod=\''+p[0]+'\';renderEmballages()">'+p[1]+'</button>';}).join('')
-    +'<select onchange="_embCarrier=this.value;renderEmballages()" style="padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--t1);font-size:11px;margin-left:8px">'
+    +(datePicker?'<span style="margin-left:4px">'+datePicker+'</span>':'')
+    +'<select onchange="_embCarrier=this.value;renderEmballages()" style="'+inpStyle+';margin-left:8px">'
     +'<option value="">Tous transporteurs</option>'
     +carriers.map(function(c){return '<option value="'+c+'"'+(_embCarrier===c?' selected':'')+'>'+c+'</option>';}).join('')
     +'</select>'
@@ -11908,13 +11952,17 @@ function renderEmballages(){
     +'</div>';
 
   // ── Export buttons ────────────────────────────────────────────────────
+  // Export label helpers
+  var _expLbl={day:'Jour '+_embDateSel,week:'Sem. '+_embDateSel,month:'Mois '+_embDateSel.slice(0,7),all:'Tout',carrier:'/ Transporteur'};
+  var _ebtn=function(period,lbl,col,colb){return '<button onclick="_embExportExcel(\''+period+'\')" style="padding:7px 14px;border-radius:8px;border:1px solid '+colb+';background:'+col+';color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel '+lbl+'</button>';};
+  var _pbtn=function(period,lbl){return '<button onclick="_embExportPDF(\''+period+'\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.1);color:#fbbf24;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC4 PDF '+lbl+'</button>';};
   var exportBtns='<div style="display:flex;flex-wrap:wrap;gap:8px">'
-    +'<button onclick="_embExportExcel(\'day\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Jour</button>'
-    +'<button onclick="_embExportExcel(\'week\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Semaine</button>'
-    +'<button onclick="_embExportExcel(\'month\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Mois</button>'
-    +'<button onclick="_embExportExcel(\'all\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel Tout</button>'
+    +_ebtn('day',_expLbl.day,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
+    +_ebtn('week',_expLbl.week,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
+    +_ebtn('month',_expLbl.month,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
+    +_ebtn('all',_expLbl.all,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
     +'<button onclick="_embExportExcel(\'carrier\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.1);color:#818cf8;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel / Transporteur</button>'
-    +'<button onclick="_embExportPDF()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.1);color:#fbbf24;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC4 PDF Bilan</button>'
+    +_pbtn('day',_expLbl.day)+_pbtn('week',_expLbl.week)+_pbtn('month',_expLbl.month)+_pbtn('all','Tout')+_pbtn('carrier','/ Transporteur')
     +'<button onclick="_embExportJson()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC2 Export JSON archive</button>'
     +'<label style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);font-size:12px;font-weight:700;cursor:pointer">'
     +'\uD83D\uDCC2 Import JSON archive<input type="file" accept=".json" style="display:none" onchange="_embImportJson(event)"></label>'
@@ -11927,7 +11975,7 @@ function renderEmballages(){
     +'</div>'
     +filterBar
     +'<div class="emb-section"><div class="emb-section-ttl">\uD83C\uDFC6 Soldes par transporteur (cumul total)</div><div class="emb-balance-grid">'+(balCards||'<span style="color:var(--t3);font-size:12px">Aucune donn\u00e9e</span>')+'</div></div>'
-    +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDCCA Statistiques \u2014 '+(['day','week','month'].indexOf(_embPeriod)>=0?['Aujourd\'hui','Semaine en cours','Mois en cours','Tout l\'historique'][['day','week','month','all'].indexOf(_embPeriod)]:'Tout l\'historique')+'</div>'+statsHtml+'</div>'
+    +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDCCA Statistiques \u2014 '+(_embPeriod==='day'?'Jour '+_embDateSel:_embPeriod==='week'?'Semaine du '+_embDateSel:_embPeriod==='month'?'Mois '+_embDateSel.slice(0,7):'Tout l\'historique')+'</div>'+statsHtml+'</div>'
     +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDCDD Saisie manuelle / Correction</div>'+manualForm+'</div>'
     +'<div class="emb-section"><div class="emb-section-ttl">\uD83D\uDDC2 Historique des mouvements</div>'+tableHtml+'</div>'
     +'</div>';
@@ -11949,62 +11997,51 @@ function _embAddManual(){
   var posee=parseInt(document.getElementById('embPosee').value,10)||0;
   var type=document.getElementById('embType').value;
   if(!date||!carrier){alert('Date et transporteur obligatoires');return;}
-  _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:carrier,livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,type:type});
+  _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:_normalizeCarrier(carrier),livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,type:type});
   savePalettes();renderEmballages();
   if(typeof showToast==='function') showToast('Entr\u00e9e ajout\u00e9e \u2705');
 }
 
-function _embGetByPeriod(period){
-  var now=new Date();var todayISO=now.toISOString().slice(0,10);
-  return (_palettes||[]).filter(function(e){
-    if(period==='day') return e.date===todayISO;
-    if(period==='week'){var d=new Date(e.date);var day=now.getDay()||7;var mon=new Date(now);mon.setDate(now.getDate()-day+1);mon.setHours(0,0,0,0);return d>=mon;}
-    if(period==='month') return e.date&&e.date.slice(0,7)===todayISO.slice(0,7);
-    return true;
-  });
-}
-
 function _embExportExcel(period){
   if(typeof XLSX==='undefined'){alert('SheetJS non charg\u00e9');return;}
-  var now=new Date();var todayISO=now.toISOString().slice(0,10);
+  var ref=_embDateSel||new Date().toISOString().slice(0,10);
   var wb=XLSX.utils.book_new();
   if(period==='carrier'){
-    var carriers=[...new Set((_palettes||[]).map(function(e){return e.transporteur;}).filter(Boolean))].sort();
-    carriers.forEach(function(c){
-      var rows=(_palettes||[]).filter(function(e){return e.transporteur===c;})
-        .sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure)});
+    var allC=[...new Set((_palettes||[]).map(function(e){return e.transporteur;}).filter(Boolean))].sort();
+    allC.forEach(function(c){
+      var rows=_embGetByRef('all',ref,c).sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
       var data=[['Date','Heure','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type']];
       rows.forEach(function(e){data.push([e.date,e.heure,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type]);});
       XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),c.slice(0,31));
     });
-    // Summary sheet
     var sumData=[['Transporteur','Prises Total','Pos\u00e9es Total','Solde','Mouvements']];
-    carriers.forEach(function(c){
-      var es=(_palettes||[]).filter(function(e){return e.transporteur===c;});
+    allC.forEach(function(c){
+      var es=_embGetByRef('all',ref,c);
       var p=es.reduce(function(s,e){return s+(e.palPrise||0);},0);
       var pos=es.reduce(function(s,e){return s+(e.palPosee||0);},0);
       sumData.push([c,p,pos,pos-p,es.length]);
     });
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumData),'Soldes');
   } else {
-    var entries=_embGetByPeriod(period);
-    entries.sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
+    var entries=_embGetByRef(period,ref,'').sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);});
     var data=[['Date','Heure','Transporteur','Camion','Pal. Sol','Pal. Prises','Pal. Pos\u00e9es','Solde','Type']];
     entries.forEach(function(e){data.push([e.date,e.heure,e.transporteur,e.camionId,e.palSol,e.palPrise,e.palPosee,(e.palPosee||0)-(e.palPrise||0),e.type]);});
-    var ws=XLSX.utils.aoa_to_sheet(data);
-    var lbl={day:'Jour_'+todayISO,week:'Semaine',month:'Mois_'+todayISO.slice(0,7),all:'Historique'}[period]||period;
-    XLSX.utils.book_append_sheet(wb,ws,lbl);
+    var lbl={day:'Jour_'+ref,week:'Sem_'+ref,month:'Mois_'+ref.slice(0,7),all:'Historique'}[period]||period;
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),lbl.slice(0,31));
   }
-  var fname='palettes_'+(period==='carrier'?'transporteurs':period)+'_'+todayISO+'.xlsx';
+  var fname='palettes_'+(period==='carrier'?'transporteurs_'+ref:(period==='all'?'historique':period+'_'+ref))+'.xlsx';
   XLSX.writeFile(wb,fname);
 }
 
-function _embExportPDF(){
-  var now=new Date();var todayISO=now.toISOString().slice(0,10);
-  var allE=_palettes||[];
-  var carriers=[...new Set(allE.map(function(e){return e.transporteur;}).filter(Boolean))].sort();
-  var rows=allE.sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);})
-    .slice(0,200).map(function(e){
+function _embExportPDF(period){
+  period=period||'all';
+  var ref=_embDateSel||new Date().toISOString().slice(0,10);
+  var periodLbl={day:'Jour '+ref,week:'Semaine du '+ref,month:'Mois '+ref.slice(0,7),all:'Historique complet',carrier:'Par transporteur'}[period]||period;
+  // For 'carrier' period, use all data grouped by carrier; otherwise filter by period
+  var sourceEntries=period==='carrier'?(_palettes||[]):_embGetByRef(period,ref,'');
+  var carriers=[...new Set(sourceEntries.map(function(e){return e.transporteur;}).filter(Boolean))].sort();
+  var rows=sourceEntries.slice().sort(function(a,b){return (b.date+b.heure).localeCompare(a.date+a.heure);})
+    .slice(0,300).map(function(e){
       var s=(e.palPosee||0)-(e.palPrise||0);
       return '<tr><td>'+e.date+'</td><td>'+e.heure+'</td><td><b>'+e.transporteur+'</b></td><td>'+e.camionId+'</td>'
         +'<td style="text-align:right">'+e.palSol+'</td>'
@@ -12013,23 +12050,23 @@ function _embExportPDF(){
         +'<td style="text-align:right;color:'+(s>0?'#16a34a':s<0?'#dc2626':'#666')+';font-weight:bold">'+(s>0?'+':'')+s+'</td></tr>';
     }).join('');
   var balRows=carriers.map(function(c){
-    var es=allE.filter(function(e){return e.transporteur===c;});
+    var es=sourceEntries.filter(function(e){return e.transporteur===c;});
     var p=es.reduce(function(s,e){return s+(e.palPrise||0);},0);
     var pos=es.reduce(function(s,e){return s+(e.palPosee||0);},0);
     var s=pos-p;
     return '<tr><td><b>'+c+'</b></td><td style="text-align:right">'+p+'</td><td style="text-align:right">'+pos+'</td>'
       +'<td style="text-align:right;font-weight:bold;color:'+(s>0?'#16a34a':s<0?'#dc2626':'#666')+'">'+(s>0?'+':'')+s+'</td><td style="text-align:right">'+es.length+'</td></tr>';
   }).join('');
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Palettes '+todayISO+'</title>'
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Palettes \u2014 '+periodLbl+'</title>'
     +'<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111}h1{font-size:16px}h2{font-size:13px;margin-top:22px;border-bottom:1px solid #ccc;padding-bottom:4px}'
     +'table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#f0f0f0;padding:5px 8px;text-align:left;font-size:10px;border:1px solid #ddd}'
     +'td{padding:4px 8px;border:1px solid #eee}tr:nth-child(even)td{background:#fafafa}'
     +'</style></head><body>'
-    +'<h1>📦 Bilan Palettes Euro — '+todayISO+'</h1>'
+    +'<h1>\uD83D\uDCE6 Bilan Palettes Euro \u2014 '+periodLbl+'</h1>'
     +'<h2>Soldes par transporteur</h2>'
-    +'<table><thead><tr><th>Transporteur</th><th style="text-align:right">Prises</th><th style="text-align:right">Posées</th><th style="text-align:right">Solde</th><th style="text-align:right">Mvts</th></tr></thead><tbody>'+balRows+'</tbody></table>'
-    +'<h2>Historique (200 derniers)</h2>'
-    +'<table><thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Posées</th><th style="text-align:right">Solde</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<table><thead><tr><th>Transporteur</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th><th style="text-align:right">Mvts</th></tr></thead><tbody>'+balRows+'</tbody></table>'
+    +'<h2>D\u00e9tail (300 max)</h2>'
+    +'<table><thead><tr><th>Date</th><th>Heure</th><th>Transporteur</th><th>Camion</th><th style="text-align:right">Sol</th><th style="text-align:right">Prises</th><th style="text-align:right">Pos\u00e9es</th><th style="text-align:right">Solde</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'</body></html>';
   var w=window.open('','_blank','width=1000,height=700');
   if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},400);}
