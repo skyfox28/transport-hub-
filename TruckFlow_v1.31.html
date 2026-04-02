@@ -1803,7 +1803,7 @@ tbody tr:nth-child(even):hover td{background:rgba(255,255,255,.05)}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.30';
+var APP_VERSION = 'v1.31';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -11952,20 +11952,13 @@ function renderEmballages(){
     +'</div>';
 
   // ── Export buttons ────────────────────────────────────────────────────
-  // Export label helpers
-  var _expLbl={day:'Jour '+_embDateSel,week:'Sem. '+_embDateSel,month:'Mois '+_embDateSel.slice(0,7),all:'Tout',carrier:'/ Transporteur'};
-  var _ebtn=function(period,lbl,col,colb){return '<button onclick="_embExportExcel(\''+period+'\')" style="padding:7px 14px;border-radius:8px;border:1px solid '+colb+';background:'+col+';color:#22c55e;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel '+lbl+'</button>';};
-  var _pbtn=function(period,lbl){return '<button onclick="_embExportPDF(\''+period+'\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.1);color:#fbbf24;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC4 PDF '+lbl+'</button>';};
-  var exportBtns='<div style="display:flex;flex-wrap:wrap;gap:8px">'
-    +_ebtn('day',_expLbl.day,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
-    +_ebtn('week',_expLbl.week,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
-    +_ebtn('month',_expLbl.month,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
-    +_ebtn('all',_expLbl.all,'rgba(34,197,94,.1)','rgba(34,197,94,.3)')
-    +'<button onclick="_embExportExcel(\'carrier\')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.1);color:#818cf8;font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCCA Excel / Transporteur</button>'
-    +_pbtn('day',_expLbl.day)+_pbtn('week',_expLbl.week)+_pbtn('month',_expLbl.month)+_pbtn('all','Tout')+_pbtn('carrier','/ Transporteur')
-    +'<button onclick="_embExportJson()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);font-size:12px;font-weight:700;cursor:pointer">\uD83D\uDCC2 Export JSON archive</button>'
-    +'<label style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);font-size:12px;font-weight:700;cursor:pointer">'
-    +'\uD83D\uDCC2 Import JSON archive<input type="file" accept=".json" style="display:none" onchange="_embImportJson(event)"></label>'
+  var btnS='padding:8px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid ';
+  var exportBtns='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
+    +'<button id="embXlsBtn" onclick="_embOpenExportPanel(\'excel\',this)" style="'+btnS+'rgba(34,197,94,.4);background:rgba(34,197,94,.12);color:#22c55e">\uD83D\uDCCA Excel \u25BE</button>'
+    +'<button id="embPdfBtn" onclick="_embOpenExportPanel(\'pdf\',this)" style="'+btnS+'rgba(251,191,36,.4);background:rgba(251,191,36,.1);color:#fbbf24">\uD83D\uDCC4 PDF \u25BE</button>'
+    +'<button onclick="_embExportJson()" style="'+btnS+'rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3)">\uD83D\uDCC2 Export JSON</button>'
+    +'<label style="'+btnS+'rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--t3);cursor:pointer">'
+    +'\uD83D\uDCC2 Import JSON<input type="file" accept=".json" style="display:none" onchange="_embImportJson(event)"></label>'
     +'</div>';
 
   el.innerHTML='<div style="padding:0 4px">'
@@ -12000,6 +11993,54 @@ function _embAddManual(){
   _palettes.push({id:'pal_'+Date.now(),date:date,heure:heure||'00:00',camionId:camion,transporteur:_normalizeCarrier(carrier),livraisons:[],palSol:sol,palPrise:prise,palPosee:posee,type:type});
   savePalettes();renderEmballages();
   if(typeof showToast==='function') showToast('Entr\u00e9e ajout\u00e9e \u2705');
+}
+
+function _embOpenExportPanel(fmt,btn){
+  // Toggle: close if same panel already open
+  var existing=document.getElementById('_embExportPanel');
+  if(existing){var wasFor=existing.getAttribute('data-fmt');existing.remove();if(wasFor===fmt)return;}
+  var todayISO=new Date().toISOString().slice(0,10);
+  var ref=_embDateSel||todayISO;
+  var inpS='width:100%;box-sizing:border-box;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:var(--t1);font-size:12px;outline:none;margin-top:5px';
+  var isXls=fmt==='excel';
+  var accentCol=isXls?'#22c55e':'#fbbf24';
+  var accentBg=isXls?'rgba(34,197,94,.18)':'rgba(251,191,36,.15)';
+  var accentBd=isXls?'rgba(34,197,94,.4)':'rgba(251,191,36,.4)';
+  var panel=document.createElement('div');panel.id='_embExportPanel';panel.setAttribute('data-fmt',fmt);
+  panel.style.cssText='position:absolute;z-index:9999;background:rgba(13,17,23,.97);border:1.5px solid rgba(255,255,255,.15);border-radius:14px;padding:16px;width:280px;box-shadow:0 16px 48px rgba(0,0,0,.6);backdrop-filter:blur(20px)';
+  panel.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--t1);margin-bottom:12px">'+(isXls?'\uD83D\uDCCA Excel':'\uD83D\uDCC4 PDF')+' \u2014 Choisir la p\u00e9riode</div>'
+    +'<div style="display:grid;gap:6px" id="_embPanelOptions">'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="embP" value="day" checked> Jour <input id="_epDay" type="date" value="'+ref+'" style="'+inpS+';width:auto;flex:1"></label>'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="embP" value="week"> Semaine <input id="_epWeek" type="week" value="'+_embDateToWeek(ref)+'" style="'+inpS+';width:auto;flex:1"></label>'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="embP" value="month"> Mois <input id="_epMonth" type="month" value="'+ref.slice(0,7)+'" style="'+inpS+';width:auto;flex:1"></label>'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="embP" value="all"> Tout l\'historique</label>'
+    +'<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="embP" value="carrier"> Par transporteur</label>'
+    +'</div>'
+    +'<button onclick="_embDoExport(\''+fmt+'\')" style="margin-top:14px;width:100%;padding:10px;border-radius:9px;border:1.5px solid '+accentBd+';background:'+accentBg+';color:'+accentCol+';font-size:13px;font-weight:800;cursor:pointer">Exporter</button>';
+  // Position below button
+  var rect=btn.getBoundingClientRect();
+  panel.style.top=(rect.bottom+window.scrollY+6)+'px';
+  panel.style.left=Math.min(rect.left+window.scrollX,window.innerWidth-300)+'px';
+  document.body.appendChild(panel);
+  // Close on outside click
+  setTimeout(function(){
+    document.addEventListener('click',function _cls(e){if(!panel.contains(e.target)&&e.target!==btn){panel.remove();document.removeEventListener('click',_cls);}});
+  },10);
+}
+function _embDoExport(fmt){
+  var sel=document.querySelector('input[name="embP"]:checked');
+  var period=sel?sel.value:'all';
+  var ref;
+  if(period==='day'){var di=document.getElementById('_epDay');ref=di?di.value:(_embDateSel||new Date().toISOString().slice(0,10));}
+  else if(period==='week'){var wi=document.getElementById('_epWeek');ref=wi?_embWeekToDate(wi.value):(_embDateSel||new Date().toISOString().slice(0,10));}
+  else if(period==='month'){var mi=document.getElementById('_epMonth');ref=mi?(mi.value+'-01'):(_embDateSel||new Date().toISOString().slice(0,10));}
+  else{ref=_embDateSel||new Date().toISOString().slice(0,10);}
+  document.getElementById('_embExportPanel').remove();
+  // Store ref for export functions
+  var prevRef=_embDateSel;_embDateSel=ref;
+  if(fmt==='excel') _embExportExcel(period);
+  else _embExportPDF(period);
+  _embDateSel=prevRef;
 }
 
 function _embExportExcel(period){
