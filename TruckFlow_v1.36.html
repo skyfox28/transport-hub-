@@ -1805,7 +1805,7 @@ select.emb-form-input option{background:#161b22;color:#e6edf3}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.35';
+var APP_VERSION = 'v1.36';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -12067,7 +12067,7 @@ function _embAddManual(){
 }
 
 // Liste consolidée transporteurs : liste fixe + tous ceux déjà en base
-var _EMB_CARRIERS_BASE=['BERNARD','CEVA','COQUELLE','DISPAM','DTS','OMNITRANS','PERRENOT','SLT','TAB','XPO'];
+var _EMB_CARRIERS_BASE=['BERNARD','CEVA','COQUELLE','DISPAM','DTS','OMNITRANS','PERRENOT','RAPITEAU','SLT','TAB','XPO'];
 function _embAllCarriers(){
   var known=new Set(_EMB_CARRIERS_BASE);
   (_palettes||[]).forEach(function(e){if(e.transporteur)known.add(e.transporteur);});
