@@ -12,12 +12,12 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.44.html` | v1.44 | **Version courante** |
+| `TruckFlow_v1.48.html` | v1.48 | **Version courante** |
+| `TruckFlow_v1.47.html` | v1.47 | Archivé |
+| `TruckFlow_v1.46.html` | v1.46 | Archivé |
+| `TruckFlow_v1.45.html` | v1.45 | Archivé |
+| `TruckFlow_v1.44.html` | v1.44 | Archivé |
 | `TruckFlow_v1.43.html` | v1.43 | Archivé |
-| `TruckFlow_v1.42.html` | v1.42 | Archivé |
-| `TruckFlow_v1.41.html` | v1.41 | Archivé |
-| `TruckFlow_v1.40.html` | v1.40 | Archivé |
-| `TruckFlow_v1.39.html` | v1.39 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -100,6 +100,36 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - Ajout compte `mccormick` (opérateur restreint)
 - `applyProfileRestrictions()` appelée dans `tfRunApp()`
 - Badge utilisateur dans le header pour les profils restreints
+
+### v1.45 — Badge admin + switch + Excel/PDF McCormick + bouton Undo
+- Badge vert pour admin (galaad, caserta), bleu pour restricted (mccormick)
+- Bouton "Changer de session" dans le menu `⋯`
+- Excel et PDF autorisés pour McCormick
+- Bouton `↩ Annuler` dans le header — `_undoStack`, `pushUndo()`, `doUndo()`
+- Undo restore les archives : capture `trucks`, `timestamps` ET `_completedTrucks`
+
+### v1.46 — Sauvegarde d'urgence
+- `_buildSessionPayload()` / `_saveBackupSessionSync()` — écrit dans `tf_emergency_backup`
+- Hook sur `save()`, `visibilitychange`, `beforeunload`, `pagehide`
+- Bouton `🛟 Restaurer sauvegarde d'urgence` dans le modal login
+- `tfRestoreBackup()` — restaure la session complète
+- `tf_emergency_backup` exclu du `tfPurgeAndQuit()`
+
+### v1.47 — Mode Monitor amélioré
+- Sélecteur de date dans Monitor (`#monDateInp`) — voir un autre jour
+- Compteur "Partis" correct : les camions archivés (`_completedTrucks`) sont inclus dans les KPIs et la section Partis
+- `getCompleted()` dans Monitor — lit `tf_completed`
+- Fix COMPANS dans Monitor : 2 timestamps seulement (arr + dep)
+
+### v1.48 — Sync réseau (File System Access API)
+- Bouton `📡 Réseau` dans le header principal — `toggleNetSync()`
+- `openNetworkSync()` : `showSaveFilePicker` → choisir/créer un fichier sur un partage réseau
+- `_writeNetSync()` : écrit le payload JSON dans le fichier après chaque `save()`
+- Bouton `📡 Connexion réseau` dans le Monitor — `toggleNetMon()`
+- `openNetworkMonitor()` : `showOpenFilePicker` → ouvrir le fichier réseau
+- `_pollNetFile()` : poll toutes les 10s, met à jour localStorage puis appelle `render()`
+- Indicateur visuel (point vert/rouge animé) dans les deux interfaces
+- McCormick ne voit pas le bouton `📡 Réseau` (ajouté à `applyProfileRestrictions`)
 
 ---
 
