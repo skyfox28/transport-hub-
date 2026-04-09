@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.58.html` | v1.58 | **Version courante** |
+| `TruckFlow_v1.59.html` | v1.59 | **Version courante** |
+| `TruckFlow_v1.58.html` | v1.58 | Archivé |
 | `TruckFlow_v1.57.html` | v1.57 | Archivé |
 | `TruckFlow_v1.56.html` | v1.56 | Archivé |
 | `TruckFlow_v1.55.html` | v1.55 | Archivé |
@@ -169,6 +170,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
 - **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
 - `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
+
+### v1.59 — Redesign Monitor SaaS (Linear/Notion style)
+- **Typographie** : `Inter/Segoe UI/system-ui` (sans-serif) pour le texte, `monospace` réservé aux chiffres/timestamps
+- **Palette** : fond `#04070e`, fond panneau `rgba(255,255,255,.04)`, badges pill-shaped (border-radius:40px) pour les KPIs
+- **Header** : hauteur 68px, clock 40px weight 200, KPIs en chips arrondis (pill) avec gap, `backdrop-filter` renforcé
+- **Cards attente** `.tc` : `border-radius:14px`, stripe 4px (au lieu de 6px), `box-shadow` doux, hover `translateY(-1px)`
+- **Cards actives** `.ac` : structure 2 zones — `.ac-head` (badges + nom, fond teinté par statut) + `.ac-body` (progress + actions)
+- **Badges status** `.b` : `border-radius:5px`, typographie `var(--sans)`, couleurs plus douces
+- **Cartes alertes** `.late-bar` : layout grille `4px 1fr auto` — `.lb-stripe` + `.lb-body` (icon + info + over) + `.lb-actions`
+- **Section headers** `.sec-hdr2` : compteur en pill `background:rgba(255,255,255,.06)`, plus discret
+- **Animations** : `retardpulse` adapté au nouveau fond, `activepulse` mis à jour
 
 ### v1.58 — Chemin réseau auto + IndexedDB persistence
 - **`_tfNetPath`** / **`_tfNetFile`** : chemin par défaut `P:\Distribution\LOG_MTX3\Répertoires_nominatifs\Galaad Poivey` + nom `TruckFlow_sync.json`
