@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.61.html` | v1.61 | **Version courante** |
+| `TruckFlow_v1.62.html` | v1.62 | **Version courante** |
+| `TruckFlow_v1.61.html` | v1.61 | Archivé |
 | `TruckFlow_v1.60.html` | v1.60 | Archivé |
 | `TruckFlow_v1.59.html` | v1.59 | Archivé |
 | `TruckFlow_v1.58.html` | v1.58 | Archivé |
@@ -64,6 +65,7 @@ L'app est organisée en **8 onglets** :
 | `caserta` | Admin | Tout |
 | `mccormick` | Opérateur restreint | Camions + Import/Export/VL06O/Monitor |
 | `live` | Live Monitor | Monitor uniquement + sync réseau auto |
+| `transport` | Lecture seule | Camions/Planning/Stats/Archive + Monitor/Excel/PDF |
 
 > **Ajouter un compte** : modifier `_TF_AUTH_USERS` (~ligne 11059 dans v1.44) avec le hash SHA-256 du mot de passe.
 > Commande : `echo -n "motdepasse" | sha256sum`
@@ -99,6 +101,21 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.62 — Profil Transport + Overlay détail Monitor
+- **Compte `transport`** / mot de passe `camion` (SHA-256) — profil lecture seule
+- **Onglets visibles** : Camions, Planning, Statistiques, Archive (syn/liv/quai/emb masqués)
+- **Accès autorisé** : Mode Monitor, Excel, Rapport PDF
+- **Accès bloqué** : import VL06O, import session, export Partager, Mobile, Réseau, Undo, Journal, Réglages, Purger
+- **`switchTab` verrouillé** : seuls cam/plan/stat/arch accessibles
+- **`applyProfileRestrictions()`** refactorisé : branche `mccormick` + branche `transport` séparées
+- **IDs ajoutés** aux boutons header : `hdrBtnVL06O`, `hdrBtnSync`, `hdrBtnPartager`
+- **`openTruckDetail(tid)`** dans le Monitor `_js` : overlay glassmorphism centré, ouvert en cliquant sur `.tc-left`/`.tc-center` (cards attente) ou `.ac-head` (cards actives)
+  - Timeline timestamps verticale (ARR → QUAI → CHGT → FIN → DÉP) avec icônes et heures en grand
+  - Liste des livraisons avec destination, ville, palettes, colis
+  - Chips résumé (nb livraisons, palettes totales, colis totaux)
+  - Fermeture : bouton ✕ ou clic sur l'overlay
+  - Animation `_tdIn` : slide-up avec spring cubic-bezier
 
 ### v1.43 — Bug montage + Export auto
 - **Fix `toggleMontageGroup`** : le filtre de sélection de groupe respecte maintenant `_montageDateFilter` — évite de sélectionner les livraisons de toutes les dates d'un transporteur quand un filtre date est actif
