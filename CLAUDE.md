@@ -12,10 +12,10 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.49.html` | v1.49 | **Version courante** |
+| `TruckFlow_v1.50.html` | v1.50 | **Version courante** |
+| `TruckFlow_v1.49.html` | v1.49 | Archivé |
 | `TruckFlow_v1.48.html` | v1.48 | Archivé |
 | `TruckFlow_v1.47.html` | v1.47 | Archivé |
-| `TruckFlow_v1.46.html` | v1.46 | Archivé |
 | `TruckFlow_v1.45.html` | v1.45 | Archivé |
 | `TruckFlow_v1.44.html` | v1.44 | Archivé |
 
@@ -140,6 +140,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - `openTruckMonitor(opts)` modifié : si `live`, écrit dans `window` courant (pas de nouvelle fenêtre), injecte `_isLiveProfile=true`, titre `📡 TruckFlow Live`
 - Splash plein écran au démarrage : bouton unique "Choisir le fichier réseau" → `openNetworkMonitor()` → splash se ferme si connexion OK
 - Page transformée en Monitor pur, sans aucun accès à l'app principale
+
+### v1.50 — Fix timestamps sur date passée dans le Monitor
+- `_nowTs()` : helper Monitor qui retourne `_monDate + heure locale courante`
+- **Bug corrigé** : `stampM()` utilisait `new Date().toISOString().slice(0,10)` → remplacé par `_monDate`
+- **Bug corrigé** : `stamp()` (timestamp immédiat) utilisait `new Date().toISOString()` → remplacé par `_nowTs()`
+- **Bug corrigé** : `_stampDepNow()` utilisait `new Date().toISOString()` → remplacé par `_nowTs()`
+- Résultat : toute saisie dans le Monitor (manuelle ou auto) est enregistrée à la date sélectionnée dans `#monDateInp`
 
 ---
 
