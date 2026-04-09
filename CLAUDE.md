@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.55.html` | v1.55 | **Version courante** |
+| `TruckFlow_v1.56.html` | v1.56 | **Version courante** |
+| `TruckFlow_v1.55.html` | v1.55 | Archivé |
 | `TruckFlow_v1.54.html` | v1.54 | Archivé |
 | `TruckFlow_v1.53.html` | v1.53 | Archivé |
 | `TruckFlow_v1.52.html` | v1.52 | Archivé |
@@ -20,7 +21,6 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 | `TruckFlow_v1.50.html` | v1.50 | Archivé |
 | `TruckFlow_v1.49.html` | v1.49 | Archivé |
 | `TruckFlow_v1.48.html` | v1.48 | Archivé |
-| `TruckFlow_v1.47.html` | v1.47 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -168,6 +168,25 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
 - **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
 - `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
+
+### v1.56 — Glassmorphism WOW Monitor + Auto-propose réseau
+- **Glassmorphisme profond** sur les cartes `.tc` : `backdrop-filter:blur(16px)`, fond `rgba(10,18,34,.8)`, hover `rgba(14,26,50,.85)`
+- **Stripes statut 6px** avec `linear-gradient` + `box-shadow` glow coloré par statut (blue/purple/orange/green/red)
+- **Grille `.tc`** mise à jour : `grid-template-columns:6px 220px 1fr auto`
+- **`.tc-right`** flex column + `align-items:stretch` + `min-width:155px` définis en CSS (plus d'inline style)
+- **Clock 44px weight 100** avec double glow vert `text-shadow:0 0 40px rgba(0,230,118,.7),0 0 80px rgba(0,230,118,.3)`
+- **Header glass** : `backdrop-filter:saturate(200%) blur(32px)`, `box-shadow:0 4px 32px rgba(0,0,0,.5)`, hauteur 64px
+- **`.pd.done`** : glow vert `box-shadow:0 0 10px rgba(0,200,83,.4)`
+- **`.tc-ts.filled`** : chip verre (fond + bordure verte subtile)
+- **`.tc-timer`** : glows colorés par statut `ok/warn/hot`
+- **`.act:hover`** : `box-shadow:0 0 16px currentColor`
+- **`.ac`** glassmorphisme : `backdrop-filter:blur(12px)`, fond `rgba(10,18,34,.8)`
+- **`.late-bar`** : `backdrop-filter:blur(8px)` + `box-shadow` inset rouge
+- **`.lb-over`** : glow rouge `box-shadow + text-shadow`
+- **`#toast`** : glassmorphisme `backdrop-filter:blur(24px)`, `border-radius:10px`, `cubic-bezier` spring animation
+- **Orbs** : plus grands (700/600/450px) et plus vifs
+- **`--sf2` + `--glass`** CSS vars définis dans `:root`
+- **Auto-propose réseau** : overlay bottom-right affiché 1s après ouverture Monitor (utilisateurs non-live) — "📡 Connexion" / "Plus tard", auto-disparaît après 8s. Fonctions : `_autoPropose()` dans le bloc `else` du splash live
 
 ### v1.55 — Redesign Monitor style TMS Operations Center
 - Refonte complète du CSS Monitor : palette sombre `#060a12`, grille CSS `body::before` (40×40px)
