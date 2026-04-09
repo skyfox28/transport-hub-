@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.54.html` | v1.54 | **Version courante** |
+| `TruckFlow_v1.55.html` | v1.55 | **Version courante** |
+| `TruckFlow_v1.54.html` | v1.54 | Archivé |
 | `TruckFlow_v1.53.html` | v1.53 | Archivé |
 | `TruckFlow_v1.52.html` | v1.52 | Archivé |
 | `TruckFlow_v1.51.html` | v1.51 | Archivé |
@@ -167,6 +168,18 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
 - **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
 - `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
+
+### v1.55 — Redesign Monitor style TMS Operations Center
+- Refonte complète du CSS Monitor : palette sombre `#060a12`, grille CSS `body::before` (40×40px)
+- Police `'SF Mono','Fira Code','Consolas',monospace` sur tout le Monitor (look terminal TMS)
+- Cartes en attente : layout grille `grid-template-columns:4px 220px 1fr auto` (`.tc`)
+  - `.tc-stripe` (4px colorée par statut) + `.tc-left` (badges/nom/dest) + `.tc-center` (progress + timestamps row) + `.tc-right` (timer + bouton)
+  - `.tc-ts-row` : chips timestamp `ARR / QUAI / CHGT / FIN / DÉP` avec label uppercase
+  - `.tc-timer` : chrono en cours `ok/warn/hot` (vert/ambre/orange)
+- Cartes actives `.ac` (grille 4 colonnes) : mini progress dots `.mpd` + étiquettes + timestamps
+- Strips attente remplacés par `makeCard()` (layout `.tc` complet)
+- `makeActiveCard()` COMPANS : correction utilisation `.ac` au lieu de `.mac` (classe inexistante)
+- Clock 40px, glow vert `rgba(0,230,118,.25)`
 
 ### v1.54 — Redesign visuel du Monitor
 - Refonte complète du CSS Monitor : fond plus sombre `#07090f`, orbs plus grands et plus diffus
