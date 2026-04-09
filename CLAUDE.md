@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.57.html` | v1.57 | **Version courante** |
+| `TruckFlow_v1.58.html` | v1.58 | **Version courante** |
+| `TruckFlow_v1.57.html` | v1.57 | Archivé |
 | `TruckFlow_v1.56.html` | v1.56 | Archivé |
 | `TruckFlow_v1.55.html` | v1.55 | Archivé |
 | `TruckFlow_v1.54.html` | v1.54 | Archivé |
@@ -21,7 +22,6 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 | `TruckFlow_v1.51.html` | v1.51 | Archivé |
 | `TruckFlow_v1.50.html` | v1.50 | Archivé |
 | `TruckFlow_v1.49.html` | v1.49 | Archivé |
-| `TruckFlow_v1.48.html` | v1.48 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -169,6 +169,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
 - **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
 - `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
+
+### v1.58 — Chemin réseau auto + IndexedDB persistence
+- **`_tfNetPath`** / **`_tfNetFile`** : chemin par défaut `P:\Distribution\LOG_MTX3\Répertoires_nominatifs\Galaad Poivey` + nom `TruckFlow_sync.json`
+- **Auto-reconnexion IndexedDB** : `_idbHandle()` (main) / `_idbHandleMon()` (Monitor) — `FileSystemFileHandle` persisté entre sessions
+- **Modal helper** : affiche le chemin préconfiguré + bouton 📋 Copier (presse-papiers) + bouton Choisir le fichier + Annuler
+- **`openNetworkSync()`** modifié : tente IDB auto → si échec, affiche modal helper → file picker
+- **`openNetworkMonitor()`** modifié : même logique (IDB auto → modal → picker)
+- Fallback manuel si permission refusée ou handle expiré
 
 ### v1.56 — Glassmorphism WOW Monitor + Auto-propose réseau
 - **Glassmorphisme profond** sur les cartes `.tc` : `backdrop-filter:blur(16px)`, fond `rgba(10,18,34,.8)`, hover `rgba(14,26,50,.85)`
