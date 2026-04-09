@@ -12,12 +12,12 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.48.html` | v1.48 | **Version courante** |
+| `TruckFlow_v1.49.html` | v1.49 | **Version courante** |
+| `TruckFlow_v1.48.html` | v1.48 | Archivé |
 | `TruckFlow_v1.47.html` | v1.47 | Archivé |
 | `TruckFlow_v1.46.html` | v1.46 | Archivé |
 | `TruckFlow_v1.45.html` | v1.45 | Archivé |
 | `TruckFlow_v1.44.html` | v1.44 | Archivé |
-| `TruckFlow_v1.43.html` | v1.43 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -55,7 +55,8 @@ L'app est organisée en **8 onglets** :
 |------------|------|-------|
 | `galaad` | Admin | Tout |
 | `caserta` | Admin | Tout |
-| `mccormick` | Opérateur restreint | Voir ci-dessous |
+| `mccormick` | Opérateur restreint | Camions + Import/Export/VL06O/Monitor |
+| `live` | Live Monitor | Monitor uniquement + sync réseau auto |
 
 > **Ajouter un compte** : modifier `_TF_AUTH_USERS` (~ligne 11059 dans v1.44) avec le hash SHA-256 du mot de passe.
 > Commande : `echo -n "motdepasse" | sha256sum`
@@ -130,6 +131,15 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - `_pollNetFile()` : poll toutes les 10s, met à jour localStorage puis appelle `render()`
 - Indicateur visuel (point vert/rouge animé) dans les deux interfaces
 - McCormick ne voit pas le bouton `📡 Réseau` (ajouté à `applyProfileRestrictions`)
+
+### v1.49 — Profil Live Monitor
+- Compte `live` / mot de passe `1963` — hash identique à caserta/mccormick
+- `_TF_LIVE_PROFILES = ['live']` : liste des profils qui ouvrent directement le Monitor
+- Login `live` → `tfRunApp()` détecte le profil → appelle `openLiveMonitor()`
+- `openLiveMonitor()` : appelle `openTruckMonitor({live:true})`
+- `openTruckMonitor(opts)` modifié : si `live`, écrit dans `window` courant (pas de nouvelle fenêtre), injecte `_isLiveProfile=true`, titre `📡 TruckFlow Live`
+- Splash plein écran au démarrage : bouton unique "Choisir le fichier réseau" → `openNetworkMonitor()` → splash se ferme si connexion OK
+- Page transformée en Monitor pur, sans aucun accès à l'app principale
 
 ---
 
