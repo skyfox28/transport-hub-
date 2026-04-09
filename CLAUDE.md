@@ -12,14 +12,14 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.52.html` | v1.52 | **Version courante** |
+| `TruckFlow_v1.53.html` | v1.53 | **Version courante** |
+| `TruckFlow_v1.52.html` | v1.52 | Archivé |
 | `TruckFlow_v1.51.html` | v1.51 | Archivé |
 | `TruckFlow_v1.50.html` | v1.50 | Archivé |
 | `TruckFlow_v1.49.html` | v1.49 | Archivé |
 | `TruckFlow_v1.48.html` | v1.48 | Archivé |
 | `TruckFlow_v1.47.html` | v1.47 | Archivé |
 | `TruckFlow_v1.45.html` | v1.45 | Archivé |
-| `TruckFlow_v1.44.html` | v1.44 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -149,6 +149,24 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - **Bug corrigé** : `stamp()` (timestamp immédiat) utilisait `new Date().toISOString()` → remplacé par `_nowTs()`
 - **Bug corrigé** : `_stampDepNow()` utilisait `new Date().toISOString()` → remplacé par `_nowTs()`
 - Résultat : toute saisie dans le Monitor (manuelle ou auto) est enregistrée à la date sélectionnée dans `#monDateInp`
+
+### v1.51 — Saisie manuelle via modal (Monitor)
+- Remplacement de l'inline `.man` div dans le Monitor par un modal centré
+- `openManualModal(tid,k)` / `confirmManualModal()` / `closeManualModal()` dans le JS Monitor
+- Modal : overlay sombre, input `type=time` 32px, bouton gradient Confirmer
+
+### v1.52 — Saisie manuelle via modal (onglet Camions)
+- `_openTsModal(truckName,label,icon,currentReal,onConfirm)` : fonction globale pour modal timestamp
+- `_buildEditRow()` et handler `finManEl` migrent vers `_openTsModal()` au lieu de l'inline input
+- Même UX que le Monitor : overlay + time picker centré
+
+### v1.53 — Corrections profil Live
+- **Fix `tfLogin()`** : login `live` n'affiche plus le modal import session — appelle directement `openLiveMonitor()`
+- **Monitor lecture seule** : `makeCard()`, `makeActiveCard()`, `makeStrip()`, `makeLateBar()` suppriment les boutons d'action quand `_isLiveProfile===true` (ni timestamp, ni annulation, ni heure manuelle)
+- **Badge LECTURE SEULE** : bandeau bleu dans le header Monitor pour le profil live
+- **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
+- **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
+- `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
 
 ---
 
