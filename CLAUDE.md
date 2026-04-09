@@ -12,14 +12,14 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.53.html` | v1.53 | **Version courante** |
+| `TruckFlow_v1.54.html` | v1.54 | **Version courante** |
+| `TruckFlow_v1.53.html` | v1.53 | Archivé |
 | `TruckFlow_v1.52.html` | v1.52 | Archivé |
 | `TruckFlow_v1.51.html` | v1.51 | Archivé |
 | `TruckFlow_v1.50.html` | v1.50 | Archivé |
 | `TruckFlow_v1.49.html` | v1.49 | Archivé |
 | `TruckFlow_v1.48.html` | v1.48 | Archivé |
 | `TruckFlow_v1.47.html` | v1.47 | Archivé |
-| `TruckFlow_v1.45.html` | v1.45 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -167,6 +167,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 - **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
 - **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
 - `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
+
+### v1.54 — Redesign visuel du Monitor
+- Refonte complète du CSS Monitor : fond plus sombre `#07090f`, orbs plus grands et plus diffus
+- Glassmorphism renforcé sur les cartes `.tc` : `backdrop-filter:blur(20px)`, border-radius 22px, double pseudo-élément `::before/::after` pour highlight top + gradient interne
+- Progress dots plus grands (30px), glow vert sur `.done`, glow bleu sur `.active`
+- Boutons d'action `.act` : gradient + `box-shadow` coloré selon l'étape, hover avec glow amplifié
+- Header : `saturate(200%) blur(32px)`, shadow portée profonde, clock 52px weight 100
+- Cartes compactes `.ac` (grille active) : bordures et box-shadows colorés selon statut
+- Strips en attente : border-radius 11px, transitions sur border-color
+- Splash profil live : redesigné avec glass button et drop-shadow emoji
+- Barre retard `.late-bar` : glow rouge, border coloré
 
 ---
 
