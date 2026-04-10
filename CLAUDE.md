@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.66.html` | v1.66 | **Version courante** |
+| `TruckFlow_v1.67.html` | v1.67 | **Version courante** |
+| `TruckFlow_v1.66.html` | v1.66 | Archivé |
 | `TruckFlow_v1.65.html` | v1.65 | Archivé |
 | `TruckFlow_v1.64.html` | v1.64 | Archivé |
 | `TruckFlow_v1.63.html` | v1.63 | Archivé |
@@ -105,6 +106,15 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.67 — Correctifs Monitor TFE
+- **Fix `makeActiveCard()` TFE** : les TFE avec arrivée enregistrée (section "Actifs") affichaient encore les 5 étapes — branche TFE ajoutée (fusionnée avec COMPANS) : ARR+DÉP uniquement, badge cyan 🚌, nom `Tour N°X`, durée auto
+
+### v1.66 — TFE Monitor + Overlay livraisons + Stats référence + Excel TFE
+- **Overlay Monitor** : numéro de livraison (N° id) affiché pour chaque livraison + état ✅/⏳/🔧 par livraison
+- **Monitor TFE** : `makeCard()` branche TFE (cyan, ARR+DÉP, Tour N°, durée) ; `render()` routing TFE comme COMPANS ; `updateKPIs()` KPI cyan 🚌 Tours TFE séparé
+- **Stats TFE** : planning de référence `_TFE_PLAN` (T1: 10:30/11:30 · T2: 14:00/15:00 · T3: 17:00/18:00) ; tableau détail avec colonnes Réf./Δ colorées
+- **Excel** : onglet `Tours TFE` dans export jour et semaine (Date/Tour/Quai/Arr réelle/Réf/Δ/Dép réel/Réf/Δ/Durée)
 
 ### v1.65 — Correctifs UX
 - **Suppression modal palettes au départ** : `stampNow` (main app) et `stamp()` (Monitor) stampent le DEP directement sans demander SOL/PRISES/POSÉES
