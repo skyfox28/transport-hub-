@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.63.html` | v1.63 | **Version courante** |
+| `TruckFlow_v1.64.html` | v1.64 | **Version courante** |
+| `TruckFlow_v1.63.html` | v1.63 | Archivé |
 | `TruckFlow_v1.62.html` | v1.62 | Archivé |
 | `TruckFlow_v1.61.html` | v1.61 | Archivé |
 | `TruckFlow_v1.60.html` | v1.60 | Archivé |
@@ -102,6 +103,19 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.64 — Type TFE + Suppression onglet Emballages
+- **Onglet Emballages supprimé** : bouton tab, panel, `renderEmballages()` et toutes fonctions `_emb*` retirés ; `tabIds` mis à jour
+- **Type TFE** : camion tournée avec uniquement Arrivée + Départ, numéro de tour auto-incrémenté par jour (repart à 1 chaque matin), quai Q10 ou Q11 (choix libre), un seul TFE actif à la fois par jour
+  - `openTFEForm()` : modal de création avec sélection quai (Q10/Q11), calcul automatique du numéro de tour
+  - `confirmTFE(tourNum, quai)` : crée le truck `type:'tfe'`, assigne le quai, log activité
+  - `_renderTFETruckCard()` : carte dédiée (cyan), badge Tour N°, badge quai, chips ARR+DÉP, durée auto si les deux timestamps sont présents, boutons lock/delete, lecture seule si `_tfReadOnlyProfile`
+  - `renderTrucks()` : dispatch `type==='tfe'` → `_renderTFETruckCard` avant COMPANS
+  - `stampNow()` patché : TFE stampe directement (pas de modal arr_pret ni palettes)
+  - `cleanCompletedTrucks()` : archive `type` + `tour` dans `_completedTrucks`
+  - `computeTimingStats()` : TFE exclu des stats camions standards (comme COMPANS)
+- **Stats TFE** dans l'onglet Statistiques : KPIs (total tours, tours aujourd'hui, durée moy/min/max), comparatif par jour, tableau détaillé Date/Tour/Quai/Arrivée/Départ/Durée, bouton **Export CSV TFE**
+- **Profil transport** : boutons `+ COMPANS` et `+ TFE` masqués (IDs `camBtnCompans`, `camBtnTFE`)
 
 ### v1.63 — Lecture seule Transport + Bouton Monitor + Fix late-bar click
 - **Profil `transport` onglet Camions — lecture seule totale** :
