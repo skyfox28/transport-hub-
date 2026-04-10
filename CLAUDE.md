@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.64.html` | v1.64 | **Version courante** |
+| `TruckFlow_v1.65.html` | v1.65 | **Version courante** |
+| `TruckFlow_v1.64.html` | v1.64 | Archivé |
 | `TruckFlow_v1.63.html` | v1.63 | Archivé |
 | `TruckFlow_v1.62.html` | v1.62 | Archivé |
 | `TruckFlow_v1.61.html` | v1.61 | Archivé |
@@ -103,6 +104,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.65 — Correctifs UX
+- **Suppression modal palettes au départ** : `stampNow` (main app) et `stamp()` (Monitor) stampent le DEP directement sans demander SOL/PRISES/POSÉES
+- **Fix badge motif retard** : `autoUpdateAllPret()` préserve désormais le motif saisi manuellement (`arr_motif`) — ne l'écrase plus avec `retard_silo` si le camion a déjà un motif enregistré à l'arrivée ; le motif est seulement effacé quand le camion devient "prêt"
+- **Badge live connectés** : `#hdrLiveBadge` (cyan, dot pulsant) dans le header — visible uniquement pour `galaad`, indique le nombre de fenêtres Monitor actives via BroadcastChannel presence ping/pong toutes les 8s
 
 ### v1.64 — Type TFE + Suppression onglet Emballages
 - **Onglet Emballages supprimé** : bouton tab, panel, `renderEmballages()` et toutes fonctions `_emb*` retirés ; `tabIds` mis à jour
