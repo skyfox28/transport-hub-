@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.62.html` | v1.62 | **Version courante** |
+| `TruckFlow_v1.63.html` | v1.63 | **Version courante** |
+| `TruckFlow_v1.62.html` | v1.62 | Archivé |
 | `TruckFlow_v1.61.html` | v1.61 | Archivé |
 | `TruckFlow_v1.60.html` | v1.60 | Archivé |
 | `TruckFlow_v1.59.html` | v1.59 | Archivé |
@@ -101,6 +102,16 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.63 — Lecture seule Transport + Bouton Monitor + Fix late-bar click
+- **Profil `transport` onglet Camions — lecture seule totale** :
+  - `_tfReadOnlyProfile=true` activé dans `applyProfileRestrictions()` pour `transport`
+  - `makeTsChip` : boutons Pointer, Heure manuelle, Saisir, ✎/🗑 masqués ; fin_chg (Arrêter chargement, Heure manuelle, clear) masqués
+  - `renderTrucks` : splitBtn, lockBtn, delBtn, decBtn masqués ; dateInp readonly ; créneau non cliquable ; badge Prêt et badge Décalage non cliquables
+  - `_renderCompansTruckCard` : qBadge non cliquable, qAssignBtn masqué, dateInp readonly, lockBtn/delBtn masqués
+- **Cadences masquées pour `transport`** : `id="hdrCadSilo"` et `id="hdrCadPick"` ajoutés aux `.cad-group`, cachés via `applyProfileRestrictions()`
+- **Bouton Monitor dans le header** : `id="hdrBtnMonitor"` ajouté à la barre du haut (visible tous profils sauf live qui n'a pas de header), remplace l'entrée du menu ⋯ comme point d'accès principal
+- **Fix Monitor late-bar** : clic sur `.lb-body` ouvre `openTruckDetail(tid)` ; le bouton Arrivée dans `.lb-actions` reçoit `event.stopPropagation()` pour éviter le conflit
 
 ### v1.62 — Profil Transport + Overlay détail Monitor
 - **Compte `transport`** / mot de passe `camion` (SHA-256) — profil lecture seule
