@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.68.html` | v1.68 | **Version courante** |
+| `TruckFlow_v1.69.html` | v1.69 | **Version courante** |
+| `TruckFlow_v1.68.html` | v1.68 | Archivé |
 | `TruckFlow_v1.67.html` | v1.67 | Archivé |
 | `TruckFlow_v1.66.html` | v1.66 | Archivé |
 | `TruckFlow_v1.65.html` | v1.65 | Archivé |
@@ -107,6 +108,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.69 — TFE saisie heure manuelle + création depuis Monitor
+- **Heure d'arrivée manuelle** : le modal `openTFEArrModal` (onglet Camions) inclut désormais un champ `input[type=time]` pré-rempli à l'heure courante — `confirmTFEArr()` utilise cette valeur si renseignée, sinon `_nowIso()`
+- **Création TFE depuis le Monitor** : le placeholder "En attente d'arrivée" dans le Monitor appelle désormais `openTFEMonModal()` — modal identique (Tour N°, Heure d'arrivée, Quai Q10/Q11) qui crée le truck dans localStorage, assigne le quai et stampe l'arrivée sans quitter le Monitor
+- Départ TFE depuis le Monitor : déjà opérationnel via le bouton "🚀 Départ" + "✎ Heure manuelle" sur les cartes actives
 
 ### v1.68 — TFE simplifié : arrivée directe + carte toujours présente
 - **Flux TFE simplifié** : le bouton `🚌 Arrivée TFE` ouvre un modal demandant Tour N° (pré-rempli, modifiable) + Quai → crée le camion ET stampe l'arrivée en une seule action (`openTFEArrModal` / `confirmTFEArr`)
