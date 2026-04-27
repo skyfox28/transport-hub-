@@ -2,82 +2,318 @@
 
 ## Projet
 
-Application web monofichier HTML : **`truckflow_2058.html`** (~7800 lignes, ~220 fonctions)
-Outil de gestion logistique d'un hub de transport (quais, camions, livraisons).
-**Version Alpha** — Auteur : Galaad Poivey — Développé avec Claude (Anthropic)
+Application web monofichier HTML — outil de gestion logistique d'un hub de transport (quais, camions, livraisons).
+**Auteur** : Galaad Poivey — Développé avec Claude (Anthropic)
 **Écran cible** : 24 pouces (1920×1080) — layout optimisé `max-width:1920px`
+
+---
+
+## Fichier actif
+
+| Fichier | Version | État |
+|---------|---------|------|
+| `TruckFlow_v1.69.html` | v1.69 | **Version courante** |
+| `TruckFlow_v1.68.html` | v1.68 | Archivé |
+| `TruckFlow_v1.67.html` | v1.67 | Archivé |
+| `TruckFlow_v1.66.html` | v1.66 | Archivé |
+| `TruckFlow_v1.65.html` | v1.65 | Archivé |
+| `TruckFlow_v1.64.html` | v1.64 | Archivé |
+| `TruckFlow_v1.63.html` | v1.63 | Archivé |
+| `TruckFlow_v1.62.html` | v1.62 | Archivé |
+| `TruckFlow_v1.61.html` | v1.61 | Archivé |
+| `TruckFlow_v1.60.html` | v1.60 | Archivé |
+| `TruckFlow_v1.59.html` | v1.59 | Archivé |
+| `TruckFlow_v1.58.html` | v1.58 | Archivé |
+| `TruckFlow_v1.57.html` | v1.57 | Archivé |
+| `TruckFlow_v1.56.html` | v1.56 | Archivé |
+| `TruckFlow_v1.55.html` | v1.55 | Archivé |
+| `TruckFlow_v1.54.html` | v1.54 | Archivé |
+| `TruckFlow_v1.53.html` | v1.53 | Archivé |
+| `TruckFlow_v1.52.html` | v1.52 | Archivé |
+| `TruckFlow_v1.51.html` | v1.51 | Archivé |
+| `TruckFlow_v1.50.html` | v1.50 | Archivé |
+| `TruckFlow_v1.49.html` | v1.49 | Archivé |
+
+> **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
 ---
 
 ## Structure de l'application HTML
 
-L'app est organisée en **7 onglets principaux** :
+L'app est organisée en **8 onglets** :
 
-| Onglet | Description |
-|--------|-------------|
-| **Synthèse** | KPIs globaux, ponctualité, vue semaine/jour (cartes glass individuelles), cadences |
-| **Livraisons** | Recherche, filtres, détail articles par livraison |
-| **Camions** | Filtres (ponctualité, période, statut "en cours"), timestamps, créneaux, split, verrouillage, indépendant des reimports VL06O |
-| **Planning** | Timeline 5h-22h, assignation créneaux, lien vers camion |
-| **Plan de quai** | Layout visuel Q2→Q11 + Allées + Épis, assignation statuts, flux manuels (en développement) |
-| **Statistiques** | Ponctualité, temps entre étapes, comparatif par jour, comparatif transporteurs (lit données live + archivées) |
-| **Archive** | Camions terminés consultables (10 jours de rétention), détail livraisons, timestamps, ponctualité |
-
-### Fonctionnalités clés
-- **Import VL06O** : import de données SAP, colonnes détectées automatiquement, validation erreurs
-- **Partage & Export** : sauvegarde JSON (inclut archive), sync entre onglets (BroadcastChannel), export Excel, purge détaillée
-- **Workflow quotidien** : 6 étapes (import → synthèse → assignation quai → suivi → export → purge)
-- **Notifications** : alertes retard camion + chargement long, seuils configurables, son optionnel, checker démarré dès init()
-- **Verrouillage** : figer camions + livraisons, préservation temporalité
-- **Indépendance camions** : les camions avec timestamps conservent leurs livraisons même absentes du reimport VL06O
-- **Archive camions terminés** : `_completedTrucks[]` avec rétention 10 jours, inclus dans export/import session, stats lisent live + archivé
-- **Suivi activité** : cadences sortie silo (pal/h) et ramasse colis (col/h)
-- **Dashboard briefing** : récapitulatif automatique après import VL06O
-- **Barre de progression** : % camions terminés dans le header
-- **Journal d'activité** : historique horodaté de toutes les actions
-- **Drag & drop** : déplacer livraisons entre camions visuellement
-- **Mode compact** : cartes camion réduites à une ligne
-- **Auto-refresh** : mise à jour des chronos toutes les 30 secondes + couleurs camions toutes les 5 secondes
-- **Animations** : flash vert à la complétion d'un camion
-- **Tooltips KPI** : détails enrichis au survol des indicateurs
-- **Thème clair/sombre** : toggle avec persistance localStorage
-- **Recherche globale** : livraisons et camions depuis le header
-- **ETA camions** : estimation heure de départ basée sur les temps moyens historiques
-- **Gantt interactif** : barres de progression réelles sur le planning
-- **Raccourcis clavier** : navigation rapide (1-7 onglets, Ctrl+F, Ctrl+Z, C, T, ?)
-- **Mode TV** : affichage grandes polices pour écran mural
-- **Rapport PDF** : génération rapport complet imprimable
-- **Sparklines** : mini-graphiques tendance 7 jours sur les KPIs
-- **Scoring transporteurs** : note pondérée ponctualité/temps chargement (5 étoiles)
-- **Heatmap horaire** : carte de chaleur occupation jour×heure
-- **Système Undo** : annulation des dernières actions (Ctrl+Z)
-- **Notes camions** : commentaires libres par camion avec persistance
-- **Filtre avancé** : multi-critères (transporteur, période, ponctualité, statut "en cours", quai)
-- **Archive quotidienne** : export/import fichier JSON séparé (90 jours max), auto-archivage avant chaque import VL06O
-- **Prédiction retard** : badge de risque sur les camions basé sur l'historique transporteur + créneau
-- **Comparatif semaine** : KPIs semaine actuelle vs précédente avec deltas colorés
-- **Temps optimal quai** : classement des quais par temps de rotation moyen
-- **Alerte surcharge créneau** : détection temps réel des créneaux à 70%+ de capacité
-- **Vue Kanban** : colonnes En attente → Arrivé → À quai → En chargement → Parti
-- **Timeline verticale** : frise chronologique détaillée par camion avec durées inter-étapes
-- **Export rapport email** : copie texte formaté dans le presse-papier (touche E)
-- **Checklist de clôture** : vérification fin de journée avec auto-détection
-- **Marqueur priorité** : étiquettes Urgent / Normal / Flexible par camion
-- **Courbe tendance ponctualité** : graphique SVG sur 30 jours depuis l'archive
-- **Top 3 / Flop 3 transporteurs** : podium visuel basé sur l'historique archivé
-- **Compteurs temps réel** : widgets sur site / en attente / en chargement / partis
-- **Templates créneaux** : sauvegarder et réappliquer des configurations types de journée
+| ID tab | Onglet | Description |
+|--------|--------|-------------|
+| `syn` | **Synthèse** | KPIs globaux, ponctualité, vue semaine/jour, cadences |
+| `liv` | **Livraisons** | Recherche, filtres, détail articles par livraison |
+| `cam` | **Camions** | Timestamps, créneaux, split, verrouillage, mode montage |
+| `plan` | **Planning** | Timeline 5h-22h, assignation créneaux, Gantt |
+| `quai` | **Plan de quai** | Layout visuel Q2→Q11 + Allées + Épis |
+| `stat` | **Statistiques** | Ponctualité, comparatif transporteurs, heatmap |
+| `arch` | **Archive** | Camions terminés (10 jours rétention) |
+| `emb` | **Emballages** | Suivi emballages |
 
 ---
 
-## Design & Layout
+## Système d'authentification (v1.44)
 
-- **Liquid Glassmorphism** : `backdrop-filter:saturate(200%) blur(28px)`, bordures cyan `rgba(160,210,255,.18)`, gradient surfaces, `--glass-glow` inner glow 4 côtés
-- **4 orbs animés** : Blue 1000px, Violet 900px, Cyan 700px, Amber 600px, blur 80px sur fond `#0d1117`
-- **Layout 24"** : `.main` max-width 1920px, `.hdr-in` / `.tabs-in` max-width 1920px
-- **Vue Semaine & Vue Jour** : même pattern de cartes glass individuelles (`.syn-ponct` conteneur + `.spc` cartes en grille)
-- **Classe utilitaire `.glass-panel`** : panneau glass réutilisable avec `::before` lumineux
-- **Grille KPI jour** : `repeat(5,1fr)` par défaut, responsive 3 cols sous 1200px, 2 cols sous 700px
+### Fonctionnement
+- Écran de login plein-écran à l'ouverture (`#auth-overlay`)
+- Hash SHA-256 des mots de passe — jamais stockés en clair
+- `sessionStorage.tf_auth = '1'` après login
+- `sessionStorage.tf_user = '<username>'` stocke l'utilisateur connecté
+- Purge automatique des données localStorage à la fermeture
+
+### Comptes existants
+
+| Utilisateur | Rôle | Accès |
+|------------|------|-------|
+| `galaad` | Admin | Tout |
+| `caserta` | Admin | Tout |
+| `mccormick` | Opérateur restreint | Camions + Import/Export/VL06O/Monitor |
+| `live` | Live Monitor | Monitor uniquement + sync réseau auto |
+| `transport` | Lecture seule | Camions/Planning/Stats/Archive + Monitor/Excel/PDF |
+
+> **Ajouter un compte** : modifier `_TF_AUTH_USERS` (~ligne 11059 dans v1.44) avec le hash SHA-256 du mot de passe.
+> Commande : `echo -n "motdepasse" | sha256sum`
+
+> **Ajouter un profil restreint** : ajouter le username dans `_TF_RESTRICTED_PROFILES` (tableau juste après `_TF_AUTH_USERS`).
+
+### Profil McCormick (opérateur restreint)
+- **Onglets visibles** : Camions uniquement (tous les autres masqués)
+- **Fonctions autorisées** :
+  - Import VL06O (bouton `↑ VL06O`)
+  - Import session (bouton `↑ Sync`)
+  - Export session (bouton `↓ Partager`)
+  - Mode Monitor (dans le menu `⋯`)
+- **Fonctions masquées** :
+  - Onglets : Synthèse, Livraisons, Planning, Plan de quai, Stats, Archive, Emballages
+  - Boutons header : Mobile, Excel, Rapport
+  - Menu `⋯` : Journal d'activité, Réglages alertes, Purger les données
+- **Badge** : affiche `MCCORMICK` en bleu dans le header
+- **switchTab verrouillé** : seul l'onglet `cam` est accessible programmatiquement
+
+### Fonctions clés auth
+```
+tfLogin()              — vérifie username + hash pwd, stocke tf_auth + tf_user
+tfRunApp()             — démarre l'app (init + restrictions)
+applyProfileRestrictions() — applique le masquage selon tf_user
+tfChooseImportSession() — post-login : importer session JSON
+tfChooseImportVL06O()  — post-login : importer VL06O
+tfChooseFresh()        — post-login : session vierge
+tfShowQuitModal()      — modal quitter + exporter
+tfPurgeAndQuit()       — purge localStorage + reload
+```
+
+---
+
+## Fonctionnalités récentes (depuis v1.42)
+
+### v1.69 — TFE saisie heure manuelle + création depuis Monitor
+- **Heure d'arrivée manuelle** : le modal `openTFEArrModal` (onglet Camions) inclut désormais un champ `input[type=time]` pré-rempli à l'heure courante — `confirmTFEArr()` utilise cette valeur si renseignée, sinon `_nowIso()`
+- **Création TFE depuis le Monitor** : le placeholder "En attente d'arrivée" dans le Monitor appelle désormais `openTFEMonModal()` — modal identique (Tour N°, Heure d'arrivée, Quai Q10/Q11) qui crée le truck dans localStorage, assigne le quai et stampe l'arrivée sans quitter le Monitor
+- Départ TFE depuis le Monitor : déjà opérationnel via le bouton "🚀 Départ" + "✎ Heure manuelle" sur les cartes actives
+
+### v1.68 — TFE simplifié : arrivée directe + carte toujours présente
+- **Flux TFE simplifié** : le bouton `🚌 Arrivée TFE` ouvre un modal demandant Tour N° (pré-rempli, modifiable) + Quai → crée le camion ET stampe l'arrivée en une seule action (`openTFEArrModal` / `confirmTFEArr`)
+- **Carte TFE toujours présente** : si aucun TFE actif aujourd'hui, un placeholder "En attente d'arrivée" s'affiche en tête de liste dans l'onglet Camions et dans le Monitor
+
+### v1.67 — Correctifs Monitor TFE
+- **Fix `makeActiveCard()` TFE** : les TFE avec arrivée enregistrée (section "Actifs") affichaient encore les 5 étapes — branche TFE ajoutée (fusionnée avec COMPANS) : ARR+DÉP uniquement, badge cyan 🚌, nom `Tour N°X`, durée auto
+
+### v1.66 — TFE Monitor + Overlay livraisons + Stats référence + Excel TFE
+- **Overlay Monitor** : numéro de livraison (N° id) affiché pour chaque livraison + état ✅/⏳/🔧 par livraison
+- **Monitor TFE** : `makeCard()` branche TFE (cyan, ARR+DÉP, Tour N°, durée) ; `render()` routing TFE comme COMPANS ; `updateKPIs()` KPI cyan 🚌 Tours TFE séparé
+- **Stats TFE** : planning de référence `_TFE_PLAN` (T1: 10:30/11:30 · T2: 14:00/15:00 · T3: 17:00/18:00) ; tableau détail avec colonnes Réf./Δ colorées
+- **Excel** : onglet `Tours TFE` dans export jour et semaine (Date/Tour/Quai/Arr réelle/Réf/Δ/Dép réel/Réf/Δ/Durée)
+
+### v1.65 — Correctifs UX
+- **Suppression modal palettes au départ** : `stampNow` (main app) et `stamp()` (Monitor) stampent le DEP directement sans demander SOL/PRISES/POSÉES
+- **Fix badge motif retard** : `autoUpdateAllPret()` préserve désormais le motif saisi manuellement (`arr_motif`) — ne l'écrase plus avec `retard_silo` si le camion a déjà un motif enregistré à l'arrivée ; le motif est seulement effacé quand le camion devient "prêt"
+- **Badge live connectés** : `#hdrLiveBadge` (cyan, dot pulsant) dans le header — visible uniquement pour `galaad`, indique le nombre de fenêtres Monitor actives via BroadcastChannel presence ping/pong toutes les 8s
+
+### v1.64 — Type TFE + Suppression onglet Emballages
+- **Onglet Emballages supprimé** : bouton tab, panel, `renderEmballages()` et toutes fonctions `_emb*` retirés ; `tabIds` mis à jour
+- **Type TFE** : camion tournée avec uniquement Arrivée + Départ, numéro de tour auto-incrémenté par jour (repart à 1 chaque matin), quai Q10 ou Q11 (choix libre), un seul TFE actif à la fois par jour
+  - `openTFEForm()` : modal de création avec sélection quai (Q10/Q11), calcul automatique du numéro de tour
+  - `confirmTFE(tourNum, quai)` : crée le truck `type:'tfe'`, assigne le quai, log activité
+  - `_renderTFETruckCard()` : carte dédiée (cyan), badge Tour N°, badge quai, chips ARR+DÉP, durée auto si les deux timestamps sont présents, boutons lock/delete, lecture seule si `_tfReadOnlyProfile`
+  - `renderTrucks()` : dispatch `type==='tfe'` → `_renderTFETruckCard` avant COMPANS
+  - `stampNow()` patché : TFE stampe directement (pas de modal arr_pret ni palettes)
+  - `cleanCompletedTrucks()` : archive `type` + `tour` dans `_completedTrucks`
+  - `computeTimingStats()` : TFE exclu des stats camions standards (comme COMPANS)
+- **Stats TFE** dans l'onglet Statistiques : KPIs (total tours, tours aujourd'hui, durée moy/min/max), comparatif par jour, tableau détaillé Date/Tour/Quai/Arrivée/Départ/Durée, bouton **Export CSV TFE**
+- **Profil transport** : boutons `+ COMPANS` et `+ TFE` masqués (IDs `camBtnCompans`, `camBtnTFE`)
+
+### v1.63 — Lecture seule Transport + Bouton Monitor + Fix late-bar click
+- **Profil `transport` onglet Camions — lecture seule totale** :
+  - `_tfReadOnlyProfile=true` activé dans `applyProfileRestrictions()` pour `transport`
+  - `makeTsChip` : boutons Pointer, Heure manuelle, Saisir, ✎/🗑 masqués ; fin_chg (Arrêter chargement, Heure manuelle, clear) masqués
+  - `renderTrucks` : splitBtn, lockBtn, delBtn, decBtn masqués ; dateInp readonly ; créneau non cliquable ; badge Prêt et badge Décalage non cliquables
+  - `_renderCompansTruckCard` : qBadge non cliquable, qAssignBtn masqué, dateInp readonly, lockBtn/delBtn masqués
+- **Cadences masquées pour `transport`** : `id="hdrCadSilo"` et `id="hdrCadPick"` ajoutés aux `.cad-group`, cachés via `applyProfileRestrictions()`
+- **Bouton Monitor dans le header** : `id="hdrBtnMonitor"` ajouté à la barre du haut (visible tous profils sauf live qui n'a pas de header), remplace l'entrée du menu ⋯ comme point d'accès principal
+- **Fix Monitor late-bar** : clic sur `.lb-body` ouvre `openTruckDetail(tid)` ; le bouton Arrivée dans `.lb-actions` reçoit `event.stopPropagation()` pour éviter le conflit
+
+### v1.62 — Profil Transport + Overlay détail Monitor
+- **Compte `transport`** / mot de passe `camion` (SHA-256) — profil lecture seule
+- **Onglets visibles** : Camions, Planning, Statistiques, Archive (syn/liv/quai/emb masqués)
+- **Accès autorisé** : Mode Monitor, Excel, Rapport PDF
+- **Accès bloqué** : import VL06O, import session, export Partager, Mobile, Réseau, Undo, Journal, Réglages, Purger
+- **`switchTab` verrouillé** : seuls cam/plan/stat/arch accessibles
+- **`applyProfileRestrictions()`** refactorisé : branche `mccormick` + branche `transport` séparées
+- **IDs ajoutés** aux boutons header : `hdrBtnVL06O`, `hdrBtnSync`, `hdrBtnPartager`
+- **`openTruckDetail(tid)`** dans le Monitor `_js` : overlay glassmorphism centré, ouvert en cliquant sur `.tc-left`/`.tc-center` (cards attente) ou `.ac-head` (cards actives)
+  - Timeline timestamps verticale (ARR → QUAI → CHGT → FIN → DÉP) avec icônes et heures en grand
+  - Liste des livraisons avec destination, ville, palettes, colis
+  - Chips résumé (nb livraisons, palettes totales, colis totaux)
+  - Fermeture : bouton ✕ ou clic sur l'overlay
+  - Animation `_tdIn` : slide-up avec spring cubic-bezier
+
+### v1.43 — Bug montage + Export auto
+- **Fix `toggleMontageGroup`** : le filtre de sélection de groupe respecte maintenant `_montageDateFilter` — évite de sélectionner les livraisons de toutes les dates d'un transporteur quand un filtre date est actif
+- **Export session automatique horaire** : option dans Réglages alertes (`⚙`) → "Export session automatique" → "Toutes les heures". Fonction `autoExportSession()` silencieuse (sans `confirm`). Persisté dans `tf_alert_cfg.autoExport`.
+
+### v1.44 — Système de profils
+- Ajout compte `mccormick` (opérateur restreint)
+- `applyProfileRestrictions()` appelée dans `tfRunApp()`
+- Badge utilisateur dans le header pour les profils restreints
+
+### v1.45 — Badge admin + switch + Excel/PDF McCormick + bouton Undo
+- Badge vert pour admin (galaad, caserta), bleu pour restricted (mccormick)
+- Bouton "Changer de session" dans le menu `⋯`
+- Excel et PDF autorisés pour McCormick
+- Bouton `↩ Annuler` dans le header — `_undoStack`, `pushUndo()`, `doUndo()`
+- Undo restore les archives : capture `trucks`, `timestamps` ET `_completedTrucks`
+
+### v1.46 — Sauvegarde d'urgence
+- `_buildSessionPayload()` / `_saveBackupSessionSync()` — écrit dans `tf_emergency_backup`
+- Hook sur `save()`, `visibilitychange`, `beforeunload`, `pagehide`
+- Bouton `🛟 Restaurer sauvegarde d'urgence` dans le modal login
+- `tfRestoreBackup()` — restaure la session complète
+- `tf_emergency_backup` exclu du `tfPurgeAndQuit()`
+
+### v1.47 — Mode Monitor amélioré
+- Sélecteur de date dans Monitor (`#monDateInp`) — voir un autre jour
+- Compteur "Partis" correct : les camions archivés (`_completedTrucks`) sont inclus dans les KPIs et la section Partis
+- `getCompleted()` dans Monitor — lit `tf_completed`
+- Fix COMPANS dans Monitor : 2 timestamps seulement (arr + dep)
+
+### v1.48 — Sync réseau (File System Access API)
+- Bouton `📡 Réseau` dans le header principal — `toggleNetSync()`
+- `openNetworkSync()` : `showSaveFilePicker` → choisir/créer un fichier sur un partage réseau
+- `_writeNetSync()` : écrit le payload JSON dans le fichier après chaque `save()`
+- Bouton `📡 Connexion réseau` dans le Monitor — `toggleNetMon()`
+- `openNetworkMonitor()` : `showOpenFilePicker` → ouvrir le fichier réseau
+- `_pollNetFile()` : poll toutes les 10s, met à jour localStorage puis appelle `render()`
+- Indicateur visuel (point vert/rouge animé) dans les deux interfaces
+- McCormick ne voit pas le bouton `📡 Réseau` (ajouté à `applyProfileRestrictions`)
+
+### v1.49 — Profil Live Monitor
+- Compte `live` / mot de passe `1963` — hash identique à caserta/mccormick
+- `_TF_LIVE_PROFILES = ['live']` : liste des profils qui ouvrent directement le Monitor
+- Login `live` → `tfRunApp()` détecte le profil → appelle `openLiveMonitor()`
+- `openLiveMonitor()` : appelle `openTruckMonitor({live:true})`
+- `openTruckMonitor(opts)` modifié : si `live`, écrit dans `window` courant (pas de nouvelle fenêtre), injecte `_isLiveProfile=true`, titre `📡 TruckFlow Live`
+- Splash plein écran au démarrage : bouton unique "Choisir le fichier réseau" → `openNetworkMonitor()` → splash se ferme si connexion OK
+- Page transformée en Monitor pur, sans aucun accès à l'app principale
+
+### v1.50 — Fix timestamps sur date passée dans le Monitor
+- `_nowTs()` : helper Monitor qui retourne `_monDate + heure locale courante`
+- **Bug corrigé** : `stampM()` utilisait `new Date().toISOString().slice(0,10)` → remplacé par `_monDate`
+- **Bug corrigé** : `stamp()` (timestamp immédiat) utilisait `new Date().toISOString()` → remplacé par `_nowTs()`
+- **Bug corrigé** : `_stampDepNow()` utilisait `new Date().toISOString()` → remplacé par `_nowTs()`
+- Résultat : toute saisie dans le Monitor (manuelle ou auto) est enregistrée à la date sélectionnée dans `#monDateInp`
+
+### v1.51 — Saisie manuelle via modal (Monitor)
+- Remplacement de l'inline `.man` div dans le Monitor par un modal centré
+- `openManualModal(tid,k)` / `confirmManualModal()` / `closeManualModal()` dans le JS Monitor
+- Modal : overlay sombre, input `type=time` 32px, bouton gradient Confirmer
+
+### v1.52 — Saisie manuelle via modal (onglet Camions)
+- `_openTsModal(truckName,label,icon,currentReal,onConfirm)` : fonction globale pour modal timestamp
+- `_buildEditRow()` et handler `finManEl` migrent vers `_openTsModal()` au lieu de l'inline input
+- Même UX que le Monitor : overlay + time picker centré
+
+### v1.53 — Corrections profil Live
+- **Fix `tfLogin()`** : login `live` n'affiche plus le modal import session — appelle directement `openLiveMonitor()`
+- **Monitor lecture seule** : `makeCard()`, `makeActiveCard()`, `makeStrip()`, `makeLateBar()` suppriment les boutons d'action quand `_isLiveProfile===true` (ni timestamp, ni annulation, ni heure manuelle)
+- **Badge LECTURE SEULE** : bandeau bleu dans le header Monitor pour le profil live
+- **Polling réseau corrigé** : `_pollNetFile()` utilise `setTimeout` auto-planifié (5s) au lieu de `setInterval(10s)` → évite les overlaps async sur partage réseau lent
+- **`#netSyncLbl`** : span affichant l'heure de dernière sync (ex: `14:32:07`) ou `⚠ Erreur lecture`
+- `stopNetMonitor()` utilise `clearTimeout` au lieu de `clearInterval`
+
+### v1.59 — Redesign Monitor SaaS (Linear/Notion style)
+- **Typographie** : `Inter/Segoe UI/system-ui` (sans-serif) pour le texte, `monospace` réservé aux chiffres/timestamps
+- **Palette** : fond `#04070e`, fond panneau `rgba(255,255,255,.04)`, badges pill-shaped (border-radius:40px) pour les KPIs
+- **Header** : hauteur 68px, clock 40px weight 200, KPIs en chips arrondis (pill) avec gap, `backdrop-filter` renforcé
+- **Cards attente** `.tc` : `border-radius:14px`, stripe 4px (au lieu de 6px), `box-shadow` doux, hover `translateY(-1px)`
+- **Cards actives** `.ac` : structure 2 zones — `.ac-head` (badges + nom, fond teinté par statut) + `.ac-body` (progress + actions)
+- **Badges status** `.b` : `border-radius:5px`, typographie `var(--sans)`, couleurs plus douces
+- **Cartes alertes** `.late-bar` : layout grille `4px 1fr auto` — `.lb-stripe` + `.lb-body` (icon + info + over) + `.lb-actions`
+- **Section headers** `.sec-hdr2` : compteur en pill `background:rgba(255,255,255,.06)`, plus discret
+- **Animations** : `retardpulse` adapté au nouveau fond, `activepulse` mis à jour
+
+### v1.58 — Chemin réseau auto + IndexedDB persistence
+- **`_tfNetPath`** / **`_tfNetFile`** : chemin par défaut `P:\Distribution\LOG_MTX3\Répertoires_nominatifs\Galaad Poivey` + nom `TruckFlow_sync.json`
+- **Auto-reconnexion IndexedDB** : `_idbHandle()` (main) / `_idbHandleMon()` (Monitor) — `FileSystemFileHandle` persisté entre sessions
+- **Modal helper** : affiche le chemin préconfiguré + bouton 📋 Copier (presse-papiers) + bouton Choisir le fichier + Annuler
+- **`openNetworkSync()`** modifié : tente IDB auto → si échec, affiche modal helper → file picker
+- **`openNetworkMonitor()`** modifié : même logique (IDB auto → modal → picker)
+- Fallback manuel si permission refusée ou handle expiré
+
+### v1.56 — Glassmorphism WOW Monitor + Auto-propose réseau
+- **Glassmorphisme profond** sur les cartes `.tc` : `backdrop-filter:blur(16px)`, fond `rgba(10,18,34,.8)`, hover `rgba(14,26,50,.85)`
+- **Stripes statut 6px** avec `linear-gradient` + `box-shadow` glow coloré par statut (blue/purple/orange/green/red)
+- **Grille `.tc`** mise à jour : `grid-template-columns:6px 220px 1fr auto`
+- **`.tc-right`** flex column + `align-items:stretch` + `min-width:155px` définis en CSS (plus d'inline style)
+- **Clock 44px weight 100** avec double glow vert `text-shadow:0 0 40px rgba(0,230,118,.7),0 0 80px rgba(0,230,118,.3)`
+- **Header glass** : `backdrop-filter:saturate(200%) blur(32px)`, `box-shadow:0 4px 32px rgba(0,0,0,.5)`, hauteur 64px
+- **`.pd.done`** : glow vert `box-shadow:0 0 10px rgba(0,200,83,.4)`
+- **`.tc-ts.filled`** : chip verre (fond + bordure verte subtile)
+- **`.tc-timer`** : glows colorés par statut `ok/warn/hot`
+- **`.act:hover`** : `box-shadow:0 0 16px currentColor`
+- **`.ac`** glassmorphisme : `backdrop-filter:blur(12px)`, fond `rgba(10,18,34,.8)`
+- **`.late-bar`** : `backdrop-filter:blur(8px)` + `box-shadow` inset rouge
+- **`.lb-over`** : glow rouge `box-shadow + text-shadow`
+- **`#toast`** : glassmorphisme `backdrop-filter:blur(24px)`, `border-radius:10px`, `cubic-bezier` spring animation
+- **Orbs** : plus grands (700/600/450px) et plus vifs
+- **`--sf2` + `--glass`** CSS vars définis dans `:root`
+- **Auto-propose réseau** : overlay bottom-right affiché 1s après ouverture Monitor (utilisateurs non-live) — "📡 Connexion" / "Plus tard", auto-disparaît après 8s. Fonctions : `_autoPropose()` dans le bloc `else` du splash live
+
+### v1.55 — Redesign Monitor style TMS Operations Center
+- Refonte complète du CSS Monitor : palette sombre `#060a12`, grille CSS `body::before` (40×40px)
+- Police `'SF Mono','Fira Code','Consolas',monospace` sur tout le Monitor (look terminal TMS)
+- Cartes en attente : layout grille `grid-template-columns:4px 220px 1fr auto` (`.tc`)
+  - `.tc-stripe` (4px colorée par statut) + `.tc-left` (badges/nom/dest) + `.tc-center` (progress + timestamps row) + `.tc-right` (timer + bouton)
+  - `.tc-ts-row` : chips timestamp `ARR / QUAI / CHGT / FIN / DÉP` avec label uppercase
+  - `.tc-timer` : chrono en cours `ok/warn/hot` (vert/ambre/orange)
+- Cartes actives `.ac` (grille 4 colonnes) : mini progress dots `.mpd` + étiquettes + timestamps
+- Strips attente remplacés par `makeCard()` (layout `.tc` complet)
+- `makeActiveCard()` COMPANS : correction utilisation `.ac` au lieu de `.mac` (classe inexistante)
+- Clock 40px, glow vert `rgba(0,230,118,.25)`
+
+### v1.54 — Redesign visuel du Monitor
+- Refonte complète du CSS Monitor : fond plus sombre `#07090f`, orbs plus grands et plus diffus
+- Glassmorphism renforcé sur les cartes `.tc` : `backdrop-filter:blur(20px)`, border-radius 22px, double pseudo-élément `::before/::after` pour highlight top + gradient interne
+- Progress dots plus grands (30px), glow vert sur `.done`, glow bleu sur `.active`
+- Boutons d'action `.act` : gradient + `box-shadow` coloré selon l'étape, hover avec glow amplifié
+- Header : `saturate(200%) blur(32px)`, shadow portée profonde, clock 52px weight 100
+- Cartes compactes `.ac` (grille active) : bordures et box-shadows colorés selon statut
+- Strips en attente : border-radius 11px, transitions sur border-color
+- Splash profil live : redesigné avec glass button et drop-shadow emoji
+- Barre retard `.late-bar` : glow rouge, border coloré
+
+---
+
+## Mode Montage (`_montageMode`)
+
+- Activé depuis l'onglet Camions
+- `_montageDateFilter` : filtre par date (null = toutes dates)
+- `_montageSelected` : objet `{id: true}` des livraisons sélectionnées
+- `toggleMontageGroup(itin)` : sélectionne toutes les livraisons d'un transporteur **pour la date filtrée**
+- `confirmMontage()` : crée le camion avec `locked:true` et `_montage:true`
+- Les camions montage sont indépendants des reimports VL06O
 
 ---
 
@@ -90,33 +326,39 @@ L'app est organisée en **7 onglets principaux** :
 | `th10_deliveries` | Livraisons importées |
 | `th10_articles` | Articles par livraison |
 | `tf_completed` | Camions terminés archivés (10 jours) |
-| `tf_*` | Config/features diverses |
-
-- `save()` sérialise trucks, timestamps, deliveries, articles dans localStorage
-- `init()` charge depuis localStorage au démarrage
-- `exportSession()` inclut `completed: _completedTrucks`
-- `importSession()` restaure les camions archivés
+| `tf_alert_cfg` | Seuils alertes + son + export auto |
+| `tf_theme` | Thème clair/sombre |
+| `tf_palettes` | Données palettes |
+| `tf_history` | Historique actions |
+| `tf_purge_warned` | Date dernier avertissement purge |
 
 ---
 
-## Fichiers produits
+## Design & Layout
 
-| Fichier | Description |
-|---------|-------------|
-| `truckflow_2058.html` | Fichier source principal |
-| `TruckFlow_Documentation_Technique.docx` | Documentation technique complète |
-| `TruckFlow_Presentation.pptx` | Présentation réunion (12 slides) |
+- **Liquid Glassmorphism** : `backdrop-filter:saturate(200%) blur(28px)`, bordures cyan `rgba(160,210,255,.18)`, `--glass-glow` inner glow
+- **4 orbs animés** : Blue 1000px, Violet 900px, Cyan 700px, Amber 600px, fond `#0d1117`
+- **Layout 24"** : `.main` max-width 1920px
+- **Classe `.glass-panel`** : panneau glass réutilisable avec `::before` lumineux
+- **Grille KPI jour** : `repeat(5,1fr)`, responsive 3 cols < 1200px, 2 cols < 700px
 
 ---
 
 ## Notes techniques
 
 - Application **100% frontend** (HTML + CSS + JS vanilla, monofichier)
-- ~7 800 lignes de code, ~220 fonctions JavaScript
-- Design Apple-style dark theme (liquid glassmorphism) + light theme
+- ~7 800+ lignes, ~220+ fonctions JavaScript
 - Dépendance unique : SheetJS (CDN) pour import/export Excel
-- Compatible navigateur moderne (Chrome, Edge, Firefox)
-- Toutes les fonctions développées par IA
-- `autoGenTrucks()` : camions avec timestamps traités comme verrouillés (conservent leurs livraisons)
-- `cleanCompletedTrucks()` : archive le camion dans `_completedTrucks` avant suppression
+- Compatible Chrome, Edge, Firefox
+- `autoGenTrucks()` : camions avec timestamps traités comme verrouillés
+- `cleanCompletedTrucks()` : archive dans `_completedTrucks` avant suppression
 - `computeTimingStats()` / `computeCarrierStats()` : fusionnent données live + archivées
+- `BroadcastChannel` pour sync multi-onglets (token sécurisé)
+
+---
+
+## Idées / Évolutions à prévoir
+
+- Profils supplémentaires : si besoin d'un 4e compte, ajouter dans `_TF_AUTH_USERS` + optionnellement dans `_TF_RESTRICTED_PROFILES`
+- Personnaliser les droits d'un profil restreint : modifier `applyProfileRestrictions()` — la liste des IDs à masquer est dans le tableau `['hdrBtnMobile','excelMenuWrap',...]`
+- Import choice modal pour McCormick : actuellement il voit les 3 options (session, VL06O, vierge) — possible de masquer "Session vierge" si besoin
