@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.67.html` | v1.67 | **Version courante** |
+| `TruckFlow_v1.68.html` | v1.68 | **Version courante** |
+| `TruckFlow_v1.67.html` | v1.67 | Archivé |
 | `TruckFlow_v1.66.html` | v1.66 | Archivé |
 | `TruckFlow_v1.65.html` | v1.65 | Archivé |
 | `TruckFlow_v1.64.html` | v1.64 | Archivé |
@@ -106,6 +107,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.68 — TFE simplifié : arrivée directe + carte toujours présente
+- **Flux TFE simplifié** : le bouton `🚌 Arrivée TFE` ouvre un modal demandant Tour N° (pré-rempli, modifiable) + Quai → crée le camion ET stampe l'arrivée en une seule action (`openTFEArrModal` / `confirmTFEArr`)
+- **Carte TFE toujours présente** : si aucun TFE actif aujourd'hui, un placeholder "En attente d'arrivée" s'affiche en tête de liste dans l'onglet Camions et dans le Monitor
 
 ### v1.67 — Correctifs Monitor TFE
 - **Fix `makeActiveCard()` TFE** : les TFE avec arrivée enregistrée (section "Actifs") affichaient encore les 5 étapes — branche TFE ajoutée (fusionnée avec COMPANS) : ARR+DÉP uniquement, badge cyan 🚌, nom `Tour N°X`, durée auto
