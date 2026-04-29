@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.71.html` | v1.71 | **Version courante** |
+| `TruckFlow_v1.72.html` | v1.72 | **Version courante** |
+| `TruckFlow_v1.71.html` | v1.71 | Archivé |
 | `TruckFlow_v1.70.html` | v1.70 | Archivé |
 | `TruckFlow_v1.69.html` | v1.69 | Archivé |
 | `TruckFlow_v1.68.html` | v1.68 | Archivé |
@@ -110,6 +111,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.72 — Galaxie 3D : Camions schématisés (vue de dessus)
+- **Camions en rectangles arrondis** : rendu vue de dessus style "garé" — carrosserie dégradée couleur statut, cabine distincte (rectangle droit côté droit), pare-brise (trait blanc), 4 roues (petits rectangles noirs aux coins)
+- **Quais redessinés** : sphère nacrée + double anneau + croix centrale (symbole quai de chargement)
+- **Tailles augmentées** : quais sz 9→14, camions partis sz 4→8, en attente sz 6→14, actifs sz 10→18
+- **Labels toujours visibles** pour les quais ; labels camions dès sc>.28 (au lieu de .42)
+- **Glow elliptique** adapté à la forme rectangle des camions (`ctx.ellipse`)
+- Pulse ring ovale sur camions en chargement/arrivé
 
 ### v1.71 — Monitor : Vue Galaxie 3D (Canvas)
 - **Bouton 🌌 Galaxie** dans le header Monitor (non-live) : `toggleGalaxy()` — bascule entre vue normale et canvas 3D
