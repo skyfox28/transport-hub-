@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.73.html` | v1.73 | **Version courante** |
+| `TruckFlow_v1.74.html` | v1.74 | **Version courante** |
+| `TruckFlow_v1.73.html` | v1.73 | Archivé |
 | `TruckFlow_v1.72.html` | v1.72 | Archivé |
 | `TruckFlow_v1.71.html` | v1.71 | Archivé |
 | `TruckFlow_v1.70.html` | v1.70 | Archivé |
@@ -112,6 +113,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.74 — Hub 3D : Légende HTML + Scène agrandie
+- **Légende hors canvas** : `<div id="gxLegend">` fixe en bas-gauche (backdrop-filter glass, dots colorés avec glow) — ne chevauche plus la scène 3D ; show/hide dans `toggleGalaxy()`
+- **Scène 3D agrandie** : FOV 520→700, depth offset 320→160, zoom initial 1×→1.5×, angle initial RotX 0.28→0.22
+- **Zones plus écartées** : clusters `_GXK` élargis (~30%), espacement quais 42→55px, labels de zones repositionnés
+- **Marquages sol** adaptés aux nouvelles dimensions
 
 ### v1.73 — Galaxie 3D : Vue Hub logistique 3D
 - **Fond hub industriel** : fond `#080d14` + ambiance plafond néon bleuté + spot central + mur de fond (zone docks)
