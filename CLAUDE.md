@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.74.html` | v1.74 | **Version courante** |
+| `TruckFlow_v1.75.html` | v1.75 | **Version courante** |
+| `TruckFlow_v1.74.html` | v1.74 | Archivé |
 | `TruckFlow_v1.73.html` | v1.73 | Archivé |
 | `TruckFlow_v1.72.html` | v1.72 | Archivé |
 | `TruckFlow_v1.71.html` | v1.71 | Archivé |
@@ -113,6 +114,15 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.75 — Hub 3D : Bâtiment warehouse + effets WOW
+- **Bâtiment `_gxRenderBuilding`** : mur de fond 3D en perspective, dalle de toit, piliers d'angles lumineux, enseigne "HUB DE DISTRIBUTION"
+- **Portes de quai** Q2→Q11 : ouverture sombre avec glow coloré si occupé, faisceau lumineux projeté vers l'avant (cone de lumière), LED indicateur animée au-dessus de chaque porte
+- **Nœuds quai supprimés** — le bâtiment remplace les spheres Pluto ; `_gxActiveDocks` alimente les portes actives
+- **Zones colorées au sol** : polygones perspectivés semi-transparents (bleu attente, cyan arrivée, vert chargé, gris départ)
+- **Liaisons pointillées** truck→porte de quai (gradient coloré)
+- **FOV 860 + depth 100** : scène encore plus grande/proche
+- **Clusters élargis** (~25% de plus vs v1.74), trucks sz 16-22
 
 ### v1.74 — Hub 3D : Légende HTML + Scène agrandie
 - **Légende hors canvas** : `<div id="gxLegend">` fixe en bas-gauche (backdrop-filter glass, dots colorés avec glow) — ne chevauche plus la scène 3D ; show/hide dans `toggleGalaxy()`
