@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.69.html` | v1.69 | **Version courante** |
+| `TruckFlow_v1.70.html` | v1.70 | **Version courante** |
+| `TruckFlow_v1.69.html` | v1.69 | Archivé |
 | `TruckFlow_v1.68.html` | v1.68 | Archivé |
 | `TruckFlow_v1.67.html` | v1.67 | Archivé |
 | `TruckFlow_v1.66.html` | v1.66 | Archivé |
@@ -108,6 +109,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.70 — Monitor : Aurora Borealis + Glow Aura + Tilt 3D
+- **Aurora borealis** : 4 orbs animés (bleu, vert, violet, cyan) avec `@keyframes aurora1-4` — mouvements lents et fluides, scale + translate + opacity
+- **Glow aura** : `@keyframes gaura-blue/purple/orange/green/red/cyan` — halo lumineux pulsant sur chaque carte selon son statut (arrivé=bleu, à quai=violet, chargement=orange, chargé=vert, retard=rouge, TFE=cyan)
+- **Tilt 3D** : `_applyTilt()` / `_resetTilt()` — inclinaison perspective 900px des cartes `.tc` et `.ac` selon position souris (max ±6°), retour fluide `cubic-bezier`
+- `will-change:transform` ajouté sur `.tc` et `.ac` pour GPU compositing
 
 ### v1.69 — TFE saisie heure manuelle + création depuis Monitor
 - **Heure d'arrivée manuelle** : le modal `openTFEArrModal` (onglet Camions) inclut désormais un champ `input[type=time]` pré-rempli à l'heure courante — `confirmTFEArr()` utilise cette valeur si renseignée, sinon `_nowIso()`
