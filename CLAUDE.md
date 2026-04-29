@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.70.html` | v1.70 | **Version courante** |
+| `TruckFlow_v1.71.html` | v1.71 | **Version courante** |
+| `TruckFlow_v1.70.html` | v1.70 | Archivé |
 | `TruckFlow_v1.69.html` | v1.69 | Archivé |
 | `TruckFlow_v1.68.html` | v1.68 | Archivé |
 | `TruckFlow_v1.67.html` | v1.67 | Archivé |
@@ -109,6 +110,22 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.71 — Monitor : Vue Galaxie 3D (Canvas)
+- **Bouton 🌌 Galaxie** dans le header Monitor (non-live) : `toggleGalaxy()` — bascule entre vue normale et canvas 3D
+- **Canvas 3D** : `<canvas id="galaxyCvs">` plein-écran (position:fixed, top:68px) — rendu via `requestAnimationFrame` à 60fps
+- **Nœuds Quais** : 10 quais Q2→Q11 disposés en anneau (r=170), sphères grises avec double ring, labels en blanc
+- **Nœuds Camions** : groupés par statut (attente/arrivé/à quai/chargement/chargé/parti/TFE/COMPANS) avec clusters prédéfinis (`_GXK`) et dispersion golden-angle ; animation orbitale autour du cluster
+- **Projection 3D custom** : rotation Y puis X puis perspective (`fov=520×zoom`, `depth+320`) — `_gxProj(x,y,z)`
+- **Painter's algorithm** : Z-sort avant rendu pour la profondeur correcte
+- **Fond** : 4 nébuleuses radial-gradient + 280 étoiles statiques (`_gxRenderStars`)
+- **Glow aura** sur chaque nœud : halo radial coloré par statut (`_GXC`)
+- **Rotation auto** : +0.003 rad/frame sur Y — s'arrête au drag, reprend après 5s
+- **Drag souris** : rotate X/Y, zoom molette (0.25–3.5×)
+- **Hover** : tooltip avec nom du camion + badge statut
+- **Click sur nœud camion** : ouvre `openTruckDetail(tid)` — overlay détail du camion
+- **Rebuild toutes les 15s** : `_gxBuild()` relancé automatiquement pour intégrer les nouveaux camions
+- Fonctions : `toggleGalaxy`, `_gxBuild`, `_gxProj`, `_gxRender`, `_gxRenderNode`, `_gxRenderStars`, `_gxHitTest`, `_gxFrame`, `_gxInitCanvas`
 
 ### v1.70 — Monitor : Aurora Borealis + Glow Aura + Tilt 3D
 - **Aurora borealis** : 4 orbs animés (bleu, vert, violet, cyan) avec `@keyframes aurora1-4` — mouvements lents et fluides, scale + translate + opacity
