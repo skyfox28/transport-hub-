@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.72.html` | v1.72 | **Version courante** |
+| `TruckFlow_v1.73.html` | v1.73 | **Version courante** |
+| `TruckFlow_v1.72.html` | v1.72 | Archivé |
 | `TruckFlow_v1.71.html` | v1.71 | Archivé |
 | `TruckFlow_v1.70.html` | v1.70 | Archivé |
 | `TruckFlow_v1.69.html` | v1.69 | Archivé |
@@ -111,6 +112,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.73 — Galaxie 3D : Vue Hub logistique 3D
+- **Fond hub industriel** : fond `#080d14` + ambiance plafond néon bleuté + spot central + mur de fond (zone docks)
+- **Sol perspectif** : grille de lignes convergentes (point de fuite centré) avec marquages jaunes de zones (`_gxRenderFloor`)
+- **Quais en rangée** : Q2→Q11 alignés sur un mur du fond (z=-185) au lieu de l'anneau — position `(i-5.5)*42` en X
+- **Camions statiques** (garés) : plus d'orbite — juste un léger flottement vertical sur les actifs (`sin*2.5px`)
+- **Zones labellisées** en 3D : ATTENTE (gauche), ARRIVÉE, CHARGÉ, DÉPART (droite), DOCKS (fond) — projetées en perspective
+- **Rotation très lente** : 0.003 → 0.0008 rad/frame (hub plus stable)
+- **Hit zones rectangulaires** : `_gxHitTest` utilise les bounds du rectangle camion (plus précis que le rayon cercle)
+- **Flash clic** : anneau blanc qui se dissipe en 0.5s autour du camion cliqué (`_gxClickFlash`)
+- **Légende repositionnée** en bas à droite avec fond semi-transparent
 
 ### v1.72 — Galaxie 3D : Camions schématisés (vue de dessus)
 - **Camions en rectangles arrondis** : rendu vue de dessus style "garé" — carrosserie dégradée couleur statut, cabine distincte (rectangle droit côté droit), pare-brise (trait blanc), 4 roues (petits rectangles noirs aux coins)
