@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.76.html` | v1.76 | **Version courante** |
+| `TruckFlow_v1.77.html` | v1.77 | **Version courante** |
+| `TruckFlow_v1.76.html` | v1.76 | Archivé |
 | `TruckFlow_v1.75.html` | v1.75 | Archivé |
 | `TruckFlow_v1.74.html` | v1.74 | Archivé |
 | `TruckFlow_v1.73.html` | v1.73 | Archivé |
@@ -115,6 +116,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.77 — Hub 3D : Corrections orientation + camion à son quai
+- **Quais Q2→Q11 gauche→droite** : formule corrigée `(q-6.5)*60` — Q2 à gauche, Q11 à droite (vue de face correcte)
+- **Camion positionné devant son quai** : si un camion est assigné à un quai, son nœud est placé à `x=(q-6.5)*60, z=BZ_DOCK+70` (juste devant la porte, entre bâtiment et spectateur)
+- **Zone Retard en retrait** : cluster `_GXK.retard` déplacé à `z=20` (était z=110) — zone rouge au sol repositionnée à `z=[-30,50]` et label à `z=10`, plus reculée par rapport aux zones principales
+
+### v1.76 — Hub 3D : Oscillation latérale + quais inversés + zone retard + panneau latéral
+- (voir commit 6e02b29)
 
 ### v1.75 — Hub 3D : Bâtiment warehouse + effets WOW
 - **Bâtiment `_gxRenderBuilding`** : mur de fond 3D en perspective, dalle de toit, piliers d'angles lumineux, enseigne "HUB DE DISTRIBUTION"
