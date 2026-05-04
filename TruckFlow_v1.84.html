@@ -14212,6 +14212,26 @@ function _gxUpdatePanel(){
   if(!departed.length)h+='<div style="font-size:11px;color:rgba(80,100,130,.5)">Aucun d\u00e9part</div>';
   departed.forEach(function(d){h+=row(d.t.id,nm(d.t),'D\u00e9p. '+(d.dep?d.dep.substr(11,5):'--')+(d.t.creneau?' \u2502 \u23f0 '+d.t.creneau:''),'rgba(44,58,74,.3)','rgba(150,170,200,.7)');});
   el.innerHTML=h;
+  // Panneau retard gauche
+  var rPanel=document.getElementById('gxRetardBody');
+  var rCount=document.getElementById('gxRetardCount');
+  if(rPanel){
+    var lateList=day.filter(function(t){var ts2=tsm[t.id]||{};return _gxIsLate(t,ts2,_monDate);});
+    if(rCount)rCount.textContent=lateList.length;
+    var rh='';
+    if(!lateList.length){rh='<div style="font-size:11px;color:rgba(180,100,100,.5);text-align:center;padding:10px 0">\u2713 Aucun retard</div>';}
+    lateList.forEach(function(t){
+      var ts2=tsm[t.id]||{};
+      var sub=t.creneau?('\u23f0 '+t.creneau+(ts2.arr?' \xb7 arriv\xe9':'')):'';
+      rh+='<div onclick="_gxPD(\''+t.id+'\')" style="cursor:pointer;padding:7px 9px;margin-bottom:5px;border-radius:9px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.07);transition:background .15s" onmouseenter="this.style.background=\'rgba(248,113,113,.16)\'" onmouseleave="this.style.background=\'rgba(248,113,113,.07)\'">'
+        +'<div style="font-size:12px;font-weight:700;color:rgba(248,113,113,.95);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nm(t)+'</div>'
+        +(sub?'<div style="font-size:10px;color:rgba(200,100,100,.6);margin-top:2px">'+sub+'</div>':'')
+        +'</div>';
+    });
+    rPanel.innerHTML=rh;
+    var rPanelDiv=document.getElementById('gxRetardPanel');
+    if(rPanelDiv)rPanelDiv.style.display=lateList.length?'block':'none';
+  }
 }
 function _gxPD(id){openTruckDetail(id);}
 
@@ -14550,30 +14570,70 @@ function _gxRender(){
   if(!_gxCtx||!_gxCvs)return;
   var ctx=_gxCtx,W=_gxCvs.width,H=_gxCvs.height,t=_gxTime;
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#060b12';ctx.fillRect(0,0,W,H);
-  // Étoiles plafond
-  if(!_gxStars){_gxStars=[];for(var _si=0;_si<180;_si++){_gxStars.push({x:Math.random()*W,y:Math.random()*(H*.58),r:Math.random()*1.3+.2,a:Math.random()*.55+.1,tw:Math.random()*Math.PI*2});}}
-  _gxStars.forEach(function(s){var ta=s.a*(.7+.3*Math.sin(t*.9+s.tw));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+ta+')';ctx.fill();});
-  // Nébuleuse ambiante
-  [{x:W*.15,y:H*.1,r:H*.5,col:'rgba(30,60,160,.13)'},{x:W*.85,y:H*.08,r:H*.4,col:'rgba(80,20,120,.1)'},{x:W*.5,y:0,r:H*.45,col:'rgba(20,60,140,.12)'}].forEach(function(nb){var g=ctx.createRadialGradient(nb.x,nb.y,0,nb.x,nb.y,nb.r);g.addColorStop(0,nb.col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);});
-  // Ambiance plafond
-  var ceil=ctx.createLinearGradient(0,0,0,H*.42);
-  ceil.addColorStop(0,'rgba(10,28,70,.55)');ceil.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=ceil;ctx.fillRect(0,0,W,H);
-  var spot=ctx.createRadialGradient(W/2,0,0,W/2,0,H*.52);
-  spot.addColorStop(0,'rgba(25,70,150,.16)');spot.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=spot;ctx.fillRect(0,0,W,H);
-  // Halo zone retard (gauche)
-  var rGx=W*.07,rGy=H*.55;
-  var retardG=ctx.createRadialGradient(rGx,rGy,0,rGx,rGy,H*.28);
-  retardG.addColorStop(0,'rgba(248,113,113,'+(.05+.03*Math.sin(t*1.5))+')');
+  // ── Fond dégradé profond ──────────────────────────────────────────────────
+  var bgG=ctx.createLinearGradient(0,0,0,H);
+  bgG.addColorStop(0,'#03060e');bgG.addColorStop(.45,'#060c18');bgG.addColorStop(1,'#040810');
+  ctx.fillStyle=bgG;ctx.fillRect(0,0,W,H);
+  // ── Étoiles — 2 couches (lointaines + proches) ───────────────────────────
+  if(!_gxStars){
+    _gxStars=[];
+    for(var _si=0;_si<240;_si++){
+      var _far=_si<160;
+      _gxStars.push({x:Math.random()*W,y:Math.random()*(H*(_far?.65:.45)),
+        r:_far?Math.random()*.9+.15:Math.random()*1.6+.4,
+        a:_far?Math.random()*.4+.1:Math.random()*.6+.2,
+        tw:Math.random()*Math.PI*2,sp:_far?.6:1.4});
+    }
+  }
+  _gxStars.forEach(function(s){
+    var ta=s.a*(.65+.35*Math.sin(t*s.sp+s.tw));
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,'+ta+')';ctx.fill();
+  });
+  // ── Nébuleuses ambiantes ─────────────────────────────────────────────────
+  [
+    {x:W*.12,y:H*.06,r:H*.55,c:'10,35,120',a:.16},
+    {x:W*.88,y:H*.08,r:H*.45,c:'65,15,110',a:.12},
+    {x:W*.5, y:H*.02,r:H*.5, c:'8,50,140', a:.14},
+    {x:W*.3, y:H*.5, r:H*.35,c:'20,80,60', a:.07},
+    {x:W*.72,y:H*.45,r:H*.3, c:'80,30,10', a:.06}
+  ].forEach(function(nb){
+    var g=ctx.createRadialGradient(nb.x,nb.y,0,nb.x,nb.y,nb.r);
+    g.addColorStop(0,'rgba('+nb.c+','+nb.a+')');g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  });
+  // ── Gradient plafond néon bleu ───────────────────────────────────────────
+  var ceilG=ctx.createLinearGradient(0,0,0,H*.5);
+  ceilG.addColorStop(0,'rgba(8,24,72,.62)');ceilG.addColorStop(.6,'rgba(4,12,36,.22)');ceilG.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ceilG;ctx.fillRect(0,0,W,H);
+  // Spot central animé (plafond)
+  var sp2=Math.sin(t*.3)*.04+.18;
+  var spot2=ctx.createRadialGradient(W/2,-H*.05,0,W/2,H*.1,H*.65);
+  spot2.addColorStop(0,'rgba(20,65,160,'+sp2+')');spot2.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=spot2;ctx.fillRect(0,0,W,H);
+  // Reflet sol (bas)
+  var floorG=ctx.createLinearGradient(0,H*.7,0,H);
+  floorG.addColorStop(0,'rgba(0,0,0,0)');floorG.addColorStop(1,'rgba(2,8,22,.65)');
+  ctx.fillStyle=floorG;ctx.fillRect(0,0,W,H);
+  // ── Halo zone retard gauche ──────────────────────────────────────────────
+  var rGx=W*.055,rGy=H*.58,rPls=Math.sin(t*1.6)*.04+.07;
+  var retardG=ctx.createRadialGradient(rGx,rGy,0,rGx,rGy,H*.32);
+  retardG.addColorStop(0,'rgba(248,113,113,'+rPls+')');
+  retardG.addColorStop(.6,'rgba(180,40,40,'+rPls*.4+')');
   retardG.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=retardG;ctx.fillRect(0,0,W,H);
-  // Mur du fond (quais)
+  // ── Mur du fond amélioré ─────────────────────────────────────────────────
   var wallP=_gxProj(0,-100,185),wallH=Math.abs(_gxProj(0,60,185).sy-wallP.sy);
-  var wg=ctx.createLinearGradient(0,wallP.sy,0,wallP.sy+wallH);
-  wg.addColorStop(0,'rgba(20,40,80,.28)');wg.addColorStop(1,'rgba(8,16,32,.1)');
-  ctx.fillStyle=wg;ctx.fillRect(0,wallP.sy,W,wallH+30);
+  var wg=ctx.createLinearGradient(0,wallP.sy,0,wallP.sy+wallH+40);
+  wg.addColorStop(0,'rgba(14,32,80,.38)');wg.addColorStop(.4,'rgba(8,20,52,.22)');wg.addColorStop(1,'rgba(4,10,26,.08)');
+  ctx.fillStyle=wg;ctx.fillRect(0,wallP.sy,W,wallH+40);
+  // Reflet horizontal sur le sol au pied du mur
+  var horizP=_gxProj(0,26,185);
+  if(horizP.sy>0&&horizP.sy<H){
+    var horizG=ctx.createLinearGradient(0,horizP.sy-2,0,horizP.sy+12);
+    horizG.addColorStop(0,'rgba(60,120,255,.18)');horizG.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=horizG;ctx.fillRect(0,horizP.sy-2,W,14);
+  }
   _gxRenderFloor(ctx,W,H);
   // Léger flottement vertical pour les camions actifs
   _gxNodes.forEach(function(nd){
