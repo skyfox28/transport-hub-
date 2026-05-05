@@ -5554,106 +5554,190 @@ function renderFeuilleDeRoute(date){
   var dayTrucks=trucks.filter(function(t){return t.date===date && !isExport({itin:t.itin,dest:''}); });
   dayTrucks.sort(function(a,b){return creToMinutes(a.creneau)-creToMinutes(b.creneau);});
   if(!dayTrucks.length){
-    tl.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">\uD83D\uDE9B</div><p>Aucun camion pour le '+date+'</p></div>';
+    tl.innerHTML='<div class="empty" style="padding:40px"><div class="empty-ico">🚛</div><p>Aucun camion pour le '+date+'</p></div>';
     return;
   }
   var now=Date.now();
-  var nDone=0,nLate=0,totalLivs=0,totalPal=0,totalColis=0;
+
+  // Collect all liv IDs for the day
+  var allLivIds={};
+  dayTrucks.forEach(function(t){ (t.deliveries||[]).forEach(function(id){allLivIds[id]=true;}); });
+
+  // Build restMap from APP.articles (same logic as Synthèse)
+  var restMap={};  // {livId: {palRest, siloRest, pickRest}}
+  (APP.articles||[]).forEach(function(a){
+    if(!allLivIds[a.liv]) return;
+    if(!restMap[a.liv]) restMap[a.liv]={palRest:0,siloRest:0,pickRest:0};
+    if(a.vp!=='C'){ restMap[a.liv].palRest+=(a.pal||0); restMap[a.liv].siloRest+=(a.silo||0); }
+    if(a.wm!=='C'){ restMap[a.liv].pickRest+=(a.pick||0); }
+  });
+  var hasArticles=Object.keys(restMap).length>0;
+
+  // Global KPIs
+  var nDone=0,nLate=0,totalLivs=0,totalPal=0,totalSilo=0,totalPick=0;
+  var totalPalRest=0,totalSiloRest=0,totalPickRest=0;
   dayTrucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
     if(ts.dep) nDone++;
     var p=getPonctualite(t,ts,now);
     if(p.status==='retard_reel'||p.status==='retard_auto') nLate++;
     (t.deliveries||[]).forEach(function(id){
-      var d=getDeliv(id);if(!d)return;
-      totalLivs++;totalPal+=(d.palSilo||0);totalColis+=(d.colisSilo||0)+(d.colisPick||0);
+      var d=getDeliv(id); if(!d) return;
+      totalLivs++;
+      totalPal+=(d.palSilo||0); totalSilo+=(d.colisSilo||0); totalPick+=(d.colisPick||0);
+      var rm=restMap[id]||{palRest:0,siloRest:0,pickRest:0};
+      totalPalRest+=rm.palRest; totalSiloRest+=rm.siloRest; totalPickRest+=rm.pickRest;
     });
   });
+
   var dateLabel=new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   var html='<div class="fdr-wrap">';
-  html+='<div class="fdr-print-header"><h2 style="margin:0 0 4px;color:#1e3a5f;font-size:18px">Feuille de route \u2014 TruckFlow '+APP_VERSION+'</h2><p style="margin:0;color:#555;font-size:13px">'+dateLabel+'</p></div>';
+  html+='<div class="fdr-print-header"><h2 style="margin:0 0 4px;color:#1e3a5f;font-size:18px">Feuille de route — TruckFlow '+APP_VERSION+'</h2><p style="margin:0;color:#555;font-size:13px">'+dateLabel+'</p></div>';
   html+='<div class="fdr-header">';
-  html+='<div class="fdr-title">\uD83D\uDCCB Feuille de route \u2014 <span>'+dateLabel+'</span></div>';
+  html+='<div class="fdr-title">📋 Feuille de route — <span>'+dateLabel+'</span></div>';
   html+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   html+='<div class="fdr-kpis">';
-  html+='<span class="fdr-kpi" style="color:var(--t1)">'+dayTrucks.length+' camion'+(dayTrucks.length>1?'s':'')+'</span>';
+  html+='<span class="fdr-kpi">'+dayTrucks.length+' camion'+(dayTrucks.length>1?'s':'')+'</span>';
   html+='<span class="fdr-kpi" style="color:var(--t3)">'+totalLivs+' livraison'+(totalLivs>1?'s':'')+'</span>';
-  if(totalPal)html+='<span class="fdr-kpi" style="color:var(--indigo)">'+Math.round(totalPal)+' pal.</span>';
-  if(totalColis)html+='<span class="fdr-kpi" style="color:var(--blue)">'+Math.round(totalColis).toLocaleString('fr')+' col.</span>';
-  if(nLate)html+='<span class="fdr-kpi" style="color:var(--red)">'+nLate+' en retard</span>';
-  if(nDone)html+='<span class="fdr-kpi" style="color:var(--green)">'+nDone+' termin\u00e9'+(nDone>1?'s':'')+'</span>';
+  if(totalPal){
+    if(hasArticles){
+      var palDone=Math.max(0,totalPal-totalPalRest);
+      html+='<span class="fdr-kpi" style="color:var(--indigo)">🏭 SILO : <strong>'+Math.round(totalPalRest)+'</strong><span style="opacity:.55">/'+Math.round(totalPal)+'</span> pal. rest.</span>';
+    } else {
+      html+='<span class="fdr-kpi" style="color:var(--indigo)">'+Math.round(totalPal)+' pal.</span>';
+    }
+  }
+  if(totalSilo){
+    if(hasArticles){
+      html+='<span class="fdr-kpi" style="color:var(--blue)">📦 Silo : <strong>'+Math.round(totalSiloRest).toLocaleString('fr')+'</strong><span style="opacity:.55">/'+Math.round(totalSilo).toLocaleString('fr')+'</span> cs rest.</span>';
+    } else {
+      html+='<span class="fdr-kpi" style="color:var(--blue)">'+Math.round(totalSilo).toLocaleString('fr')+' cs silo</span>';
+    }
+  }
+  if(totalPick){
+    if(hasArticles){
+      html+='<span class="fdr-kpi" style="color:var(--purple)">✋ Pick : <strong>'+Math.round(totalPickRest).toLocaleString('fr')+'</strong><span style="opacity:.55">/'+Math.round(totalPick).toLocaleString('fr')+'</span> cs rest.</span>';
+    } else {
+      html+='<span class="fdr-kpi" style="color:var(--purple)">'+Math.round(totalPick).toLocaleString('fr')+' cs pick</span>';
+    }
+  }
+  if(nLate) html+='<span class="fdr-kpi" style="color:var(--red)">'+nLate+' en retard</span>';
+  if(nDone) html+='<span class="fdr-kpi" style="color:var(--green)">'+nDone+' terminé'+(nDone>1?'s':'')+'</span>';
   html+='</div>';
-  html+='<button class="fdr-export-btn no-print" onclick="printFeuilleDeRoute()">\uD83D\uDDA8 Imprimer / PDF</button>';
+  html+='<button class="fdr-export-btn no-print" onclick="printFeuilleDeRoute()">🖨 Imprimer / PDF</button>';
   html+='</div></div>';
+
   dayTrucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
     var ponct=getPonctualite(t,ts,now);
     var win=creWindow(t.creneau||'');
     var statusLabel,statusColor;
-    if(ts.dep){statusLabel='Termin\u00e9';statusColor='var(--green)';}
+    if(ts.dep){statusLabel='Terminé';statusColor='var(--green)';}
     else if(ts.chg){statusLabel='En chargement';statusColor='var(--amber)';}
-    else if(ts.quai){statusLabel='\u00c0 quai';statusColor='var(--blue)';}
-    else if(ts.arr){statusLabel='Arriv\u00e9';statusColor='var(--blue)';}
+    else if(ts.quai){statusLabel='À quai';statusColor='var(--blue)';}
+    else if(ts.arr){statusLabel='Arrivé';statusColor='var(--blue)';}
     else if(ponct.status==='retard_reel'||ponct.status==='retard_auto'){statusLabel='En retard';statusColor='var(--red)';}
     else if(ponct.status==='attente'){statusLabel='Attendu';statusColor='var(--amber)';}
-    else{statusLabel='Pr\u00e9vu';statusColor='var(--t3)';}
+    else{statusLabel='Prévu';statusColor='var(--t3)';}
     var etaLabel='';
-    if(!ts.arr&&win){
-      var eta=win.start;var etaH=Math.floor(eta/60);var etaM=eta%60;
-      etaLabel=(etaH<10?'0':'')+etaH+'h'+(etaM<10?'0':'')+etaM;
-    }
+    if(!ts.arr&&win){var eta=win.start;var etaH=Math.floor(eta/60);var etaM=eta%60;etaLabel=(etaH<10?'0':'')+etaH+'h'+(etaM<10?'0':'')+etaM;}
     var pretBadge='';
     if(ts.hasOwnProperty('arr_pret')){
-      if(ts.arr_pret){pretBadge='<span class="fdr-badge fdr-badge-pret">\u2713 Pr\u00eate</span>';}
-      else{
-        var motifTxt='Pas pr\u00eate';
-        if(ts.arr_motif==='retard_silo')motifTxt='\u23f3 Retard silo';
-        else if(ts.arr_motif==='retard_prepa')motifTxt='\uD83D\uDD27 Retard pr\u00e9pa';
-        pretBadge='<span class="fdr-badge fdr-badge-notpret">\u2717 '+motifTxt+'</span>';
-      }
+      if(ts.arr_pret){pretBadge='<span class="fdr-badge fdr-badge-pret">✓ Prête</span>';}
+      else{var motifTxt='Pas prête';if(ts.arr_motif==='retard_silo')motifTxt='⏳ Retard silo';else if(ts.arr_motif==='retard_prepa')motifTxt='🔧 Retard prépa';pretBadge='<span class="fdr-badge fdr-badge-notpret">✗ '+motifTxt+'</span>';}
     }
     var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'');
-    var quaiBadge=quaiLabel?('<span class="fdr-badge fdr-badge-quai">Quai '+quaiLabel+'</span>'):'';
     var livIds=t.deliveries||[];
     var livs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
-    var tPal=0,tSilo=0,tPick=0;
-    livs.forEach(function(d){tPal+=(d.palSilo||0);tSilo+=(d.colisSilo||0);tPick+=(d.colisPick||0);});
+    var tPal=0,tSilo=0,tPick=0,tPalRest=0,tSiloRest=0,tPickRest=0;
+    livs.forEach(function(d){
+      tPal+=(d.palSilo||0); tSilo+=(d.colisSilo||0); tPick+=(d.colisPick||0);
+      var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};
+      tPalRest+=rm.palRest; tSiloRest+=rm.siloRest; tPickRest+=rm.pickRest;
+    });
     var borderColor=(statusColor==='var(--red)')?'rgba(255,69,58,.3)':(statusColor==='var(--green)'?'rgba(45,202,114,.2)':'rgba(255,255,255,.08)');
     html+='<div class="fdr-truck-card" style="border-color:'+borderColor+'">';
     html+='<div class="fdr-truck-head">';
-    html+='<div class="fdr-truck-name">\uD83D\uDE9B '+(t.transporteur||t.itin||'?')+'</div>';
+    html+='<div class="fdr-truck-name">🚛 '+(t.transporteur||t.itin||'?')+'</div>';
     html+='<div class="fdr-truck-badges">';
-    if(t.creneau)html+='<span class="fdr-badge fdr-badge-creneau">\u23f0 '+t.creneau+'</span>';
-    if(quaiBadge)html+=quaiBadge;
+    if(t.creneau) html+='<span class="fdr-badge fdr-badge-creneau">⏰ '+t.creneau+'</span>';
+    if(quaiLabel) html+='<span class="fdr-badge fdr-badge-quai">Quai '+quaiLabel+'</span>';
     html+='<span class="fdr-badge fdr-badge-status" style="color:'+statusColor+'">'+statusLabel+'</span>';
-    if(pretBadge)html+=pretBadge;
-    if(etaLabel&&!ts.dep)html+='<span class="fdr-badge fdr-badge-eta">\uD83D\uDD52 ETA '+etaLabel+'</span>';
-    if(ts.arr&&!ts.dep)html+='<span class="fdr-badge" style="background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--blue)">\u2192 Arr. '+fmtTime(ts.arr)+'</span>';
-    if(ts.dep)html+='<span class="fdr-badge" style="background:rgba(45,202,114,.12);border:1px solid rgba(45,202,114,.3);color:var(--green)">\u2714 D\u00e9p. '+fmtTime(ts.dep)+'</span>';
+    if(pretBadge) html+=pretBadge;
+    if(etaLabel&&!ts.dep) html+='<span class="fdr-badge fdr-badge-eta">🕒 ETA '+etaLabel+'</span>';
+    if(ts.arr&&!ts.dep) html+='<span class="fdr-badge" style="background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--blue)">→ Arr. '+fmtTime(ts.arr)+'</span>';
+    if(ts.dep) html+='<span class="fdr-badge" style="background:rgba(45,202,114,.12);border:1px solid rgba(45,202,114,.3);color:var(--green)">✔ Dép. '+fmtTime(ts.dep)+'</span>';
     html+='</div></div>';
     if(livs.length){
       html+='<div class="fdr-truck-body">';
-      html+='<div class="fdr-delivs-title">\uD83D\uDCE6 Livraisons ('+livs.length+')</div>';
-      html+='<table class="fdr-delivs-table"><thead><tr><th>N\u00b0</th><th>Destination</th><th>Ville</th><th>Pal.</th><th>Colis silo</th><th>Colis pick</th></tr></thead><tbody>';
+      html+='<div class="fdr-delivs-title">📦 Livraisons ('+livs.length+')</div>';
+      var showRest=hasArticles;
+      html+='<table class="fdr-delivs-table"><thead><tr><th>N°</th><th>Destination</th><th>Ville</th>';
+      if(showRest){
+        html+='<th>🏭 Pal. rest.</th><th>📦 Silo rest.</th><th>✋ Pick rest.</th>';
+      } else {
+        html+='<th>Pal.</th><th>Colis silo</th><th>Colis pick</th>';
+      }
+      html+='</tr></thead><tbody>';
       livs.forEach(function(d){
+        var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};
         html+='<tr>';
         html+='<td class="fdr-del-id">'+escH(d.id)+'</td>';
-        html+='<td class="fdr-del-dest">'+escH(d.dest||'\u2014')+'</td>';
-        html+='<td class="fdr-del-ville">'+escH(d.ville||'\u2014')+'</td>';
-        html+='<td class="fdr-del-pal">'+(d.palSilo?Math.round(d.palSilo)+' pal.':'\u2014')+'</td>';
-        html+='<td class="fdr-del-silo">'+(d.colisSilo?Math.round(d.colisSilo).toLocaleString('fr')+' cs':'\u2014')+'</td>';
-        html+='<td class="fdr-del-pick">'+(d.colisPick?Math.round(d.colisPick).toLocaleString('fr')+' pk':'\u2014')+'</td>';
+        html+='<td class="fdr-del-dest">'+escH(d.dest||'—')+'</td>';
+        html+='<td class="fdr-del-ville">'+escH(d.ville||'—')+'</td>';
+        if(showRest){
+          html+='<td class="fdr-del-pal">'+(d.palSilo?'<strong>'+Math.round(rm.palRest)+'</strong><span style="opacity:.5">/'+Math.round(d.palSilo)+'</span>':'—')+'</td>';
+          html+='<td class="fdr-del-silo">'+(d.colisSilo?'<strong>'+Math.round(rm.siloRest).toLocaleString('fr')+'</strong><span style="opacity:.5">/'+Math.round(d.colisSilo).toLocaleString('fr')+'</span>':'—')+'</td>';
+          html+='<td class="fdr-del-pick">'+(d.colisPick?'<strong>'+Math.round(rm.pickRest).toLocaleString('fr')+'</strong><span style="opacity:.5">/'+Math.round(d.colisPick).toLocaleString('fr')+'</span>':'—')+'</td>';
+        } else {
+          html+='<td class="fdr-del-pal">'+(d.palSilo?Math.round(d.palSilo)+' pal.':'—')+'</td>';
+          html+='<td class="fdr-del-silo">'+(d.colisSilo?Math.round(d.colisSilo).toLocaleString('fr')+' cs':'—')+'</td>';
+          html+='<td class="fdr-del-pick">'+(d.colisPick?Math.round(d.colisPick).toLocaleString('fr')+' pk':'—')+'</td>';
+        }
         html+='</tr>';
       });
-      html+='</tbody></table></div>';
-    }else{
-      html+='<div class="fdr-truck-body" style="color:var(--t3);font-size:12px;font-style:italic">Aucune livraison associ\u00e9e</div>';
+      html+='</tbody></table>';
+      // Rest summary bar for truck
+      if(hasArticles && (tPal||tSilo||tPick)){
+        html+='<div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">';
+        if(tPal){
+          var pct=tPal>0?Math.round((1-tPalRest/tPal)*100):100;
+          html+='<div style="flex:1;min-width:140px">';
+          html+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:3px"><span>🏭 Pal. SILO</span><span style="color:var(--indigo);font-weight:700">'+Math.round(tPalRest)+' rest. / '+Math.round(tPal)+'</span></div>';
+          html+='<div style="height:4px;border-radius:3px;background:rgba(94,92,230,.15);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--indigo);width:'+pct+'%"></div></div>';
+          html+='</div>';
+        }
+        if(tSilo){
+          var pctS=tSilo>0?Math.round((1-tSiloRest/tSilo)*100):100;
+          html+='<div style="flex:1;min-width:140px">';
+          html+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:3px"><span>📦 Colis silo</span><span style="color:var(--blue);font-weight:700">'+Math.round(tSiloRest).toLocaleString('fr')+' rest.</span></div>';
+          html+='<div style="height:4px;border-radius:3px;background:rgba(59,130,246,.15);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--blue);width:'+pctS+'%"></div></div>';
+          html+='</div>';
+        }
+        if(tPick){
+          var pctP=tPick>0?Math.round((1-tPickRest/tPick)*100):100;
+          html+='<div style="flex:1;min-width:140px">';
+          html+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:3px"><span>✋ Colis pick</span><span style="color:var(--purple);font-weight:700">'+Math.round(tPickRest).toLocaleString('fr')+' rest.</span></div>';
+          html+='<div style="height:4px;border-radius:3px;background:rgba(191,90,242,.15);overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--purple);width:'+pctP+'%"></div></div>';
+          html+='</div>';
+        }
+        html+='</div>';
+      }
+      html+='</div>';
+    } else {
+      html+='<div class="fdr-truck-body" style="color:var(--t3);font-size:12px;font-style:italic">Aucune livraison associée</div>';
     }
     html+='<div class="fdr-truck-foot">';
-    html+='<div class="fdr-foot-item"><span>\uD83D\uDCE6</span><strong>'+livs.length+'</strong> livraison'+(livs.length>1?'s':'')+'</div>';
-    if(tPal)html+='<div class="fdr-foot-item"><span>\uD83C\uDFED</span><strong>'+Math.round(tPal)+'</strong> palettes</div>';
-    if(tSilo)html+='<div class="fdr-foot-item"><span>\uD83D\uDCE6</span><strong>'+Math.round(tSilo).toLocaleString('fr')+'</strong> colis silo</div>';
-    if(tPick)html+='<div class="fdr-foot-item"><span>\u270b</span><strong>'+Math.round(tPick).toLocaleString('fr')+'</strong> colis picking</div>';
+    html+='<div class="fdr-foot-item"><span>📦</span><strong>'+livs.length+'</strong> livraison'+(livs.length>1?'s':'')+'</div>';
+    if(hasArticles){
+      if(tPal) html+='<div class="fdr-foot-item" style="color:var(--indigo)"><span>🏭</span><strong>'+Math.round(tPalRest)+'</strong><span style="opacity:.5">/'+Math.round(tPal)+'</span> pal.</div>';
+      if(tSilo) html+='<div class="fdr-foot-item" style="color:var(--blue)"><span>📦</span><strong>'+Math.round(tSiloRest).toLocaleString('fr')+'</strong><span style="opacity:.5">/'+Math.round(tSilo).toLocaleString('fr')+'</span> cs silo</div>';
+      if(tPick) html+='<div class="fdr-foot-item" style="color:var(--purple)"><span>✋</span><strong>'+Math.round(tPickRest).toLocaleString('fr')+'</strong><span style="opacity:.5">/'+Math.round(tPick).toLocaleString('fr')+'</span> cs pick</div>';
+    } else {
+      if(tPal) html+='<div class="fdr-foot-item"><span>🏭</span><strong>'+Math.round(tPal)+'</strong> pal.</div>';
+      if(tSilo) html+='<div class="fdr-foot-item"><span>📦</span><strong>'+Math.round(tSilo).toLocaleString('fr')+'</strong> cs silo</div>';
+      if(tPick) html+='<div class="fdr-foot-item"><span>✋</span><strong>'+Math.round(tPick).toLocaleString('fr')+'</strong> cs pick</div>';
+    }
     html+='</div></div>';
   });
   html+='</div>';
@@ -5666,6 +5750,19 @@ function printFeuilleDeRoute(){
   dayTrucks.sort(function(a,b){return creToMinutes(a.creneau)-creToMinutes(b.creneau);});
   var dateLabel=new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   var now=Date.now();
+
+  // Build restMap
+  var allLivIds={};
+  dayTrucks.forEach(function(t){ (t.deliveries||[]).forEach(function(id){allLivIds[id]=true;}); });
+  var restMap={};
+  (APP.articles||[]).forEach(function(a){
+    if(!allLivIds[a.liv]) return;
+    if(!restMap[a.liv]) restMap[a.liv]={palRest:0,siloRest:0,pickRest:0};
+    if(a.vp!=='C'){ restMap[a.liv].palRest+=(a.pal||0); restMap[a.liv].siloRest+=(a.silo||0); }
+    if(a.wm!=='C'){ restMap[a.liv].pickRest+=(a.pick||0); }
+  });
+  var hasArticles=Object.keys(restMap).length>0;
+
   var w=window.open('','TruckFlowFDR','width=1100,height=900,resizable=yes');
   if(!w){alert('Autorisez les popups pour imprimer.');return;}
   w.document.open();
@@ -5676,8 +5773,9 @@ function printFeuilleDeRoute(){
   w.document.write('.print-header{text-align:center;border-bottom:2px solid #1e3a5f;padding-bottom:12px;margin-bottom:20px}');
   w.document.write('.print-header h1{font-size:20px;color:#1e3a5f;font-weight:900;margin-bottom:4px}');
   w.document.write('.print-header p{font-size:12px;color:#555}');
-  w.document.write('.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}');
-  w.document.write('.kpi-chip{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;background:#eee;border:1px solid #ccc}');
+  w.document.write('.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}');
+  w.document.write('.kpi-chip{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#eee;border:1px solid #ccc;white-space:nowrap}');
+  w.document.write('.kpi-chip strong{font-weight:900}');
   w.document.write('.truck-card{border:1px solid #ccc;border-radius:8px;margin-bottom:16px;page-break-inside:avoid;break-inside:avoid}');
   w.document.write('.truck-head{background:#f5f7fa;padding:10px 14px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #ddd;border-radius:8px 8px 0 0}');
   w.document.write('.truck-name{font-size:14px;font-weight:900;color:#111;flex:1;min-width:120px}');
@@ -5696,41 +5794,58 @@ function printFeuilleDeRoute(){
   w.document.write('table{width:100%;border-collapse:collapse;font-size:11px}');
   w.document.write('th{text-align:left;padding:5px 8px;font-size:10px;font-weight:700;text-transform:uppercase;color:#666;border-bottom:1px solid #ddd;background:#fafafa}');
   w.document.write('td{padding:5px 8px;border-bottom:1px solid #eee;color:#111;vertical-align:middle}');
-  w.document.write('tr:last-child td{border-bottom:none}');
-  w.document.write('tr:nth-child(even) td{background:#fafafa}');
+  w.document.write('tr:last-child td{border-bottom:none}tr:nth-child(even) td{background:#fafafa}');
   w.document.write('.td-id{font-family:monospace;font-size:10px;font-weight:700;color:#1e40af}');
-  w.document.write('.td-dest{font-weight:600}');
-  w.document.write('.td-ville{color:#666;font-size:10px}');
-  w.document.write('.td-pal{color:#4338ca;font-weight:700}');
-  w.document.write('.td-silo{color:#1d4ed8}');
-  w.document.write('.td-pick{color:#7e22ce;font-weight:700}');
+  w.document.write('.td-dest{font-weight:600}.td-ville{color:#666;font-size:10px}');
+  w.document.write('.td-pal{color:#4338ca;font-weight:700}.td-silo{color:#1d4ed8}.td-pick{color:#7e22ce;font-weight:700}');
+  w.document.write('.rest-bar-wrap{margin-top:8px;display:flex;gap:10px;flex-wrap:wrap}');
+  w.document.write('.rest-bar-item{flex:1;min-width:130px}');
+  w.document.write('.rest-bar-label{display:flex;justify-content:space-between;font-size:10px;color:#555;margin-bottom:3px}');
+  w.document.write('.rest-bar-track{height:4px;border-radius:3px;background:#e5e7eb;overflow:hidden}');
+  w.document.write('.rest-bar-fill{height:100%;border-radius:3px}');
   w.document.write('.truck-foot{display:flex;gap:14px;padding:8px 14px;background:#fafafa;border-top:1px solid #eee;font-size:11px;flex-wrap:wrap;border-radius:0 0 8px 8px}');
-  w.document.write('.foot-item{color:#555}');
-  w.document.write('.foot-item strong{color:#111;font-weight:700}');
+  w.document.write('.foot-item{color:#555}.foot-item strong{color:#111;font-weight:700}.foot-rest{font-size:10px;color:#888}');
   w.document.write('.no-delivs{font-style:italic;color:#888;font-size:11px;padding:8px 0}');
   w.document.write('.no-print{margin-bottom:16px}');
   w.document.write('@media print{.no-print{display:none!important}body{padding:10px}.truck-card{page-break-inside:avoid}}');
   w.document.write('</style></head><body>');
   w.document.write('<div class="no-print"><button onclick="window.print()" style="padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #1e3a5f;border-radius:6px;background:#1e3a5f;color:#fff;margin-right:8px">&#128438; Imprimer / Enregistrer PDF</button><button onclick="window.close()" style="padding:8px 16px;font-size:12px;cursor:pointer;border:1px solid #ccc;border-radius:6px;background:#f5f5f5">Fermer</button></div>');
   w.document.write('<div class="print-header"><h1>&#128203; Feuille de route &mdash; TruckFlow '+APP_VERSION+'</h1><p>'+escH(dateLabel)+'</p></div>');
-  // KPIs
-  var totalLivs=0,totalPal=0,totalColis=0,nDone=0,nLate=0;
+
+  // Global KPIs
+  var totalLivs=0,totalPal=0,totalSilo=0,totalPick=0,totalPalRest=0,totalSiloRest=0,totalPickRest=0,nDone=0,nLate=0;
   dayTrucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
     if(ts.dep) nDone++;
     var p=getPonctualite(t,ts,now);
     if(p.status==='retard_reel'||p.status==='retard_auto') nLate++;
-    (t.deliveries||[]).forEach(function(id){var d=getDeliv(id);if(!d)return;totalLivs++;totalPal+=(d.palSilo||0);totalColis+=(d.colisSilo||0)+(d.colisPick||0);});
+    (t.deliveries||[]).forEach(function(id){
+      var d=getDeliv(id); if(!d) return;
+      totalLivs++; totalPal+=(d.palSilo||0); totalSilo+=(d.colisSilo||0); totalPick+=(d.colisPick||0);
+      var rm=restMap[id]||{palRest:0,siloRest:0,pickRest:0};
+      totalPalRest+=rm.palRest; totalSiloRest+=rm.siloRest; totalPickRest+=rm.pickRest;
+    });
   });
   var kpiHtml='<div class="kpis">';
   kpiHtml+='<span class="kpi-chip">'+dayTrucks.length+' camion'+(dayTrucks.length>1?'s':'')+'</span>';
   kpiHtml+='<span class="kpi-chip">'+totalLivs+' livraison'+(totalLivs>1?'s':'')+'</span>';
-  if(totalPal) kpiHtml+='<span class="kpi-chip" style="background:#ede9fe;border-color:#c4b5fd;color:#4c1d95">'+Math.round(totalPal)+' pal.</span>';
-  if(totalColis) kpiHtml+='<span class="kpi-chip" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">'+Math.round(totalColis).toLocaleString('fr')+' col.</span>';
+  if(totalPal){
+    if(hasArticles) kpiHtml+='<span class="kpi-chip" style="background:#ede9fe;border-color:#c4b5fd;color:#4c1d95">&#127981; Pal. SILO : <strong>'+Math.round(totalPalRest)+'</strong>/'+Math.round(totalPal)+' rest.</span>';
+    else kpiHtml+='<span class="kpi-chip" style="background:#ede9fe;border-color:#c4b5fd;color:#4c1d95">'+Math.round(totalPal)+' pal.</span>';
+  }
+  if(totalSilo){
+    if(hasArticles) kpiHtml+='<span class="kpi-chip" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">&#128230; Silo : <strong>'+Math.round(totalSiloRest).toLocaleString('fr')+'</strong>/'+Math.round(totalSilo).toLocaleString('fr')+' cs rest.</span>';
+    else kpiHtml+='<span class="kpi-chip" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">'+Math.round(totalSilo).toLocaleString('fr')+' cs silo</span>';
+  }
+  if(totalPick){
+    if(hasArticles) kpiHtml+='<span class="kpi-chip" style="background:#f5f3ff;border-color:#c4b5fd;color:#7e22ce">&#9995; Pick : <strong>'+Math.round(totalPickRest).toLocaleString('fr')+'</strong>/'+Math.round(totalPick).toLocaleString('fr')+' cs rest.</span>';
+    else kpiHtml+='<span class="kpi-chip" style="background:#f5f3ff;border-color:#c4b5fd;color:#7e22ce">'+Math.round(totalPick).toLocaleString('fr')+' cs pick</span>';
+  }
   if(nLate) kpiHtml+='<span class="kpi-chip" style="background:#fee2e2;border-color:#fca5a5;color:#991b1b">'+nLate+' en retard</span>';
   if(nDone) kpiHtml+='<span class="kpi-chip" style="background:#dcfce7;border-color:#86efac;color:#166534">'+nDone+' terminé'+(nDone>1?'s':'')+'</span>';
   kpiHtml+='</div>';
   w.document.write(kpiHtml);
+
   // Per-truck cards
   dayTrucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
@@ -5748,13 +5863,17 @@ function printFeuilleDeRoute(){
     var pretBadge='';
     if(ts.hasOwnProperty('arr_pret')){
       if(ts.arr_pret){pretBadge='<span class="badge badge-pret">✓ Prête</span>';}
-      else{var motifTxt='Pas prête';if(ts.arr_motif==='retard_silo')motifTxt='⏳ Retard silo';else if(ts.arr_motif==='retard_prepa')motifTxt='🔧 Retard prépa';pretBadge='<span class="badge badge-notpret">✗ '+motifTxt+'</span>';}
+      else{var motifTxt='Pas prête';if(ts.arr_motif==='retard_silo')motifTxt='⏳ Retard silo';else if(ts.arr_motif==='retard_prepa')motifTxt='Retard prépa';pretBadge='<span class="badge badge-notpret">✗ '+motifTxt+'</span>';}
     }
     var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'');
     var livIds=t.deliveries||[];
     var livs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
-    var tPal=0,tSilo=0,tPick=0;
-    livs.forEach(function(d){tPal+=(d.palSilo||0);tSilo+=(d.colisSilo||0);tPick+=(d.colisPick||0);});
+    var tPal=0,tSilo=0,tPick=0,tPalRest=0,tSiloRest=0,tPickRest=0;
+    livs.forEach(function(d){
+      tPal+=(d.palSilo||0); tSilo+=(d.colisSilo||0); tPick+=(d.colisPick||0);
+      var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};
+      tPalRest+=rm.palRest; tSiloRest+=rm.siloRest; tPickRest+=rm.pickRest;
+    });
     var cardBorderStyle=statusCls==='badge-late'?'border-color:#fca5a5':statusCls==='badge-done'?'border-color:#86efac':'';
     w.document.write('<div class="truck-card" style="'+cardBorderStyle+'">');
     w.document.write('<div class="truck-head">');
@@ -5770,26 +5889,51 @@ function printFeuilleDeRoute(){
     if(livs.length){
       w.document.write('<div class="truck-body">');
       w.document.write('<div class="delivs-title">📦 Livraisons ('+livs.length+')</div>');
-      w.document.write('<table><thead><tr><th>N°</th><th>Destination</th><th>Ville</th><th>Pal.</th><th>Colis silo</th><th>Colis pick</th></tr></thead><tbody>');
+      if(hasArticles){
+        w.document.write('<table><thead><tr><th>N°</th><th>Destination</th><th>Ville</th><th>🏭 Pal. rest.</th><th>📦 Silo rest.</th><th>✋ Pick rest.</th></tr></thead><tbody>');
+      } else {
+        w.document.write('<table><thead><tr><th>N°</th><th>Destination</th><th>Ville</th><th>Pal.</th><th>Colis silo</th><th>Colis pick</th></tr></thead><tbody>');
+      }
       livs.forEach(function(d){
+        var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};
         w.document.write('<tr>');
         w.document.write('<td class="td-id">'+escH(d.id)+'</td>');
         w.document.write('<td class="td-dest">'+escH(d.dest||'—')+'</td>');
         w.document.write('<td class="td-ville">'+escH(d.ville||'—')+'</td>');
-        w.document.write('<td class="td-pal">'+(d.palSilo?Math.round(d.palSilo)+' pal.':'—')+'</td>');
-        w.document.write('<td class="td-silo">'+(d.colisSilo?Math.round(d.colisSilo).toLocaleString('fr')+' cs':'—')+'</td>');
-        w.document.write('<td class="td-pick">'+(d.colisPick?Math.round(d.colisPick).toLocaleString('fr')+' pk':'—')+'</td>');
+        if(hasArticles){
+          w.document.write('<td class="td-pal">'+(d.palSilo?'<strong>'+Math.round(rm.palRest)+'</strong> <span class="foot-rest">/'+Math.round(d.palSilo)+'</span>':'—')+'</td>');
+          w.document.write('<td class="td-silo">'+(d.colisSilo?'<strong>'+Math.round(rm.siloRest).toLocaleString('fr')+'</strong> <span class="foot-rest">/'+Math.round(d.colisSilo).toLocaleString('fr')+'</span>':'—')+'</td>');
+          w.document.write('<td class="td-pick">'+(d.colisPick?'<strong>'+Math.round(rm.pickRest).toLocaleString('fr')+'</strong> <span class="foot-rest">/'+Math.round(d.colisPick).toLocaleString('fr')+'</span>':'—')+'</td>');
+        } else {
+          w.document.write('<td class="td-pal">'+(d.palSilo?Math.round(d.palSilo)+' pal.':'—')+'</td>');
+          w.document.write('<td class="td-silo">'+(d.colisSilo?Math.round(d.colisSilo).toLocaleString('fr')+' cs':'—')+'</td>');
+          w.document.write('<td class="td-pick">'+(d.colisPick?Math.round(d.colisPick).toLocaleString('fr')+' pk':'—')+'</td>');
+        }
         w.document.write('</tr>');
       });
-      w.document.write('</tbody></table></div>');
+      w.document.write('</tbody></table>');
+      if(hasArticles && (tPal||tSilo||tPick)){
+        w.document.write('<div class="rest-bar-wrap">');
+        if(tPal){var pct=tPal>0?Math.round((1-tPalRest/tPal)*100):100;w.document.write('<div class="rest-bar-item"><div class="rest-bar-label"><span>&#127981; Palettes SILO</span><span style="color:#4338ca;font-weight:700">'+Math.round(tPalRest)+' rest./'+Math.round(tPal)+'</span></div><div class="rest-bar-track"><div class="rest-bar-fill" style="background:#4338ca;width:'+pct+'%"></div></div></div>');}
+        if(tSilo){var pctS=tSilo>0?Math.round((1-tSiloRest/tSilo)*100):100;w.document.write('<div class="rest-bar-item"><div class="rest-bar-label"><span>&#128230; Colis silo</span><span style="color:#1d4ed8;font-weight:700">'+Math.round(tSiloRest).toLocaleString('fr')+' rest.</span></div><div class="rest-bar-track"><div class="rest-bar-fill" style="background:#1d4ed8;width:'+pctS+'%"></div></div></div>');}
+        if(tPick){var pctP=tPick>0?Math.round((1-tPickRest/tPick)*100):100;w.document.write('<div class="rest-bar-item"><div class="rest-bar-label"><span>&#9995; Colis picking</span><span style="color:#7e22ce;font-weight:700">'+Math.round(tPickRest).toLocaleString('fr')+' rest.</span></div><div class="rest-bar-track"><div class="rest-bar-fill" style="background:#7e22ce;width:'+pctP+'%"></div></div></div>');}
+        w.document.write('</div>');
+      }
+      w.document.write('</div>');
     } else {
       w.document.write('<div class="truck-body"><div class="no-delivs">Aucune livraison associée</div></div>');
     }
     w.document.write('<div class="truck-foot">');
     w.document.write('<span class="foot-item">📦 <strong>'+livs.length+'</strong> livraison'+(livs.length>1?'s':'')+'</span>');
-    if(tPal) w.document.write('<span class="foot-item">🏭 <strong>'+Math.round(tPal)+'</strong> pal.</span>');
-    if(tSilo) w.document.write('<span class="foot-item">📦 <strong>'+Math.round(tSilo).toLocaleString('fr')+'</strong> cs silo</span>');
-    if(tPick) w.document.write('<span class="foot-item">✋ <strong>'+Math.round(tPick).toLocaleString('fr')+'</strong> cs pick</span>');
+    if(hasArticles){
+      if(tPal) w.document.write('<span class="foot-item" style="color:#4338ca">🏭 <strong>'+Math.round(tPalRest)+'</strong> <span class="foot-rest">/'+Math.round(tPal)+'</span> pal.</span>');
+      if(tSilo) w.document.write('<span class="foot-item" style="color:#1d4ed8">📦 <strong>'+Math.round(tSiloRest).toLocaleString('fr')+'</strong> <span class="foot-rest">/'+Math.round(tSilo).toLocaleString('fr')+'</span> cs silo</span>');
+      if(tPick) w.document.write('<span class="foot-item" style="color:#7e22ce">✋ <strong>'+Math.round(tPickRest).toLocaleString('fr')+'</strong> <span class="foot-rest">/'+Math.round(tPick).toLocaleString('fr')+'</span> cs pick</span>');
+    } else {
+      if(tPal) w.document.write('<span class="foot-item">🏭 <strong>'+Math.round(tPal)+'</strong> pal.</span>');
+      if(tSilo) w.document.write('<span class="foot-item">📦 <strong>'+Math.round(tSilo).toLocaleString('fr')+'</strong> cs silo</span>');
+      if(tPick) w.document.write('<span class="foot-item">✋ <strong>'+Math.round(tPick).toLocaleString('fr')+'</strong> cs pick</span>');
+    }
     w.document.write('</div>');
     w.document.write('</div>');
   });
