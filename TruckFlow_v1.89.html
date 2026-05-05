@@ -6243,8 +6243,8 @@ function printSyntheseRoute(){
       w.document.write('<td style="font-weight:700;color:'+statColor+'">'+statLabel+'</td>');
       w.document.write('<td class="td-time">'+fmtTS(ts2.arr)+'</td>');
       if(gPal) w.document.write('<td class="td-pal">'+(hasArticles&&tPalR2?Math.round(tPalR2):'&mdash;')+'</td>');
-      if(gSilo) w.document.write('<td class="td-silo">'+(hasArticles&&tSiloR2?Math.round(tSiloR2).toLocaleString(\'fr\'):'&mdash;')+'</td>');
-      if(gPick) w.document.write('<td class="td-pick">'+(hasArticles&&tPickR2?Math.round(tPickR2).toLocaleString(\'fr\'):'&mdash;')+'</td>');
+      if(gSilo) w.document.write('<td class="td-silo">'+(hasArticles&&tSiloR2?Math.round(tSiloR2).toLocaleString('fr'):'&mdash;')+'</td>');
+      if(gPick) w.document.write('<td class="td-pick">'+(hasArticles&&tPickR2?Math.round(tPickR2).toLocaleString('fr'):'&mdash;')+'</td>');
       w.document.write('<td style="min-width:100px"></td>');
       w.document.write('</tr>');
     });
