@@ -5647,7 +5647,8 @@ function renderFeuilleDeRoute(date){
       if(ts.arr_pret){pretBadge='<span class="fdr-badge fdr-badge-pret">✓ Prête</span>';}
       else{var motifTxt='Pas prête';if(ts.arr_motif==='retard_silo')motifTxt='⏳ Retard silo';else if(ts.arr_motif==='retard_prepa')motifTxt='🔧 Retard prépa';pretBadge='<span class="fdr-badge fdr-badge-notpret">✗ '+motifTxt+'</span>';}
     }
-    var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'');
+    var _qa=null;Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)_qa=Number(q);});
+    var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):(_qa?('Q'+_qa):''));
     var livIds=t.deliveries||[];
     var livs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
     var tPal=0,tSilo=0,tPick=0,tPalRest=0,tSiloRest=0,tPickRest=0;
@@ -5867,7 +5868,8 @@ function printFeuilleDeRoute(){
       if(ts.arr_pret){pretBadge='<span class="badge badge-pret">✓ Prête</span>';}
       else{var motifTxt='Pas prête';if(ts.arr_motif==='retard_silo')motifTxt='⏳ Retard silo';else if(ts.arr_motif==='retard_prepa')motifTxt='Retard prépa';pretBadge='<span class="badge badge-notpret">✗ '+motifTxt+'</span>';}
     }
-    var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'');
+    var _qa=null;Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)_qa=Number(q);});
+    var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):(_qa?('Q'+_qa):''));
     var livIds=t.deliveries||[];
     var livs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
     var tPal=0,tSilo=0,tPick=0,tPalRest=0,tSiloRest=0,tPickRest=0;
@@ -6117,7 +6119,7 @@ function printSyntheseRoute(){
   function fmtTS(iso){ return iso?fmtTime(iso):'—'; }
 
   // Table columns presence
-  var hasQuai=allRows.some(function(r){return r.t.quai||r.t.assignedQuai;});
+  var hasQuai=allRows.some(function(r){return r.t.quai||r.t.assignedQuai||Object.values(quaiAssign).indexOf(r.t.id)>=0;});
   var hasPret=allRows.some(function(r){return r.ts.hasOwnProperty('arr_pret');});
 
   // Render groups: En cours, En retard, En attente, Partis (live + archived)
@@ -6157,7 +6159,8 @@ function printSyntheseRoute(){
         var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};
         tPalR+=rm.palRest; tSiloR+=rm.siloRest; tPickR+=rm.pickRest;
       });
-      var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'—');
+      var _qa=null;Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)_qa=Number(q);});
+      var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):(_qa?('Q'+_qa):'—'));
       var pretTxt='—',pretCls='td-nd';
       if(ts2.hasOwnProperty('arr_pret')){
         if(ts2.arr_pret){pretTxt='✓ Prête';pretCls='td-ok';}
@@ -6225,7 +6228,8 @@ function printSyntheseRoute(){
       var livs2=(t.deliveries||[]).map(function(id){return getDeliv(id);}).filter(Boolean);
       var tPalR2=0,tSiloR2=0,tPickR2=0;
       livs2.forEach(function(d){var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};tPalR2+=rm.palRest;tSiloR2+=rm.siloRest;tPickR2+=rm.pickRest;});
-      var quaiLbl=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'—');
+      var _qa=null;Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)_qa=Number(q);});
+      var quaiLbl=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):(_qa?('Q'+_qa):'—'));
       var statLabel,statColor;
       if(r.bucket===1){
         if(ts2.fin_chg){statLabel='Chargé';statColor='#166534';}
@@ -6292,7 +6296,8 @@ function printOneTruckRoute(truckId){
   else if(ponct.status==='retard_reel'||ponct.status==='retard_auto') statusLabel='En retard';
   else if(ponct.status==='attente') statusLabel='Attendu';
   else statusLabel='Prévu';
-  var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'—');
+  var _qa=null;Object.keys(quaiAssign).forEach(function(q){if(quaiAssign[q]===t.id)_qa=Number(q);});
+  var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):(_qa?('Q'+_qa):'—'));
   var truckName=t.transporteur||t.itin||'?';
   var etaLabel='';
   if(!ts.arr&&win){var e=win.start;etaLabel=(Math.floor(e/60)<10?'0':'')+Math.floor(e/60)+'h'+(e%60<10?'0':'')+(e%60);}
