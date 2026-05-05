@@ -6034,12 +6034,9 @@ function printSyntheseRoute(){
   w.document.write('.bar-fill{height:100%;border-radius:4px}.bar-pct{position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;font-size:9px;font-weight:700;color:#fff}');
   w.document.write('.bar-nums{width:180px;text-align:right;font-size:10px;color:#555;white-space:nowrap}');
   w.document.write('.depart-section{border:2px solid #166534;border-radius:8px;margin-bottom:18px;overflow:hidden}');
-  w.document.write('.passation{border:2px solid #1e3a5f;border-radius:8px;padding:14px 16px;margin-top:20px}');
-  w.document.write('.passation h3{font-size:12px;font-weight:700;color:#1e3a5f;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}');
-  w.document.write('.pass-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}');
-  w.document.write('.pass-box{border:1px solid #ccc;border-radius:6px;padding:10px 14px;min-height:60px}');
-  w.document.write('.pass-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px}');
-  w.document.write('.pass-wide{grid-column:1/-1}');
+  w.document.write('.recap-section{border:2px solid #1e3a5f;border-radius:8px;padding:14px 16px;margin-top:20px}');
+  w.document.write('.recap-section h3{font-size:12px;font-weight:700;color:#1e3a5f;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}');
+  w.document.write('.recap-tbl{border:1px solid #e5e7eb!important;margin-bottom:0!important}');
   w.document.write('.no-print{margin-bottom:16px}@media print{.no-print{display:none!important}body{padding:10px;font-size:10px}table{font-size:10px}.ph-left h1{font-size:16px}}');
   w.document.write('</style></head><body>');
   w.document.write('<div class="no-print"><button onclick="window.print()" style="padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #1e3a5f;border-radius:6px;background:#1e3a5f;color:#fff;margin-right:8px">&#128438; Imprimer / Enregistrer PDF</button><button onclick="window.close()" style="padding:8px 16px;font-size:12px;cursor:pointer;border:1px solid #ccc;border-radius:6px;background:#f5f5f5">Fermer</button></div>');
@@ -6047,7 +6044,7 @@ function printSyntheseRoute(){
   // Header
   w.document.write('<div class="ph">');
   w.document.write('<div class="ph-left"><h1>&#128202; Feuille de synth&egrave;se &mdash; TruckFlow '+APP_VERSION+'</h1><p>'+escH(dateLabel)+'</p></div>');
-  w.document.write('<div class="ph-right">G&eacute;n&eacute;r&eacute;e le '+new Date().toLocaleString('fr-FR')+'<br><strong>Passation d\'&eacute;quipe</strong></div>');
+  w.document.write('<div class="ph-right">G&eacute;n&eacute;r&eacute;e le '+new Date().toLocaleString('fr-FR')+'<br><strong>Synth&egrave;se op&eacute;rationnelle</strong></div>');
   w.document.write('</div>');
 
   // Compute KPIs
@@ -6210,15 +6207,51 @@ function printSyntheseRoute(){
     w.document.write('</tbody></table>');
   });
 
-  // Passation section
-  w.document.write('<div class="passation">');
-  w.document.write('<h3>&#128203; Passation de consigne &mdash; '+escH(dateLabel)+'</h3>');
-  w.document.write('<div class="pass-grid">');
-  w.document.write('<div class="pass-box"><div class="pass-lbl">Équipe sortante — Responsable</div></div>');
-  w.document.write('<div class="pass-box"><div class="pass-lbl">Équipe entrante — Responsable</div></div>');
-  w.document.write('<div class="pass-box pass-wide" style="min-height:80px"><div class="pass-lbl">Points de vigilance / Camions en attente particuliers</div></div>');
-  w.document.write('<div class="pass-box pass-wide" style="min-height:60px"><div class="pass-lbl">Actions en cours / Instructions pour l\'équipe suivante</div></div>');
-  w.document.write('</div></div>');
+  // Recap présents
+  var presentRows=allRows.filter(function(r){return r.bucket!==0;});
+  presentRows.sort(function(a,b){return creToMinutes(a.t.creneau)-creToMinutes(b.t.creneau);});
+  if(presentRows.length){
+    w.document.write('<div class="recap-section">');
+    w.document.write('<h3>&#128204; Camions pr&eacute;sents &mdash; Situation en cours</h3>');
+    w.document.write('<table class="recap-tbl"><thead><tr>');
+    w.document.write('<th>Cr&eacute;neau</th><th>Quai</th><th>Transporteur</th><th>Statut</th><th>Arr.</th>');
+    if(gPal) w.document.write('<th>Pal.</th>');
+    if(gSilo) w.document.write('<th>Silo</th>');
+    if(gPick) w.document.write('<th>Pick</th>');
+    w.document.write('<th style="min-width:100px">Notes</th>');
+    w.document.write('</tr></thead><tbody>');
+    presentRows.forEach(function(r){
+      var t=r.t; var ts2=r.ts;
+      var livs2=(t.deliveries||[]).map(function(id){return getDeliv(id);}).filter(Boolean);
+      var tPalR2=0,tSiloR2=0,tPickR2=0;
+      livs2.forEach(function(d){var rm=restMap[d.id]||{palRest:0,siloRest:0,pickRest:0};tPalR2+=rm.palRest;tSiloR2+=rm.siloRest;tPickR2+=rm.pickRest;});
+      var quaiLbl=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'—');
+      var statLabel,statColor;
+      if(r.bucket===1){
+        if(ts2.fin_chg){statLabel='Chargé';statColor='#166534';}
+        else if(ts2.chg){statLabel='En chargement';statColor='#92400e';}
+        else if(ts2.quai){statLabel='À quai';statColor='#5b21b6';}
+        else if(ts2.arr){statLabel='Arrivé';statColor='#1e40af';}
+        else{statLabel='En cours';statColor='#1e40af';}
+      } else if(r.bucket===2){statLabel='RETARD';statColor='#991b1b';}
+      else{statLabel='En attente';statColor='#555';}
+      var rowBg=r.bucket===2?'#fff1f2':r.bucket===1?'#eff6ff':'#fff';
+      w.document.write('<tr style="background:'+rowBg+'">');
+      w.document.write('<td style="font-weight:700;color:#713f12;white-space:nowrap">'+escH(t.creneau||'&mdash;')+'</td>');
+      w.document.write('<td style="font-size:16px;font-weight:900;color:#1e40af;text-align:center;white-space:nowrap">'+escH(quaiLbl)+'</td>');
+      w.document.write('<td style="font-weight:700">'+escH(t.transporteur||t.itin||'?')+'</td>');
+      w.document.write('<td style="font-weight:700;color:'+statColor+'">'+statLabel+'</td>');
+      w.document.write('<td class="td-time">'+fmtTS(ts2.arr)+'</td>');
+      if(gPal) w.document.write('<td class="td-pal">'+(hasArticles&&tPalR2?Math.round(tPalR2):'&mdash;')+'</td>');
+      if(gSilo) w.document.write('<td class="td-silo">'+(hasArticles&&tSiloR2?Math.round(tSiloR2).toLocaleString(\'fr\'):'&mdash;')+'</td>');
+      if(gPick) w.document.write('<td class="td-pick">'+(hasArticles&&tPickR2?Math.round(tPickR2).toLocaleString(\'fr\'):'&mdash;')+'</td>');
+      w.document.write('<td style="min-width:100px"></td>');
+      w.document.write('</tr>');
+    });
+    w.document.write('</tbody></table></div>');
+  } else {
+    w.document.write('<p style="color:#888;font-size:11px;padding:10px 0">Aucun camion en cours au moment de la génération.</p>');
+  }
 
   w.document.write('</body></html>');
   w.document.close();
