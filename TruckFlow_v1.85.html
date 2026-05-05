@@ -5661,7 +5661,141 @@ function renderFeuilleDeRoute(date){
 }
 
 function printFeuilleDeRoute(){
-  window.print();
+  var date=_planFdrDate||new Date().toISOString().slice(0,10);
+  var dayTrucks=trucks.filter(function(t){return t.date===date&&!isExport({itin:t.itin,dest:''}); });
+  dayTrucks.sort(function(a,b){return creToMinutes(a.creneau)-creToMinutes(b.creneau);});
+  var dateLabel=new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var now=Date.now();
+  var w=window.open('','TruckFlowFDR','width=1100,height=900,resizable=yes');
+  if(!w){alert('Autorisez les popups pour imprimer.');return;}
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Feuille de route — '+escH(date)+'</title>');
+  w.document.write('<style>');
+  w.document.write('*{box-sizing:border-box;margin:0;padding:0}');
+  w.document.write('body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111;background:#fff;padding:20px}');
+  w.document.write('.print-header{text-align:center;border-bottom:2px solid #1e3a5f;padding-bottom:12px;margin-bottom:20px}');
+  w.document.write('.print-header h1{font-size:20px;color:#1e3a5f;font-weight:900;margin-bottom:4px}');
+  w.document.write('.print-header p{font-size:12px;color:#555}');
+  w.document.write('.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}');
+  w.document.write('.kpi-chip{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;background:#eee;border:1px solid #ccc}');
+  w.document.write('.truck-card{border:1px solid #ccc;border-radius:8px;margin-bottom:16px;page-break-inside:avoid;break-inside:avoid}');
+  w.document.write('.truck-head{background:#f5f7fa;padding:10px 14px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid #ddd;border-radius:8px 8px 0 0}');
+  w.document.write('.truck-name{font-size:14px;font-weight:900;color:#111;flex:1;min-width:120px}');
+  w.document.write('.badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;border:1px solid #ccc;background:#fff;color:#333;white-space:nowrap}');
+  w.document.write('.badge-creneau{background:#fef9c3;border-color:#fde047;color:#713f12}');
+  w.document.write('.badge-quai{background:#dbeafe;border-color:#93c5fd;color:#1e40af}');
+  w.document.write('.badge-pret{background:#dcfce7;border-color:#86efac;color:#166534}');
+  w.document.write('.badge-notpret{background:#fee2e2;border-color:#fca5a5;color:#991b1b}');
+  w.document.write('.badge-eta{background:#ede9fe;border-color:#c4b5fd;color:#4c1d95}');
+  w.document.write('.badge-done{background:#dcfce7;border-color:#86efac;color:#166534}');
+  w.document.write('.badge-late{background:#fee2e2;border-color:#fca5a5;color:#991b1b}');
+  w.document.write('.badge-active{background:#dbeafe;border-color:#93c5fd;color:#1e40af}');
+  w.document.write('.badge-planned{background:#f3f4f6;border-color:#d1d5db;color:#374151}');
+  w.document.write('.truck-body{padding:12px 14px}');
+  w.document.write('.delivs-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#666;margin-bottom:8px}');
+  w.document.write('table{width:100%;border-collapse:collapse;font-size:11px}');
+  w.document.write('th{text-align:left;padding:5px 8px;font-size:10px;font-weight:700;text-transform:uppercase;color:#666;border-bottom:1px solid #ddd;background:#fafafa}');
+  w.document.write('td{padding:5px 8px;border-bottom:1px solid #eee;color:#111;vertical-align:middle}');
+  w.document.write('tr:last-child td{border-bottom:none}');
+  w.document.write('tr:nth-child(even) td{background:#fafafa}');
+  w.document.write('.td-id{font-family:monospace;font-size:10px;font-weight:700;color:#1e40af}');
+  w.document.write('.td-dest{font-weight:600}');
+  w.document.write('.td-ville{color:#666;font-size:10px}');
+  w.document.write('.td-pal{color:#4338ca;font-weight:700}');
+  w.document.write('.td-silo{color:#1d4ed8}');
+  w.document.write('.td-pick{color:#7e22ce;font-weight:700}');
+  w.document.write('.truck-foot{display:flex;gap:14px;padding:8px 14px;background:#fafafa;border-top:1px solid #eee;font-size:11px;flex-wrap:wrap;border-radius:0 0 8px 8px}');
+  w.document.write('.foot-item{color:#555}');
+  w.document.write('.foot-item strong{color:#111;font-weight:700}');
+  w.document.write('.no-delivs{font-style:italic;color:#888;font-size:11px;padding:8px 0}');
+  w.document.write('.no-print{margin-bottom:16px}');
+  w.document.write('@media print{.no-print{display:none!important}body{padding:10px}.truck-card{page-break-inside:avoid}}');
+  w.document.write('</style></head><body>');
+  w.document.write('<div class="no-print"><button onclick="window.print()" style="padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid #1e3a5f;border-radius:6px;background:#1e3a5f;color:#fff;margin-right:8px">&#128438; Imprimer / Enregistrer PDF</button><button onclick="window.close()" style="padding:8px 16px;font-size:12px;cursor:pointer;border:1px solid #ccc;border-radius:6px;background:#f5f5f5">Fermer</button></div>');
+  w.document.write('<div class="print-header"><h1>&#128203; Feuille de route &mdash; TruckFlow '+APP_VERSION+'</h1><p>'+escH(dateLabel)+'</p></div>');
+  // KPIs
+  var totalLivs=0,totalPal=0,totalColis=0,nDone=0,nLate=0;
+  dayTrucks.forEach(function(t){
+    var ts=timestamps[t.id]||{};
+    if(ts.dep) nDone++;
+    var p=getPonctualite(t,ts,now);
+    if(p.status==='retard_reel'||p.status==='retard_auto') nLate++;
+    (t.deliveries||[]).forEach(function(id){var d=getDeliv(id);if(!d)return;totalLivs++;totalPal+=(d.palSilo||0);totalColis+=(d.colisSilo||0)+(d.colisPick||0);});
+  });
+  var kpiHtml='<div class="kpis">';
+  kpiHtml+='<span class="kpi-chip">'+dayTrucks.length+' camion'+(dayTrucks.length>1?'s':'')+'</span>';
+  kpiHtml+='<span class="kpi-chip">'+totalLivs+' livraison'+(totalLivs>1?'s':'')+'</span>';
+  if(totalPal) kpiHtml+='<span class="kpi-chip" style="background:#ede9fe;border-color:#c4b5fd;color:#4c1d95">'+Math.round(totalPal)+' pal.</span>';
+  if(totalColis) kpiHtml+='<span class="kpi-chip" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">'+Math.round(totalColis).toLocaleString('fr')+' col.</span>';
+  if(nLate) kpiHtml+='<span class="kpi-chip" style="background:#fee2e2;border-color:#fca5a5;color:#991b1b">'+nLate+' en retard</span>';
+  if(nDone) kpiHtml+='<span class="kpi-chip" style="background:#dcfce7;border-color:#86efac;color:#166534">'+nDone+' terminé'+(nDone>1?'s':'')+'</span>';
+  kpiHtml+='</div>';
+  w.document.write(kpiHtml);
+  // Per-truck cards
+  dayTrucks.forEach(function(t){
+    var ts=timestamps[t.id]||{};
+    var ponct=getPonctualite(t,ts,now);
+    var win2=creWindow(t.creneau||'');
+    var statusLabel,statusCls;
+    if(ts.dep){statusLabel='Terminé';statusCls='badge-done';}
+    else if(ts.chg){statusLabel='En chargement';statusCls='badge-active';}
+    else if(ts.quai){statusLabel='À quai';statusCls='badge-active';}
+    else if(ts.arr){statusLabel='Arrivé';statusCls='badge-active';}
+    else if(ponct.status==='retard_reel'||ponct.status==='retard_auto'){statusLabel='En retard';statusCls='badge-late';}
+    else{statusLabel='Prévu';statusCls='badge-planned';}
+    var etaLabel='';
+    if(!ts.arr&&win2){var eta=win2.start;var etaH=Math.floor(eta/60);var etaM=eta%60;etaLabel=(etaH<10?'0':'')+etaH+'h'+(etaM<10?'0':'')+etaM;}
+    var pretBadge='';
+    if(ts.hasOwnProperty('arr_pret')){
+      if(ts.arr_pret){pretBadge='<span class="badge badge-pret">✓ Prête</span>';}
+      else{var motifTxt='Pas prête';if(ts.arr_motif==='retard_silo')motifTxt='⏳ Retard silo';else if(ts.arr_motif==='retard_prepa')motifTxt='🔧 Retard prépa';pretBadge='<span class="badge badge-notpret">✗ '+motifTxt+'</span>';}
+    }
+    var quaiLabel=t.quai?('Q'+t.quai):(t.assignedQuai?('Q'+t.assignedQuai):'');
+    var livIds=t.deliveries||[];
+    var livs=livIds.map(function(id){return getDeliv(id);}).filter(Boolean);
+    var tPal=0,tSilo=0,tPick=0;
+    livs.forEach(function(d){tPal+=(d.palSilo||0);tSilo+=(d.colisSilo||0);tPick+=(d.colisPick||0);});
+    var cardBorderStyle=statusCls==='badge-late'?'border-color:#fca5a5':statusCls==='badge-done'?'border-color:#86efac':'';
+    w.document.write('<div class="truck-card" style="'+cardBorderStyle+'">');
+    w.document.write('<div class="truck-head">');
+    w.document.write('<div class="truck-name">🚛 '+escH(t.transporteur||t.itin||'?')+'</div>');
+    if(t.creneau) w.document.write('<span class="badge badge-creneau">⏰ '+escH(t.creneau)+'</span>');
+    if(quaiLabel) w.document.write('<span class="badge badge-quai">Quai '+escH(quaiLabel)+'</span>');
+    w.document.write('<span class="badge '+statusCls+'">'+statusLabel+'</span>');
+    if(pretBadge) w.document.write(pretBadge);
+    if(etaLabel&&!ts.dep) w.document.write('<span class="badge badge-eta">🕒 ETA '+escH(etaLabel)+'</span>');
+    if(ts.arr&&!ts.dep) w.document.write('<span class="badge badge-active">→ Arr. '+fmtTime(ts.arr)+'</span>');
+    if(ts.dep) w.document.write('<span class="badge badge-done">✔ Dép. '+fmtTime(ts.dep)+'</span>');
+    w.document.write('</div>');
+    if(livs.length){
+      w.document.write('<div class="truck-body">');
+      w.document.write('<div class="delivs-title">📦 Livraisons ('+livs.length+')</div>');
+      w.document.write('<table><thead><tr><th>N°</th><th>Destination</th><th>Ville</th><th>Pal.</th><th>Colis silo</th><th>Colis pick</th></tr></thead><tbody>');
+      livs.forEach(function(d){
+        w.document.write('<tr>');
+        w.document.write('<td class="td-id">'+escH(d.id)+'</td>');
+        w.document.write('<td class="td-dest">'+escH(d.dest||'—')+'</td>');
+        w.document.write('<td class="td-ville">'+escH(d.ville||'—')+'</td>');
+        w.document.write('<td class="td-pal">'+(d.palSilo?Math.round(d.palSilo)+' pal.':'—')+'</td>');
+        w.document.write('<td class="td-silo">'+(d.colisSilo?Math.round(d.colisSilo).toLocaleString('fr')+' cs':'—')+'</td>');
+        w.document.write('<td class="td-pick">'+(d.colisPick?Math.round(d.colisPick).toLocaleString('fr')+' pk':'—')+'</td>');
+        w.document.write('</tr>');
+      });
+      w.document.write('</tbody></table></div>');
+    } else {
+      w.document.write('<div class="truck-body"><div class="no-delivs">Aucune livraison associée</div></div>');
+    }
+    w.document.write('<div class="truck-foot">');
+    w.document.write('<span class="foot-item">📦 <strong>'+livs.length+'</strong> livraison'+(livs.length>1?'s':'')+'</span>');
+    if(tPal) w.document.write('<span class="foot-item">🏭 <strong>'+Math.round(tPal)+'</strong> pal.</span>');
+    if(tSilo) w.document.write('<span class="foot-item">📦 <strong>'+Math.round(tSilo).toLocaleString('fr')+'</strong> cs silo</span>');
+    if(tPick) w.document.write('<span class="foot-item">✋ <strong>'+Math.round(tPick).toLocaleString('fr')+'</strong> cs pick</span>');
+    w.document.write('</div>');
+    w.document.write('</div>');
+  });
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(function(){w.focus();},200);
 }
 
 function _planDateClick(date){
