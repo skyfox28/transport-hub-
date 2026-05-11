@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.115.html` | v1.115 | **Version courante** |
+| `TruckFlow_v1.116.html` | v1.116 | **Version courante** |
+| `TruckFlow_v1.115.html` | v1.115 | Archivé |
 | `TruckFlow_v1.114.html` | v1.114 | Archivé |
 | `TruckFlow_v1.113.html` | v1.113 | Archivé |
 | `TruckFlow_v1.112.html` | v1.112 | Archivé |
@@ -92,6 +93,9 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.116 — Logo : fond blanc
+- `.logo-ico`, `.auth-logo-ico`, `.mon-logo-ico` : `background:#fff` — fond blanc au lieu de transparent/dégradé
 
 ### v1.115 — Fix login + Logo logo_final.png
 - **Fix bug login** : erreur de syntaxe JS dans `openMontageForm()` — ternaire incomplet `(mainItin?' ('+mainItin+')')` → `(mainItin?' ('+mainItin+')':'')` — empêchait le chargement du script et bloquait la connexion + masquait le badge de version
