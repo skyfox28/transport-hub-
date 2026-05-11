@@ -17,47 +17,6 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 | `TruckFlow_v1.107.html` | v1.107 | Archivé |
 | `TruckFlow_v1.106.html` | v1.106 | Archivé |
 | `TruckFlow_v1.105.html` | v1.105 | Archivé |
-| `TruckFlow_v1.104.html` | v1.104 | Archivé |
-| `TruckFlow_v1.103.html` | v1.103 | Archivé |
-| `TruckFlow_v1.102.html` | v1.102 | Archivé |
-| `TruckFlow_v1.101.html` | v1.101 | Archivé |
-| `TruckFlow_v1.100.html` | v1.100 | Archivé |
-| `TruckFlow_v1.99.html` | v1.99 | Archivé |
-| `TruckFlow_v1.98.html` | v1.98 | Archivé |
-| `TruckFlow_v1.97.html` | v1.97 | Archivé |
-| `TruckFlow_v1.96.html` | v1.96 | Archivé |
-| `TruckFlow_v1.95.html` | v1.95 | Archivé |
-| `TruckFlow_v1.94.html` | v1.94 | Archivé |
-| `TruckFlow_v1.93.html` | v1.93 | Archivé |
-| `TruckFlow_v1.77.html` | v1.77 | Archivé |
-| `TruckFlow_v1.76.html` | v1.76 | Archivé |
-| `TruckFlow_v1.75.html` | v1.75 | Archivé |
-| `TruckFlow_v1.74.html` | v1.74 | Archivé |
-| `TruckFlow_v1.73.html` | v1.73 | Archivé |
-| `TruckFlow_v1.72.html` | v1.72 | Archivé |
-| `TruckFlow_v1.71.html` | v1.71 | Archivé |
-| `TruckFlow_v1.70.html` | v1.70 | Archivé |
-| `TruckFlow_v1.69.html` | v1.69 | Archivé |
-| `TruckFlow_v1.68.html` | v1.68 | Archivé |
-| `TruckFlow_v1.67.html` | v1.67 | Archivé |
-| `TruckFlow_v1.66.html` | v1.66 | Archivé |
-| `TruckFlow_v1.65.html` | v1.65 | Archivé |
-| `TruckFlow_v1.64.html` | v1.64 | Archivé |
-| `TruckFlow_v1.63.html` | v1.63 | Archivé |
-| `TruckFlow_v1.62.html` | v1.62 | Archivé |
-| `TruckFlow_v1.61.html` | v1.61 | Archivé |
-| `TruckFlow_v1.60.html` | v1.60 | Archivé |
-| `TruckFlow_v1.59.html` | v1.59 | Archivé |
-| `TruckFlow_v1.58.html` | v1.58 | Archivé |
-| `TruckFlow_v1.57.html` | v1.57 | Archivé |
-| `TruckFlow_v1.56.html` | v1.56 | Archivé |
-| `TruckFlow_v1.55.html` | v1.55 | Archivé |
-| `TruckFlow_v1.54.html` | v1.54 | Archivé |
-| `TruckFlow_v1.53.html` | v1.53 | Archivé |
-| `TruckFlow_v1.52.html` | v1.52 | Archivé |
-| `TruckFlow_v1.51.html` | v1.51 | Archivé |
-| `TruckFlow_v1.50.html` | v1.50 | Archivé |
-| `TruckFlow_v1.49.html` | v1.49 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
