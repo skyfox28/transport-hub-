@@ -12,7 +12,32 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.69.html` | v1.69 | **Version courante** |
+| `TruckFlow_v1.109.html` | v1.109 | **Version courante** |
+| `TruckFlow_v1.108.html` | v1.108 | Archivé |
+| `TruckFlow_v1.107.html` | v1.107 | Archivé |
+| `TruckFlow_v1.106.html` | v1.106 | Archivé |
+| `TruckFlow_v1.105.html` | v1.105 | Archivé |
+| `TruckFlow_v1.104.html` | v1.104 | Archivé |
+| `TruckFlow_v1.103.html` | v1.103 | Archivé |
+| `TruckFlow_v1.102.html` | v1.102 | Archivé |
+| `TruckFlow_v1.101.html` | v1.101 | Archivé |
+| `TruckFlow_v1.100.html` | v1.100 | Archivé |
+| `TruckFlow_v1.99.html` | v1.99 | Archivé |
+| `TruckFlow_v1.98.html` | v1.98 | Archivé |
+| `TruckFlow_v1.97.html` | v1.97 | Archivé |
+| `TruckFlow_v1.96.html` | v1.96 | Archivé |
+| `TruckFlow_v1.95.html` | v1.95 | Archivé |
+| `TruckFlow_v1.94.html` | v1.94 | Archivé |
+| `TruckFlow_v1.93.html` | v1.93 | Archivé |
+| `TruckFlow_v1.77.html` | v1.77 | Archivé |
+| `TruckFlow_v1.76.html` | v1.76 | Archivé |
+| `TruckFlow_v1.75.html` | v1.75 | Archivé |
+| `TruckFlow_v1.74.html` | v1.74 | Archivé |
+| `TruckFlow_v1.73.html` | v1.73 | Archivé |
+| `TruckFlow_v1.72.html` | v1.72 | Archivé |
+| `TruckFlow_v1.71.html` | v1.71 | Archivé |
+| `TruckFlow_v1.70.html` | v1.70 | Archivé |
+| `TruckFlow_v1.69.html` | v1.69 | Archivé |
 | `TruckFlow_v1.68.html` | v1.68 | Archivé |
 | `TruckFlow_v1.67.html` | v1.67 | Archivé |
 | `TruckFlow_v1.66.html` | v1.66 | Archivé |
@@ -108,6 +133,154 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.109 — Mail récap : message allégé (en cours/à venir) + PDF lisibilité améliorée
+- **Message mail** : uniquement 🔄 En cours + ⏳ À venir — les récupérés et décalés restent dans le PDF uniquement
+- **PDF** : `font-size:13px`, noms de camion `14px`, section headers `13px`, KPIs `28px`, `@page{size:A4;margin:10mm}`, fenêtre `1000×800px`, `border-radius:9px` cartes, espacement augmenté partout
+
+### v1.108 — Mail récap : deux sens de décalage (vers autre jour / depuis autre jour)
+- **Mécanique clarifiée** : quand un truck est décalé, `t.date = dateNew` → il quitte le filtre du jour d'origine
+- **`decalesVersAutreJour`** : camions dont `decalage.dateOrig = aujourd'hui` et `t.date ≠ aujourd'hui` (partis vers un autre jour) — trouvés dans `trucks[]` global
+- **`recuperes`** : camions dont `t.date = aujourd'hui` mais `decalage.dateOrig ≠ aujourd'hui` (reçus d'un autre jour) — dans `todayTrucks` + `completed`
+- **Mail** : 4 sections — En cours / À venir / 📥 Récupérés d'un autre jour / ⚠️ Décalés vers un autre jour
+- **PDF** : 7 KPIs + 5 sections avec code couleur : cyan (récupérés ← date orig) + orange (décalés → date new)
+
+### v1.107 — Mail récap : décalés = renvoyés à une autre date uniquement
+- **Définition corrigée des décalés** : uniquement les camions actifs du jour avec `t.decalage` (renvoyés vers `dateNew`) — les camions archivés/partis ne sont jamais dans cette section (s'ils sont partis, ils sont venus)
+- **Mail** : section décalés affiche `Renvoyé au : dateNew creneauNew` en priorité, puis responsabilité, motif, note, livraisons
+- **PDF** : section ⚠️ DÉCALÉS avec encart orange `→ dateNew` en grand, badge responsabilité coloré, sans timeline timestamps (ces camions ne sont pas venus)
+- **Archivés** : inclus dans PARTIS uniquement, jamais dans DÉCALÉS
+
+### v1.106 — Mail récap : corrections décalés + PDF synthèse complète avec timestamps
+- **Fix décalés** : `decales` = uniquement camions avec `t.decalage` (motif mtx3/transporteur/pas_venu) — ne pas confondre avec `arr_motif` (marchandise pas prête à l'arrivée)
+- **Message mail** : En cours + À venir + Décalés (opérationnel), livraisons, responsabilité décalé
+- **PDF synthèse complète** :
+  - Header bleu foncé, 6 KPIs (Partis / En cours / À venir / Décalés / Total camions / Total livraisons)
+  - ✅ PARTIS triés par ordre d'arrivée — timeline `ARR ▸ QUAI ▸ CHGT ▸ FIN ▸ DÉP` + nb livraisons + liste
+  - 🔄 EN COURS — même timeline partielle + statut courant
+  - ⏳ À VENIR — créneau + livraisons
+  - ⚠️ DÉCALÉS — badge responsabilité coloré (MTX3=orange/Transporteur=bleu/Pas venu=rouge), motif, renvoi, note, statut, livraisons
+  - Quai depuis `quaiAssign` (actifs) ou `ct.quai` (archivés)
+
+### v1.105 — Mail récap : message allégé (situation) + PDF synthèse complète
+- **Message mail** : uniquement 🔄 En cours + ⏳ À venir + ⚠️ Décalés — objet `Point situation camions DD-MM-YYYY`
+- **PDF synthèse** : rapport complet avec header bleu foncé, 4 KPIs colorés (Partis/En cours/À venir/Décalés), sections ✅ Partis / 🔄 En cours / ⏳ À venir / ⚠️ Décalés avec numéros de livraisons et détail des décalés (responsabilité/motif/renvoi/marchandise/statut)
+- **`_mrData`** : variable globale stockant les données calculées à l'ouverture du modal, réutilisée par `printMailRecapPDF()` sans recalcul
+
+### v1.104 — Mail récap : distinction responsabilité décalés + marchandise
+- **Section Décalés** : distinction claire "qui/quoi" par camion
+  - `Responsabilité :` MTX3 / Transporteur / Pas venu (depuis `decalage.motif`)
+  - `Motif :` libellé du décalage + renvoi `→ dateNew creneauNew` si applicable
+  - `Note :` si renseignée dans le décalage
+  - `Marchandise :` ⏳ Retard silo / 🔧 Retard prépa si `arr_motif` présent
+  - `Statut :` Parti / À quai / En chargement / Chargé / En attente
+  - `Livraisons :` numéros
+- **Catégorisation décalés élargie** : inclut les camions avec `t.decalage` (pas seulement `arr_motif`)
+
+### v1.103 — Mail récap : numéros de livraison + détail décalés
+- **Timestamps supprimés** du corps mail — plus d'heures arr/dép dans les sections
+- **Numéros de livraison** : chaque camion (partis/en cours/en attente/décalés) affiche `Livraisons : 80123456, 80234567, ...` sur une ligne indentée
+- **Section Décalés enrichie** : 3 lignes par camion — `Motif :` / `Statut :` (Parti / En chargement / À quai / En attente) / `Livraisons :`
+
+### v1.102 — Bouton Mail récap fin de poste + fix quitter → login
+- **Bouton `📧 Mail`** dans le header (visible uniquement pour galaad) : ouvre un modal de récapitulatif fin de poste
+- **Modal mail** : objet auto `Camions DD-MM-YYYY`, corps structuré en 4 sections ✅ Partis / 🔄 En cours / ⏳ En attente / ⚠️ Décalés (avec motif)
+- **Boutons modal** : 📋 Copier (presse-papiers), 📧 Ouvrir messagerie (mailto: sans destinataire fixe), 🖨️ PDF (popup print)
+- **Fonctions** : `openMailRecap()`, `closeMailRecap()`, `copyMailRecap()`, `openMailtoRecap()`, `printMailRecapPDF()`
+- **Fix quitter en mode stat** : `tfShowQuitModal()` efface `sessionStorage tf_auth + tf_user` avant `location.reload()` → revient bien à l'écran de login
+
+### v1.101 — Mode consultation : isolation CSS robuste (body.tf-stat-mode)
+- **CSS `body.tf-stat-mode`** : règles `display:none!important` sur `#tab-syn/liv/cam/plan/quai` et `#welcomeScreen` — résiste aux resets JS inline (`p.style.display=''`) de `renderWelcome()`
+- **`applyProfileRestrictions` stat** : `document.body.classList.add('tf-stat-mode')` — appliqué dès l'initialisation du profil
+- **`renderWelcome()` patché** : retour anticipé si `_tfReadOnlyProfile` — n'enlève plus la classe `on` des panels, n'affiche plus l'écran VL06O, affiche simplement les onglets
+- **`tfOpenStatDirect()` simplifié** : suppression du listener `'change'` défectueux (qui ciblait `.tabPanel[data-tab]` inexistant) — le CSS gère le masquage, la fonction se contente de cliquer `fi-session`
+- **Deux anomalies corrigées** : (1) contenu Synthèse visible après chargement JSON en mode stat ; (2) écran "Importer VL06O" visible au démarrage du mode consultation
+
+### v1.100 — Mode consultatif allégé (correction profil __stat__)
+- **Onglet syn masqué au chargement JSON** : après import session, force retour sur onglet Statistiques et masque physiquement les panels syn/liv/cam/plan/quai (`display:none!important`)
+- **Archive lecture seule** : boutons "🗑 Vider l'archive" et "↩ Restaurer" masqués quand `_tfReadOnlyProfile=true`
+- **Quitter sans modal** : `tfShowQuitModal()` → `location.reload()` direct pour le profil stat, sans proposition de sauvegarde ni export
+- **Backup désactivé** : `_saveBackupSessionSync()` et hook `beforeunload` sautés quand `_tfReadOnlyProfile=true` — aucune écriture localStorage en mode consultation
+
+### v1.99 — Accès consultatif direct (sans compte) sur l'écran de login
+- **Bouton "📡 Live Monitor"** sur l'écran de login (sans identifiant) : appelle directement `openLiveMonitor()` — même comportement que le compte `live`, connexion réseau requise, lecture seule
+- **Bouton "📊 Statistiques"** sur l'écran de login (sans identifiant) : charge un fichier session JSON puis ouvre l'app en mode consultatif — onglets visibles uniquement : Statistiques + Archive ; Export Excel (semaine) disponible ; aucune modification possible
+- **Profil interne `__stat__`** : badge "CONSULTATION" violet dans le header, `_tfReadOnlyProfile=true`, switchTab verrouillé sur stat/arch, tous les boutons d'action/import masqués, pas de proposition sync réseau
+- `tfOpenLiveDirect()` / `tfOpenStatDirect()` — nouvelles fonctions d'entrée sans auth
+- CSS `.auth-direct-btn` avec variantes `.live-btn` (vert) et `.stat-btn` (violet)
+
+### v1.98 — Synthèse planning : sous-lignes corrigées + livraisons sans camion
+- **Sous-lignes `artDone` corrigées** dans `printSyntheseRoute` : "✓ Préparé" uniquement si `d.sp='C'` ET `d.wm='C'` (ou pas de pick) ; affiche "⚠ En cours" ou "⏳ WM en cours" selon le cas — plus de faux vert quand le header SAP indique B
+- **Livraisons sans camion** : section ⚠ ajoutée en bas de la feuille de synthèse (toutes les livraisons du jour sans camion assigné) avec colonnes Prél./WM/restants, ligne de totaux, statut "✓ Terminé" ou "⚠ Non assigné" ; KPIs globaux (barres de progression) incluent ces livraisons
+
+### v1.97 — Planning : KPIs globaux complets + colonne RESTANT corrigée
+- **Planning feuille de route — KPIs globaux** : `renderFeuilleDeRoute` et `printFeuilleDeRoute` incluent désormais les livraisons non assignées dans les totaux (pal/silo/pick restants) — cohérence avec l'onglet Synthèse
+- **Section livraisons non assignées** : bloc d'avertissement ⚠ affiché en bas de la feuille de route quand des livraisons non assignées ont encore du restant (liste avec quantités)
+- **Colonne RESTANT synthèse corrigée** : `renderDayDetail` — affiche "⚠ En cours" (ambre) si `d.sp !== 'C'` mais articles à 0, "⏳ WM en cours" si silo done mais pick non ; "✓ Terminé" uniquement quand `d.sp='C'` ET `d.wm='C'` (ou pas de pick) — ne montre plus "✓ OK" à tort pour les livraisons dont le header SAP indique encore B
+
+### v1.77 — Hub 3D : Corrections orientation + camion à son quai
+- **Quais Q2→Q11 gauche→droite** : formule corrigée `(q-6.5)*60` — Q2 à gauche, Q11 à droite (vue de face correcte)
+- **Camion positionné devant son quai** : si un camion est assigné à un quai, son nœud est placé à `x=(q-6.5)*60, z=BZ_DOCK+70` (juste devant la porte, entre bâtiment et spectateur)
+- **Zone Retard en retrait** : cluster `_GXK.retard` déplacé à `z=20` (était z=110) — zone rouge au sol repositionnée à `z=[-30,50]` et label à `z=10`, plus reculée par rapport aux zones principales
+
+### v1.76 — Hub 3D : Oscillation latérale + quais inversés + zone retard + panneau latéral
+- (voir commit 6e02b29)
+
+### v1.75 — Hub 3D : Bâtiment warehouse + effets WOW
+- **Bâtiment `_gxRenderBuilding`** : mur de fond 3D en perspective, dalle de toit, piliers d'angles lumineux, enseigne "HUB DE DISTRIBUTION"
+- **Portes de quai** Q2→Q11 : ouverture sombre avec glow coloré si occupé, faisceau lumineux projeté vers l'avant (cone de lumière), LED indicateur animée au-dessus de chaque porte
+- **Nœuds quai supprimés** — le bâtiment remplace les spheres Pluto ; `_gxActiveDocks` alimente les portes actives
+- **Zones colorées au sol** : polygones perspectivés semi-transparents (bleu attente, cyan arrivée, vert chargé, gris départ)
+- **Liaisons pointillées** truck→porte de quai (gradient coloré)
+- **FOV 860 + depth 100** : scène encore plus grande/proche
+- **Clusters élargis** (~25% de plus vs v1.74), trucks sz 16-22
+
+### v1.74 — Hub 3D : Légende HTML + Scène agrandie
+- **Légende hors canvas** : `<div id="gxLegend">` fixe en bas-gauche (backdrop-filter glass, dots colorés avec glow) — ne chevauche plus la scène 3D ; show/hide dans `toggleGalaxy()`
+- **Scène 3D agrandie** : FOV 520→700, depth offset 320→160, zoom initial 1×→1.5×, angle initial RotX 0.28→0.22
+- **Zones plus écartées** : clusters `_GXK` élargis (~30%), espacement quais 42→55px, labels de zones repositionnés
+- **Marquages sol** adaptés aux nouvelles dimensions
+
+### v1.73 — Galaxie 3D : Vue Hub logistique 3D
+- **Fond hub industriel** : fond `#080d14` + ambiance plafond néon bleuté + spot central + mur de fond (zone docks)
+- **Sol perspectif** : grille de lignes convergentes (point de fuite centré) avec marquages jaunes de zones (`_gxRenderFloor`)
+- **Quais en rangée** : Q2→Q11 alignés sur un mur du fond (z=-185) au lieu de l'anneau — position `(i-5.5)*42` en X
+- **Camions statiques** (garés) : plus d'orbite — juste un léger flottement vertical sur les actifs (`sin*2.5px`)
+- **Zones labellisées** en 3D : ATTENTE (gauche), ARRIVÉE, CHARGÉ, DÉPART (droite), DOCKS (fond) — projetées en perspective
+- **Rotation très lente** : 0.003 → 0.0008 rad/frame (hub plus stable)
+- **Hit zones rectangulaires** : `_gxHitTest` utilise les bounds du rectangle camion (plus précis que le rayon cercle)
+- **Flash clic** : anneau blanc qui se dissipe en 0.5s autour du camion cliqué (`_gxClickFlash`)
+- **Légende repositionnée** en bas à droite avec fond semi-transparent
+
+### v1.72 — Galaxie 3D : Camions schématisés (vue de dessus)
+- **Camions en rectangles arrondis** : rendu vue de dessus style "garé" — carrosserie dégradée couleur statut, cabine distincte (rectangle droit côté droit), pare-brise (trait blanc), 4 roues (petits rectangles noirs aux coins)
+- **Quais redessinés** : sphère nacrée + double anneau + croix centrale (symbole quai de chargement)
+- **Tailles augmentées** : quais sz 9→14, camions partis sz 4→8, en attente sz 6→14, actifs sz 10→18
+- **Labels toujours visibles** pour les quais ; labels camions dès sc>.28 (au lieu de .42)
+- **Glow elliptique** adapté à la forme rectangle des camions (`ctx.ellipse`)
+- Pulse ring ovale sur camions en chargement/arrivé
+
+### v1.71 — Monitor : Vue Galaxie 3D (Canvas)
+- **Bouton 🌌 Galaxie** dans le header Monitor (non-live) : `toggleGalaxy()` — bascule entre vue normale et canvas 3D
+- **Canvas 3D** : `<canvas id="galaxyCvs">` plein-écran (position:fixed, top:68px) — rendu via `requestAnimationFrame` à 60fps
+- **Nœuds Quais** : 10 quais Q2→Q11 disposés en anneau (r=170), sphères grises avec double ring, labels en blanc
+- **Nœuds Camions** : groupés par statut (attente/arrivé/à quai/chargement/chargé/parti/TFE/COMPANS) avec clusters prédéfinis (`_GXK`) et dispersion golden-angle ; animation orbitale autour du cluster
+- **Projection 3D custom** : rotation Y puis X puis perspective (`fov=520×zoom`, `depth+320`) — `_gxProj(x,y,z)`
+- **Painter's algorithm** : Z-sort avant rendu pour la profondeur correcte
+- **Fond** : 4 nébuleuses radial-gradient + 280 étoiles statiques (`_gxRenderStars`)
+- **Glow aura** sur chaque nœud : halo radial coloré par statut (`_GXC`)
+- **Rotation auto** : +0.003 rad/frame sur Y — s'arrête au drag, reprend après 5s
+- **Drag souris** : rotate X/Y, zoom molette (0.25–3.5×)
+- **Hover** : tooltip avec nom du camion + badge statut
+- **Click sur nœud camion** : ouvre `openTruckDetail(tid)` — overlay détail du camion
+- **Rebuild toutes les 15s** : `_gxBuild()` relancé automatiquement pour intégrer les nouveaux camions
+- Fonctions : `toggleGalaxy`, `_gxBuild`, `_gxProj`, `_gxRender`, `_gxRenderNode`, `_gxRenderStars`, `_gxHitTest`, `_gxFrame`, `_gxInitCanvas`
+
+### v1.70 — Monitor : Aurora Borealis + Glow Aura + Tilt 3D
+- **Aurora borealis** : 4 orbs animés (bleu, vert, violet, cyan) avec `@keyframes aurora1-4` — mouvements lents et fluides, scale + translate + opacity
+- **Glow aura** : `@keyframes gaura-blue/purple/orange/green/red/cyan` — halo lumineux pulsant sur chaque carte selon son statut (arrivé=bleu, à quai=violet, chargement=orange, chargé=vert, retard=rouge, TFE=cyan)
+- **Tilt 3D** : `_applyTilt()` / `_resetTilt()` — inclinaison perspective 900px des cartes `.tc` et `.ac` selon position souris (max ±6°), retour fluide `cubic-bezier`
+- `will-change:transform` ajouté sur `.tc` et `.ac` pour GPU compositing
 
 ### v1.69 — TFE saisie heure manuelle + création depuis Monitor
 - **Heure d'arrivée manuelle** : le modal `openTFEArrModal` (onglet Camions) inclut désormais un champ `input[type=time]` pré-rempli à l'heure courante — `confirmTFEArr()` utilise cette valeur si renseignée, sinon `_nowIso()`
