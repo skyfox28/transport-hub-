@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.105.html` | v1.105 | **Version courante** |
+| `TruckFlow_v1.106.html` | v1.106 | **Version courante** |
+| `TruckFlow_v1.105.html` | v1.105 | Archivé |
 | `TruckFlow_v1.104.html` | v1.104 | Archivé |
 | `TruckFlow_v1.103.html` | v1.103 | Archivé |
 | `TruckFlow_v1.102.html` | v1.102 | Archivé |
@@ -129,6 +130,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.106 — Mail récap : corrections décalés + PDF synthèse complète avec timestamps
+- **Fix décalés** : `decales` = uniquement camions avec `t.decalage` (motif mtx3/transporteur/pas_venu) — ne pas confondre avec `arr_motif` (marchandise pas prête à l'arrivée)
+- **Message mail** : En cours + À venir + Décalés (opérationnel), livraisons, responsabilité décalé
+- **PDF synthèse complète** :
+  - Header bleu foncé, 6 KPIs (Partis / En cours / À venir / Décalés / Total camions / Total livraisons)
+  - ✅ PARTIS triés par ordre d'arrivée — timeline `ARR ▸ QUAI ▸ CHGT ▸ FIN ▸ DÉP` + nb livraisons + liste
+  - 🔄 EN COURS — même timeline partielle + statut courant
+  - ⏳ À VENIR — créneau + livraisons
+  - ⚠️ DÉCALÉS — badge responsabilité coloré (MTX3=orange/Transporteur=bleu/Pas venu=rouge), motif, renvoi, note, statut, livraisons
+  - Quai depuis `quaiAssign` (actifs) ou `ct.quai` (archivés)
 
 ### v1.105 — Mail récap : message allégé (situation) + PDF synthèse complète
 - **Message mail** : uniquement 🔄 En cours + ⏳ À venir + ⚠️ Décalés — objet `Point situation camions DD-MM-YYYY`
