@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.99.html` | v1.99 | **Version courante** |
+| `TruckFlow_v1.100.html` | v1.100 | **Version courante** |
+| `TruckFlow_v1.99.html` | v1.99 | Archivé |
 | `TruckFlow_v1.98.html` | v1.98 | Archivé |
 | `TruckFlow_v1.97.html` | v1.97 | Archivé |
 | `TruckFlow_v1.96.html` | v1.96 | Archivé |
@@ -123,6 +124,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.100 — Mode consultatif allégé (correction profil __stat__)
+- **Onglet syn masqué au chargement JSON** : après import session, force retour sur onglet Statistiques et masque physiquement les panels syn/liv/cam/plan/quai (`display:none!important`)
+- **Archive lecture seule** : boutons "🗑 Vider l'archive" et "↩ Restaurer" masqués quand `_tfReadOnlyProfile=true`
+- **Quitter sans modal** : `tfShowQuitModal()` → `location.reload()` direct pour le profil stat, sans proposition de sauvegarde ni export
+- **Backup désactivé** : `_saveBackupSessionSync()` et hook `beforeunload` sautés quand `_tfReadOnlyProfile=true` — aucune écriture localStorage en mode consultation
 
 ### v1.99 — Accès consultatif direct (sans compte) sur l'écran de login
 - **Bouton "📡 Live Monitor"** sur l'écran de login (sans identifiant) : appelle directement `openLiveMonitor()` — même comportement que le compte `live`, connexion réseau requise, lecture seule
