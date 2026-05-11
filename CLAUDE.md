@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.108.html` | v1.108 | **Version courante** |
+| `TruckFlow_v1.109.html` | v1.109 | **Version courante** |
+| `TruckFlow_v1.108.html` | v1.108 | Archivé |
 | `TruckFlow_v1.107.html` | v1.107 | Archivé |
 | `TruckFlow_v1.106.html` | v1.106 | Archivé |
 | `TruckFlow_v1.105.html` | v1.105 | Archivé |
@@ -132,6 +133,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.109 — Mail récap : message allégé (en cours/à venir) + PDF lisibilité améliorée
+- **Message mail** : uniquement 🔄 En cours + ⏳ À venir — les récupérés et décalés restent dans le PDF uniquement
+- **PDF** : `font-size:13px`, noms de camion `14px`, section headers `13px`, KPIs `28px`, `@page{size:A4;margin:10mm}`, fenêtre `1000×800px`, `border-radius:9px` cartes, espacement augmenté partout
 
 ### v1.108 — Mail récap : deux sens de décalage (vers autre jour / depuis autre jour)
 - **Mécanique clarifiée** : quand un truck est décalé, `t.date = dateNew` → il quitte le filtre du jour d'origine
