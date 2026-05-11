@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.116.html` | v1.116 | **Version courante** |
+| `TruckFlow_v1.117.html` | v1.117 | **Version courante** |
+| `TruckFlow_v1.116.html` | v1.116 | Archivé |
 | `TruckFlow_v1.115.html` | v1.115 | Archivé |
 | `TruckFlow_v1.114.html` | v1.114 | Archivé |
 | `TruckFlow_v1.113.html` | v1.113 | Archivé |
@@ -93,6 +94,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.117 — Mail récap : corps allégé (camion + créneau + ville + livraisons)
+- **Corps mail** : pour chaque camion En cours / À venir — uniquement `• Nom transporteur — Créneau — Ville` + `Livraisons : XXXXXXXX, …` ; tout le reste (statut, quai, timestamps, partis, décalés) reste dans le PDF uniquement
+- **`fmtVille(t)`** : utilise `t.dest` en priorité, sinon cherche `d.ville` dans les livraisons assignées
 
 ### v1.116 — Logo : fond blanc
 - `.logo-ico`, `.auth-logo-ico`, `.mon-logo-ico` : `background:#fff` — fond blanc au lieu de transparent/dégradé
