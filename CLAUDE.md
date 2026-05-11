@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.119.html` | v1.119 | **Version courante** |
+| `TruckFlow_v1.120.html` | v1.120 | **Version courante** |
+| `TruckFlow_v1.119.html` | v1.119 | Archivé |
 | `TruckFlow_v1.118.html` | v1.118 | Archivé |
 | `TruckFlow_v1.117.html` | v1.117 | Archivé |
 | `TruckFlow_v1.116.html` | v1.116 | Archivé |
@@ -96,6 +97,15 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.120 — Statistiques : refonte sections + KPI cliquables + nouvelles analyses
+- **Supprimé** : "Analyse avancée" et "Top / Flop transporteurs"
+- **KPI ponctualité cliquables** : À l'heure / En avance / En retard / En attente → `filterStatPonct()` → bascule onglet Camions avec filtre actif + bannière "Effacer"
+- **Tendance mensuelle** : combo barres (nb camions, couleur selon ponct) + courbe ponctualité ; tooltip détaillé (date · camions · ponct% · breakdown H/A/R/att)
+- **Tendance ponctualité** : dots r=5 + title riche (date + % + breakdown complet)
+- **Classement transporteurs** `renderCarrierRanking` : tableau depuis archive (rang 🥇🥈🥉, camions, H/A/R/att, ponct%)
+- **Occupation des créneaux** `renderSlotOccupancy` : barre par slot 2h avec partis (vert) et retards
+- **Distribution durées de passage** `renderDurationDistrib` : histogram <1h / 1h–90min / 90min–2h / >2h + moy/min/max
 
 ### v1.119 — Fix bouton mail + Logo zoom (correction placement overlay)
 - **Fix mail** : `fmtVille` utilisait `deliveries` (non déclaré) → `APP.deliveries` — ReferenceError qui bloquait `openMailRecap()`
