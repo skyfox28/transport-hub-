@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.102.html` | v1.102 | **Version courante** |
+| `TruckFlow_v1.103.html` | v1.103 | **Version courante** |
+| `TruckFlow_v1.102.html` | v1.102 | Archivé |
 | `TruckFlow_v1.101.html` | v1.101 | Archivé |
 | `TruckFlow_v1.100.html` | v1.100 | Archivé |
 | `TruckFlow_v1.99.html` | v1.99 | Archivé |
@@ -126,6 +127,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.103 — Mail récap : numéros de livraison + détail décalés
+- **Timestamps supprimés** du corps mail — plus d'heures arr/dép dans les sections
+- **Numéros de livraison** : chaque camion (partis/en cours/en attente/décalés) affiche `Livraisons : 80123456, 80234567, ...` sur une ligne indentée
+- **Section Décalés enrichie** : 3 lignes par camion — `Motif :` / `Statut :` (Parti / En chargement / À quai / En attente) / `Livraisons :`
 
 ### v1.102 — Bouton Mail récap fin de poste + fix quitter → login
 - **Bouton `📧 Mail`** dans le header (visible uniquement pour galaad) : ouvre un modal de récapitulatif fin de poste
