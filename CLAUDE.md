@@ -12,11 +12,11 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.109.html` | v1.109 | **Version courante** |
+| `TruckFlow_v1.110.html` | v1.110 | **Version courante** |
+| `TruckFlow_v1.109.html` | v1.109 | Archivé |
 | `TruckFlow_v1.108.html` | v1.108 | Archivé |
 | `TruckFlow_v1.107.html` | v1.107 | Archivé |
 | `TruckFlow_v1.106.html` | v1.106 | Archivé |
-| `TruckFlow_v1.105.html` | v1.105 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -92,6 +92,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.110 — Profil Statistiques : corrections écran vierge + notifications masquées
+- **Écran vierge après import JSON corrigé** : `importSession()` activait `tab-syn` par défaut → masqué en mode `tf-stat-mode` → page blanche. Après `renderAll()`, si `tf_user === '__stat__'`, force-active l'onglet Statistiques (`tab-stat`) et appelle `renderStats()`
+- **Centre de notifications masqué** : `id="hdrBtnNotif"` ajouté sur le div `.notif-btn` (cloche 🔔) — ajouté à la liste `applyProfileRestrictions()` pour le profil `__stat__`
+- **Mode Monitor (menu ⋯) masqué** : `id="hdrMoreMonitor"` ajouté sur le bouton "Mode Monitor (nouvel onglet)" du dropdown — ajouté à la liste `applyProfileRestrictions()` pour le profil `__stat__`
+- **Barre de recherche** : déjà invisible via CSS `body.tf-stat-mode #tab-liv{display:none!important}` (dans `#tab-liv`)
 
 ### v1.109 — Mail récap : message allégé (en cours/à venir) + PDF lisibilité améliorée
 - **Message mail** : uniquement 🔄 En cours + ⏳ À venir — les récupérés et décalés restent dans le PDF uniquement
