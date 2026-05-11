@@ -1575,7 +1575,7 @@ body.tf-stat-mode #welcomeScreen{display:none!important}
       <div class="hdr-more-menu" id="hdrMoreMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:6px;min-width:180px;z-index:150;box-shadow:var(--sh)">
         <button id="hdrMoreJournal" class="hdr-more-item" onclick="openActivityLog();toggleHdrMore()">&#128221; Journal d'activit&eacute;</button>
         <button id="hdrMoreAlerts" class="hdr-more-item" onclick="openAlertConfig();toggleHdrMore()">&#9881; R&eacute;glages alertes</button>
-        <button class="hdr-more-item" style="color:var(--cyan)" onclick="openTruckMonitor();toggleHdrMore()">&#x1F5A5; Mode Monitor (nouvel onglet)</button>
+        <button id="hdrMoreMonitor" class="hdr-more-item" style="color:var(--cyan)" onclick="openTruckMonitor();toggleHdrMore()">&#x1F5A5; Mode Monitor (nouvel onglet)</button>
         <div style="height:1px;background:var(--bd2);margin:4px 0"></div>
         <button class="hdr-more-item" style="color:var(--blue)" onclick="tfSwitchUser();toggleHdrMore()">&#x21BA; Changer de session</button>
         <div id="hdrMoreSep" style="height:1px;background:var(--bd2);margin:4px 0"></div>
@@ -1585,7 +1585,7 @@ body.tf-stat-mode #welcomeScreen{display:none!important}
     <!-- Icônes -->
     <div class="hdr-group tv-keep">
       <div class="notif-btn" onclick="toggleTheme()" title="Th&egrave;me clair/sombre" id="themeBtn">&#x2600;</div>
-      <div class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
+      <div class="notif-btn" id="hdrBtnNotif" onclick="toggleNotifPanel()" title="Notifications">
         &#x1F514;<span class="notif-badge" id="notifBadge"></span>
       </div>
       <button class="btn-quit" onclick="tfShowQuitModal()" title="Quitter et purger">🚪 Quitter</button>
@@ -1965,7 +1965,7 @@ body.tf-stat-mode #welcomeScreen{display:none!important}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.108';
+var APP_VERSION = 'v1.113';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -2074,6 +2074,7 @@ var ITIN_MAP = {
   FRENL2:'ENL', FRENL3:'ENL', FRENL4:'ENL',
   FRCOQU:'COQU', FRGON2:'GON'
 };
+function _carrierName(t){return (t&&(t.label||t.transporteur||(t.itin&&ITIN_MAP[t.itin])||t.itin))||'?';}
 var CRENEAU_MAP = {
   FRBERN:'14-16', FRPOID:'libre', FRSTEF:'libre', FRDIS1:'14h GMS',
   FRDIS2:'manuel', FRCEV4:'14h', FRCEVA:'14h', FRCEV3:'14h',
@@ -3750,7 +3751,7 @@ function _renderCompansTruckCard(ti,t,ts,container,_creneauGroups){
   var head=document.createElement('div');head.className='tc-head';
 
   var nameSpan=document.createElement('span');nameSpan.className='tc-name';
-  nameSpan.innerHTML='&#127981; COMPANS';
+  nameSpan.innerHTML='&#127981; COMPANS'+(t.tour?' E'+t.tour:'');
   nameSpan.style.cssText='color:var(--amber)';
   head.appendChild(nameSpan);
 
@@ -4187,7 +4188,7 @@ function renderTrucks(){
 
     // Truck name
     var nameSpan=document.createElement('span');nameSpan.className='tc-name';
-    nameSpan.textContent='\uD83D\uDE9B '+(t.transporteur||t.itin||'?');
+    nameSpan.textContent='\uD83D\uDE9B '+_carrierName(t);
     head.appendChild(nameSpan);
 
     // Route change button
@@ -4241,7 +4242,7 @@ function renderTrucks(){
       dateInp.readOnly=true;dateInp.style.pointerEvents='none';dateInp.style.opacity='.7';
     } else {
       dateInp.title='Modifier la date';
-      (function(ii){dateInp.addEventListener('change',function(){trucks[ii].date=this.value;trucks[ii]._dateManuallyChanged=true;save();renderAll();logActivity('\uD83D\uDCC5','Date camion '+(trucks[ii].itin||'?')+' modifi\u00e9e \u2192 '+this.value);});})(ti);
+      (function(ii){dateInp.addEventListener('change',function(){trucks[ii].date=this.value;trucks[ii]._dateManuallyChanged=true;save();renderAll();logActivity('\uD83D\uDCC5','Date camion '+_carrierName(trucks[ii])+' modifi\u00e9e \u2192 '+this.value);});})(ti);
     }
     head.appendChild(dateInp);
 
@@ -4982,6 +4983,14 @@ function importSession(event){
       var t0=document.querySelector('.tab'); if(t0) t0.classList.add('on');
       var p0=document.getElementById('tab-syn'); if(p0) p0.classList.add('on');
       renderAll();
+      if(sessionStorage.getItem('tf_user')==='__stat__'){
+        document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+        document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+        var statBtn=Array.from(document.querySelectorAll('.tab')).find(function(b){return (b.getAttribute('onclick')||'').indexOf("'stat'")!==-1;});
+        if(statBtn) statBtn.classList.add('on');
+        var statPanel=document.getElementById('tab-stat'); if(statPanel) statPanel.classList.add('on');
+        try{renderStats();}catch(e){}
+      }
       _importTs=Date.now();startUpdTicker();startNotifChecker();
       var archMsg=(_dailyArchive&&_dailyArchive.length)?' (+ '+_dailyArchive.length+'j d\u2019archive)':'';
       showToast(APP.deliveries.length+' livraisons restaur\u00e9es depuis la session'+archMsg+' \u2705');
@@ -5065,7 +5074,7 @@ function editTruckDate(ti){
   if(nd && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(nd)){ showToast('Format invalide'); return; }
   trucks[ti].date = nd||cur;
   save(); renderAll();
-  logActivity('\uD83D\uDCC5','Date camion '+(trucks[ti].itin||'?')+' modifi\u00e9e \u2192 '+(nd||cur));
+  logActivity('\uD83D\uDCC5','Date camion '+_carrierName(trucks[ti])+' modifi\u00e9e \u2192 '+(nd||cur));
 }
 
 // ─── Manual entries (quai) ────────────────────────────────────────────────
@@ -7219,29 +7228,32 @@ function renderStats(){
       html+='<div class="stats-kpi" style="min-width:140px"><div class="stats-kpi-val" style="color:var(--teal);font-size:24px">'+fmtMinutes(cpAvg)+'</div><div class="stats-kpi-lbl">Durée moy. (Arr → Dép)</div><div class="stats-kpi-sub">min: '+fmtMinutes(Math.min.apply(null,cpTimes))+' · max: '+fmtMinutes(Math.max.apply(null,cpTimes))+'</div></div>';
     }
     html+='</div>';
-    // Table by date
-    var cpByDate={};
-    allCompans.forEach(function(d){
-      var dt=d.t.date||'?';
-      if(!cpByDate[dt])cpByDate[dt]={date:dt,count:0,done:0};
-      cpByDate[dt].count++;
-      if(d.ts.dep)cpByDate[dt].done++;
+    // Table détaillé par enlèvement
+    var cpSorted=allCompans.slice().sort(function(a,b){
+      if(a.t.date!==b.t.date)return a.t.date<b.t.date?-1:1;
+      return (a.t.tour||0)-(b.t.tour||0);
     });
-    var cpDates=Object.keys(cpByDate).sort();
-    if(cpDates.length>1){
-      html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Caisses</th><th style="color:var(--green)">Terminées</th><th style="color:var(--t3)">En attente</th></tr></thead><tbody>';
-      cpDates.forEach(function(dt){
-        var d=cpByDate[dt];
-        var dtFmt=dt;try{var dObj=new Date(dt+'T12:00:00');dtFmt=dObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}catch(e){}
-        html+='<tr>'+
-          '<td style="font-weight:700;white-space:nowrap">'+dtFmt+'</td>'+
-          '<td style="font-weight:800;color:var(--amber)">'+d.count+'</td>'+
-          '<td style="color:var(--green);font-weight:700">'+d.done+'</td>'+
-          '<td style="color:var(--t3)">'+( d.count-d.done)+'</td>'+
-        '</tr>';
-      });
-      html+='</tbody></table>';
-    }
+    html+='<table class="stats-day-table"><thead><tr>'+
+      '<th>Date</th><th>Enlèvement</th><th>Arrivée</th><th>Départ</th><th>Durée</th><th>Statut</th>'+
+    '</tr></thead><tbody>';
+    cpSorted.forEach(function(d){
+      var dt=d.t.date||'?';
+      var dtFmt=dt;try{var dObj=new Date(dt+'T12:00:00');dtFmt=dObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}catch(e){}
+      var arrFmt=d.ts.arr?new Date(d.ts.arr).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      var depFmt=d.ts.dep?new Date(d.ts.dep).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      var durFmt='—';
+      if(d.ts.arr&&d.ts.dep){var dm=Math.round((new Date(d.ts.dep)-new Date(d.ts.arr))/60000);durFmt=fmtMinutes(dm);}
+      var statut=d.ts.dep?'<span style="color:var(--green);font-weight:700">✅ Parti</span>':d.ts.arr?'<span style="color:var(--amber);font-weight:700">🚀 Sur site</span>':'<span style="color:var(--t3)">⏳ Attente</span>';
+      html+='<tr>'+
+        '<td style="font-weight:700;white-space:nowrap">'+dtFmt+'</td>'+
+        '<td style="font-weight:800;color:var(--amber)">E'+(d.t.tour||'?')+'</td>'+
+        '<td style="font-family:monospace;color:var(--t2)">'+arrFmt+'</td>'+
+        '<td style="font-family:monospace;color:var(--t2)">'+depFmt+'</td>'+
+        '<td style="font-family:monospace;color:var(--teal)">'+durFmt+'</td>'+
+        '<td>'+statut+'</td>'+
+      '</tr>';
+    });
+    html+='</tbody></table>';
     html+='</div>';
   }
 
@@ -9290,8 +9302,18 @@ function openMontageForm(){
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:14px">'+
         '<div>'+
-          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur / Route</label>'+
-          '<input id="mcTransp" value="'+mainTransp+'" placeholder="Nom du transporteur" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur</label>'+
+          (function(){
+            var opts='<option value="">— Choisir —</option>';
+            var seen={};var names=[];
+            Object.keys(ITIN_MAP).forEach(function(k){var v=ITIN_MAP[k];if(!seen[v]){seen[v]=true;names.push(v);}});
+            names.sort().forEach(function(n){opts+='<option value="'+n+'"'+(n===mainTransp?' selected':'')+'>'+n+'</option>';});
+            return '<select id="mcTransp" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;cursor:pointer">'+opts+'</select>';
+          })()+
+        '</div>'+
+        '<div>'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Nom affiché <span style="font-weight:400;opacity:.6">(optionnel)</span></label>'+
+          '<input id="mcLabel" type="text" placeholder="ex: BERNARD AM, STEF #2…" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
         '</div>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
           '<div>'+
@@ -9320,17 +9342,19 @@ function closeMontageForm(){
 }
 
 function confirmMontage(){
-  var transp=(document.getElementById('mcTransp')||{}).value||'';
+  var transp=((document.getElementById('mcTransp')||{}).value||'').trim();
+  var customLabel=((document.getElementById('mcLabel')||{}).value||'').trim();
   var dateVal=(document.getElementById('mcDate')||{}).value||'';
   var creneau=(document.getElementById('mcCreneau')||{}).value||'';
   if(!transp){showToast('\u26a0 Transporteur requis');return;}
   var selIds=Object.keys(_montageSelected);
   if(!selIds.length){closeMontageForm();return;}
-  // L'app utilise le format ISO YYYY-MM-DD partout (xlDate, date tabs, input camion)
   var itin=(getDeliv(selIds[0])||{}).itin||transp;
+  var displayName=customLabel||transp;
   var newTruck={
     id:'mont_'+Date.now(),
     transporteur:transp,
+    label:customLabel||'',
     itin:itin,
     date:dateVal,
     creneau:creneau,
@@ -9345,23 +9369,19 @@ function confirmMontage(){
   };
   trucks.push(newTruck);
   save();
-  try{logActivity('\uD83D\uDD27','Camion mont\u00e9 verrouill\u00e9 : '+transp+' \u00b7 '+selIds.length+' livraisons'+(creneau?' \u00b7 '+creneau:''));}catch(e){}
+  try{logActivity('\uD83D\uDD27','Camion mont\u00e9 verrouill\u00e9 : '+displayName+' \u00b7 '+selIds.length+' livraisons'+(creneau?' \u00b7 '+creneau:''));}catch(e){}
   closeMontageForm();
   _montageSelected={};
   renderMontagePanel();
-  showToast('\u2705 Camion '+transp+' mont\u00e9 \u00b7 '+selIds.length+' livraison'+(selIds.length>1?'s':'')+' \u2022 \uD83D\uDD12 verrouill\u00e9');
+  showToast('\u2705 Camion '+displayName+' mont\u00e9 \u00b7 '+selIds.length+' livraison'+(selIds.length>1?'s':'')+' \u2022 \uD83D\uDD12 verrouill\u00e9');
 }
 
 // ─── COMPANS form ─────────────────────────────────────────────────────────
 function openCompansForm(){
-  var selIds=Object.keys(_montageSelected||{});
-  // Compute mainDate from selected deliveries (or today)
-  var dateCount={};
-  selIds.forEach(function(id){var d=getDeliv(id);if(d)dateCount[d.date||'']=(dateCount[d.date||'']||0)+1;});
-  var mainDate=Object.keys(dateCount).sort(function(a,b){return dateCount[b]-dateCount[a];})[0]||new Date().toISOString().slice(0,10);
-  if(/^\d{2}\/\d{2}\/\d{4}$/.test(mainDate)){var p=mainDate.split('/');mainDate=p[2]+'-'+p[1]+'-'+p[0];}
-  var totPal=0,totColis=0;
-  selIds.forEach(function(id){var d=getDeliv(id);if(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;}});
+  var today=_workingDate||new Date().toISOString().slice(0,10);
+  // Count existing COMPANS for today to show as info
+  var existing=trucks.filter(function(t){return t.type==='compans'&&t.date===today;}).length+
+    (_completedTrucks||[]).filter(function(ct){return ct.type==='compans'&&ct.date===today;}).length;
   var el=document.createElement('div');
   el.id='compansFormBg';
   el.onclick=function(e){if(e.target===el)closeCompansForm();};
@@ -9369,38 +9389,39 @@ function openCompansForm(){
   el.innerHTML=
     '<div style="width:min(400px,92vw);background:linear-gradient(165deg,rgba(255,255,255,.09),rgba(15,40,100,.04));backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,160,0,.35);border-radius:20px;padding:24px;box-shadow:0 0 0 1px rgba(255,255,255,.07) inset,0 24px 60px rgba(0,0,0,.45)">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
-        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--amber)">&#127981; Caisse COMPANS</h3>'+
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--amber)">&#127981; Enlèvements COMPANS</h3>'+
         '<button onclick="closeCompansForm()" style="background:none;border:none;color:var(--t3);font-size:24px;cursor:pointer;padding:0 6px;line-height:1">&#215;</button>'+
       '</div>'+
-      (selIds.length?
-        '<div style="background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.2);border-radius:10px;padding:10px 14px;margin-bottom:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">'+
-          '<span style="font-size:13px;font-weight:700;color:var(--amber)">'+selIds.length+' caisse'+(selIds.length>1?'s':'')+' sélectionné'+(selIds.length>1?'es':'e')+'</span>'+
-          (totPal?'<span style="font-size:12px;color:#2dc272;font-weight:700">'+totPal+' pal SILO</span>':'')+
-          (totColis?'<span style="font-size:12px;color:var(--purple);font-weight:700">'+totColis+' colis pick</span>':'')+
-        '</div>':
-        '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:var(--t3);text-align:center">Aucune livraison sélectionnée — vous pourrez en assigner depuis le mode Montage</div>')+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">'+
+      (existing?'<div style="background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.2);border-radius:10px;padding:8px 14px;margin-bottom:16px;font-size:12px;color:var(--amber)">&#8505; '+existing+' enlèvement'+(existing>1?'s':'')+(existing>1?' déjà créés':' déjà créé')+' aujourd\'hui — les nouveaux prendront la suite (E'+(existing+1)+'…)</div>':'')+
+      '<div style="display:flex;flex-direction:column;gap:14px">'+
         '<div>'+
-          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Date</label>'+
-          '<input id="cpDate" type="date" value="'+mainDate+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Nombre d\'enlèvements prévus</label>'+
+          '<input id="cpCount" type="number" min="1" max="20" value="'+(existing?1:3)+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,160,0,.4);background:var(--sf2);color:var(--amber);font-size:18px;font-weight:800;outline:none;box-sizing:border-box;text-align:center">'+
         '</div>'+
-        '<div>'+
-          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Quai (6, 7 ou 8)</label>'+
-          '<select id="cpQuai" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,160,0,.3);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;appearance:none;cursor:pointer">'+
-            '<option value="">-- Quai --</option>'+
-            '<option value="6">Quai 6</option>'+
-            '<option value="7">Quai 7</option>'+
-            '<option value="8">Quai 8</option>'+
-          '</select>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Date</label>'+
+            '<input id="cpDate" type="date" value="'+today+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '</div>'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Quai (6, 7 ou 8)</label>'+
+            '<select id="cpQuai" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,160,0,.3);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;cursor:pointer">'+
+              '<option value="">-- Quai --</option>'+
+              '<option value="6">Quai 6</option>'+
+              '<option value="7">Quai 7</option>'+
+              '<option value="8">Quai 8</option>'+
+            '</select>'+
+          '</div>'+
         '</div>'+
       '</div>'+
       '<div style="display:flex;gap:10px;margin-top:20px">'+
         '<button onclick="closeCompansForm()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Annuler</button>'+
-        '<button onclick="confirmCompans()" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#f59e0b,#ef6c00);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,160,0,.3)">&#127981; Créer COMPANS</button>'+
+        '<button onclick="confirmCompans()" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#f59e0b,#ef6c00);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,160,0,.3)">&#127981; Créer les enlèvements</button>'+
       '</div>'+
-      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">Caisse intersites — Arrivée + Départ uniquement &#128274;</div>'+
+      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">Arrivée + Départ uniquement — numérotés E1, E2, E3…</div>'+
     '</div>';
   document.body.appendChild(el);
+  setTimeout(function(){var i=document.getElementById('cpCount');if(i){i.focus();i.select();}},100);
 }
 
 function closeCompansForm(){
@@ -9408,37 +9429,47 @@ function closeCompansForm(){
 }
 
 function confirmCompans(){
+  var count=Math.max(1,Math.min(20,parseInt((document.getElementById('cpCount')||{}).value||1,10)));
   var dateVal=(document.getElementById('cpDate')||{}).value||new Date().toISOString().slice(0,10);
   var quaiVal=(document.getElementById('cpQuai')||{}).value||'';
-  var selIds=Object.keys(_montageSelected||{});
-  var newTruck={
-    id:'compans_'+Date.now(),
-    transporteur:'COMPANS',
-    itin:'COMPANS',
-    type:'compans',
-    date:dateVal,
-    creneau:'',
-    deliveries:selIds.slice(),
-    lockedDeliveries:selIds.slice(),
-    lockedDate:dateVal,
-    lockedCreneau:'',
-    locked:true,
-    _montage:true,
-    decalage:null,
-    notes:''
-  };
-  trucks.push(newTruck);
-  if(quaiVal){
-    var tid=newTruck.id;var q=parseInt(quaiVal,10);
-    Object.keys(quaiAssign).forEach(function(old){if(quaiAssign[old]===tid)delete quaiAssign[old];});
-    quaiAssign[q]=tid;saveQuaiAssign();
+  // Find next available tour number for this date
+  var usedNums=trucks.map(function(t){return (t.type==='compans'&&t.date===dateVal)?(t.tour||0):0;})
+    .concat((_completedTrucks||[]).map(function(ct){return (ct.type==='compans'&&ct.date===dateVal)?(ct.tour||0):0;}));
+  var startNum=(usedNums.length?Math.max.apply(null,usedNums):0)+1;
+  var created=[];
+  for(var i=0;i<count;i++){
+    var tourNum=startNum+i;
+    var newTruck={
+      id:'compans_'+Date.now()+'_'+tourNum,
+      transporteur:'COMPANS',
+      itin:'COMPANS',
+      type:'compans',
+      tour:tourNum,
+      date:dateVal,
+      creneau:'',
+      deliveries:[],
+      lockedDeliveries:[],
+      lockedDate:dateVal,
+      lockedCreneau:'',
+      locked:true,
+      _montage:true,
+      decalage:null,
+      notes:''
+    };
+    trucks.push(newTruck);
+    // Assign quai to first enlèvement only if quai chosen
+    if(quaiVal&&i===0){
+      var q=parseInt(quaiVal,10);
+      Object.keys(quaiAssign).forEach(function(old){if(quaiAssign[old]===newTruck.id)delete quaiAssign[old];});
+      quaiAssign[q]=newTruck.id;saveQuaiAssign();
+    }
+    created.push('E'+tourNum);
   }
   save();
-  try{logActivity('&#127981;','Caisse COMPANS créée · '+selIds.length+' livraison'+(selIds.length>1?'s':'')+(quaiVal?' · Q'+quaiVal:''));}catch(e){}
+  try{logActivity('🏭',count+' enlèvement'+(count>1?'s':'')+' COMPANS créé'+(count>1?'s':'')+' ('+created.join(', ')+')'+(quaiVal?' · Q'+quaiVal:''));}catch(e){}
   closeCompansForm();
-  _montageSelected={};
   if(_montageMode){renderMontagePanel();}else{renderTrucks();}
-  showToast('✅ Caisse COMPANS créée'+(selIds.length?' · '+selIds.length+' livraison'+(selIds.length>1?'s':''):'')+(quaiVal?' · Q'+quaiVal:''));
+  showToast('✅ '+count+' enlèvement'+(count>1?'s':'')+' COMPANS créé'+(count>1?'s':'')+' ('+created.join(', ')+')');
 }
 
 // ─── TFE Tours ────────────────────────────────────────────────────────────
@@ -11938,8 +11969,8 @@ function renderAnalysis(el){
     riskyTrucks.slice(0,5).forEach(function(r){
       html+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px">'+
         '<span class="predict-badge '+r.risk.level+'">'+r.risk.pct+'%</span>'+
-        '<span style="font-weight:700;color:var(--t1)">'+(r.truck.itin||'?')+'</span>'+
-        '<span style="color:var(--t3)">'+(r.truck.transporteur||'')+'</span></div>';
+        '<span style="font-weight:700;color:var(--t1)">'+_carrierName(r.truck)+'</span>'+(r.truck.itin&&r.truck.itin!==r.truck.transporteur?'<span style="font-size:10px;color:var(--t3)"> '+r.truck.itin+'</span>':'')+
+        '</div>';
     });
     html+='</div><div class="ac-sub">Bas\u00e9 sur l\u2019historique de '+_dailyArchive.length+' jours</div></div>';
   } else if(_dailyArchive.length>=3){
@@ -12079,8 +12110,8 @@ function openTimeline(truckId){
   ];
   var prio=(_truckPriorities&&_truckPriorities[truckId])||'';
   var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+(t.itin||'?')+'</div>'+
-    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(t.dest||'\u2014')+' \u2502 '+(t.transporteur||'')+' \u2502 Cr\u00e9neau : '+(t.creneau||'\u2014')+'</div></div>'+
+    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+_carrierName(t)+(t.itin&&t.itin!==t.transporteur?' <span style="font-size:10px;color:var(--t3)">'+t.itin+'</span>':'')+'</div>'+
+    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(t.dest||'\u2014')+' \u2502 Cr\u00e9neau : '+(t.creneau||'\u2014')+'</div></div>'+
     '<div style="display:flex;gap:6px;align-items:center">'+
     '<select style="font-size:10px;background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:3px 6px;color:var(--t1);cursor:pointer" onchange="setTruckPriority(\''+truckId+'\',this.value);openTimeline(\''+truckId+'\')">'+
     '<option value=""'+(prio===''?' selected':'')+'>-- Priorit\u00e9 --</option>'+
@@ -12128,9 +12159,9 @@ function openTimelineKanban(truckId,archived){
     {key:'dep',ico:'\uD83D\uDE80',label:'D\u00e9part'}
   ];
   var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+(ct.itin||'?')+
+    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+_carrierName(ct)+(ct.itin&&ct.itin!==ct.transporteur?' <span style="font-size:10px;color:var(--t3)">'+ct.itin+'</span>':'')+
     ' <span style="font-size:11px;color:var(--orange);background:rgba(255,140,66,.12);padding:2px 7px;border-radius:5px;font-weight:600">Archive</span></div>'+
-    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(ct.dest||'\u2014')+' \u2502 '+(ct.transporteur||'')+' \u2502 Cr\u00e9neau : '+(ct.creneau||'\u2014')+'</div></div>'+
+    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(ct.dest||'\u2014')+' \u2502 Cr\u00e9neau : '+(ct.creneau||'\u2014')+'</div></div>'+
     '<div style="cursor:pointer;font-size:18px;color:var(--t3);padding:4px 8px" onclick="document.getElementById(\'vtlBg\').classList.remove(\'open\')">\u2715</div></div>';
   html+='<div style="margin-top:12px">';
   var lastTime=null;
@@ -13272,6 +13303,7 @@ function applyProfileRestrictions(){
     // Masquer tous les boutons d'action / import / write
     ['hdrBtnMobile','hdrBtnNetSync','hdrBtnVL06O','hdrBtnSync','hdrBtnPartager',
      'hdrUndoBtn','hdrCadSilo','hdrCadPick','hdrBtnMonitor','hdrBtnRapport',
+     'hdrBtnNotif','hdrMoreMonitor',
      'hdrMoreJournal','hdrMoreAlerts','hdrMoreSep','hdrMorePurge',
      'camBtnCompans','camBtnTFE'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='none';
@@ -14620,7 +14652,7 @@ function makeCard(t,ts,quai,prio){
       +'<div class="tc-stripe" style="background:#f59e0b;box-shadow:2px 0 8px rgba(245,158,11,.4)"></div>'
       +'<div class="tc-left" style="cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'
         +'<div class="tc-top"><span class="b" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:rgba(245,158,11,.35)">COMPANS</span>'+(quai?'<span class="b bq">Q'+quai+'</span>':'')+'<span style="margin-left:auto;font-size:9px;color:var(--t3)">📦 '+nDel+'</span></div>'
-        +'<div class="tc-name" style="color:#f59e0b">'+(t.transporteur||'COMPANS')+'</div>'
+        +'<div class="tc-name" style="color:#f59e0b">🏭 COMPANS'+(t.tour?' E'+t.tour:'')+'</div>'
       +'</div>'
       +'<div class="tc-center" style="cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'+prog+tsRow+delSummary(t)+'</div>'
       +'<div class="tc-right">'+ab+'</div>'
@@ -14721,7 +14753,7 @@ function makeCard(t,ts,quai,prio){
         +'<span style="margin-left:auto;font-size:9px;color:var(--t3)">📦 '+nDel+'</span>'
       +'</div>'
       +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
-      +'<div class="tc-sub">'+(t.dest||t.itin||'—')+'</div>'
+      +'<div class="tc-sub">'+(t.dest||t.transporteur||t.itin||'—')+'</div>'
     +'</div>'
     +'<div class="tc-center" style="cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'+prog+tsRow+delSummary(t)+'</div>'
     +'<div class="tc-right">'
@@ -14835,7 +14867,7 @@ function makeActiveCard(t,ts,quai,prio){
     var acColor=isT?'rgba(0,188,212,.7)':'rgba(245,158,11,.7)';
     var badgeStyle=isT?'background:rgba(0,188,212,.15);color:#00bcd4;border-color:rgba(0,188,212,.35)':'background:rgba(245,158,11,.15);color:#f59e0b;border-color:rgba(245,158,11,.35)';
     var badgeTxt=isT?'🚌 TFE':'COMPANS';
-    var acName=isT?'Tour N°'+(t.tour||'?'):(t.transporteur||'COMPANS');
+    var acName=isT?'Tour N°'+(t.tour||'?'):'🏭 COMPANS'+(t.tour?' E'+t.tour:'');
     var nameColor=isT?'#00bcd4':'#f59e0b';
     return '<div class="ac sw">'
       +'<div class="ac-head" style="border-left:3px solid '+acColor+';cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'
@@ -14897,7 +14929,7 @@ function makeActiveCard(t,ts,quai,prio){
         +prB+ptB+pretB
       +'</div>'
       +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
-      +'<div class="ac-sub">'+(t.dest||t.itin||'—')+'</div>'
+      +'<div class="ac-sub">'+(t.dest||t.transporteur||t.itin||'—')+'</div>'
     +'</div>'
     +'<div class="ac-body">'
       +prog+elapsed
@@ -14918,7 +14950,7 @@ function makeStrip(t,ts,quai,prio){
       +'<span class="b" style="background:rgba(255,160,0,.18);color:#f59e0b;border-color:rgba(255,160,0,.3);font-size:9px">🏭 COMPANS</span>'
       +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
       +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
-      +'<div class="strip-name">'+(t.transporteur||'COMPANS')+'</div>'
+      +'<div class="strip-name">🏭 COMPANS'+(t.tour?' E'+t.tour:'')+'</div>'
       +(_liveROc?'':'<button class="strip-btn act-arr" onclick="stamp(\''+tid+'\',\'arr\')">🕐 Arrivée</button>')
       +'</div></div>';
   }
@@ -16491,14 +16523,8 @@ function openMailRecap(){
   var todayTrucks=(trucks||[]).filter(function(t){return (t.date||'').slice(0,10)===dateStr;});
   var completed=(_completedTrucks||[]).filter(function(t){return (t.date||'').slice(0,10)===dateStr;});
 
-  var partis=[],enCours=[],enAttente=[];
-  // Décalés DEPUIS aujourd'hui → t.date a été changé à dateNew donc hors todayTrucks
-  // On les retrouve dans trucks[] avec decalage.dateOrig = dateStr et t.date ≠ dateStr
-  var decalesVersAutreJour=[];
-  // Récupérés D'UN AUTRE JOUR → t.date = aujourd'hui mais decalage.dateOrig ≠ dateStr
-  var recuperes=[];
+  var partis=[],enCours=[],enAttente=[],decalesVersAutreJour=[],recuperes=[];
 
-  // ── camions actifs du jour ──
   todayTrucks.forEach(function(t){
     var ts=timestamps[t.id]||{};
     var quaiNum=null;
@@ -16508,19 +16534,14 @@ function openMailRecap(){
     if(status==='parti') partis.push(entry);
     else if(status==='encours') enCours.push(entry);
     else enAttente.push(entry);
-    // récupéré d'un autre jour si décalage.dateOrig ≠ aujourd'hui
     if(t.decalage&&(t.decalage.dateOrig||'').slice(0,10)!==dateStr) recuperes.push(entry);
   });
-
-  // ── archivés (partis aujourd'hui) ──
   completed.forEach(function(ct){
     var ts=ct.timestamps||{};
     var entry={t:ct,ts:ts,quaiNum:ct.quai||null,status:'parti'};
     partis.push(entry);
     if(ct.decalage&&(ct.decalage.dateOrig||'').slice(0,10)!==dateStr) recuperes.push(entry);
   });
-
-  // ── décalés VERS un autre jour (t.date a changé, hors todayTrucks) ──
   (trucks||[]).forEach(function(t){
     if(!t.decalage) return;
     var orig=(t.decalage.dateOrig||'').slice(0,10);
@@ -16532,8 +16553,6 @@ function openMailRecap(){
       decalesVersAutreJour.push({t:t,ts:ts,quaiNum:quaiNum,status:'decale'});
     }
   });
-
-  // tri partis par heure d'arrivée
   partis.sort(function(a,b){return (a.ts.arr||'')>(b.ts.arr||'')?1:-1;});
 
   _mrData={partis:partis,enCours:enCours,enAttente:enAttente,
@@ -16549,8 +16568,8 @@ function openMailRecap(){
     if(ts.quai) return 'À quai';
     return 'Arrivé — attente quai';
   }
-  function fmtResponsable(m){return m==='mtx3'?'MTX3':m==='transporteur'?'Transporteur':m==='pas_venu'?'Pas venu':(m||'?');}
 
+  // ── Corps mail : uniquement En cours + À venir ──
   var L=[];
   L.push('Bonsoir,');
   L.push('');
@@ -16579,38 +16598,7 @@ function openMailRecap(){
     L.push('');
   }
 
-  if(recuperes.length){
-    L.push('📥 RÉCUPÉRÉS D\'UN AUTRE JOUR ('+recuperes.length+')');
-    L.push('─'.repeat(40));
-    recuperes.forEach(function(x){
-      var dec=x.t.decalage;
-      var orig=(dec.dateOrig||'')+(dec.creneauOrig?' '+dec.creneauOrig:'');
-      var statLbl=x.status==='parti'?'Parti':x.status==='encours'?fmtStatut(x.ts):'En attente';
-      L.push('• '+fmtName(x.t));
-      L.push('  Décalé depuis : '+(orig||'date inconnue')+' — '+fmtResponsable(dec.motif));
-      L.push('  Statut : '+statLbl);
-      L.push('  Livraisons : '+fmtLivs(x.t));
-    });
-    L.push('');
-  }
-
-  if(decalesVersAutreJour.length){
-    L.push('⚠️ DÉCALÉS VERS UN AUTRE JOUR ('+decalesVersAutreJour.length+')');
-    L.push('─'.repeat(40));
-    decalesVersAutreJour.forEach(function(x){
-      var dec=x.t.decalage;
-      var renvoi=(dec.dateNew||'')+(dec.creneauNew?' '+dec.creneauNew:'');
-      L.push('• '+fmtName(x.t));
-      L.push('  Renvoyé au : '+(renvoi||'date non précisée'));
-      L.push('  Responsabilité : '+fmtResponsable(dec.motif));
-      L.push('  Motif : '+(dec.label||'—'));
-      if(dec.note) L.push('  Note : '+dec.note);
-      L.push('  Livraisons : '+fmtLivs(x.t));
-    });
-    L.push('');
-  }
-
-  if(!enCours.length&&!enAttente.length&&!decalesVersAutreJour.length&&!recuperes.length){
+  if(!enCours.length&&!enAttente.length){
     L.push('Tous les camions sont partis. Bonne fin de journée !');
   } else {
     L.push('Bonne fin de journée.');
@@ -16646,7 +16634,7 @@ function openMailtoRecap(){
 function printMailRecapPDF(){
   var d=_mrData;
   if(!d){showToast('⚠ Ouvrir le récap avant de générer le PDF');return;}
-  var w=window.open('','_blank','width=880,height=750');
+  var w=window.open('','_blank','width=1000,height=800');
   if(!w) return;
 
   function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -16669,53 +16657,63 @@ function printMailRecapPDF(){
 
   var css=
     '*{box-sizing:border-box;margin:0;padding:0}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#1a1a2e;background:#fff}'
-    +'.hdr{background:#1e3a5f;color:#fff;padding:18px 24px 14px;display:flex;justify-content:space-between;align-items:flex-start}'
-    +'.hdr-title{font-size:18px;font-weight:800}'
-    +'.hdr-sub{font-size:10px;opacity:.7;margin-top:4px}'
-    +'.hdr-right{text-align:right;font-size:10px;opacity:.7;line-height:1.6}'
-    +'.kpis{display:flex;gap:8px;padding:12px 24px;background:#f1f5f9;border-bottom:2px solid #e2e8f0;flex-wrap:wrap}'
-    +'.kpi{flex:1;min-width:80px;background:#fff;border-radius:8px;padding:9px;text-align:center;border:1px solid #e2e8f0}'
-    +'.kpi-n{font-size:22px;font-weight:900;line-height:1.1}'
-    +'.kpi-l{font-size:9px;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;color:#64748b;font-weight:700}'
+    // Corps général — plus grand et aéré
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1a1a2e;background:#fff;line-height:1.5}'
+    // Header
+    +'@page{size:A4;margin:10mm}'
+    +'.hdr{background:#1e3a5f;color:#fff;padding:22px 28px 18px;display:flex;justify-content:space-between;align-items:flex-start;border-radius:0 0 4px 4px}'
+    +'.hdr-title{font-size:22px;font-weight:900;letter-spacing:-.3px}'
+    +'.hdr-sub{font-size:12px;opacity:.75;margin-top:5px}'
+    +'.hdr-right{text-align:right;font-size:11px;opacity:.75;line-height:1.7}'
+    // KPIs
+    +'.kpis{display:flex;gap:10px;padding:14px 28px;background:#f1f5f9;border-bottom:2px solid #e2e8f0;flex-wrap:wrap}'
+    +'.kpi{flex:1;min-width:90px;background:#fff;border-radius:10px;padding:12px 10px;text-align:center;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.06)}'
+    +'.kpi-n{font-size:28px;font-weight:900;line-height:1.1}'
+    +'.kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-top:4px;color:#64748b;font-weight:700}'
     +'.kpi.g .kpi-n{color:#15803d}.kpi.b .kpi-n{color:#1d4ed8}.kpi.o .kpi-n{color:#b45309}'
     +'.kpi.r .kpi-n{color:#dc2626}.kpi.t .kpi-n{color:#0891b2}.kpi.s .kpi-n{color:#6d28d9}'
-    +'.body{padding:16px 24px}'
-    +'.sec{margin-bottom:20px;page-break-inside:avoid}'
-    +'.sec-hdr{font-size:11px;font-weight:800;padding:5px 10px;border-radius:6px;margin-bottom:8px}'
-    +'.sec-hdr.g{background:#dcfce7;color:#15803d;border-left:4px solid #16a34a}'
-    +'.sec-hdr.b{background:#dbeafe;color:#1d4ed8;border-left:4px solid #2563eb}'
-    +'.sec-hdr.o{background:#fef3c7;color:#b45309;border-left:4px solid #d97706}'
-    +'.sec-hdr.r{background:#fee2e2;color:#b91c1c;border-left:4px solid #dc2626}'
-    +'.sec-hdr.t{background:#ecfeff;color:#0e7490;border-left:4px solid #0891b2}'
-    +'.truck{border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;margin-bottom:6px;page-break-inside:avoid}'
-    +'.truck.g{border-left:3px solid #16a34a}.truck.b{border-left:3px solid #2563eb}'
-    +'.truck.o{border-left:3px solid #d97706}.truck.r{border-left:3px solid #dc2626}'
-    +'.truck.t{border-left:3px solid #0891b2}'
-    +'.t-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}'
-    +'.t-name{font-weight:800;font-size:12px;color:#0f172a}'
-    +'.t-quai{font-size:10px;color:#fff;background:#64748b;border-radius:4px;padding:1px 7px;font-weight:700}'
-    +'.t-ts{display:flex;gap:5px;margin:5px 0;align-items:center;flex-wrap:wrap}'
-    +'.ts-chip{font-size:9.5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 7px;color:#334155}'
-    +'.ts-chip.filled{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;font-weight:700}'
+    // Contenu
+    +'.body{padding:20px 28px}'
+    +'.sec{margin-bottom:24px;page-break-inside:avoid}'
+    +'.sec-hdr{font-size:13px;font-weight:800;padding:7px 12px;border-radius:7px;margin-bottom:10px;letter-spacing:.01em}'
+    +'.sec-hdr.g{background:#dcfce7;color:#15803d;border-left:5px solid #16a34a}'
+    +'.sec-hdr.b{background:#dbeafe;color:#1d4ed8;border-left:5px solid #2563eb}'
+    +'.sec-hdr.o{background:#fef3c7;color:#b45309;border-left:5px solid #d97706}'
+    +'.sec-hdr.r{background:#fee2e2;color:#b91c1c;border-left:5px solid #dc2626}'
+    +'.sec-hdr.t{background:#ecfeff;color:#0e7490;border-left:5px solid #0891b2}'
+    // Cartes camion
+    +'.truck{border:1px solid #e2e8f0;border-radius:9px;padding:11px 14px;margin-bottom:8px;page-break-inside:avoid}'
+    +'.truck.g{border-left:4px solid #16a34a}.truck.b{border-left:4px solid #2563eb}'
+    +'.truck.o{border-left:4px solid #d97706}.truck.r{border-left:4px solid #dc2626}'
+    +'.truck.t{border-left:4px solid #0891b2}'
+    +'.t-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}'
+    +'.t-name{font-weight:800;font-size:14px;color:#0f172a}'
+    +'.t-quai{font-size:12px;color:#fff;background:#475569;border-radius:5px;padding:2px 10px;font-weight:700}'
+    +'.t-statut{display:inline-block;font-size:11px;background:#f1f5f9;border-radius:5px;padding:2px 10px;color:#475569;margin-left:8px;font-weight:600}'
+    // Timeline timestamps
+    +'.t-ts{display:flex;gap:6px;margin:7px 0;align-items:center;flex-wrap:wrap}'
+    +'.ts-chip{font-size:11px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:3px 9px;color:#334155;font-weight:600}'
+    +'.ts-chip.filled{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}'
     +'.ts-arr{background:#f0fdf4!important;border-color:#bbf7d0!important;color:#15803d!important}'
     +'.ts-dep{background:#eff6ff!important;border-color:#bfdbfe!important;color:#1d4ed8!important}'
-    +'.ts-arrow{color:#94a3b8;font-size:9px}'
-    +'.t-livs{font-size:9.5px;color:#475569;margin-top:4px}'
-    +'.t-livs b{color:#1e40af}'
-    +'.t-statut{display:inline-block;font-size:9.5px;background:#f1f5f9;border-radius:4px;padding:1px 8px;color:#475569;margin-left:6px}'
-    +'.dec-box{border-radius:6px;padding:8px 10px;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;margin-top:6px}'
+    +'.ts-arrow{color:#94a3b8;font-size:10px}'
+    // Livraisons
+    +'.t-livs{font-size:11.5px;color:#475569;margin-top:6px;line-height:1.5}'
+    +'.t-livs b{color:#1e40af;font-size:12px}'
+    // Encart décalage
+    +'.dec-box{border-radius:7px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center;margin-top:8px}'
     +'.dec-box.out{background:#fff7f0;border:1px solid #fed7aa}'
     +'.dec-box.in{background:#ecfeff;border:1px solid #a5f3fc}'
-    +'.dec-date{font-size:13px;font-weight:900;grid-column:1/-1;margin-bottom:2px}'
+    +'.dec-date{font-size:15px;font-weight:900;grid-column:1/-1;margin-bottom:3px}'
     +'.dec-date.out{color:#c2410c}.dec-date.in{color:#0e7490}'
-    +'.dec-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}'
+    +'.dec-key{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}'
     +'.dec-key.out{color:#92400e}.dec-key.in{color:#164e63}'
-    +'.dec-val{font-size:9.5px}'
+    +'.dec-val{font-size:11.5px}'
     +'.dec-val.out{color:#7c2d12}.dec-val.in{color:#0c4a6e}'
-    +'.dec-badge{display:inline-block;font-size:9px;font-weight:800;border-radius:3px;padding:1px 7px;margin-right:4px}'
-    +'.footer{text-align:center;font-size:9px;color:#94a3b8;padding:10px 24px;border-top:1px solid #f1f5f9}'
-    +'@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
+    +'.dec-badge{display:inline-block;font-size:10px;font-weight:800;border-radius:4px;padding:2px 8px;margin-right:5px}'
+    // Footer
+    +'.footer{text-align:center;font-size:10px;color:#94a3b8;padding:12px 28px;border-top:1px solid #f1f5f9;margin-top:4px}'
+    +'@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.sec{page-break-inside:avoid}}';
 
   function tsRow(ts){
     var chips=[{k:'arr',lbl:'ARR'},{k:'quai',lbl:'QUAI'},{k:'chg',lbl:'CHGT'},{k:'fin_chg',lbl:'FIN'},{k:'dep',lbl:'DÉP'}];
@@ -16736,7 +16734,8 @@ function printMailRecapPDF(){
     entries.forEach(function(x){
       var q=fmtQ(x);
       var ids=x.t.deliveries||[];
-      var livsTxt='<b>'+(ids.length||0)+' livraison'+(ids.length>1?'s':'')+'</b>'+(ids.length?' : '+eh(ids.join(', ')):'');
+      var livsTxt='<b>'+(ids.length||0)+' livraison'+(ids.length>1?'s':'')+'</b>'
+        +(ids.length?' : '+eh(ids.join(', ')):'');
       var statut=(cls==='b')?'<span class="t-statut">'+eh(fmtStatut(x.ts))+'</span>':'';
       var decHtml='';
       if(type==='out'||type==='in'){

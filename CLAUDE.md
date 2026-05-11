@@ -12,11 +12,11 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.112.html` | v1.112 | **Version courante** |
+| `TruckFlow_v1.113.html` | v1.113 | **Version courante** |
+| `TruckFlow_v1.112.html` | v1.112 | Archivé |
 | `TruckFlow_v1.111.html` | v1.111 | Archivé |
 | `TruckFlow_v1.110.html` | v1.110 | Archivé |
 | `TruckFlow_v1.109.html` | v1.109 | Archivé |
-| `TruckFlow_v1.108.html` | v1.108 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -92,6 +92,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.113 — COMPANS : N enlèvements créés d'un coup, numérotés E1/E2/E3
+- **Formulaire COMPANS** : remplace la création caisse-par-caisse — spinbox "Nombre d'enlèvements prévus" (1–20), date, quai optionnel ; affiche le nb d'enlèvements déjà créés pour la journée
+- **`confirmCompans()`** : crée N trucks `type:'compans'` avec `tour:1,2,3…` (continuation de la numérotation existante du jour), sans livraisons assignées
+- **Affichage** : cartes onglet Camions = "🏭 COMPANS E1", "🏭 COMPANS E2"…
+- **Monitor** : `makeCard`, `makeActiveCard`, `makeStrip` affichent "🏭 COMPANS E1" / "🏭 COMPANS E2"
+- **Statistiques** : tableau détaillé par enlèvement (Date / E-num / Arrivée / Départ / Durée / Statut) trié par date puis tour
 
 ### v1.112 — Montage : select transporteur + champ nom affiché optionnel
 - **Select transporteur** : remplace l'input texte libre — liste déroulante des noms du `ITIN_MAP` (dédupliqués, triés alphabétiquement), pré-sélection automatique basée sur l'itin dominant des livraisons sélectionnées
