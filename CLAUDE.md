@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.118.html` | v1.118 | **Version courante** |
+| `TruckFlow_v1.119.html` | v1.119 | **Version courante** |
+| `TruckFlow_v1.118.html` | v1.118 | Archivé |
 | `TruckFlow_v1.117.html` | v1.117 | Archivé |
 | `TruckFlow_v1.116.html` | v1.116 | Archivé |
 | `TruckFlow_v1.115.html` | v1.115 | Archivé |
@@ -95,6 +96,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.119 — Fix bouton mail + Logo zoom (correction placement overlay)
+- **Fix mail** : `fmtVille` utilisait `deliveries` (non déclaré) → `APP.deliveries` — ReferenceError qui bloquait `openMailRecap()`
+- **Logo zoom** : `showLogoZoom()` — clic sur `.auth-logo-ico` (login) ou `.logo-ico` (header) → overlay `#logoZoomOverlay` plein écran avec image agrandie (max 600px) ; clic overlay pour fermer
+- **Fix v1.118** : l'overlay avait été injecté dans le bloc JS Monitor au lieu du body HTML — reconstruit depuis v1.117
 
 ### v1.118 — Fix bouton mail + Logo zoom
 - **Fix mail** : `fmtVille` utilisait `deliveries` (non déclaré) → `APP.deliveries` — ReferenceError qui bloquait `openMailRecap()`
