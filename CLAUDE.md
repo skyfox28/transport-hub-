@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.117.html` | v1.117 | **Version courante** |
+| `TruckFlow_v1.118.html` | v1.118 | **Version courante** |
+| `TruckFlow_v1.117.html` | v1.117 | Archivé |
 | `TruckFlow_v1.116.html` | v1.116 | Archivé |
 | `TruckFlow_v1.115.html` | v1.115 | Archivé |
 | `TruckFlow_v1.114.html` | v1.114 | Archivé |
@@ -94,6 +95,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.118 — Fix bouton mail + Logo zoom
+- **Fix mail** : `fmtVille` utilisait `deliveries` (non déclaré) → `APP.deliveries` — ReferenceError qui bloquait `openMailRecap()`
+- **Logo zoom** : clic sur le logo (écran login `.auth-logo-ico` + header `.logo-ico`) → overlay plein écran `#logoZoomOverlay` avec l'image agrandie (`max 600px`, `cursor:zoom-out` pour fermer)
 
 ### v1.117 — Mail récap : corps allégé (camion + créneau + ville + livraisons)
 - **Corps mail** : pour chaque camion En cours / À venir — uniquement `• Nom transporteur — Créneau — Ville` + `Livraisons : XXXXXXXX, …` ; tout le reste (statut, quai, timestamps, partis, décalés) reste dans le PDF uniquement
