@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.103.html` | v1.103 | **Version courante** |
+| `TruckFlow_v1.104.html` | v1.104 | **Version courante** |
+| `TruckFlow_v1.103.html` | v1.103 | Archivé |
 | `TruckFlow_v1.102.html` | v1.102 | Archivé |
 | `TruckFlow_v1.101.html` | v1.101 | Archivé |
 | `TruckFlow_v1.100.html` | v1.100 | Archivé |
@@ -127,6 +128,16 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.104 — Mail récap : distinction responsabilité décalés + marchandise
+- **Section Décalés** : distinction claire "qui/quoi" par camion
+  - `Responsabilité :` MTX3 / Transporteur / Pas venu (depuis `decalage.motif`)
+  - `Motif :` libellé du décalage + renvoi `→ dateNew creneauNew` si applicable
+  - `Note :` si renseignée dans le décalage
+  - `Marchandise :` ⏳ Retard silo / 🔧 Retard prépa si `arr_motif` présent
+  - `Statut :` Parti / À quai / En chargement / Chargé / En attente
+  - `Livraisons :` numéros
+- **Catégorisation décalés élargie** : inclut les camions avec `t.decalage` (pas seulement `arr_motif`)
 
 ### v1.103 — Mail récap : numéros de livraison + détail décalés
 - **Timestamps supprimés** du corps mail — plus d'heures arr/dép dans les sections
