@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.97.html` | v1.97 | **Version courante** |
+| `TruckFlow_v1.98.html` | v1.98 | **Version courante** |
+| `TruckFlow_v1.97.html` | v1.97 | Archivé |
 | `TruckFlow_v1.96.html` | v1.96 | Archivé |
 | `TruckFlow_v1.95.html` | v1.95 | Archivé |
 | `TruckFlow_v1.94.html` | v1.94 | Archivé |
@@ -121,6 +122,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.98 — Synthèse planning : sous-lignes corrigées + livraisons sans camion
+- **Sous-lignes `artDone` corrigées** dans `printSyntheseRoute` : "✓ Préparé" uniquement si `d.sp='C'` ET `d.wm='C'` (ou pas de pick) ; affiche "⚠ En cours" ou "⏳ WM en cours" selon le cas — plus de faux vert quand le header SAP indique B
+- **Livraisons sans camion** : section ⚠ ajoutée en bas de la feuille de synthèse (toutes les livraisons du jour sans camion assigné) avec colonnes Prél./WM/restants, ligne de totaux, statut "✓ Terminé" ou "⚠ Non assigné" ; KPIs globaux (barres de progression) incluent ces livraisons
 
 ### v1.97 — Planning : KPIs globaux complets + colonne RESTANT corrigée
 - **Planning feuille de route — KPIs globaux** : `renderFeuilleDeRoute` et `printFeuilleDeRoute` incluent désormais les livraisons non assignées dans les totaux (pal/silo/pick restants) — cohérence avec l'onglet Synthèse
