@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.104.html` | v1.104 | **Version courante** |
+| `TruckFlow_v1.105.html` | v1.105 | **Version courante** |
+| `TruckFlow_v1.104.html` | v1.104 | Archivé |
 | `TruckFlow_v1.103.html` | v1.103 | Archivé |
 | `TruckFlow_v1.102.html` | v1.102 | Archivé |
 | `TruckFlow_v1.101.html` | v1.101 | Archivé |
@@ -128,6 +129,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.105 — Mail récap : message allégé (situation) + PDF synthèse complète
+- **Message mail** : uniquement 🔄 En cours + ⏳ À venir + ⚠️ Décalés — objet `Point situation camions DD-MM-YYYY`
+- **PDF synthèse** : rapport complet avec header bleu foncé, 4 KPIs colorés (Partis/En cours/À venir/Décalés), sections ✅ Partis / 🔄 En cours / ⏳ À venir / ⚠️ Décalés avec numéros de livraisons et détail des décalés (responsabilité/motif/renvoi/marchandise/statut)
+- **`_mrData`** : variable globale stockant les données calculées à l'ouverture du modal, réutilisée par `printMailRecapPDF()` sans recalcul
 
 ### v1.104 — Mail récap : distinction responsabilité décalés + marchandise
 - **Section Décalés** : distinction claire "qui/quoi" par camion
