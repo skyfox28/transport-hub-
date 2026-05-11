@@ -1575,7 +1575,7 @@ body.tf-stat-mode #welcomeScreen{display:none!important}
       <div class="hdr-more-menu" id="hdrMoreMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:6px;min-width:180px;z-index:150;box-shadow:var(--sh)">
         <button id="hdrMoreJournal" class="hdr-more-item" onclick="openActivityLog();toggleHdrMore()">&#128221; Journal d'activit&eacute;</button>
         <button id="hdrMoreAlerts" class="hdr-more-item" onclick="openAlertConfig();toggleHdrMore()">&#9881; R&eacute;glages alertes</button>
-        <button class="hdr-more-item" style="color:var(--cyan)" onclick="openTruckMonitor();toggleHdrMore()">&#x1F5A5; Mode Monitor (nouvel onglet)</button>
+        <button id="hdrMoreMonitor" class="hdr-more-item" style="color:var(--cyan)" onclick="openTruckMonitor();toggleHdrMore()">&#x1F5A5; Mode Monitor (nouvel onglet)</button>
         <div style="height:1px;background:var(--bd2);margin:4px 0"></div>
         <button class="hdr-more-item" style="color:var(--blue)" onclick="tfSwitchUser();toggleHdrMore()">&#x21BA; Changer de session</button>
         <div id="hdrMoreSep" style="height:1px;background:var(--bd2);margin:4px 0"></div>
@@ -1585,7 +1585,7 @@ body.tf-stat-mode #welcomeScreen{display:none!important}
     <!-- Icônes -->
     <div class="hdr-group tv-keep">
       <div class="notif-btn" onclick="toggleTheme()" title="Th&egrave;me clair/sombre" id="themeBtn">&#x2600;</div>
-      <div class="notif-btn" onclick="toggleNotifPanel()" title="Notifications">
+      <div class="notif-btn" id="hdrBtnNotif" onclick="toggleNotifPanel()" title="Notifications">
         &#x1F514;<span class="notif-badge" id="notifBadge"></span>
       </div>
       <button class="btn-quit" onclick="tfShowQuitModal()" title="Quitter et purger">🚪 Quitter</button>
@@ -1965,7 +1965,7 @@ body.tf-stat-mode #welcomeScreen{display:none!important}
    ═══════════════════════════════════════════════════════════════════ */
 
 // ─── State ────────────────────────────────────────────────────────────────
-var APP_VERSION = 'v1.109';
+var APP_VERSION = 'v1.114';
 var APP = {"deliveries":[],"articles":[],"horaires":[],"deliveryCache":{}};
 // Lookup livraison dans les données actives OU dans le cache persistant
 function getDeliv(id){
@@ -2074,6 +2074,7 @@ var ITIN_MAP = {
   FRENL2:'ENL', FRENL3:'ENL', FRENL4:'ENL',
   FRCOQU:'COQU', FRGON2:'GON'
 };
+function _carrierName(t){return (t&&(t.label||t.transporteur||(t.itin&&ITIN_MAP[t.itin])||t.itin))||'?';}
 var CRENEAU_MAP = {
   FRBERN:'14-16', FRPOID:'libre', FRSTEF:'libre', FRDIS1:'14h GMS',
   FRDIS2:'manuel', FRCEV4:'14h', FRCEVA:'14h', FRCEV3:'14h',
@@ -3750,7 +3751,7 @@ function _renderCompansTruckCard(ti,t,ts,container,_creneauGroups){
   var head=document.createElement('div');head.className='tc-head';
 
   var nameSpan=document.createElement('span');nameSpan.className='tc-name';
-  nameSpan.innerHTML='&#127981; COMPANS';
+  nameSpan.innerHTML='&#127981; COMPANS'+(t.tour?' E'+t.tour:'');
   nameSpan.style.cssText='color:var(--amber)';
   head.appendChild(nameSpan);
 
@@ -4187,7 +4188,7 @@ function renderTrucks(){
 
     // Truck name
     var nameSpan=document.createElement('span');nameSpan.className='tc-name';
-    nameSpan.textContent='\uD83D\uDE9B '+(t.transporteur||t.itin||'?');
+    nameSpan.textContent='\uD83D\uDE9B '+_carrierName(t);
     head.appendChild(nameSpan);
 
     // Route change button
@@ -4241,7 +4242,7 @@ function renderTrucks(){
       dateInp.readOnly=true;dateInp.style.pointerEvents='none';dateInp.style.opacity='.7';
     } else {
       dateInp.title='Modifier la date';
-      (function(ii){dateInp.addEventListener('change',function(){trucks[ii].date=this.value;trucks[ii]._dateManuallyChanged=true;save();renderAll();logActivity('\uD83D\uDCC5','Date camion '+(trucks[ii].itin||'?')+' modifi\u00e9e \u2192 '+this.value);});})(ti);
+      (function(ii){dateInp.addEventListener('change',function(){trucks[ii].date=this.value;trucks[ii]._dateManuallyChanged=true;save();renderAll();logActivity('\uD83D\uDCC5','Date camion '+_carrierName(trucks[ii])+' modifi\u00e9e \u2192 '+this.value);});})(ti);
     }
     head.appendChild(dateInp);
 
@@ -4982,6 +4983,14 @@ function importSession(event){
       var t0=document.querySelector('.tab'); if(t0) t0.classList.add('on');
       var p0=document.getElementById('tab-syn'); if(p0) p0.classList.add('on');
       renderAll();
+      if(sessionStorage.getItem('tf_user')==='__stat__'){
+        document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+        document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+        var statBtn=Array.from(document.querySelectorAll('.tab')).find(function(b){return (b.getAttribute('onclick')||'').indexOf("'stat'")!==-1;});
+        if(statBtn) statBtn.classList.add('on');
+        var statPanel=document.getElementById('tab-stat'); if(statPanel) statPanel.classList.add('on');
+        try{renderStats();}catch(e){}
+      }
       _importTs=Date.now();startUpdTicker();startNotifChecker();
       var archMsg=(_dailyArchive&&_dailyArchive.length)?' (+ '+_dailyArchive.length+'j d\u2019archive)':'';
       showToast(APP.deliveries.length+' livraisons restaur\u00e9es depuis la session'+archMsg+' \u2705');
@@ -5065,7 +5074,7 @@ function editTruckDate(ti){
   if(nd && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(nd)){ showToast('Format invalide'); return; }
   trucks[ti].date = nd||cur;
   save(); renderAll();
-  logActivity('\uD83D\uDCC5','Date camion '+(trucks[ti].itin||'?')+' modifi\u00e9e \u2192 '+(nd||cur));
+  logActivity('\uD83D\uDCC5','Date camion '+_carrierName(trucks[ti])+' modifi\u00e9e \u2192 '+(nd||cur));
 }
 
 // ─── Manual entries (quai) ────────────────────────────────────────────────
@@ -7219,29 +7228,32 @@ function renderStats(){
       html+='<div class="stats-kpi" style="min-width:140px"><div class="stats-kpi-val" style="color:var(--teal);font-size:24px">'+fmtMinutes(cpAvg)+'</div><div class="stats-kpi-lbl">Durée moy. (Arr → Dép)</div><div class="stats-kpi-sub">min: '+fmtMinutes(Math.min.apply(null,cpTimes))+' · max: '+fmtMinutes(Math.max.apply(null,cpTimes))+'</div></div>';
     }
     html+='</div>';
-    // Table by date
-    var cpByDate={};
-    allCompans.forEach(function(d){
-      var dt=d.t.date||'?';
-      if(!cpByDate[dt])cpByDate[dt]={date:dt,count:0,done:0};
-      cpByDate[dt].count++;
-      if(d.ts.dep)cpByDate[dt].done++;
+    // Table détaillé par enlèvement
+    var cpSorted=allCompans.slice().sort(function(a,b){
+      if(a.t.date!==b.t.date)return a.t.date<b.t.date?-1:1;
+      return (a.t.tour||0)-(b.t.tour||0);
     });
-    var cpDates=Object.keys(cpByDate).sort();
-    if(cpDates.length>1){
-      html+='<table class="stats-day-table"><thead><tr><th>Date</th><th>Caisses</th><th style="color:var(--green)">Terminées</th><th style="color:var(--t3)">En attente</th></tr></thead><tbody>';
-      cpDates.forEach(function(dt){
-        var d=cpByDate[dt];
-        var dtFmt=dt;try{var dObj=new Date(dt+'T12:00:00');dtFmt=dObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}catch(e){}
-        html+='<tr>'+
-          '<td style="font-weight:700;white-space:nowrap">'+dtFmt+'</td>'+
-          '<td style="font-weight:800;color:var(--amber)">'+d.count+'</td>'+
-          '<td style="color:var(--green);font-weight:700">'+d.done+'</td>'+
-          '<td style="color:var(--t3)">'+( d.count-d.done)+'</td>'+
-        '</tr>';
-      });
-      html+='</tbody></table>';
-    }
+    html+='<table class="stats-day-table"><thead><tr>'+
+      '<th>Date</th><th>Enlèvement</th><th>Arrivée</th><th>Départ</th><th>Durée</th><th>Statut</th>'+
+    '</tr></thead><tbody>';
+    cpSorted.forEach(function(d){
+      var dt=d.t.date||'?';
+      var dtFmt=dt;try{var dObj=new Date(dt+'T12:00:00');dtFmt=dObj.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}catch(e){}
+      var arrFmt=d.ts.arr?new Date(d.ts.arr).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      var depFmt=d.ts.dep?new Date(d.ts.dep).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      var durFmt='—';
+      if(d.ts.arr&&d.ts.dep){var dm=Math.round((new Date(d.ts.dep)-new Date(d.ts.arr))/60000);durFmt=fmtMinutes(dm);}
+      var statut=d.ts.dep?'<span style="color:var(--green);font-weight:700">✅ Parti</span>':d.ts.arr?'<span style="color:var(--amber);font-weight:700">🚀 Sur site</span>':'<span style="color:var(--t3)">⏳ Attente</span>';
+      html+='<tr>'+
+        '<td style="font-weight:700;white-space:nowrap">'+dtFmt+'</td>'+
+        '<td style="font-weight:800;color:var(--amber)">E'+(d.t.tour||'?')+'</td>'+
+        '<td style="font-family:monospace;color:var(--t2)">'+arrFmt+'</td>'+
+        '<td style="font-family:monospace;color:var(--t2)">'+depFmt+'</td>'+
+        '<td style="font-family:monospace;color:var(--teal)">'+durFmt+'</td>'+
+        '<td>'+statut+'</td>'+
+      '</tr>';
+    });
+    html+='</tbody></table>';
     html+='</div>';
   }
 
@@ -9271,6 +9283,12 @@ function openMontageForm(){
   selIds.forEach(function(id){var d=getDeliv(id);if(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;}});
   // Plusieurs itins différents ?
   var multiItin=Object.keys(itinCount).length>1;
+  // Créneau par défaut depuis CRENEAU_MAP
+  var mainCreneau=CRENEAU_MAP[mainItin]||'';
+  // Villes des livraisons sélectionnées
+  var villesSeen={};var villes=[];
+  selIds.forEach(function(id){var d=getDeliv(id);if(d&&d.ville&&!villesSeen[d.ville]){villesSeen[d.ville]=true;villes.push(d.ville);}});
+  villes.sort();
 
   var el=document.createElement('div');
   el.id='montageFormBg';
@@ -9290,8 +9308,18 @@ function openMontageForm(){
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:14px">'+
         '<div>'+
-          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur / Route</label>'+
-          '<input id="mcTransp" value="'+mainTransp+'" placeholder="Nom du transporteur" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Transporteur</label>'+
+          (function(){
+            var opts='<option value="">— Choisir —</option>';
+            var seen={};var names=[];
+            Object.keys(ITIN_MAP).forEach(function(k){var v=ITIN_MAP[k];if(!seen[v]){seen[v]=true;names.push(v);}});
+            names.sort().forEach(function(n){opts+='<option value="'+n+'"'+(n===mainTransp?' selected':'')+'>'+n+'</option>';});
+            return '<select id="mcTransp" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;cursor:pointer">'+opts+'</select>';
+          })()+
+        '</div>'+
+        '<div>'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Nom affiché <span style="font-weight:400;opacity:.6">(optionnel)</span></label>'+
+          '<input id="mcLabel" type="text" placeholder="ex: BERNARD AM, STEF #2…" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
         '</div>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
           '<div>'+
@@ -9299,10 +9327,27 @@ function openMontageForm(){
             '<input id="mcDate" type="date" value="'+mainDate+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
           '</div>'+
           '<div>'+
-            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Cr\u00e9neau</label>'+
-            '<input id="mcCreneau" placeholder="ex: 07-09" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Cr\u00e9neau'+(mainCreneau?' <span style="font-weight:400;color:var(--blue);opacity:.8">'+mainCreneau+'</span>':'')+'</label>'+
+            (function(){
+              var slots=['06-08','07-09','08-10','09-11','10-12','11-13','12-14','13-15','14-16','15-17','16-18','17-19','18-20'];
+              var opts='<option value="">\u2014 Cr\u00e9neau \u2014</option>';
+              if(mainCreneau&&slots.indexOf(mainCreneau)===-1){
+                opts+='<option value="'+mainCreneau+'" selected>'+mainCreneau+(mainItin?' ('+mainItin+')')+'</option>';
+              }
+              slots.forEach(function(s){opts+='<option value="'+s+'"'+(s===mainCreneau?' selected':'')+'>'+s+'</option>';});
+              return '<select id="mcCreneau" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;cursor:pointer">'+opts+'</select>';
+            })()+
           '</div>'+
         '</div>'+
+        (villes.length?
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Ville <span style="font-weight:400;opacity:.6">(optionnel)</span></label>'+
+            (function(){
+              var opts='<option value="">\u2014 Ville de livraison \u2014</option>';
+              villes.forEach(function(v){opts+='<option value="'+v+'"'+(villes.length===1?' selected':'')+'>'+v+'</option>';});
+              return '<select id="mcDest" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;cursor:pointer">'+opts+'</select>';
+            })()+
+          '</div>':'')+
       '</div>'+
       '<div style="display:flex;gap:10px;margin-top:20px">'+
         '<button onclick="closeMontageForm()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Annuler</button>'+
@@ -9320,18 +9365,22 @@ function closeMontageForm(){
 }
 
 function confirmMontage(){
-  var transp=(document.getElementById('mcTransp')||{}).value||'';
+  var transp=((document.getElementById('mcTransp')||{}).value||'').trim();
+  var customLabel=((document.getElementById('mcLabel')||{}).value||'').trim();
   var dateVal=(document.getElementById('mcDate')||{}).value||'';
-  var creneau=(document.getElementById('mcCreneau')||{}).value||'';
+  var creneau=((document.getElementById('mcCreneau')||{}).value||'').trim();
+  var destVal=((document.getElementById('mcDest')||{}).value||'').trim();
   if(!transp){showToast('\u26a0 Transporteur requis');return;}
   var selIds=Object.keys(_montageSelected);
   if(!selIds.length){closeMontageForm();return;}
-  // L'app utilise le format ISO YYYY-MM-DD partout (xlDate, date tabs, input camion)
   var itin=(getDeliv(selIds[0])||{}).itin||transp;
+  var displayName=customLabel||transp;
   var newTruck={
     id:'mont_'+Date.now(),
     transporteur:transp,
+    label:customLabel||'',
     itin:itin,
+    dest:destVal||'',
     date:dateVal,
     creneau:creneau,
     deliveries:selIds.slice(),
@@ -9345,23 +9394,19 @@ function confirmMontage(){
   };
   trucks.push(newTruck);
   save();
-  try{logActivity('\uD83D\uDD27','Camion mont\u00e9 verrouill\u00e9 : '+transp+' \u00b7 '+selIds.length+' livraisons'+(creneau?' \u00b7 '+creneau:''));}catch(e){}
+  try{logActivity('\uD83D\uDD27','Camion mont\u00e9 verrouill\u00e9 : '+displayName+' \u00b7 '+selIds.length+' livraisons'+(creneau?' \u00b7 '+creneau:''));}catch(e){}
   closeMontageForm();
   _montageSelected={};
   renderMontagePanel();
-  showToast('\u2705 Camion '+transp+' mont\u00e9 \u00b7 '+selIds.length+' livraison'+(selIds.length>1?'s':'')+' \u2022 \uD83D\uDD12 verrouill\u00e9');
+  showToast('\u2705 Camion '+displayName+' mont\u00e9 \u00b7 '+selIds.length+' livraison'+(selIds.length>1?'s':'')+' \u2022 \uD83D\uDD12 verrouill\u00e9');
 }
 
 // ─── COMPANS form ─────────────────────────────────────────────────────────
 function openCompansForm(){
-  var selIds=Object.keys(_montageSelected||{});
-  // Compute mainDate from selected deliveries (or today)
-  var dateCount={};
-  selIds.forEach(function(id){var d=getDeliv(id);if(d)dateCount[d.date||'']=(dateCount[d.date||'']||0)+1;});
-  var mainDate=Object.keys(dateCount).sort(function(a,b){return dateCount[b]-dateCount[a];})[0]||new Date().toISOString().slice(0,10);
-  if(/^\d{2}\/\d{2}\/\d{4}$/.test(mainDate)){var p=mainDate.split('/');mainDate=p[2]+'-'+p[1]+'-'+p[0];}
-  var totPal=0,totColis=0;
-  selIds.forEach(function(id){var d=getDeliv(id);if(d){totPal+=d.palSilo||0;totColis+=d.colisPick||0;}});
+  var today=_workingDate||new Date().toISOString().slice(0,10);
+  // Count existing COMPANS for today to show as info
+  var existing=trucks.filter(function(t){return t.type==='compans'&&t.date===today;}).length+
+    (_completedTrucks||[]).filter(function(ct){return ct.type==='compans'&&ct.date===today;}).length;
   var el=document.createElement('div');
   el.id='compansFormBg';
   el.onclick=function(e){if(e.target===el)closeCompansForm();};
@@ -9369,38 +9414,39 @@ function openCompansForm(){
   el.innerHTML=
     '<div style="width:min(400px,92vw);background:linear-gradient(165deg,rgba(255,255,255,.09),rgba(15,40,100,.04));backdrop-filter:saturate(200%) blur(40px);border:1px solid rgba(255,160,0,.35);border-radius:20px;padding:24px;box-shadow:0 0 0 1px rgba(255,255,255,.07) inset,0 24px 60px rgba(0,0,0,.45)">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
-        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--amber)">&#127981; Caisse COMPANS</h3>'+
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:var(--amber)">&#127981; Enlèvements COMPANS</h3>'+
         '<button onclick="closeCompansForm()" style="background:none;border:none;color:var(--t3);font-size:24px;cursor:pointer;padding:0 6px;line-height:1">&#215;</button>'+
       '</div>'+
-      (selIds.length?
-        '<div style="background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.2);border-radius:10px;padding:10px 14px;margin-bottom:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">'+
-          '<span style="font-size:13px;font-weight:700;color:var(--amber)">'+selIds.length+' caisse'+(selIds.length>1?'s':'')+' sélectionné'+(selIds.length>1?'es':'e')+'</span>'+
-          (totPal?'<span style="font-size:12px;color:#2dc272;font-weight:700">'+totPal+' pal SILO</span>':'')+
-          (totColis?'<span style="font-size:12px;color:var(--purple);font-weight:700">'+totColis+' colis pick</span>':'')+
-        '</div>':
-        '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:var(--t3);text-align:center">Aucune livraison sélectionnée — vous pourrez en assigner depuis le mode Montage</div>')+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">'+
+      (existing?'<div style="background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.2);border-radius:10px;padding:8px 14px;margin-bottom:16px;font-size:12px;color:var(--amber)">&#8505; '+existing+' enlèvement'+(existing>1?'s':'')+(existing>1?' déjà créés':' déjà créé')+' aujourd\'hui — les nouveaux prendront la suite (E'+(existing+1)+'…)</div>':'')+
+      '<div style="display:flex;flex-direction:column;gap:14px">'+
         '<div>'+
-          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Date</label>'+
-          '<input id="cpDate" type="date" value="'+mainDate+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Nombre d\'enlèvements prévus</label>'+
+          '<input id="cpCount" type="number" min="1" max="20" value="'+(existing?1:3)+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,160,0,.4);background:var(--sf2);color:var(--amber);font-size:18px;font-weight:800;outline:none;box-sizing:border-box;text-align:center">'+
         '</div>'+
-        '<div>'+
-          '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Quai (6, 7 ou 8)</label>'+
-          '<select id="cpQuai" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,160,0,.3);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;appearance:none;cursor:pointer">'+
-            '<option value="">-- Quai --</option>'+
-            '<option value="6">Quai 6</option>'+
-            '<option value="7">Quai 7</option>'+
-            '<option value="8">Quai 8</option>'+
-          '</select>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Date</label>'+
+            '<input id="cpDate" type="date" value="'+today+'" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box">'+
+          '</div>'+
+          '<div>'+
+            '<label style="font-size:12px;color:var(--t3);font-weight:600;display:block;margin-bottom:5px">Quai (6, 7 ou 8)</label>'+
+            '<select id="cpQuai" style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,160,0,.3);background:var(--sf2);color:var(--t1);font-size:13px;outline:none;box-sizing:border-box;cursor:pointer">'+
+              '<option value="">-- Quai --</option>'+
+              '<option value="6">Quai 6</option>'+
+              '<option value="7">Quai 7</option>'+
+              '<option value="8">Quai 8</option>'+
+            '</select>'+
+          '</div>'+
         '</div>'+
       '</div>'+
       '<div style="display:flex;gap:10px;margin-top:20px">'+
         '<button onclick="closeCompansForm()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--bd2);background:var(--sf2);color:var(--t1);font-size:13px;cursor:pointer">Annuler</button>'+
-        '<button onclick="confirmCompans()" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#f59e0b,#ef6c00);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,160,0,.3)">&#127981; Créer COMPANS</button>'+
+        '<button onclick="confirmCompans()" style="flex:2;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,#f59e0b,#ef6c00);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,160,0,.3)">&#127981; Créer les enlèvements</button>'+
       '</div>'+
-      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">Caisse intersites — Arrivée + Départ uniquement &#128274;</div>'+
+      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">Arrivée + Départ uniquement — numérotés E1, E2, E3…</div>'+
     '</div>';
   document.body.appendChild(el);
+  setTimeout(function(){var i=document.getElementById('cpCount');if(i){i.focus();i.select();}},100);
 }
 
 function closeCompansForm(){
@@ -9408,37 +9454,47 @@ function closeCompansForm(){
 }
 
 function confirmCompans(){
+  var count=Math.max(1,Math.min(20,parseInt((document.getElementById('cpCount')||{}).value||1,10)));
   var dateVal=(document.getElementById('cpDate')||{}).value||new Date().toISOString().slice(0,10);
   var quaiVal=(document.getElementById('cpQuai')||{}).value||'';
-  var selIds=Object.keys(_montageSelected||{});
-  var newTruck={
-    id:'compans_'+Date.now(),
-    transporteur:'COMPANS',
-    itin:'COMPANS',
-    type:'compans',
-    date:dateVal,
-    creneau:'',
-    deliveries:selIds.slice(),
-    lockedDeliveries:selIds.slice(),
-    lockedDate:dateVal,
-    lockedCreneau:'',
-    locked:true,
-    _montage:true,
-    decalage:null,
-    notes:''
-  };
-  trucks.push(newTruck);
-  if(quaiVal){
-    var tid=newTruck.id;var q=parseInt(quaiVal,10);
-    Object.keys(quaiAssign).forEach(function(old){if(quaiAssign[old]===tid)delete quaiAssign[old];});
-    quaiAssign[q]=tid;saveQuaiAssign();
+  // Find next available tour number for this date
+  var usedNums=trucks.map(function(t){return (t.type==='compans'&&t.date===dateVal)?(t.tour||0):0;})
+    .concat((_completedTrucks||[]).map(function(ct){return (ct.type==='compans'&&ct.date===dateVal)?(ct.tour||0):0;}));
+  var startNum=(usedNums.length?Math.max.apply(null,usedNums):0)+1;
+  var created=[];
+  for(var i=0;i<count;i++){
+    var tourNum=startNum+i;
+    var newTruck={
+      id:'compans_'+Date.now()+'_'+tourNum,
+      transporteur:'COMPANS',
+      itin:'COMPANS',
+      type:'compans',
+      tour:tourNum,
+      date:dateVal,
+      creneau:'',
+      deliveries:[],
+      lockedDeliveries:[],
+      lockedDate:dateVal,
+      lockedCreneau:'',
+      locked:true,
+      _montage:true,
+      decalage:null,
+      notes:''
+    };
+    trucks.push(newTruck);
+    // Assign quai to first enlèvement only if quai chosen
+    if(quaiVal&&i===0){
+      var q=parseInt(quaiVal,10);
+      Object.keys(quaiAssign).forEach(function(old){if(quaiAssign[old]===newTruck.id)delete quaiAssign[old];});
+      quaiAssign[q]=newTruck.id;saveQuaiAssign();
+    }
+    created.push('E'+tourNum);
   }
   save();
-  try{logActivity('&#127981;','Caisse COMPANS créée · '+selIds.length+' livraison'+(selIds.length>1?'s':'')+(quaiVal?' · Q'+quaiVal:''));}catch(e){}
+  try{logActivity('🏭',count+' enlèvement'+(count>1?'s':'')+' COMPANS créé'+(count>1?'s':'')+' ('+created.join(', ')+')'+(quaiVal?' · Q'+quaiVal:''));}catch(e){}
   closeCompansForm();
-  _montageSelected={};
   if(_montageMode){renderMontagePanel();}else{renderTrucks();}
-  showToast('✅ Caisse COMPANS créée'+(selIds.length?' · '+selIds.length+' livraison'+(selIds.length>1?'s':''):'')+(quaiVal?' · Q'+quaiVal:''));
+  showToast('✅ '+count+' enlèvement'+(count>1?'s':'')+' COMPANS créé'+(count>1?'s':'')+' ('+created.join(', ')+')');
 }
 
 // ─── TFE Tours ────────────────────────────────────────────────────────────
@@ -11938,8 +11994,8 @@ function renderAnalysis(el){
     riskyTrucks.slice(0,5).forEach(function(r){
       html+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px">'+
         '<span class="predict-badge '+r.risk.level+'">'+r.risk.pct+'%</span>'+
-        '<span style="font-weight:700;color:var(--t1)">'+(r.truck.itin||'?')+'</span>'+
-        '<span style="color:var(--t3)">'+(r.truck.transporteur||'')+'</span></div>';
+        '<span style="font-weight:700;color:var(--t1)">'+_carrierName(r.truck)+'</span>'+(r.truck.itin&&r.truck.itin!==r.truck.transporteur?'<span style="font-size:10px;color:var(--t3)"> '+r.truck.itin+'</span>':'')+
+        '</div>';
     });
     html+='</div><div class="ac-sub">Bas\u00e9 sur l\u2019historique de '+_dailyArchive.length+' jours</div></div>';
   } else if(_dailyArchive.length>=3){
@@ -12079,8 +12135,8 @@ function openTimeline(truckId){
   ];
   var prio=(_truckPriorities&&_truckPriorities[truckId])||'';
   var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+(t.itin||'?')+'</div>'+
-    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(t.dest||'\u2014')+' \u2502 '+(t.transporteur||'')+' \u2502 Cr\u00e9neau : '+(t.creneau||'\u2014')+'</div></div>'+
+    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+_carrierName(t)+(t.itin&&t.itin!==t.transporteur?' <span style="font-size:10px;color:var(--t3)">'+t.itin+'</span>':'')+'</div>'+
+    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(t.dest||'\u2014')+' \u2502 Cr\u00e9neau : '+(t.creneau||'\u2014')+'</div></div>'+
     '<div style="display:flex;gap:6px;align-items:center">'+
     '<select style="font-size:10px;background:var(--sf2);border:1px solid var(--bd2);border-radius:6px;padding:3px 6px;color:var(--t1);cursor:pointer" onchange="setTruckPriority(\''+truckId+'\',this.value);openTimeline(\''+truckId+'\')">'+
     '<option value=""'+(prio===''?' selected':'')+'>-- Priorit\u00e9 --</option>'+
@@ -12128,9 +12184,9 @@ function openTimelineKanban(truckId,archived){
     {key:'dep',ico:'\uD83D\uDE80',label:'D\u00e9part'}
   ];
   var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+(ct.itin||'?')+
+    '<div><div style="font-weight:800;font-size:16px;color:var(--t1)">\uD83D\uDE9A '+_carrierName(ct)+(ct.itin&&ct.itin!==ct.transporteur?' <span style="font-size:10px;color:var(--t3)">'+ct.itin+'</span>':'')+
     ' <span style="font-size:11px;color:var(--orange);background:rgba(255,140,66,.12);padding:2px 7px;border-radius:5px;font-weight:600">Archive</span></div>'+
-    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(ct.dest||'\u2014')+' \u2502 '+(ct.transporteur||'')+' \u2502 Cr\u00e9neau : '+(ct.creneau||'\u2014')+'</div></div>'+
+    '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+(ct.dest||'\u2014')+' \u2502 Cr\u00e9neau : '+(ct.creneau||'\u2014')+'</div></div>'+
     '<div style="cursor:pointer;font-size:18px;color:var(--t3);padding:4px 8px" onclick="document.getElementById(\'vtlBg\').classList.remove(\'open\')">\u2715</div></div>';
   html+='<div style="margin-top:12px">';
   var lastTime=null;
@@ -13272,6 +13328,7 @@ function applyProfileRestrictions(){
     // Masquer tous les boutons d'action / import / write
     ['hdrBtnMobile','hdrBtnNetSync','hdrBtnVL06O','hdrBtnSync','hdrBtnPartager',
      'hdrUndoBtn','hdrCadSilo','hdrCadPick','hdrBtnMonitor','hdrBtnRapport',
+     'hdrBtnNotif','hdrMoreMonitor',
      'hdrMoreJournal','hdrMoreAlerts','hdrMoreSep','hdrMorePurge',
      'camBtnCompans','camBtnTFE'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='none';
@@ -14435,16 +14492,16 @@ function toast(msg){var el=document.getElementById('toast');el.textContent=msg;e
 function kbox(v,l,c){return '<div class="kpi"><div class="kv" style="color:'+c+'">'+v+'</div><div class="kl">'+l+'</div></div>';}
 function updateKPIs(trucks,tsm){
   var day=trucks.filter(function(t){return t.date===_monDate;});
-  var nW=0,nA=0,nD=0,nL=0,nLo=0,nP=0,nTFE=0,nTFEDep=0;
+  var nW=0,nA=0,nD=0,nL=0,nLo=0,nP=0,nTFE=0,nTFEDep=0,nComp=0,nCompDep=0;
   day.forEach(function(t){
     if(t.type==='tfe'){nTFE++;if((tsm[t.id]||{}).dep)nTFEDep++;return;}
-    if(t.type==='compans'){if((tsm[t.id]||{}).dep)nP++;else nA++;return;}
+    if(t.type==='compans'){nComp++;if((tsm[t.id]||{}).dep)nCompDep++;return;}
     var s=getStatus(tsm[t.id]||{});if(s==='w')nW++;else if(s==='a')nA++;else if(s==='d')nD++;else if(s==='l')nL++;else if(s==='lo')nLo++;else nP++;
   });
   // Ajouter les camions terminés (archivés) du jour sélectionné
   var completed=getCompleted().filter(function(c){return c.date===_monDate;});
-  completed.forEach(function(c){if(c.type==='tfe'){nTFE++;nTFEDep++;}else nP++;});
-  var total=day.length+completed.length-nTFE;
+  completed.forEach(function(c){if(c.type==='tfe'){nTFE++;nTFEDep++;}else if(c.type==='compans'){nComp++;nCompDep++;}else nP++;});
+  var total=day.length+completed.length-nTFE-nComp;
   document.getElementById('kpis').innerHTML=
     kbox(total,'🚛 Total','var(--t1)')+
     kbox(nW,'⏳ Attente','#8b949e')+
@@ -14453,7 +14510,8 @@ function updateKPIs(trucks,tsm){
     kbox(nL,'📦 Chargement','#fb923c')+
     kbox(nLo,'✅ Chargé','#4ade80')+
     kbox(nP,'🚀 Partis','#34d399')+
-    (nTFE?kbox(nTFE,'🚌 Tours TFE','#00bcd4')+'<span style="font-size:10px;color:#00bcd4;padding:2px 8px;background:rgba(0,188,212,.1);border-radius:20px;align-self:center">'+nTFEDep+' partis</span>':'');
+    (nTFE?kbox(nTFE,'🚌 Tours TFE','#00bcd4')+'<span style="font-size:10px;color:#00bcd4;padding:2px 8px;background:rgba(0,188,212,.1);border-radius:20px;align-self:center">'+nTFEDep+' partis</span>':'')+
+    (nComp?kbox(nComp,'🏭 COMPANS','#f59e0b')+'<span style="font-size:10px;color:#f59e0b;padding:2px 8px;background:rgba(245,158,11,.1);border-radius:20px;align-self:center">'+nCompDep+' partis</span>':'');
 }
 function saveQ(truckId,quaiNum){
   var qa=getQ();
@@ -14620,7 +14678,7 @@ function makeCard(t,ts,quai,prio){
       +'<div class="tc-stripe" style="background:#f59e0b;box-shadow:2px 0 8px rgba(245,158,11,.4)"></div>'
       +'<div class="tc-left" style="cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'
         +'<div class="tc-top"><span class="b" style="background:rgba(245,158,11,.15);color:#f59e0b;border-color:rgba(245,158,11,.35)">COMPANS</span>'+(quai?'<span class="b bq">Q'+quai+'</span>':'')+'<span style="margin-left:auto;font-size:9px;color:var(--t3)">📦 '+nDel+'</span></div>'
-        +'<div class="tc-name" style="color:#f59e0b">'+(t.transporteur||'COMPANS')+'</div>'
+        +'<div class="tc-name" style="color:#f59e0b">🏭 COMPANS'+(t.tour?' E'+t.tour:'')+'</div>'
       +'</div>'
       +'<div class="tc-center" style="cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'+prog+tsRow+delSummary(t)+'</div>'
       +'<div class="tc-right">'+ab+'</div>'
@@ -14721,7 +14779,7 @@ function makeCard(t,ts,quai,prio){
         +'<span style="margin-left:auto;font-size:9px;color:var(--t3)">📦 '+nDel+'</span>'
       +'</div>'
       +'<div class="tc-name">'+(t.transporteur||t.itin||'?')+'</div>'
-      +'<div class="tc-sub">'+(t.dest||t.itin||'—')+'</div>'
+      +'<div class="tc-sub">'+(t.dest||t.transporteur||t.itin||'—')+'</div>'
     +'</div>'
     +'<div class="tc-center" style="cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'+prog+tsRow+delSummary(t)+'</div>'
     +'<div class="tc-right">'
@@ -14835,7 +14893,7 @@ function makeActiveCard(t,ts,quai,prio){
     var acColor=isT?'rgba(0,188,212,.7)':'rgba(245,158,11,.7)';
     var badgeStyle=isT?'background:rgba(0,188,212,.15);color:#00bcd4;border-color:rgba(0,188,212,.35)':'background:rgba(245,158,11,.15);color:#f59e0b;border-color:rgba(245,158,11,.35)';
     var badgeTxt=isT?'🚌 TFE':'COMPANS';
-    var acName=isT?'Tour N°'+(t.tour||'?'):(t.transporteur||'COMPANS');
+    var acName=isT?'Tour N°'+(t.tour||'?'):'🏭 COMPANS'+(t.tour?' E'+t.tour:'');
     var nameColor=isT?'#00bcd4':'#f59e0b';
     return '<div class="ac sw">'
       +'<div class="ac-head" style="border-left:3px solid '+acColor+';cursor:pointer" onclick="openTruckDetail(\''+tid+'\')">'
@@ -14897,7 +14955,7 @@ function makeActiveCard(t,ts,quai,prio){
         +prB+ptB+pretB
       +'</div>'
       +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
-      +'<div class="ac-sub">'+(t.dest||t.itin||'—')+'</div>'
+      +'<div class="ac-sub">'+(t.dest||t.transporteur||t.itin||'—')+'</div>'
     +'</div>'
     +'<div class="ac-body">'
       +prog+elapsed
@@ -14918,7 +14976,7 @@ function makeStrip(t,ts,quai,prio){
       +'<span class="b" style="background:rgba(255,160,0,.18);color:#f59e0b;border-color:rgba(255,160,0,.3);font-size:9px">🏭 COMPANS</span>'
       +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
       +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
-      +'<div class="strip-name">'+(t.transporteur||'COMPANS')+'</div>'
+      +'<div class="strip-name">🏭 COMPANS'+(t.tour?' E'+t.tour:'')+'</div>'
       +(_liveROc?'':'<button class="strip-btn act-arr" onclick="stamp(\''+tid+'\',\'arr\')">🕐 Arrivée</button>')
       +'</div></div>';
   }
