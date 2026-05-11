@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.100.html` | v1.100 | **Version courante** |
+| `TruckFlow_v1.101.html` | v1.101 | **Version courante** |
+| `TruckFlow_v1.100.html` | v1.100 | Archivé |
 | `TruckFlow_v1.99.html` | v1.99 | Archivé |
 | `TruckFlow_v1.98.html` | v1.98 | Archivé |
 | `TruckFlow_v1.97.html` | v1.97 | Archivé |
@@ -124,6 +125,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.101 — Mode consultation : isolation CSS robuste (body.tf-stat-mode)
+- **CSS `body.tf-stat-mode`** : règles `display:none!important` sur `#tab-syn/liv/cam/plan/quai` et `#welcomeScreen` — résiste aux resets JS inline (`p.style.display=''`) de `renderWelcome()`
+- **`applyProfileRestrictions` stat** : `document.body.classList.add('tf-stat-mode')` — appliqué dès l'initialisation du profil
+- **`renderWelcome()` patché** : retour anticipé si `_tfReadOnlyProfile` — n'enlève plus la classe `on` des panels, n'affiche plus l'écran VL06O, affiche simplement les onglets
+- **`tfOpenStatDirect()` simplifié** : suppression du listener `'change'` défectueux (qui ciblait `.tabPanel[data-tab]` inexistant) — le CSS gère le masquage, la fonction se contente de cliquer `fi-session`
+- **Deux anomalies corrigées** : (1) contenu Synthèse visible après chargement JSON en mode stat ; (2) écran "Importer VL06O" visible au démarrage du mode consultation
 
 ### v1.100 — Mode consultatif allégé (correction profil __stat__)
 - **Onglet syn masqué au chargement JSON** : après import session, force retour sur onglet Statistiques et masque physiquement les panels syn/liv/cam/plan/quai (`display:none!important`)
