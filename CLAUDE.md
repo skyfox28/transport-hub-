@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.101.html` | v1.101 | **Version courante** |
+| `TruckFlow_v1.102.html` | v1.102 | **Version courante** |
+| `TruckFlow_v1.101.html` | v1.101 | Archivé |
 | `TruckFlow_v1.100.html` | v1.100 | Archivé |
 | `TruckFlow_v1.99.html` | v1.99 | Archivé |
 | `TruckFlow_v1.98.html` | v1.98 | Archivé |
@@ -125,6 +126,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.102 — Bouton Mail récap fin de poste + fix quitter → login
+- **Bouton `📧 Mail`** dans le header (visible uniquement pour galaad) : ouvre un modal de récapitulatif fin de poste
+- **Modal mail** : objet auto `Camions DD-MM-YYYY`, corps structuré en 4 sections ✅ Partis / 🔄 En cours / ⏳ En attente / ⚠️ Décalés (avec motif)
+- **Boutons modal** : 📋 Copier (presse-papiers), 📧 Ouvrir messagerie (mailto: sans destinataire fixe), 🖨️ PDF (popup print)
+- **Fonctions** : `openMailRecap()`, `closeMailRecap()`, `copyMailRecap()`, `openMailtoRecap()`, `printMailRecapPDF()`
+- **Fix quitter en mode stat** : `tfShowQuitModal()` efface `sessionStorage tf_auth + tf_user` avant `location.reload()` → revient bien à l'écran de login
 
 ### v1.101 — Mode consultation : isolation CSS robuste (body.tf-stat-mode)
 - **CSS `body.tf-stat-mode`** : règles `display:none!important` sur `#tab-syn/liv/cam/plan/quai` et `#welcomeScreen` — résiste aux resets JS inline (`p.style.display=''`) de `renderWelcome()`
