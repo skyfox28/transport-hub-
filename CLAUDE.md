@@ -12,11 +12,11 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.111.html` | v1.111 | **Version courante** |
+| `TruckFlow_v1.112.html` | v1.112 | **Version courante** |
+| `TruckFlow_v1.111.html` | v1.111 | Archivé |
 | `TruckFlow_v1.110.html` | v1.110 | Archivé |
 | `TruckFlow_v1.109.html` | v1.109 | Archivé |
 | `TruckFlow_v1.108.html` | v1.108 | Archivé |
-| `TruckFlow_v1.107.html` | v1.107 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -92,6 +92,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.112 — Montage : select transporteur + champ nom affiché optionnel
+- **Select transporteur** : remplace l'input texte libre — liste déroulante des noms du `ITIN_MAP` (dédupliqués, triés alphabétiquement), pré-sélection automatique basée sur l'itin dominant des livraisons sélectionnées
+- **Champ "Nom affiché" optionnel** : `t.label` — si renseigné, s'affiche à la place du transporteur partout (ex: "BERNARD AM", "STEF #2")
+- **`_carrierName(t)`** mis à jour : priorité `t.label → t.transporteur → ITIN_MAP[itin] → itin`
+- **Carte camion** `renderTrucks` : utilise `_carrierName(t)` au lieu de `t.transporteur||t.itin`
 
 ### v1.111 — Nom transporteur partout (via ITIN_MAP) : planning, timelines, Monitor, log
 - **Helper `_carrierName(t)`** : `t.transporteur || ITIN_MAP[t.itin] || t.itin || '?'` — résout le nom du transporteur depuis le code de route (ex: FRBERN → BERNARD)
