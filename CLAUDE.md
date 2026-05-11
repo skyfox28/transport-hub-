@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.107.html` | v1.107 | **Version courante** |
+| `TruckFlow_v1.108.html` | v1.108 | **Version courante** |
+| `TruckFlow_v1.107.html` | v1.107 | Archivé |
 | `TruckFlow_v1.106.html` | v1.106 | Archivé |
 | `TruckFlow_v1.105.html` | v1.105 | Archivé |
 | `TruckFlow_v1.104.html` | v1.104 | Archivé |
@@ -131,6 +132,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.108 — Mail récap : deux sens de décalage (vers autre jour / depuis autre jour)
+- **Mécanique clarifiée** : quand un truck est décalé, `t.date = dateNew` → il quitte le filtre du jour d'origine
+- **`decalesVersAutreJour`** : camions dont `decalage.dateOrig = aujourd'hui` et `t.date ≠ aujourd'hui` (partis vers un autre jour) — trouvés dans `trucks[]` global
+- **`recuperes`** : camions dont `t.date = aujourd'hui` mais `decalage.dateOrig ≠ aujourd'hui` (reçus d'un autre jour) — dans `todayTrucks` + `completed`
+- **Mail** : 4 sections — En cours / À venir / 📥 Récupérés d'un autre jour / ⚠️ Décalés vers un autre jour
+- **PDF** : 7 KPIs + 5 sections avec code couleur : cyan (récupérés ← date orig) + orange (décalés → date new)
 
 ### v1.107 — Mail récap : décalés = renvoyés à une autre date uniquement
 - **Définition corrigée des décalés** : uniquement les camions actifs du jour avec `t.decalage` (renvoyés vers `dateNew`) — les camions archivés/partis ne sont jamais dans cette section (s'ils sont partis, ils sont venus)
