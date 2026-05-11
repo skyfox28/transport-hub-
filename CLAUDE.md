@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.98.html` | v1.98 | **Version courante** |
+| `TruckFlow_v1.99.html` | v1.99 | **Version courante** |
+| `TruckFlow_v1.98.html` | v1.98 | Archivé |
 | `TruckFlow_v1.97.html` | v1.97 | Archivé |
 | `TruckFlow_v1.96.html` | v1.96 | Archivé |
 | `TruckFlow_v1.95.html` | v1.95 | Archivé |
@@ -122,6 +123,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.99 — Accès consultatif direct (sans compte) sur l'écran de login
+- **Bouton "📡 Live Monitor"** sur l'écran de login (sans identifiant) : appelle directement `openLiveMonitor()` — même comportement que le compte `live`, connexion réseau requise, lecture seule
+- **Bouton "📊 Statistiques"** sur l'écran de login (sans identifiant) : charge un fichier session JSON puis ouvre l'app en mode consultatif — onglets visibles uniquement : Statistiques + Archive ; Export Excel (semaine) disponible ; aucune modification possible
+- **Profil interne `__stat__`** : badge "CONSULTATION" violet dans le header, `_tfReadOnlyProfile=true`, switchTab verrouillé sur stat/arch, tous les boutons d'action/import masqués, pas de proposition sync réseau
+- `tfOpenLiveDirect()` / `tfOpenStatDirect()` — nouvelles fonctions d'entrée sans auth
+- CSS `.auth-direct-btn` avec variantes `.live-btn` (vert) et `.stat-btn` (violet)
 
 ### v1.98 — Synthèse planning : sous-lignes corrigées + livraisons sans camion
 - **Sous-lignes `artDone` corrigées** dans `printSyntheseRoute` : "✓ Préparé" uniquement si `d.sp='C'` ET `d.wm='C'` (ou pas de pick) ; affiche "⚠ En cours" ou "⏳ WM en cours" selon le cas — plus de faux vert quand le header SAP indique B
