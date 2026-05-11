@@ -12,11 +12,11 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.114.html` | v1.114 | **Version courante** |
+| `TruckFlow_v1.115.html` | v1.115 | **Version courante** |
+| `TruckFlow_v1.114.html` | v1.114 | Archivé |
 | `TruckFlow_v1.113.html` | v1.113 | Archivé |
 | `TruckFlow_v1.112.html` | v1.112 | Archivé |
 | `TruckFlow_v1.111.html` | v1.111 | Archivé |
-| `TruckFlow_v1.110.html` | v1.110 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -92,6 +92,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.115 — Fix login + Logo logo_final.png
+- **Fix bug login** : erreur de syntaxe JS dans `openMontageForm()` — ternaire incomplet `(mainItin?' ('+mainItin+')')` → `(mainItin?' ('+mainItin+')':'')` — empêchait le chargement du script et bloquait la connexion + masquait le badge de version
+- **Logo remplacé** : `logo_final.png` embarqué en base64 à la place de l'ancien logo dans les 3 emplacements — écran de login (80×80), header (36×36), header Monitor (32×32 `<img>` remplace l'emoji 🚚)
 
 ### v1.114 — Monitor KPI COMPANS + Montage : créneau select 2h + ville livraison
 - **Monitor KPI COMPANS** : `nComp`/`nCompDep` extraits du comptage normal (plus comptés dans "Sur site") — chip amber dédié 🏭 COMPANS + X partis ; COMPANS exclus du total camions standard
