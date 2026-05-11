@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.96.html` | v1.96 | **Version courante** |
+| `TruckFlow_v1.97.html` | v1.97 | **Version courante** |
+| `TruckFlow_v1.96.html` | v1.96 | Archivé |
 | `TruckFlow_v1.95.html` | v1.95 | Archivé |
 | `TruckFlow_v1.94.html` | v1.94 | Archivé |
 | `TruckFlow_v1.93.html` | v1.93 | Archivé |
@@ -120,6 +121,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.97 — Planning : KPIs globaux complets + colonne RESTANT corrigée
+- **Planning feuille de route — KPIs globaux** : `renderFeuilleDeRoute` et `printFeuilleDeRoute` incluent désormais les livraisons non assignées dans les totaux (pal/silo/pick restants) — cohérence avec l'onglet Synthèse
+- **Section livraisons non assignées** : bloc d'avertissement ⚠ affiché en bas de la feuille de route quand des livraisons non assignées ont encore du restant (liste avec quantités)
+- **Colonne RESTANT synthèse corrigée** : `renderDayDetail` — affiche "⚠ En cours" (ambre) si `d.sp !== 'C'` mais articles à 0, "⏳ WM en cours" si silo done mais pick non ; "✓ Terminé" uniquement quand `d.sp='C'` ET `d.wm='C'` (ou pas de pick) — ne montre plus "✓ OK" à tort pour les livraisons dont le header SAP indique encore B
 
 ### v1.77 — Hub 3D : Corrections orientation + camion à son quai
 - **Quais Q2→Q11 gauche→droite** : formule corrigée `(q-6.5)*60` — Q2 à gauche, Q11 à droite (vue de face correcte)
