@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.106.html` | v1.106 | **Version courante** |
+| `TruckFlow_v1.107.html` | v1.107 | **Version courante** |
+| `TruckFlow_v1.106.html` | v1.106 | Archivé |
 | `TruckFlow_v1.105.html` | v1.105 | Archivé |
 | `TruckFlow_v1.104.html` | v1.104 | Archivé |
 | `TruckFlow_v1.103.html` | v1.103 | Archivé |
@@ -130,6 +131,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.107 — Mail récap : décalés = renvoyés à une autre date uniquement
+- **Définition corrigée des décalés** : uniquement les camions actifs du jour avec `t.decalage` (renvoyés vers `dateNew`) — les camions archivés/partis ne sont jamais dans cette section (s'ils sont partis, ils sont venus)
+- **Mail** : section décalés affiche `Renvoyé au : dateNew creneauNew` en priorité, puis responsabilité, motif, note, livraisons
+- **PDF** : section ⚠️ DÉCALÉS avec encart orange `→ dateNew` en grand, badge responsabilité coloré, sans timeline timestamps (ces camions ne sont pas venus)
+- **Archivés** : inclus dans PARTIS uniquement, jamais dans DÉCALÉS
 
 ### v1.106 — Mail récap : corrections décalés + PDF synthèse complète avec timestamps
 - **Fix décalés** : `decales` = uniquement camions avec `t.decalage` (motif mtx3/transporteur/pas_venu) — ne pas confondre avec `arr_motif` (marchandise pas prête à l'arrivée)
