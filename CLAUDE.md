@@ -12,11 +12,11 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.110.html` | v1.110 | **Version courante** |
+| `TruckFlow_v1.111.html` | v1.111 | **Version courante** |
+| `TruckFlow_v1.110.html` | v1.110 | Archivé |
 | `TruckFlow_v1.109.html` | v1.109 | Archivé |
 | `TruckFlow_v1.108.html` | v1.108 | Archivé |
 | `TruckFlow_v1.107.html` | v1.107 | Archivé |
-| `TruckFlow_v1.106.html` | v1.106 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -92,6 +92,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.111 — Nom transporteur partout (via ITIN_MAP) : planning, timelines, Monitor, log
+- **Helper `_carrierName(t)`** : `t.transporteur || ITIN_MAP[t.itin] || t.itin || '?'` — résout le nom du transporteur depuis le code de route (ex: FRBERN → BERNARD)
+- **Planning risque retard** : affiche `_carrierName` en gras + code itin en petit secondaire (au lieu de itin en gras + transporteur en secondaire)
+- **Timeline active** (popup) : titre principal = `_carrierName(t)` + itin en 10px si différent ; sous-titre = dest | créneau (transporteur retiré du sous-titre car déjà dans le titre)
+- **Timeline archive** (popup) : même traitement que timeline active
+- **Monitor sous-titres** (`.tc-sub`, `.ac-sub`) : `t.dest || t.transporteur || t.itin` — évite d'afficher le code brut quand la destination est vide
+- **Journal d'activité** : `_carrierName(truck)` pour les logs de changement de date camion
 
 ### v1.110 — Profil Statistiques : corrections écran vierge + notifications masquées
 - **Écran vierge après import JSON corrigé** : `importSession()` activait `tab-syn` par défaut → masqué en mode `tf-stat-mode` → page blanche. Après `renderAll()`, si `tf_user === '__stat__'`, force-active l'onglet Statistiques (`tab-stat`) et appelle `renderStats()`
