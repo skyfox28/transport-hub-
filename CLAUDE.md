@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.130.html` | v1.130 | **Version courante** |
+| `TruckFlow_v1.131.html` | v1.131 | **Version courante** |
+| `TruckFlow_v1.130.html` | v1.130 | Archivé |
 | `TruckFlow_v1.129.html` | v1.129 | Archivé |
 | `TruckFlow_v1.128.html` | v1.128 | Archivé |
 | `TruckFlow_v1.127.html` | v1.127 | Archivé |
@@ -105,6 +106,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.131 — Monitor : redesign colonne gauche haute densité + centre 2 colonnes
+
+- **`makeLateCompactRow(t,ts,q)`** : nouvelle fonction — ligne ultra-compacte (42px) pour les retards quand 4+ camions sont en retard ; fond rouge pulsé `retardpulse`, bordure gauche rouge 3px, nom en rose + badge `+Xm`, créneau + quai, bouton Arr. rouge compact
+- **Seuils retard adaptatifs** : 1→`makeLateSmall` (grande carte), 2-3→grille 2×`makeMediumCard`, **4+→liste `makeLateCompactRow` avec max-height:220px + scroll** — la section retard ne monopolise plus toute la colonne
+- **Seuils attente simplifiés** : 1-2→`makeCard` (cartes complètes), **3+→`makeCompactRow`** (lignes compactes, seuil descendu de 7 à 3) — 7 camions en attente tiennent dans la colonne
+- **Fix `makeCompactRow`** : nom en 12px/700, hauteur min 44px, bouton Arr. avec label "Arr." (plus clair que l'emoji seul)
+- **Centre 2 colonnes** : 3+ actifs → grille `grid-template-columns:1fr 1fr;gap:8px` — 4 camions actifs s'affichent en 2×2 au lieu de 4 lignes ; 1-2 actifs conservent la pleine largeur
 
 ### v1.130 — Monitor : fix détection retards + cartes actives compactes
 
