@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.120.html` | v1.120 | **Version courante** |
+| `TruckFlow_v1.121.html` | v1.121 | **Version courante** |
+| `TruckFlow_v1.120.html` | v1.120 | Archivé |
 | `TruckFlow_v1.119.html` | v1.119 | Archivé |
 | `TruckFlow_v1.118.html` | v1.118 | Archivé |
 | `TruckFlow_v1.117.html` | v1.117 | Archivé |
@@ -97,6 +98,10 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.121 — Fix login (SyntaxError barre d'outils archive stats)
+- **Bug corrigé** : `row.innerHTML` dans le patch `renderStats3` contenait `document.getElementById('fi-archive').click()` — les guillemets simples dans la chaîne JS terminaient la chaîne prématurément → SyntaxError → script non chargé → connexion impossible
+- **Fix** : remplacement du `row.innerHTML` par construction DOM (`createElement` + `onclick=function(){}`) — aucun risque d'échappement
 
 ### v1.120 — Statistiques : refonte sections + KPI cliquables + nouvelles analyses
 - **Supprimé** : "Analyse avancée" et "Top / Flop transporteurs"
