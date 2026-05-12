@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.125.html` | v1.125 | **Version courante** |
+| `TruckFlow_v1.126.html` | v1.126 | **Version courante** |
+| `TruckFlow_v1.125.html` | v1.125 | Archivé |
 | `TruckFlow_v1.124.html` | v1.124 | Archivé |
 | `TruckFlow_v1.123.html` | v1.123 | Archivé |
 | `TruckFlow_v1.122.html` | v1.122 | Archivé |
@@ -100,6 +101,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.126 — Monitor : scroll molette + nom transporteur en premier + bouton compact + gantt sans labels
+- **Scroll molette col-gauche** : `min-height:0` ajouté sur `#col-left/center/right` — fix CSS Grid pour que `overflow-y:auto` fonctionne avec la molette
+- **Nom transporteur en premier** : dans les cartes en attente, le `tc-name` (nom du transporteur) est affiché en premier avant les badges statut/quai/créneau
+- **Bouton arrivée compact** : `padding:5px 8px`, `font-size:11px`, `border-radius:8px` — suppression du bouton "✅ Parti" désactivé (statut déjà visible dans la stripe)
+- **Gantt épuré** : suppression du label "PLAN" et de la légende au-dessus du SVG — la mini-map suffit comme référence visuelle
 
 ### v1.125 — Monitor : bouton arrivée prominent + Performance shift + mini-map quais
 - **Bouton arrivée** : `width:100%`, padding agrandi, glow cyan `box-shadow:0 0 14px rgba(0,209,255,.3)`, `event.stopPropagation()` — positionné AVANT le nom/stepper sur les cartes en attente pour visibilité immédiate
