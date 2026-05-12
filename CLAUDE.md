@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.131.html` | v1.131 | **Version courante** |
+| `TruckFlow_v1.132.html` | v1.132 | **Version courante** |
+| `TruckFlow_v1.131.html` | v1.131 | Archivé |
 | `TruckFlow_v1.130.html` | v1.130 | Archivé |
 | `TruckFlow_v1.129.html` | v1.129 | Archivé |
 | `TruckFlow_v1.128.html` | v1.128 | Archivé |
@@ -106,6 +107,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.132 — Monitor : fix noms lignes compactes + colonne droite Prochains arrivants
+
+- **Fix `makeCompactRow` / `makeLateCompactRow`** : suppression classe `.act` sur les boutons (`.act{width:100%}` écrasait le nom du camion dans les lignes flex) → styles inline purs, noms visibles
+- **Colonne droite remplacée** : `_rightPanelHtml` (timeline + livraisons du camion sélectionné) → `_nextTrucksHtml()` — liste chronologique des camions pas encore arrivés triée par créneau ; code couleur gris=futur (dans Xh), cyan=EN COURS, rouge=+Xm retard ; clic → `openTruckDetail` overlay
+- **`_selectTruck()`** simplifié : ouvre directement `openTruckDetail(tid)` au lieu de mettre à jour la colonne droite
 
 ### v1.131 — Monitor : redesign colonne gauche haute densité + centre 2 colonnes
 
