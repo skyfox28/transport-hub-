@@ -15372,28 +15372,32 @@ function _perfGaugeHtml(){
   var allDay=trucks.filter(function(t){return t.date===td&&t.type!=='compans'&&t.type!=='tfe';});
   var allComp=completed.filter(function(c){return c.date===td&&c.type!=='compans'&&c.type!=='tfe';});
   var nOk=0,nAvance=0,nRetard=0,nAtt=0;
+  var nowM=nowMin();
   function classify(t,ts){
-    if(!ts.arr){nAtt++;return;}
     var cr=parseCren(t.creneau);
+    if(!ts||!ts.arr){
+      // Pas d'arrivée : retard auto si créneau dépassé, sinon en attente
+      if(cr&&nowM>cr.e){nRetard++;return;}
+      nAtt++;return;
+    }
     if(!cr){nOk++;return;}
-    var arrMin=new Date(ts.arr).getHours()*60+new Date(ts.arr).getMinutes();
-    var delta=arrMin-cr.e;
-    if(delta<=-5)nAvance++;
-    else if(delta<=10)nOk++;
-    else nRetard++;
+    var arrM=new Date(ts.arr).getHours()*60+new Date(ts.arr).getMinutes();
+    if(arrM<cr.s){nAvance++;}
+    else if(arrM<=cr.e){nOk++;}
+    else{nRetard++;}
   }
   allDay.forEach(function(t){classify(t,tsm[t.id]||{});});
-  allComp.forEach(function(c){classify({creneau:c.creneau},{arr:(c.timestamps||{}).arr});});
+  allComp.forEach(function(c){classify({creneau:c.creneau},(c.timestamps||{}));});
   var total=nOk+nAvance+nRetard+nAtt;
-  var arrived=nOk+nAvance+nRetard;
-  var pct=arrived>0?Math.round((nOk+nAvance)/arrived*100):null;
+  var evaluated=nOk+nAvance+nRetard;
+  var pct=evaluated>0?Math.round((nOk+nAvance)/evaluated*100):null;
   var r=50,cx=65,cy=65,circ=2*Math.PI*r;
   var gColor=pct===null?'rgba(255,255,255,.15)':pct>=80?'#00E676':pct>=60?'#FFB020':'#FF5252';
   var pctTxt=pct===null?'—':pct+'%';
   var dashFilled=pct===null?0:circ*(pct/100);
   var svgStr='<svg width="130" height="130" viewBox="0 0 130 130">'
     +'<circle cx="65" cy="65" r="50" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>'
-    +(arrived>0?'<circle cx="65" cy="65" r="50" fill="none" stroke="'+gColor+'" stroke-width="9"'
+    +(evaluated>0?'<circle cx="65" cy="65" r="50" fill="none" stroke="'+gColor+'" stroke-width="9"'
       +' stroke-dasharray="'+dashFilled.toFixed(1)+' '+circ.toFixed(1)+'"'
       +' stroke-dashoffset="'+(circ/4).toFixed(1)+'"'
       +' stroke-linecap="round"'
@@ -15410,7 +15414,7 @@ function _perfGaugeHtml(){
     +'</div>';
   return '<div class="rp-card">'
     +'<div class="rp-card-hdr"><span>📊</span> Performance shift'
-    +(total?'<span style="margin-left:auto;font-size:9px;color:var(--t3);font-weight:400">'+arrived+'/'+total+' évalués</span>':'')
+    +(total?'<span style="margin-left:auto;font-size:9px;color:var(--t3);font-weight:400">'+evaluated+'/'+total+' évalués</span>':'')
     +'</div>'
     +'<div class="rp-card-body">'
     +'<div class="gauge-wrap">'+svgStr+statsHtml+'</div>'
