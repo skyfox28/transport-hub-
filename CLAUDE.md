@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.124.html` | v1.124 | **Version courante** |
+| `TruckFlow_v1.125.html` | v1.125 | **Version courante** |
+| `TruckFlow_v1.124.html` | v1.124 | Archivé |
 | `TruckFlow_v1.123.html` | v1.123 | Archivé |
 | `TruckFlow_v1.122.html` | v1.122 | Archivé |
 | `TruckFlow_v1.121.html` | v1.121 | Archivé |
@@ -99,6 +100,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.125 — Monitor : bouton arrivée prominent + Performance shift + mini-map quais
+- **Bouton arrivée** : `width:100%`, padding agrandi, glow cyan `box-shadow:0 0 14px rgba(0,209,255,.3)`, `event.stopPropagation()` — positionné AVANT le nom/stepper sur les cartes en attente pour visibilité immédiate
+- **Performance shift** : comptage de TOUS les camions (avec ET sans créneau) ; trucks sans créneau arrivés → comptés OK ; trucks non arrivés → En attente ; affiche `X/Y évalués` + `—` si aucune donnée encore
+- **Mini-map quais** : rangée de 10 boxes Q2→Q11 au-dessus du Gantt — fond + bordure colorés par statut (gris=libre, cyan=arrivé, violet=à quai, amber=chargement, vert=chargé/parti) — cliquables pour sélectionner le camion
+- **Gantt amélioré** : marqueur temps courant (trait cyan pointillé), hauteur 210px, ticks toutes les 2h, blocs plus lisibles
 
 ### v1.124 — Monitor : Layout 3 colonnes + Gantt + Panel droit + % progression
 - **Layout 3 colonnes fixe** : `#main` passe en `display:grid` avec `grid-template-columns:310px 1fr 320px` + `grid-template-rows:1fr auto` — colonnes col-left/col-center/col-right + ligne gantt-row pleine largeur en bas
