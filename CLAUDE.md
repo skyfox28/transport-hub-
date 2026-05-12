@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.121.html` | v1.121 | **Version courante** |
+| `TruckFlow_v1.122.html` | v1.122 | **Version courante** |
+| `TruckFlow_v1.121.html` | v1.121 | Archivé |
 | `TruckFlow_v1.120.html` | v1.120 | Archivé |
 | `TruckFlow_v1.119.html` | v1.119 | Archivé |
 | `TruckFlow_v1.118.html` | v1.118 | Archivé |
@@ -22,7 +23,6 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 | `TruckFlow_v1.114.html` | v1.114 | Archivé |
 | `TruckFlow_v1.113.html` | v1.113 | Archivé |
 | `TruckFlow_v1.112.html` | v1.112 | Archivé |
-| `TruckFlow_v1.111.html` | v1.111 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
