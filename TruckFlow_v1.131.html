@@ -15284,6 +15284,57 @@ function _fmtTs(iso){
   return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 }
 
+function _nextTrucksHtml(){
+  var trucks=getData(),tsm=getTs();
+  var day=trucks.filter(function(t){return t.date===_monDate;});
+  var now=nowMin();
+  var pending=day.filter(function(t){return !(tsm[t.id]||{}).arr;});
+  pending.sort(function(a,b){
+    var ca=parseCren(a.creneau),cb=parseCren(b.creneau);
+    if(!ca&&!cb)return 0;
+    if(!ca)return 1;
+    if(!cb)return -1;
+    return ca.s-cb.s;
+  });
+  var rows='';
+  if(!pending.length){
+    rows='<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">✅ Tous les camions sont arrivés</div>';
+  } else {
+    pending.forEach(function(t){
+      var cr=parseCren(t.creneau);
+      var name=t.type==='compans'?'🏭 COMPANS'+(t.tour?' E'+t.tour:''):
+               t.type==='tfe'?'🚌 Tour N°'+(t.tour||'?'):(t.transporteur||t.itin||'?');
+      var lBorderColor='rgba(100,116,139,.35)';
+      var rowBg='transparent';
+      var badge='';
+      if(cr){
+        if(now<cr.s){
+          var diff=cr.s-now,h=Math.floor(diff/60),m=diff%60;
+          badge='<span style="font-size:9px;padding:2px 7px;border-radius:40px;background:rgba(100,116,139,.12);color:var(--t3);border:1px solid rgba(100,116,139,.2);white-space:nowrap">'+(h>0?'dans '+h+'h'+(m?m+'m':''):'dans '+m+'&nbsp;min')+'</span>';
+        } else if(now<=cr.e){
+          badge='<span style="font-size:9px;padding:2px 7px;border-radius:40px;background:rgba(0,209,255,.15);color:#7ee8fa;border:1px solid rgba(0,209,255,.3);font-weight:700;animation:blink 2s infinite;white-space:nowrap">EN COURS</span>';
+          lBorderColor='#00D1FF';rowBg='rgba(0,209,255,.04)';
+        } else {
+          var over=now-cr.e;
+          badge='<span style="font-size:9px;padding:2px 7px;border-radius:40px;background:rgba(255,82,82,.15);color:#f87171;border:1px solid rgba(255,82,82,.3);font-weight:700;white-space:nowrap">+'+over+'m</span>';
+          lBorderColor='#FF5252';rowBg='rgba(255,82,82,.03)';
+        }
+      }
+      rows+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-left:3px solid '+lBorderColor+';border-bottom:1px solid rgba(255,255,255,.04);background:'+rowBg+';cursor:pointer" onclick="openTruckDetail(\''+t.id+'\')">'
+        +(t.creneau?'<div style="font-size:11px;font-weight:700;color:var(--t2);font-family:var(--mono);flex-shrink:0;min-width:40px;text-align:center">'+t.creneau+'</div>':'<div style="min-width:40px"></div>')
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:11px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(name)+'</div>'
+          +((t.dest&&t.dest!==name)?'<div style="font-size:9px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(t.dest)+'</div>':'')
+        +'</div>'
+        +(badge?'<div style="flex-shrink:0">'+badge+'</div>':'')
+        +'</div>';
+    });
+  }
+  return '<div class="rp-card">'
+    +'<div class="rp-card-hdr">📅 Prochains arrivants<span style="float:right;font-size:10px;color:var(--t3);font-weight:400">'+pending.length+' attendu'+(pending.length>1?'s':'')+'</span></div>'
+    +'<div style="overflow-y:auto">'+rows+'</div>'
+    +'</div>';
+}
 function _rightPanelHtml(tid){
   if(!tid){
     return '<div class="rp-placeholder"><div class="rp-ico">👆</div><div class="rp-txt">Cliquez sur un camion pour voir sa timeline</div></div>';
@@ -15505,8 +15556,7 @@ function _ganttHtml(allTrucks,tsm,rq){
 
 function _selectTruck(tid){
   _selectedTid=tid;
-  var rp=document.getElementById('col-right');
-  if(rp)rp.innerHTML=_rightPanelHtml(tid)+_perfGaugeHtml();
+  openTruckDetail(tid);
 }
 
 function makeMediumCard(t,ts,q,p){
@@ -15737,7 +15787,7 @@ function render(){
     centerHtml='<div class="empty" style="height:auto;padding:60px 16px"><div class="ico">🕐</div><div class="ttl">Aucun camion actif</div><div class="sub">Les camions arrivés apparaîtront ici</div></div>';
   }
   // ── RIGHT COLUMN: Timeline sélectionnée + Jauge ───────────────────────────
-  var rightHtml=_rightPanelHtml(_selectedTid)+_perfGaugeHtml();
+  var rightHtml=_nextTrucksHtml()+_perfGaugeHtml();
   // ── GANTT ROW ─────────────────────────────────────────────────────────────
   var ganttHtml=_ganttHtml(allTrucksDay,tsm,rq);
   main.innerHTML='<div id="col-left">'+leftHtml+'</div>'
