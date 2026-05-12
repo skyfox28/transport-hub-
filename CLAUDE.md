@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.123.html` | v1.123 | **Version courante** |
+| `TruckFlow_v1.124.html` | v1.124 | **Version courante** |
+| `TruckFlow_v1.123.html` | v1.123 | Archivé |
 | `TruckFlow_v1.122.html` | v1.122 | Archivé |
 | `TruckFlow_v1.121.html` | v1.121 | Archivé |
 | `TruckFlow_v1.120.html` | v1.120 | Archivé |
@@ -23,7 +24,6 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 | `TruckFlow_v1.115.html` | v1.115 | Archivé |
 | `TruckFlow_v1.114.html` | v1.114 | Archivé |
 | `TruckFlow_v1.113.html` | v1.113 | Archivé |
-| `TruckFlow_v1.112.html` | v1.112 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -99,6 +99,16 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.124 — Monitor : Layout 3 colonnes + Gantt + Panel droit + % progression
+- **Layout 3 colonnes fixe** : `#main` passe en `display:grid` avec `grid-template-columns:310px 1fr 320px` + `grid-template-rows:1fr auto` — colonnes col-left/col-center/col-right + ligne gantt-row pleine largeur en bas
+- **Colonne gauche** (`#col-left`) : alertes retard (`makeLateBar`) + TFE placeholder + camions en attente (`makeCard`) — cartes compactes scrollables
+- **Colonne centre** (`#col-center`) : camions actifs (`makeActiveCard`) avec label `QUAI XX` en cyan au-dessus de chaque carte et **% progression en 28px** (`ac-prog-pct`) affiché en grand à droite du nom
+- **Colonne droite** (`#col-right`) : panel fixe avec timeline verticale ARR→QUAI→CHGT→FIN→DÉP du camion sélectionné (`_rightPanelHtml`) + jauge SVG circulaire "Performance shift" (`_perfGaugeHtml`) — % ponctualité du jour
+- **Gantt** (`#gantt-row`, hauteur 176px) : SVG pleine largeur, axe temporel 05h–22h, lignes Q2→Q11, blocs colorés par statut (gris=prévu, cyan=arrivé, amber=chargement, vert=parti) — `_ganttHtml()`
+- **Sélection camion** : clic sur n'importe quelle carte appelle `_selectTruck(tid)` → met à jour le panel droit sans re-render complet ; `_selectedTid` global persiste entre renders
+- **Nouvelles fonctions** : `_rightPanelHtml(tid)`, `_perfGaugeHtml()`, `_ganttHtml(allTrucks,tsm,rq)`, `_selectTruck(tid)`, `_fmtTs(iso)`
+- **CSS ajouté** : `.col-sec-hdr`, `.ac-quai-lbl`, `.ac-prog-pct`, `.rp-card`, `.rp-card-hdr`, `.rp-card-body`, `.tl-step`, `.tl-dot`, `.tl-line`, `.gauge-wrap`, `.gauge-stats`, `.gantt-title`, `.gantt-legend`
 
 ### v1.123 — PDF synthèse : fix décalage horaire + header + villes
 - **Fix décalage horaire** : `fmtT(iso)` dans `printMailRecapPDF` utilisait `iso.slice(11,16)` (heure UTC) → remplacé par `new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})` — heure locale correcte (UTC+1/+2 France)
