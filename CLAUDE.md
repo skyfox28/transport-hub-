@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.126.html` | v1.126 | **Version courante** |
+| `TruckFlow_v1.127.html` | v1.127 | **Version courante** |
+| `TruckFlow_v1.126.html` | v1.126 | Archivé |
 | `TruckFlow_v1.125.html` | v1.125 | Archivé |
 | `TruckFlow_v1.124.html` | v1.124 | Archivé |
 | `TruckFlow_v1.123.html` | v1.123 | Archivé |
@@ -101,6 +102,15 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.127 — Monitor : carousel colonne gauche + suppression Gantt SVG + mini-cartes retard
+
+- **Carousel camions en attente** : une seule carte affichée à la fois dans la colonne gauche, navigation ◀/▶ + compteur N/total ; molette souris pour naviguer (addEventListener passive:false) ; index `_waitIdx` + liste `_waitList[]` persistés entre renders — pas de réinitialisation si l'index est encore valide
+- **Carousel retards** : même principe avec `_lateIdx` + `_lateList[]` — affiche `makeLateSmall()` au lieu de `makeLateBar()`
+- **`makeLateSmall(t,ts,quai)`** : carte compacte pour les retards dans le carousel — RETARD +Xmin + nom + quai + créneau + bouton Arrivée pleine largeur
+- **Suppression Gantt SVG** : `_ganttHtml()` retourne uniquement `dockMap` (mini-map quais Q2→Q11) — plus de SVG temporel ; `#gantt-row` hauteur réduite 210px→70px
+- **CSS carousel** : `.csl-wrap`, `.csl-nav`, `.csl-btn` (hover, disabled), `.csl-ind` ajoutés au bloc `_css`
+- **`_attachWheelListeners()`** : attachée après chaque `render()` sur les wraps carousel avec `{passive:false}` pour `preventDefault()` effectif
 
 ### v1.126 — Monitor : scroll molette + nom transporteur en premier + bouton compact + gantt sans labels
 - **Scroll molette col-gauche** : `min-height:0` ajouté sur `#col-left/center/right` — fix CSS Grid pour que `overflow-y:auto` fonctionne avec la molette
