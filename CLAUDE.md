@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.132.html` | v1.132 | **Version courante** |
+| `TruckFlow_v1.133.html` | v1.133 | **Version courante** |
+| `TruckFlow_v1.132.html` | v1.132 | Archivé |
 | `TruckFlow_v1.131.html` | v1.131 | Archivé |
 | `TruckFlow_v1.130.html` | v1.130 | Archivé |
 | `TruckFlow_v1.129.html` | v1.129 | Archivé |
@@ -107,6 +108,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.133 — Monitor/Mail/PDF : Performance Shift + COMPANS + Prochains arrivants
+
+- **Performance Shift** : camion non arrivé = toujours EN ATTENTE (jamais EN RETARD automatique) — la jauge n'évalue que les camions arrivés ; le % de ponctualité reflète les faits constatés
+- **Mail** : `fmtLine` utilise `fmtName` — les enlèvements COMPANS affichent le numéro E1/E2/E3
+- **PDF** : COMPANS/TFE → `tsRowSimple` (ARR + DÉP + durée seulement) ; section Livraisons masquée pour COMPANS/TFE
+- **Colonne droite Monitor** : remplacée par `_nextTrucksHtml()` — liste chronologique des camions attendus triée par créneau (gris=futur, cyan=EN COURS, rouge=+Xm) ; clic → overlay `openTruckDetail`
+- **Fix lignes compactes** : boutons sans classe `.act` (évite `width:100%` qui écrasait le nom)
 
 ### v1.132 — Monitor : fix noms lignes compactes + colonne droite Prochains arrivants
 
