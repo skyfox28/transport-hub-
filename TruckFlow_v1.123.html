@@ -16688,7 +16688,7 @@ function openMailRecap(){
     decalesVersAutreJour:decalesVersAutreJour,recuperes:recuperes,
     dateFr:dateFr,dateSubj:dateSubj,dateStr:dateStr};
 
-  function fmtName(t){return t.type==='tfe'?'TFE Tour N°'+(t.tour||'?'):(t.transporteur||t.itin||t.name||'?');}
+  function fmtName(t){return t.type==='compans'?'🏭 COMPANS'+(t.tour?' E'+t.tour:''):t.type==='tfe'?'TFE Tour N°'+(t.tour||'?'):(t.transporteur||t.itin||t.name||'?');}
   function fmtQ(entry){return entry.quaiNum?'Q'+entry.quaiNum:(entry.t.creneau?'Crén. '+entry.t.creneau:'');}
   function fmtLivs(t){return (t.deliveries||[]).length?t.deliveries.join(', '):'—';}
   function fmtStatut(ts){
@@ -16783,7 +16783,7 @@ function printMailRecapPDF(){
 
   function eh(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function fmtT(iso){return iso?new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';}
-  function fmtName(t){return t.type==='tfe'?'TFE Tour N°'+(t.tour||'?'):(t.transporteur||t.itin||t.name||'?');}
+  function fmtName(t){return t.type==='compans'?'🏭 COMPANS'+(t.tour?' E'+t.tour:''):t.type==='tfe'?'TFE Tour N°'+(t.tour||'?'):(t.transporteur||t.itin||t.name||'?');}
   function fmtQ(entry){return entry.quaiNum?'Q'+entry.quaiNum:(entry.t.creneau?'Crén. '+entry.t.creneau:'');}
   function fmtLivs(t){var ids=t.deliveries||[];return ids.length?ids.join(', '):'—';}
   function fmtVilles(t){
