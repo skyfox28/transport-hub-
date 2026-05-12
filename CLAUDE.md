@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.122.html` | v1.122 | **Version courante** |
+| `TruckFlow_v1.123.html` | v1.123 | **Version courante** |
+| `TruckFlow_v1.122.html` | v1.122 | Archivé |
 | `TruckFlow_v1.121.html` | v1.121 | Archivé |
 | `TruckFlow_v1.120.html` | v1.120 | Archivé |
 | `TruckFlow_v1.119.html` | v1.119 | Archivé |
@@ -98,6 +99,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.123 — PDF synthèse : fix décalage horaire + header + villes
+- **Fix décalage horaire** : `fmtT(iso)` dans `printMailRecapPDF` utilisait `iso.slice(11,16)` (heure UTC) → remplacé par `new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})` — heure locale correcte (UTC+1/+2 France)
+- **Fix header PDF** : ajout de `-webkit-print-color-adjust:exact;print-color-adjust:exact` sur `.hdr` — fond bleu `#1e3a5f` conservé à l'impression ; `@media print` étendu à `*` pour tous les éléments colorés
+- **Villes dans le PDF** : `fmtVilles(t)` — lookup `APP.deliveries` par IDs livraisons → extrait les `d.ville` uniques ; affichées sous les numéros de livraison (📍 Ville · Ville) dans chaque carte camion
+- **Monitor CSS redesign** : nouveau design system dans le bloc `_css` — `--bg:#050816`, `--r-card:18px`, police JetBrains Mono, top stripe 3px (`.tc-top-stripe`) à la place de left stripe, KPI pills, 72px header
+
+### v1.122 — Monitor : nouveau visuel (design system inspiré React prototype)
+- **CSS Monitor** (`_css` block) : palette `--bg:#050816`, cartes `border-radius:18px`, top stripe 3px par statut (gradient cyan/amber/green/red/purple), KPI chips pills `border-radius:40px`, header 72px, police `JetBrains Mono` pour les chiffres
+- **`.tc` layout** : `display:flex;flex-direction:column` + `.tc-top-stripe` (3px, gradient par statut) + `.tc-body` (padding 14px 16px) — remplacement de la left stripe `grid-template-columns:4px …`
+- **Classes statut** : `.sw` (attente) · `.sa` (arrivé) · `.sd` (à quai/départ) · `.sl` (chargement) · `.slo` (chargé) · `.sretard` (retard)
 
 ### v1.121 — Fix login (SyntaxError barre d'outils archive stats)
 - **Bug corrigé** : `row.innerHTML` dans le patch `renderStats3` contenait `document.getElementById('fi-archive').click()` — les guillemets simples dans la chaîne JS terminaient la chaîne prématurément → SyntaxError → script non chargé → connexion impossible
