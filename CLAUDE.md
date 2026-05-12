@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.129.html` | v1.129 | **Version courante** |
+| `TruckFlow_v1.130.html` | v1.130 | **Version courante** |
+| `TruckFlow_v1.129.html` | v1.129 | Archivé |
 | `TruckFlow_v1.128.html` | v1.128 | Archivé |
 | `TruckFlow_v1.127.html` | v1.127 | Archivé |
 | `TruckFlow_v1.126.html` | v1.126 | Archivé |
@@ -104,6 +105,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.130 — Monitor : fix détection retards + cartes actives compactes
+
+- **Fix `parseCren` (bug critique)** : le regex exigeait `[h:]` après l'heure (ex: "11h-13h") mais les créneaux sont stockés au format `"11-13"` (sans `h`) → aucun camion n'était jamais détecté en retard → section "⚠️ En retard" jamais affichée. Ajout d'un 3e regex `^(\d{1,2})\s*[-–]\s*(\d{1,2})$` pour ce format.
+- **Animation retard** : `.tc.sretard{animation:retardpulse 2.5s ease-in-out infinite;border-color:rgba(255,82,82,.3)!important}` — la carte retard pulse en rouge, clairement distincte des cartes en attente
+- **Cartes actives compactes** : `.ac-head` padding `12px 14px 10px` → `8px 12px 8px`, `.ac-body` padding `12px 14px` → `8px 12px`, gap réduit — chaque carte gagne ~20px → 4 camions actifs visibles sans scroll excessif
+- **Pourcentage progression** : `ac-prog-pct` font-size `28px` → `22px` — moins encombrant tout en restant lisible
+- **Nom camion** : `ac-name` font-size `14px` → `13px` — cohérent avec la densité compacte
 
 ### v1.129 — Monitor : colonne gauche vue adaptative selon le nombre de camions
 
