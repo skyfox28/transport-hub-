@@ -17223,7 +17223,7 @@ function openMailRecap(){
     return arr.length?arr.join('/'):'';}
 
   function fmtLine(x){
-    var name=_carrierName(x.t);
+    var name=fmtName(x.t);
     var cren=x.t.creneau||'';
     var ville=fmtVille(x.t);
     var line='• '+name;
@@ -17393,6 +17393,18 @@ function printMailRecapPDF(){
     });
     return html+'</div>';
   }
+  function tsRowSimple(ts){
+    var html='<div class="t-ts">';
+    html+='<span class="ts-chip'+(ts.arr?' filled ts-arr':'')+'">ARR '+(ts.arr?fmtT(ts.arr):'—')+'</span>';
+    html+='<span class="ts-arrow">▸</span>';
+    html+='<span class="ts-chip'+(ts.dep?' filled ts-dep':'')+'">DÉP '+(ts.dep?fmtT(ts.dep):'—')+'</span>';
+    if(ts.arr&&ts.dep){
+      var dm=Math.round((new Date(ts.dep)-new Date(ts.arr))/60000);
+      var h=Math.floor(dm/60),m=dm%60;
+      html+='<span style="font-size:10px;color:#64748b;margin-left:4px">⏱ '+(h?h+'h':'')+m+'min</span>';
+    }
+    return html+'</div>';
+  }
 
   function buildSec(entries,cls,label,type){
     if(!entries.length) return '';
@@ -17430,11 +17442,12 @@ function printMailRecapPDF(){
             +'</div>';
         }
       }
+      var isSimple=(x.t.type==='compans'||x.t.type==='tfe');
       html+='<div class="truck '+cls+'">'
         +'<div class="t-head"><span class="t-name">'+eh(fmtName(x.t))+statut+'</span>'
         +(q?'<span class="t-quai">'+eh(q)+'</span>':'')+'</div>'
-        +(type!=='out'?tsRow(x.ts):'')
-        +'<div class="t-livs">'+livsTxt+'</div>'
+        +(type!=='out'?(isSimple?tsRowSimple(x.ts):tsRow(x.ts)):'')
+        +(!isSimple?'<div class="t-livs">'+livsTxt+'</div>':'')
         +decHtml+'</div>';
     });
     return html+'</div>';
