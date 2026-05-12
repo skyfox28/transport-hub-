@@ -15427,8 +15427,7 @@ function _perfGaugeHtml(){
   function classify(t,ts){
     var cr=parseCren(t.creneau);
     if(!ts||!ts.arr){
-      // Pas d'arrivée : retard auto si créneau dépassé, sinon en attente
-      if(cr&&nowM>cr.e){nRetard++;return;}
+      // Pas encore arrivé : toujours en attente (on n'évalue que les arrivés)
       nAtt++;return;
     }
     if(!cr){nOk++;return;}
