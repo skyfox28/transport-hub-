@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.128.html` | v1.128 | **Version courante** |
+| `TruckFlow_v1.129.html` | v1.129 | **Version courante** |
+| `TruckFlow_v1.128.html` | v1.128 | Archivé |
 | `TruckFlow_v1.127.html` | v1.127 | Archivé |
 | `TruckFlow_v1.126.html` | v1.126 | Archivé |
 | `TruckFlow_v1.125.html` | v1.125 | Archivé |
@@ -103,6 +104,18 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.129 — Monitor : colonne gauche vue adaptative selon le nombre de camions
+
+- **1 retard** : grande carte `makeLateSmall` pleine largeur — très visible
+- **2+ retards** : grille 2 colonnes de cartes moyennes `makeMediumCard` — compact + rouge + +Xmin animé
+- **1-2 en attente** : cartes complètes `makeCard` — toutes les infos
+- **3-6 en attente** : grille 2 colonnes de cartes moyennes — nom + créneau + quai + bouton Arr.
+- **7+ en attente** : lignes ultra-compactes `makeCompactRow` — 44px par ligne, stripe colorée gauche, tout visible d'un coup
+- **Pas de navigation** : tout visible en même temps, scroll molette naturel sur la colonne
+- **`makeMediumCard(t,ts,q,p)`** : carte 2-col — stripe + nom tronqué + créneau + quai + bouton Arr. (140px largor)
+- **`makeCompactRow(t,ts,q,p)`** : ligne compacte — border-left colorée + nom + créneau + quai + delay + bouton 🕐 à droite
+- Suppression carousel/drum/wheel : code simplifié, plus fiable
 
 ### v1.128 — Monitor : illusion de roue (drum picker) colonne gauche
 
