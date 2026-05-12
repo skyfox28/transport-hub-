@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.127.html` | v1.127 | **Version courante** |
+| `TruckFlow_v1.128.html` | v1.128 | **Version courante** |
+| `TruckFlow_v1.127.html` | v1.127 | Archivé |
 | `TruckFlow_v1.126.html` | v1.126 | Archivé |
 | `TruckFlow_v1.125.html` | v1.125 | Archivé |
 | `TruckFlow_v1.124.html` | v1.124 | Archivé |
@@ -102,6 +103,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.128 — Monitor : illusion de roue (drum picker) colonne gauche
+
+- **Effet tambour/roue** : le carousel montre la carte précédente (en haut, estompée) + carte active (plein centre) + carte suivante (en bas, estompée) — donne l'illusion d'un tambour rotatif
+- **Fade directionnel sur les aperçus** : `.whl-peek-top` masque avec gradient bas→transparent (montre le bas de la carte précédente) ; `.whl-peek-bot` masque avec gradient haut→transparent (montre le haut de la carte suivante) — effet "autour de la courbe"
+- **Animation directionnelle** : navigation suivant → carte glisse depuis le bas (`whlpop`) ; navigation précédent → carte glisse depuis le haut (`whlpop-rev`) ; animation rejouée à chaque remplacement innerHTML
+- **`_whlWaitHtml(idx)`** / **`_whlLateHtml(idx)`** : générateurs HTML du tambour (3 emplacements: peek-top + active + peek-bot) ; `_navWait(d)` / `_navLate(d)` mettent à jour `#wait-whl`/`#late-whl` directement sans re-render complet
+- **Fix visibilité carte retard** : le masque CSS est maintenant sur les éléments peek individuels (pas sur le container) → la carte active est toujours 100% visible, même seule
 
 ### v1.127 — Monitor : carousel colonne gauche + suppression Gantt SVG + mini-cartes retard
 
