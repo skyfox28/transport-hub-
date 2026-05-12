@@ -14822,6 +14822,41 @@ function makeStepper(keys,icos,klbls,ts){
   html+='</div>';
   return html;
 }
+function makeStepperInteractive(keys,icos,klbls,ts,tid,liveRO){
+  var n=keys.length;
+  var html='<div style="display:flex;align-items:center;gap:0;margin:4px 0">';
+  for(var i=0;i<n;i++){
+    var k=keys[i];
+    var done=!!ts[k];
+    var act=!done&&(i===0||!!ts[keys[i-1]]);
+    var circFill=done?'rgba(0,200,83,.18)':act?'rgba(0,209,255,.18)':'rgba(255,255,255,.04)';
+    var circStroke=done?'rgba(0,200,83,.6)':act?'rgba(0,209,255,.6)':'rgba(255,255,255,.12)';
+    var textCol=done?'#6ee7b7':act?'#7ee8fa':'rgba(255,255,255,.3)';
+    var stampFn=(k==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+k+'\')';
+    var clickAttr='';
+    if(!liveRO){
+      if(done){clickAttr=' onclick="event.stopPropagation();openManualModal(\''+tid+'\',\''+k+'\')" style="cursor:pointer" title="✎ Modifier '+klbls[i]+'"';}
+      else if(act){clickAttr=' onclick="event.stopPropagation();'+stampFn+'" style="cursor:pointer" title="⏺ Enregistrer '+klbls[i]+'"';}
+    }
+    var svgGlow=act?'filter:drop-shadow(0 0 4px rgba(0,209,255,.6))':done&&!liveRO?'filter:drop-shadow(0 0 3px rgba(0,200,83,.3))':'';
+    html+='<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0">'
+      +'<div'+clickAttr+'>'
+        +'<svg width="24" height="24" style="flex-shrink:0;'+svgGlow+'">'
+          +'<circle cx="12" cy="12" r="10.5" fill="'+circFill+'" stroke="'+circStroke+'" stroke-width="1.5"/>'
+          +(done?'<text x="12" y="16" text-anchor="middle" font-size="10" fill="#6ee7b7" font-family="sans-serif">✓</text>':'<text x="12" y="16" text-anchor="middle" font-size="9" fill="'+textCol+'" font-family="sans-serif">'+icos[i]+'</text>')
+        +'</svg>'
+      +'</div>'
+      +'<div style="font-size:7px;text-transform:uppercase;letter-spacing:.05em;color:'+textCol+';margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center;font-family:var(--sans)">'+klbls[i]+'</div>'
+      +(ts[k]?'<div style="font-size:8px;color:#6ee7b7;font-family:var(--mono);margin-top:1px">'+ft(ts[k])+'</div>':'')
+      +(act&&!liveRO?'<div onclick="event.stopPropagation();openManualModal(\''+tid+'\',\''+k+'\')" style="font-size:7px;color:var(--t3);cursor:pointer;margin-top:1px;font-family:var(--sans)" title="Heure manuelle">✎</div>':'')
+      +'</div>';
+    if(i<n-1){
+      html+='<div style="height:2px;width:100%;background:'+(done?'rgba(0,200,83,.45)':'rgba(255,255,255,.07)')+';margin-bottom:22px;flex:0.5;min-width:6px"></div>';
+    }
+  }
+  html+='</div>';
+  return html;
+}
 function makeCard(t,ts,quai,prio){
   var s=getStatus(ts);
   var liveRO=(typeof _isLiveProfile!=='undefined'&&_isLiveProfile)||(typeof _isReadOnly!=='undefined'&&_isReadOnly);
@@ -15034,16 +15069,17 @@ function makeLateBar(t,ts,quai){
 }
 function makeActiveCard(t,ts,quai,prio){
   var s=getStatus(ts);
+  var _liveRO=(typeof _isLiveProfile!=='undefined'&&_isLiveProfile)||(typeof _isReadOnly!=='undefined'&&_isReadOnly);
+  var tid=t.id;
   // ── COMPANS : 2 timestamps seulement ──
   if(t.type==='compans'||t.type==='tfe'){
     var isT=(t.type==='tfe');
     var cpKeys=['arr','dep'],cpIcos=['+','→'],cpLbls=['ARR','DÉP'];
-    var stepperAC=makeStepper(cpKeys,cpIcos,cpLbls,ts);
+    var stepperAC=makeStepperInteractive(cpKeys,cpIcos,cpLbls,ts,tid,_liveRO);
     var nk=null,ac='act-done',al='✅ Parti';
     if(!ts.arr){nk='arr';ac='act-arr';al='🕐 Enregistrer arrivée';}
     else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Enregistrer départ';}
-    if((typeof _isLiveProfile!=='undefined'&&_isLiveProfile)||(typeof _isReadOnly!=='undefined'&&_isReadOnly))nk=null;
-    var tid=t.id;
+    if(_liveRO)nk=null;
     var durHtml2='';
     if(ts.arr&&ts.dep){var dm2=Math.round((new Date(ts.dep)-new Date(ts.arr))/60000);durHtml2='<div style="font-size:9px;color:'+(isT?'#00D1FF':'#FFB020')+';margin-top:2px">⏱ '+fm(dm2)+'</div>';}
     var ab=nk?'<button class="act-sm '+ac+'" onclick="stamp(\''+tid+'\',\''+nk+'\')">'+al+'</button>'
@@ -15067,7 +15103,7 @@ function makeActiveCard(t,ts,quai,prio){
   var keys=['arr','quai','chg','fin_chg','dep'];
   var icos=['+','Q','C','F','→'];
   var lbls=['Arr.','Quai','Chgt','Fin','Dép.'];
-  var stepperAC5=makeStepper(keys,icos,lbls,ts);
+  var stepperAC5=makeStepperInteractive(keys,icos,lbls,ts,tid,_liveRO);
   // Progress bar based on stage
   var stageIdx={w:0,a:1,d:2,l:3,lo:4,p:5}[s]||0;
   var progPct=Math.round((stageIdx/5)*100);
@@ -15087,9 +15123,7 @@ function makeActiveCard(t,ts,quai,prio){
   else if(!ts.chg){nk='chg';ac='act-chg';al='📦 Chargement';}
   else if(!ts.fin_chg&&!ts.dep){nk='fin_chg';ac='act-fin';al='⏹ Fin chgt';}
   else if(!ts.dep){nk='dep';ac='act-dep';al='🚀 Départ';}
-  var _liveRO=(typeof _isLiveProfile!=='undefined'&&_isLiveProfile)||(typeof _isReadOnly!=='undefined'&&_isReadOnly);
   if(_liveRO)nk=null;
-  var tid=t.id;
   var actOnclick=(nk==='quai')?'pickQuai(\''+tid+'\')':'stamp(\''+tid+'\',\''+nk+'\')';
   var ab=nk
     ?'<button class="act-sm '+ac+'" onclick="'+actOnclick+'">'+al+'</button>'
