@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.137.html` | v1.137 | **Version courante** |
+| `TruckFlow_v1.138.html` | v1.138 | **Version courante** |
+| `TruckFlow_v1.137.html` | v1.137 | Archivé |
 | `TruckFlow_v1.136.html` | v1.136 | Archivé |
 | `TruckFlow_v1.135.html` | v1.135 | Archivé |
 | `TruckFlow_v1.134.html` | v1.134 | Archivé |
@@ -112,6 +113,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.138 — Monitor : version correcte + Réseau "Changer de fichier"
+
+- **Version Monitor correcte** : `'Monitor v1.130'` hardcodé → `'Monitor '+APP_VERSION` — affiche toujours la version courante dans le sous-titre du logo Monitor
+- **Réseau Monitor : option "Changer de fichier"** : `toggleNetMon()` quand déjà connecté affiche un modal 3 boutons (📂 Changer de fichier / 🔌 Déconnecter / Annuler) au lieu de déconnecter directement — "Changer de fichier" appelle `openNetworkMonitor(true)` (forceNew=true, bypass IDB)
+- **`openNetworkMonitor(forceNew)`** : paramètre `forceNew` ajouté — si `true`, skip la reconnexion IDB et force le file picker — corrige le cas des utilisateurs live avec un ancien chemin mémorisé
 
 ### v1.137 — Monitor : bouton TFE dans le header
 
