@@ -10318,28 +10318,30 @@ function _showNetPathHelperMain(){
   });
 }
 
-async function openNetworkSync(){
+async function openNetworkSync(forceNew){
   if(!window.showSaveFilePicker){
     showToast('\u26a0 Non support\u00e9 \u2014 utilisez Chrome ou Edge 86+');
     return;
   }
-  // Try auto-reconnect via stored IDB handle
-  try{
-    var stored=await _idbHandle('get');
-    if(stored){
-      var perm=await stored.queryPermission({mode:'readwrite'});
-      if(perm==='prompt') perm=await stored.requestPermission({mode:'readwrite'});
-      if(perm==='granted'){
-        _netSyncHandle=stored;
-        _netSyncActive=true;
-        _updateNetSyncUI();
-        _writeNetSync();
-        showToast('\uD83D\uDCE1 Sync r\u00e9seau reconnect\u00e9');
-        logActivity('\uD83D\uDCE1','Sync r\u00e9seau reconnect\u00e9 (auto)');
-        return;
+  // Try auto-reconnect via stored IDB handle (sauf si forceNew)
+  if(!forceNew){
+    try{
+      var stored=await _idbHandle('get');
+      if(stored){
+        var perm=await stored.queryPermission({mode:'readwrite'});
+        if(perm==='prompt') perm=await stored.requestPermission({mode:'readwrite'});
+        if(perm==='granted'){
+          _netSyncHandle=stored;
+          _netSyncActive=true;
+          _updateNetSyncUI();
+          _writeNetSync();
+          showToast('\uD83D\uDCE1 Sync r\u00e9seau reconnect\u00e9');
+          logActivity('\uD83D\uDCE1','Sync r\u00e9seau reconnect\u00e9 (auto)');
+          return;
+        }
       }
-    }
-  }catch(e){}
+    }catch(e){}
+  }
   // Show path helper then file picker
   try{
     await _showNetPathHelperMain();
@@ -10397,10 +10399,9 @@ function toggleNetSync(){
     m.querySelector('#_tnsStop').onclick=function(){m.remove();stopNetSync();};
     m.querySelector('#_tnsChange').onclick=async function(){
       m.remove();
-      // Effacer le handle IDB puis ouvrir le sélecteur
       try{await _idbHandle('del');}catch(e){}
       _netSyncHandle=null;_netSyncActive=false;
-      openNetworkSync();
+      openNetworkSync(true);
     };
   } else {
     openNetworkSync();
