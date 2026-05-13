@@ -2072,7 +2072,8 @@ var ITIN_MAP = {
   FRPERR:'PERRENOT', FRSAGI:'SAGIL', FRPROM:'PROMODAL',
   FRSEXP:'EXPORT', FRINTE:'INTERNATIONAL',
   FRENL2:'ENL', FRENL3:'ENL', FRENL4:'ENL',
-  FRCOQU:'COQU', FRGON2:'GON'
+  FRCOQU:'COQU', FRGON2:'GON',
+  FRPORT:'PORTUGAL'
 };
 function _carrierName(t){return (t&&(t.label||t.transporteur||(t.itin&&ITIN_MAP[t.itin])||t.itin))||'?';}
 var CRENEAU_MAP = {
@@ -2081,7 +2082,8 @@ var CRENEAU_MAP = {
   FRSLT:'libre', FRTAB:'14-16', FRDTS:'libre', FRDTS4:'libre',
   FRXPO:'12-14', FRPEDR:'12-14', FROMNI:'10-12', FROMN1:'10-12',
   FRPERR:'16-18', FRSAGI:'impos\u00e9', FRPROM:'6h/15h',
-  FRSEXP:'export', FRINTE:'international'
+  FRSEXP:'export', FRINTE:'international',
+  FRPORT:'libre'
 };
 
 var ART_EMP = {"114880": "C  50", "142440": "C  27", "142450": "C  28", "142460": "C  24", "142530": "C  26", "143890": "C  53", "145220": "F  135", "145230": "C  43", "145630": "G  126", "145940": "C  51", "146490": "C  36", "146500": "B  32", "146520": "F  58", "146590": "C  12", "146620": "C  16", "146630": "C  17", "146660": "C  45", "146700": "B  22", "146710": "B  51", "146790": "F  30", "146840": "B  43", "146860": "C  04", "146920": "B  39", "146940": "B  40", "146980": "F  66", "146990": "B  34", "147010": "B  41", "147050": "B  28", "147070": "C  25", "147170": "C  02", "147190": "B  06", "147280": "F  136", "148200": "C  07", "148210": "B  57", "148240": "C  05", "149560": "C  23", "149820": "C  08", "150100": "B  30", "150340": "B  12", "150360": "F  119", "150430": "F  44", "151900": "F  07", "152180": "F  123", "152210": "B  60", "152220": "B  16", "152240": "F  93", "152250": "B  08", "152930": "B  10", "152950": "C  11", "152960": "C  21", "152970": "B  14", "152980": "C  59", "153130": "C  20", "153140": "B  58", "153160": "B  20", "153190": "C  47", "153800": "F  78", "153820": "F  48", "153890": "F  71", "153900": "C  32", "154295": "B  35", "154297": "J  27", "154302": "F  29", "154320": "C  46", "154326": "B  59", "201260": "A  55", "201270": "A  18", "202330": "A  52", "270510": "A  46", "273310": "F  53", "273320": "F  57", "273330": "F  105", "273340": "F  120", "273350": "F  126", "273360": "F  80", "273370": "J  32", "273380": "F  50", "273390": "J  45", "273400": "J  15", "275570": "A  30", "275630": "A  42", "275650": "I  18", "275740": "F  131", "276250": "J  29", "278220": "A  50", "278230": "A  47", "278250": "I  19", "278270": "A  15", "278600": "I  10", "278710": "A  39", "278720": "A  29", "278740": "A  12", "279267": "F  115", "279282": "A  20", "279287": "J  55", "279317": "I  25", "279401": "A  44", "279402": "I  51", "279408": "F  56", "279412": "I  27", "510812": "Z  41", "514850": "Z  63", "890780": "F  134", "900815606": "F  32", "900921131": "F  20", "900921840": "F  31", "900921841": "J  03", "900954324": "A  33", "900955710": "B  55", "900955716": "B  25", "900955720": "F  64", "900970924": "F  54", "900970925": "F  86", "901009527": "I  34", "901034375": "I  36", "901078793": "C  34", "901099366": "I  50", "901099367": "I  44", "901099369": "I  32", "901168861": "B  37", "901168862": "B  53", "901169170": "B  49", "901169172": "C  55", "901180336": "I  33", "901189496": "C  30", "901189497": "C  14", "901189498": "B  26", "901189500": "C  57", "901196599": "B  18", "901196600": "C  33", "901282108": "B  27", "901282109": "C  56", "901282110": "B  62", "901282111": "B  01", "901282115": "B  17", "901282556": "B  15", "901282557": "C  41", "901282561": "B  21", "901286498": "B  24", "901286499": "C  09", "901286502": "I  20", "901289097": "I  48", "901300166": "I  14", "901304969": "A  02", "901304972": "A  06", "901304973": "A  40", "901304974": "A  49", "901304975": "A  31", "901306136": "A  22", "901306137": "A  36", "901306138": "A  34", "901306139": "A  24", "901306140": "I  42", "901306143": "A  25", "901306147": "I  41", "901306149": "I  24", "901306171": "A  09", "901306172": "J  18", "901318373": "A  56", "901361201": "C  18", "901369273": "B  47", "901375014": "I  40", "901378423": "F  39", "901409324": "C  29", "901409328": "B  50", "901415483": "F  27", "901430680": "A  07", "901431369": "J  01", "901432870": "A  05", "901504682": "I  37", "901533467": "F  51", "901533468": "F  107", "901538041": "J  59", "901539794": "C  06", "901542393": "A  54", "901543216": "I  38", "901543221": "I  23", "901543222": "J  24", "901544233": "A  14", "901552089": "A  03", "901554359": "C  58", "901556015": "F  125", "901556093": "J  60", "901556193": "B  45", "901571290": "Y  03", "901576127": "A  53", "901580950": "I  52", "901580955": "A  08", "901581209": "J  48", "901582073": "F  82", "901582075": "F  79", "901582233": "F  45", "901582234": "F  69", "901583880": "C  31", "901584172": "B  02", "901585276": "B  19", "901586859": "F  118", "901586862": "F  03", "901586863": "B  05", "901586867": "F  19", "901586868": "F  40", "901586872": "B  42", "901586873": "C  37", "901586874": "F  22", "901586875": "F  63", "901586877": "F  106", "901586878": "F  09", "901586881": "F  67", "901586883": "F  102", "901586891": "I  13", "901586896": "J  02", "901586897": "F  103", "901589650": "G  02", "901591095": "B  64", "901591289": "C  44", "901591811": "A  16", "901599737": "F  101", "901600544": "J  08", "901600755": "F  62", "901601691": "A  13", "901601692": "I  05", "901601693": "I  31", "901601694": "A  19", "901601695": "A  23", "901601696": "I  45", "901601698": "F  23", "901601699": "A  28", "901602260": "A  43", "901602729": "A  35", "901602751": "I  46", "901602752": "A  45", "901602753": "I  12", "901603700": "A  11", "901603703": "A  17", "901603704": "F  08", "901603733": "C  49", "901605706": "C  01", "901613858": "F  97", "901613859": "F  38", "901615522": "F  133", "901616595": "A  37", "901616629": "F  124", "901616630": "F  130", "901616631": "C  60", "901616632": "F  83", "901616633": "F  75", "901616704": "F  89", "901616705": "F  13", "901616709": "F  61", "901619557": "C  54", "901619559": "C  52", "901619560": "E  18", "901619565": "E  08", "901619566": "E  00", "901619665": "E  03", "901619677": "E  14", "901619678": "E  10", "901619679": "E  16", "901619680": "E  01", "901619755": "A  38", "901619756": "J  28", "901620235": "B  38", "901620819": "C  39", "901620820": "C  38", "901620821": "C  42", "901620822": "C  40", "901620823": "B  56", "901622597": "A  32", "901623131": "B  52", "901627261": "I  07", "901630916": "B  29", "901631976": "J  12", "901631984": "G  52", "901631986": "G  49", "901632858": "F  88", "901633603": "B  31", "901633604": "B  09", "901633605": "B  07", "901633606": "C  03", "901633785": "C  15", "901635431": "C  35", "901635457": "B  63", "901635458": "B  48", "901636224": "B  04", "901637918": "G  134", "901637919": "G  160", "901637920": "G  163", "901640490": "P  25", "901641621": "E  15", "901641623": "F  42", "901729131": "P  07", "901729275": "F  68", "901731018": "J  31", "901731020": "J  37", "901731021": "F  21", "901732383": "J  11", "901732417": "F  12", "901732420": "I  21", "901732421": "F  98", "901733240": "J  06", "901733241": "J  35", "901733242": "J  23", "901733243": "J  62", "901733244": "J  21", "901733631": "J  54", "901733633": "J  20", "901733636": "J  47", "901734828": "J  14", "901734829": "I  49", "901734830": "I  06", "901735107": "F  11", "901737138": "Z  06", "901737139": "Z  24", "901737140": "Z  18", "901737141": "Z  57", "901737142": "Z  31", "901737143": "Z  11", "901737160": "Z  27", "901737161": "Z  12", "901737412": "P  32", "901737487": "P  08", "901737488": "P  06", "901737924": "Z  15", "901737925": "Z  04", "901737977": "Z  28", "901737978": "Z  17", "901737979": "Z  52", "901737980": "Z  08", "901738035": "G  07", "901738067": "P  00", "901738277": "Z  03", "901738278": "Z  01", "901738279": "Z  19", "901738307": "Z  26", "901738311": "G  14", "901738315": "G  69", "901738316": "G  43", "901738327": "G  40", "901738348": "Z  20", "901738349": "Z  09", "901738350": "Z  23", "901738351": "Z  10", "901738352": "Z  33", "901738353": "Z  54", "901738354": "Z  30", "901738355": "Z  51", "901738356": "Z  13", "901738387": "Z  07", "901738388": "Z  14", "901739399": "G  05", "901739400": "G  06", "901740423": "I  35", "901741617": "P  29", "901741618": "P  33", "901741619": "P  34", "901741620": "P  35", "901741621": "P  40", "901741622": "P  04", "901745434": "Y  05", "901747152": "Z  22", "901747153": "Z  02", "901747154": "Y  08", "901747155": "Y  07", "901747156": "Y  02", "901747347": "Y  09", "901747348": "Y  06", "901747349": "Y  04", "901747391": "G  75", "901747395": "G  83", "901747396": "G  128", "901747418": "J  49", "901747419": "J  41", "901747421": "J  50", "901747422": "J  26", "901748725": "G  133", "901749556": "J  19", "901749991": "J  46", "901751123": "E  07", "901751125": "F  84", "901751219": "J  61", "901754116": "P  01", "901755137": "Z  21", "901757564": "P  15", "901758215": "Z  50", "901759361": "P  27", "901764487": "J  56", "901769719": "A  26"};
@@ -15176,6 +15178,15 @@ function makeActiveCard(t,ts,quai,prio){
   var prB=prio==='urgent'?'<span class="b bpu" style="font-size:9px">🔴 Urgent</span>':'';
   var ptB=ponctBadge(t,ts);
   var pretB=pretBadgeMon(ts);
+  var finChgB='';
+  if(s==='l'&&ts.chg){
+    var _cpl=getCompleted().filter(function(c){return c.itin===t.itin&&c.timestamps&&c.timestamps.chg&&c.timestamps.fin_chg;});
+    var _avgDur=90;
+    if(_cpl.length>=2){var _sum=0;_cpl.forEach(function(c){_sum+=Math.round((new Date(c.timestamps.fin_chg)-new Date(c.timestamps.chg))/60000);});_avgDur=Math.round(_sum/_cpl.length);}
+    var _estEnd=new Date(new Date(ts.chg).getTime()+_avgDur*60000);
+    var _hh=_estEnd.getHours(),_mm=_estEnd.getMinutes();
+    finChgB='<span style="font-size:9px;padding:2px 8px;border-radius:40px;background:rgba(255,176,32,.14);color:#FFB020;border:1px solid rgba(255,176,32,.3);flex-shrink:0">Fin ~'+String(_hh).padStart(2,'0')+'h'+String(_mm).padStart(2,'0')+'</span>';
+  }
   var cn=isCrenNow(t);
   var _cr=parseCren(t.creneau);var _isLate=!ts.arr&&_cr&&nowMin()>_cr.e+5;
   // Big % display
@@ -15189,7 +15200,7 @@ function makeActiveCard(t,ts,quai,prio){
             +'<span class="b '+scls(s)+'" style="font-size:9px">'+slbl(s)+'</span>'
             +(quai?'<span class="b bq" style="font-size:9px">Q'+quai+'</span>':'')
             +(t.creneau?'<span class="b bc'+(cn?' bcn':'')+'" style="font-size:9px">'+t.creneau+'</span>':'')
-            +prB+ptB+pretB
+            +prB+ptB+pretB+finChgB
           +'</div>'
           +'<div class="ac-name">'+(t.transporteur||t.itin||'?')+'</div>'
           +'<div class="ac-sub">'+(t.dest||t.transporteur||t.itin||'—')+'</div>'
@@ -15340,6 +15351,35 @@ function _nextTrucksHtml(){
     if(!cb)return -1;
     return ca.s-cb.s;
   });
+  var slotCounts={};
+  pending.forEach(function(t){
+    var key=t.creneau||'sans';
+    if(!slotCounts[key])slotCounts[key]={label:t.creneau||'—',count:0,isLate:false,isNow:false};
+    slotCounts[key].count++;
+    var cr2=parseCren(t.creneau);
+    if(cr2){
+      if(now>cr2.e+5)slotCounts[key].isLate=true;
+      else if(now>=cr2.s&&now<=cr2.e)slotCounts[key].isNow=true;
+    }
+  });
+  var slotKeys=Object.keys(slotCounts).sort();
+  var heatmap='';
+  if(slotKeys.length>0){
+    heatmap='<div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.06)">';
+    slotKeys.forEach(function(k){
+      var s2=slotCounts[k];
+      var bg2,color2,border2;
+      if(s2.isLate){bg2='rgba(255,82,82,.18)';color2='#f87171';border2='rgba(255,82,82,.35)';}
+      else if(s2.isNow){bg2='rgba(0,209,255,.15)';color2='#7ee8fa';border2='rgba(0,209,255,.35)';}
+      else if(s2.count>=4){bg2='rgba(245,158,11,.15)';color2='#f59e0b';border2='rgba(245,158,11,.3)';}
+      else{bg2='rgba(255,255,255,.05)';color2='var(--t2)';border2='rgba(255,255,255,.1)';}
+      heatmap+='<div style="display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:'+bg2+';border:1px solid '+border2+'">'
+        +'<span style="font-size:9px;font-weight:700;color:'+color2+';font-family:var(--mono)">'+s2.label+'</span>'
+        +'<span style="font-size:10px;font-weight:800;color:'+color2+'">'+s2.count+'</span>'
+        +'</div>';
+    });
+    heatmap+='</div>';
+  }
   var rows='';
   if(!pending.length){
     rows='<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">✅ Tous les camions sont arrivés</div>';
@@ -15376,6 +15416,7 @@ function _nextTrucksHtml(){
   }
   return '<div class="rp-card" style="flex:1;min-height:0;display:flex;flex-direction:column">'
     +'<div class="rp-card-hdr">📅 Prochains arrivants<span style="float:right;font-size:10px;color:var(--t3);font-weight:400">'+pending.length+' attendu'+(pending.length>1?'s':'')+'</span></div>'
+    +heatmap
     +'<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent">'+rows+'</div>'
     +'</div>';
 }
@@ -15543,6 +15584,8 @@ function _ganttHtml(allTrucks,tsm,rq){
       +'<div style="font-size:8px;font-weight:800;color:rgba(255,255,255,.3);font-family:var(--mono);letter-spacing:.05em">Q'+q+'</div>'
       +(name?'<div style="font-size:9px;font-weight:700;color:'+c.tc+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;line-height:1">'+escH(name)+'</div>':'<div style="font-size:8px;color:rgba(255,255,255,.15);margin-top:2px">libre</div>')
       +(cren?'<div style="font-size:7px;color:rgba(255,255,255,.25);margin-top:1px;font-family:var(--mono)">'+cren+'</div>':'')
+      +(ts&&ts.arr?(function(){var el2=Math.round((Date.now()-new Date(ts.arr))/60000);var ec2=el2<60?'#4ade80':el2<90?'#f59e0b':'#f87171';var elTxt=el2>=60?(Math.floor(el2/60)+'h'+(el2%60?''+(el2%60)+'m':'')):(el2+'min');return '<div style="font-size:7px;color:'+ec2+';margin-top:1px;font-family:var(--mono)'+(el2>=90?';text-shadow:0 0 4px '+ec2:'')+'">'+(el2>=90?'⚠ ':'')+elTxt+'</div>';}()):'')
+
       +'</div>';
   });
   var dockMap='<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
@@ -15768,6 +15811,29 @@ function render(){
       leftHtml+='</div>';
     }
   }
+  var prepAlertList=on_site.filter(function(t){var ts2=tsm[t.id]||{};return ts2.arr_motif&&ts2.arr_motif!=='';});
+  if(prepAlertList.length){
+    leftHtml+='<div class="col-sec-hdr" style="margin-top:4px">'
+      +'<span class="csh-dot" style="background:#f59e0b;animation:blink 1.8s infinite"></span>'
+      +'<span class="csh-t" style="color:#f59e0b">⚠ Merch. pas prête</span>'
+      +'<span class="csh-n" style="color:#f59e0b">'+prepAlertList.length+'</span>'
+      +'</div>';
+    prepAlertList.forEach(function(t){
+      var ts2=tsm[t.id]||{};
+      var m=ts2.arr_motif;
+      var motifLbl=m==='retard_silo'?'⏳ Retard silo':m==='retard_prepa'?'🔧 Retard prépa':'⚪ Pas prête';
+      var q=rq[t.id];
+      var elapsed2=ts2.arr?Math.round((Date.now()-new Date(ts2.arr))/60000):0;
+      var eCol=elapsed2>90?'#f87171':elapsed2>60?'#f59e0b':'#a3e635';
+      leftHtml+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-left:3px solid rgba(245,158,11,.6);border-radius:0 8px 8px 0;background:rgba(245,158,11,.05);cursor:pointer" onclick="openTruckDetail(\''+t.id+'\')">'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:11px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(t.transporteur||t.itin||'?')+'</div>'
+          +'<div style="font-size:10px;color:#f59e0b">'+motifLbl+(q?' · Q'+q:'')+'</div>'
+        +'</div>'
+        +'<div style="font-size:10px;font-weight:700;color:'+eCol+';font-family:var(--mono);flex-shrink:0">'+elapsed2+'min</div>'
+        +'</div>';
+    });
+  }
   if(_waitList.length){
     leftHtml+='<div class="col-sec-hdr" style="margin-top:4px">'
       +'<span class="csh-dot" style="background:#8b949e"></span>'
@@ -15850,7 +15916,7 @@ function checkAlerts(){
     var ts=tsm[t.id]||{};
     if(ts.arr) return;
     var cr=parseCren(t.creneau);
-    if(cr&&nowMin()>cr.e+5) lateList.push(t);
+    if(cr&&nowMin()>cr.e+15) lateList.push(t);
   });
   if(!lateList.length){_notifShown={};return;}
   lateList.forEach(function(t){
