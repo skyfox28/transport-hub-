@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.136.html` | v1.136 | **Version courante** |
+| `TruckFlow_v1.137.html` | v1.137 | **Version courante** |
+| `TruckFlow_v1.136.html` | v1.136 | Archivé |
 | `TruckFlow_v1.135.html` | v1.135 | Archivé |
 | `TruckFlow_v1.134.html` | v1.134 | Archivé |
 | `TruckFlow_v1.133.html` | v1.133 | Archivé |
@@ -111,6 +112,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.137 — Monitor : bouton TFE dans le header
+
+- **Bouton `🚌 TFE`** ajouté dans la barre du haut du Monitor (entre Actualiser et Galaxie) — `onclick="openTFEMonModal()"`, style cyan, visible uniquement en mode non-live
+- **Section TFE supprimée de la colonne gauche** : plus de carte placeholder ni de section "🚌 TFE" dans le left panel — les TFE en attente d'arrivée remontent dans la liste "⏳ En attente" standard
+- Les TFE actifs (arrivés, non partis) restent visibles en colonne centre comme avant
 
 ### v1.136 — Fix Monitor ac-body propagation + Fix header wrap
 
