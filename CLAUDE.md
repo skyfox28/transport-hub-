@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.139.html` | v1.139 | **Version courante** |
+| `TruckFlow_v1.140.html` | v1.140 | **Version courante** |
+| `TruckFlow_v1.139.html` | v1.139 | Archivé |
 | `TruckFlow_v1.138.html` | v1.138 | Archivé |
 | `TruckFlow_v1.137.html` | v1.137 | Archivé |
 | `TruckFlow_v1.136.html` | v1.136 | Archivé |
@@ -114,6 +115,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.140 — Fix autoUpdateAllPret : ne pas écraser le "prêt" manuel
+
+- **Bug corrigé** : `autoUpdateAllPret()` écrasait `arr_pret=true` (choix manuel de l'opérateur) avec `ev.pret=false` (auto-eval VL06O) — le camion réapparaissait en "Merch. pas prête" même après avoir été validé comme prêt à l'arrivée
+- **Fix** : ajout de `if(ts.arr_pret===true && ev.pret===false) return;` — si l'utilisateur a explicitement dit "prêt", l'auto-évaluation ne peut plus le repasser en "pas prêt" ; l'auto-éval peut toujours passer de "pas prêt" → "prêt" quand VL06O devient à jour
 
 ### v1.139 — Transporteur PORTUGAL + Chrono quai + Badge Fin chgt + Alertes prépa + Heatmap créneaux + Notifications auto
 
