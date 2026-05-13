@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.138.html` | v1.138 | **Version courante** |
+| `TruckFlow_v1.139.html` | v1.139 | **Version courante** |
+| `TruckFlow_v1.138.html` | v1.138 | Archivé |
 | `TruckFlow_v1.137.html` | v1.137 | Archivé |
 | `TruckFlow_v1.136.html` | v1.136 | Archivé |
 | `TruckFlow_v1.135.html` | v1.135 | Archivé |
@@ -113,6 +114,15 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.139 — Transporteur PORTUGAL + Chrono quai + Badge Fin chgt + Alertes prépa + Heatmap créneaux + Notifications auto
+
+- **PORTUGAL** : `FRPORT:'PORTUGAL'` ajouté dans `ITIN_MAP` + `FRPORT:'libre'` dans `CRENEAU_MAP` (déjà présent depuis v1.138)
+- **Chrono par quai (Gantt)** : dans les dock boxes de `_ganttHtml()`, affichage du temps écoulé depuis `ts.arr` — vert `#4ade80` < 60min, amber `#f59e0b` 60–90min, rouge `#f87171` + glow > 90min avec indicateur ⚠
+- **Badge "Fin chgt attendue"** : dans `makeActiveCard()` quand `s==='l'` et `ts.chg` — durée moyenne calculée depuis `getCompleted()` filtré par `t.itin` (≥2 points), sinon 90min par défaut ; badge `Fin ~HHhMM` en amber dans `ac-top`
+- **Alerte retard prépa** : dans `render()`, section amber "⚠ Merch. pas prête" dans la colonne gauche pour les camions avec `ts.arr_motif` — affiche le motif, quai, temps écoulé coloré (vert/amber/rouge)
+- **Heatmap créneaux** (`_nextTrucksHtml()`) : pills groupés par créneau avant la liste des prochains arrivants — rouge=retard, cyan=en cours, amber=≥4 camions, gris=futur
+- **Notifications auto** : seuil retard passé à `cr.e+15` min ; auto-demande permission Notification 2s après ouverture Monitor (`Notification.permission==='default'`)
 
 ### v1.138 — Monitor : version correcte + Réseau "Changer de fichier"
 
