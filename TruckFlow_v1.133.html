@@ -13245,11 +13245,11 @@ trucks.forEach(function(t){
 // Hash SHA-256 du mot de passe (jamais stocké en clair)
 var _TF_AUTH_USER='galaad';
 var _TF_AUTH_HASH='d5631a2fb97ae5408575b86e03687341629b9080f752ce64cc12da52adfa8f72';
-var _TF_AUTH_USERS={'galaad':'d5631a2fb97ae5408575b86e03687341629b9080f752ce64cc12da52adfa8f72','caserta':'59279341ea59fbf34025024596b670b6df2c9f80e71b9ad19aea71ba43b083fc','mccormick':'59279341ea59fbf34025024596b670b6df2c9f80e71b9ad19aea71ba43b083fc','live':'59279341ea59fbf34025024596b670b6df2c9f80e71b9ad19aea71ba43b083fc','transport':'a46104d5a0ebe0e22751012f24a3399e8a3ff1c6bbf5c8835d0673990cd464a4'};
+var _TF_AUTH_USERS={'galaad':'d5631a2fb97ae5408575b86e03687341629b9080f752ce64cc12da52adfa8f72'};
 // Profils restreints : liste des utilisateurs non-admin
-var _TF_RESTRICTED_PROFILES=['mccormick','transport'];
+var _TF_RESTRICTED_PROFILES=[];
 // Profils live monitor : ouvrent directement le Monitor dans la page courante
-var _TF_LIVE_PROFILES=['live'];
+var _TF_LIVE_PROFILES=[];
 var _tfAuthReady=false;
 // Profil lecture seule : masque tous les contrôles d'édition (timestamps, boutons action)
 var _tfReadOnlyProfile=false;
@@ -15330,9 +15330,9 @@ function _nextTrucksHtml(){
         +'</div>';
     });
   }
-  return '<div class="rp-card">'
+  return '<div class="rp-card" style="flex:1;min-height:0;display:flex;flex-direction:column">'
     +'<div class="rp-card-hdr">📅 Prochains arrivants<span style="float:right;font-size:10px;color:var(--t3);font-weight:400">'+pending.length+' attendu'+(pending.length>1?'s':'')+'</span></div>'
-    +'<div style="overflow-y:auto">'+rows+'</div>'
+    +'<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent">'+rows+'</div>'
     +'</div>';
 }
 function _rightPanelHtml(tid){
@@ -15462,7 +15462,7 @@ function _perfGaugeHtml(){
     +'<div class="gauge-stat-item"><div class="gauge-stat-n" style="color:#FF5252">'+nRetard+'</div><div class="gauge-stat-l">En retard</div></div>'
     +'<div class="gauge-stat-item"><div class="gauge-stat-n" style="color:var(--t3)">'+nAtt+'</div><div class="gauge-stat-l">En attente</div></div>'
     +'</div>';
-  return '<div class="rp-card">'
+  return '<div class="rp-card" style="flex-shrink:0">'
     +'<div class="rp-card-hdr"><span>📊</span> Performance shift'
     +(total?'<span style="margin-left:auto;font-size:9px;color:var(--t3);font-weight:400">'+evaluated+'/'+total+' évalués</span>':'')
     +'</div>'
