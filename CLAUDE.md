@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.135.html` | v1.135 | **Version courante** |
+| `TruckFlow_v1.136.html` | v1.136 | **Version courante** |
+| `TruckFlow_v1.135.html` | v1.135 | Archivé |
 | `TruckFlow_v1.134.html` | v1.134 | Archivé |
 | `TruckFlow_v1.133.html` | v1.133 | Archivé |
 | `TruckFlow_v1.132.html` | v1.132 | Archivé |
@@ -110,6 +111,11 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.136 — Fix Monitor ac-body propagation + Fix header wrap
+
+- **Fix Monitor stepper/timestamps** : clic sur les timestamps ou boutons dans `.ac-body` des cartes actives n'ouvre plus l'overlay détail camion — `onclick="event.stopPropagation()"` ajouté sur `.ac-body` (branche standard et branche TFE/COMPANS)
+- **Fix header layout** : `.hdr-actions` passe de `flex-wrap:wrap` à `flex-wrap:nowrap;overflow:hidden` — les boutons ne wrappent plus sur une deuxième ligne qui dépassait la hauteur fixe 52px du header
 
 ### v1.133 — Monitor/Mail/PDF : Performance Shift + COMPANS + Prochains arrivants
 
