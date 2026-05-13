@@ -10283,7 +10283,7 @@ function _idbHandle(op,val){
       var db=e.target.result;
       var tx=db.transaction('h',op==='get'?'readonly':'readwrite');
       var st=tx.objectStore('h');
-      var r=op==='get'?st.get('sync'):st.put(val,'sync');
+      var r=op==='get'?st.get('sync'):op==='del'?st.delete('sync'):st.put(val,'sync');
       r.onsuccess=function(){res(r.result);};
       r.onerror=rej;
     };
@@ -10380,8 +10380,31 @@ function stopNetSync(){
 }
 
 function toggleNetSync(){
-  if(_netSyncActive) stopNetSync();
-  else openNetworkSync();
+  if(_netSyncActive){
+    // Proposer : Changer de fichier ou Déconnecter
+    var m=document.createElement('div');
+    m.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)';
+    m.innerHTML='<div style="background:rgba(13,20,35,.95);border:1px solid rgba(160,210,255,.2);border-radius:16px;padding:24px 28px;max-width:400px;width:90%;box-shadow:0 24px 60px rgba(0,0,0,.7)">'
+      +'<div style="font-size:14px;font-weight:600;color:#e8f4ff;margin-bottom:6px">📡 Sync réseau actif</div>'
+      +'<div style="font-size:12px;color:#a0b4cc;margin-bottom:18px">Fichier : <span style="color:#7dd3fc;font-family:monospace">'+_tfNetFile+'</span></div>'
+      +'<div style="display:flex;flex-direction:column;gap:8px">'
+        +'<button id="_tnsChange" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(160,210,255,.35);background:linear-gradient(135deg,#1e6fd9,#1a5bb8);color:#fff;font-size:13px;cursor:pointer;font-weight:600">📂 Changer de fichier</button>'
+        +'<button id="_tnsStop" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(255,100,100,.3);background:rgba(255,80,80,.08);color:#f87171;font-size:12px;cursor:pointer">🔌 Déconnecter</button>'
+        +'<button id="_tnsCancel" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#888;font-size:12px;cursor:pointer">Annuler</button>'
+      +'</div></div>';
+    document.body.appendChild(m);
+    m.querySelector('#_tnsCancel').onclick=function(){m.remove();};
+    m.querySelector('#_tnsStop').onclick=function(){m.remove();stopNetSync();};
+    m.querySelector('#_tnsChange').onclick=async function(){
+      m.remove();
+      // Effacer le handle IDB puis ouvrir le sélecteur
+      try{await _idbHandle('del');}catch(e){}
+      _netSyncHandle=null;_netSyncActive=false;
+      openNetworkSync();
+    };
+  } else {
+    openNetworkSync();
+  }
 }
 
 function _updateNetSyncUI(){
