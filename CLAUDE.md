@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.140.html` | v1.140 | **Version courante** |
+| `TruckFlow_v1.141.html` | v1.141 | **Version courante** |
+| `TruckFlow_v1.140.html` | v1.140 | Archivé |
 | `TruckFlow_v1.139.html` | v1.139 | Archivé |
 | `TruckFlow_v1.138.html` | v1.138 | Archivé |
 | `TruckFlow_v1.137.html` | v1.137 | Archivé |
