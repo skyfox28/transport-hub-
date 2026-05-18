@@ -12,52 +12,37 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.109.html` | v1.109 | **Version courante** |
-| `TruckFlow_v1.108.html` | v1.108 | Archivé |
-| `TruckFlow_v1.107.html` | v1.107 | Archivé |
-| `TruckFlow_v1.106.html` | v1.106 | Archivé |
-| `TruckFlow_v1.105.html` | v1.105 | Archivé |
-| `TruckFlow_v1.104.html` | v1.104 | Archivé |
-| `TruckFlow_v1.103.html` | v1.103 | Archivé |
-| `TruckFlow_v1.102.html` | v1.102 | Archivé |
-| `TruckFlow_v1.101.html` | v1.101 | Archivé |
-| `TruckFlow_v1.100.html` | v1.100 | Archivé |
-| `TruckFlow_v1.99.html` | v1.99 | Archivé |
-| `TruckFlow_v1.98.html` | v1.98 | Archivé |
-| `TruckFlow_v1.97.html` | v1.97 | Archivé |
-| `TruckFlow_v1.96.html` | v1.96 | Archivé |
-| `TruckFlow_v1.95.html` | v1.95 | Archivé |
-| `TruckFlow_v1.94.html` | v1.94 | Archivé |
-| `TruckFlow_v1.93.html` | v1.93 | Archivé |
-| `TruckFlow_v1.77.html` | v1.77 | Archivé |
-| `TruckFlow_v1.76.html` | v1.76 | Archivé |
-| `TruckFlow_v1.75.html` | v1.75 | Archivé |
-| `TruckFlow_v1.74.html` | v1.74 | Archivé |
-| `TruckFlow_v1.73.html` | v1.73 | Archivé |
-| `TruckFlow_v1.72.html` | v1.72 | Archivé |
-| `TruckFlow_v1.71.html` | v1.71 | Archivé |
-| `TruckFlow_v1.70.html` | v1.70 | Archivé |
-| `TruckFlow_v1.69.html` | v1.69 | Archivé |
-| `TruckFlow_v1.68.html` | v1.68 | Archivé |
-| `TruckFlow_v1.67.html` | v1.67 | Archivé |
-| `TruckFlow_v1.66.html` | v1.66 | Archivé |
-| `TruckFlow_v1.65.html` | v1.65 | Archivé |
-| `TruckFlow_v1.64.html` | v1.64 | Archivé |
-| `TruckFlow_v1.63.html` | v1.63 | Archivé |
-| `TruckFlow_v1.62.html` | v1.62 | Archivé |
-| `TruckFlow_v1.61.html` | v1.61 | Archivé |
-| `TruckFlow_v1.60.html` | v1.60 | Archivé |
-| `TruckFlow_v1.59.html` | v1.59 | Archivé |
-| `TruckFlow_v1.58.html` | v1.58 | Archivé |
-| `TruckFlow_v1.57.html` | v1.57 | Archivé |
-| `TruckFlow_v1.56.html` | v1.56 | Archivé |
-| `TruckFlow_v1.55.html` | v1.55 | Archivé |
-| `TruckFlow_v1.54.html` | v1.54 | Archivé |
-| `TruckFlow_v1.53.html` | v1.53 | Archivé |
-| `TruckFlow_v1.52.html` | v1.52 | Archivé |
-| `TruckFlow_v1.51.html` | v1.51 | Archivé |
-| `TruckFlow_v1.50.html` | v1.50 | Archivé |
-| `TruckFlow_v1.49.html` | v1.49 | Archivé |
+| `TruckFlow_v1.143.html` | v1.143 | **Version courante** |
+| `TruckFlow_v1.142.html` | v1.142 | Archivé |
+| `TruckFlow_v1.141.html` | v1.141 | Archivé |
+| `TruckFlow_v1.140.html` | v1.140 | Archivé |
+| `TruckFlow_v1.139.html` | v1.139 | Archivé |
+| `TruckFlow_v1.138.html` | v1.138 | Archivé |
+| `TruckFlow_v1.137.html` | v1.137 | Archivé |
+| `TruckFlow_v1.136.html` | v1.136 | Archivé |
+| `TruckFlow_v1.135.html` | v1.135 | Archivé |
+| `TruckFlow_v1.134.html` | v1.134 | Archivé |
+| `TruckFlow_v1.133.html` | v1.133 | Archivé |
+| `TruckFlow_v1.132.html` | v1.132 | Archivé |
+| `TruckFlow_v1.131.html` | v1.131 | Archivé |
+| `TruckFlow_v1.130.html` | v1.130 | Archivé |
+| `TruckFlow_v1.129.html` | v1.129 | Archivé |
+| `TruckFlow_v1.128.html` | v1.128 | Archivé |
+| `TruckFlow_v1.127.html` | v1.127 | Archivé |
+| `TruckFlow_v1.126.html` | v1.126 | Archivé |
+| `TruckFlow_v1.125.html` | v1.125 | Archivé |
+| `TruckFlow_v1.124.html` | v1.124 | Archivé |
+| `TruckFlow_v1.123.html` | v1.123 | Archivé |
+| `TruckFlow_v1.122.html` | v1.122 | Archivé |
+| `TruckFlow_v1.121.html` | v1.121 | Archivé |
+| `TruckFlow_v1.120.html` | v1.120 | Archivé |
+| `TruckFlow_v1.119.html` | v1.119 | Archivé |
+| `TruckFlow_v1.118.html` | v1.118 | Archivé |
+| `TruckFlow_v1.117.html` | v1.117 | Archivé |
+| `TruckFlow_v1.116.html` | v1.116 | Archivé |
+| `TruckFlow_v1.115.html` | v1.115 | Archivé |
+| `TruckFlow_v1.114.html` | v1.114 | Archivé |
+| `TruckFlow_v1.113.html` | v1.113 | Archivé |
 
 > **Règle de versioning** : chaque modification crée un nouveau fichier (ex: v1.44 → v1.45) et met à jour `APP_VERSION` dans le JS (`var APP_VERSION = 'vX.XX'` ligne ~1825).
 
@@ -133,6 +118,194 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.140 — Fix autoUpdateAllPret : ne pas écraser le "prêt" manuel
+
+- **Bug corrigé** : `autoUpdateAllPret()` écrasait `arr_pret=true` (choix manuel de l'opérateur) avec `ev.pret=false` (auto-eval VL06O) — le camion réapparaissait en "Merch. pas prête" même après avoir été validé comme prêt à l'arrivée
+- **Fix** : ajout de `if(ts.arr_pret===true && ev.pret===false) return;` — si l'utilisateur a explicitement dit "prêt", l'auto-évaluation ne peut plus le repasser en "pas prêt" ; l'auto-éval peut toujours passer de "pas prêt" → "prêt" quand VL06O devient à jour
+
+### v1.139 — Transporteur PORTUGAL + Chrono quai + Badge Fin chgt + Alertes prépa + Heatmap créneaux + Notifications auto
+
+- **PORTUGAL** : `FRPORT:'PORTUGAL'` ajouté dans `ITIN_MAP` + `FRPORT:'libre'` dans `CRENEAU_MAP` (déjà présent depuis v1.138)
+- **Chrono par quai (Gantt)** : dans les dock boxes de `_ganttHtml()`, affichage du temps écoulé depuis `ts.arr` — vert `#4ade80` < 60min, amber `#f59e0b` 60–90min, rouge `#f87171` + glow > 90min avec indicateur ⚠
+- **Badge "Fin chgt attendue"** : dans `makeActiveCard()` quand `s==='l'` et `ts.chg` — durée moyenne calculée depuis `getCompleted()` filtré par `t.itin` (≥2 points), sinon 90min par défaut ; badge `Fin ~HHhMM` en amber dans `ac-top`
+- **Alerte retard prépa** : dans `render()`, section amber "⚠ Merch. pas prête" dans la colonne gauche pour les camions avec `ts.arr_motif` — affiche le motif, quai, temps écoulé coloré (vert/amber/rouge)
+- **Heatmap créneaux** (`_nextTrucksHtml()`) : pills groupés par créneau avant la liste des prochains arrivants — rouge=retard, cyan=en cours, amber=≥4 camions, gris=futur
+- **Notifications auto** : seuil retard passé à `cr.e+15` min ; auto-demande permission Notification 2s après ouverture Monitor (`Notification.permission==='default'`)
+
+### v1.138 — Monitor : version correcte + Réseau "Changer de fichier"
+
+- **Version Monitor correcte** : `'Monitor v1.130'` hardcodé → `'Monitor '+APP_VERSION` — affiche toujours la version courante dans le sous-titre du logo Monitor
+- **Réseau Monitor : option "Changer de fichier"** : `toggleNetMon()` quand déjà connecté affiche un modal 3 boutons (📂 Changer de fichier / 🔌 Déconnecter / Annuler) au lieu de déconnecter directement — "Changer de fichier" appelle `openNetworkMonitor(true)` (forceNew=true, bypass IDB)
+- **`openNetworkMonitor(forceNew)`** : paramètre `forceNew` ajouté — si `true`, skip la reconnexion IDB et force le file picker — corrige le cas des utilisateurs live avec un ancien chemin mémorisé
+
+### v1.137 — Monitor : bouton TFE dans le header
+
+- **Bouton `🚌 TFE`** ajouté dans la barre du haut du Monitor (entre Actualiser et Galaxie) — `onclick="openTFEMonModal()"`, style cyan, visible uniquement en mode non-live
+- **Section TFE supprimée de la colonne gauche** : plus de carte placeholder ni de section "🚌 TFE" dans le left panel — les TFE en attente d'arrivée remontent dans la liste "⏳ En attente" standard
+- Les TFE actifs (arrivés, non partis) restent visibles en colonne centre comme avant
+
+### v1.136 — Fix Monitor ac-body propagation + Fix header wrap
+
+- **Fix Monitor stepper/timestamps** : clic sur les timestamps ou boutons dans `.ac-body` des cartes actives n'ouvre plus l'overlay détail camion — `onclick="event.stopPropagation()"` ajouté sur `.ac-body` (branche standard et branche TFE/COMPANS)
+- **Fix header layout** : `.hdr-actions` passe de `flex-wrap:wrap` à `flex-wrap:nowrap;overflow:hidden` — les boutons ne wrappent plus sur une deuxième ligne qui dépassait la hauteur fixe 52px du header
+
+### v1.133 — Monitor/Mail/PDF : Performance Shift + COMPANS + Prochains arrivants
+
+- **Performance Shift** : camion non arrivé = toujours EN ATTENTE (jamais EN RETARD automatique) — la jauge n'évalue que les camions arrivés ; le % de ponctualité reflète les faits constatés
+- **Mail** : `fmtLine` utilise `fmtName` — les enlèvements COMPANS affichent le numéro E1/E2/E3
+- **PDF** : COMPANS/TFE → `tsRowSimple` (ARR + DÉP + durée seulement) ; section Livraisons masquée pour COMPANS/TFE
+- **Colonne droite Monitor** : remplacée par `_nextTrucksHtml()` — liste chronologique des camions attendus triée par créneau (gris=futur, cyan=EN COURS, rouge=+Xm) ; clic → overlay `openTruckDetail`
+- **Fix lignes compactes** : boutons sans classe `.act` (évite `width:100%` qui écrasait le nom)
+
+### v1.132 — Monitor : fix noms lignes compactes + colonne droite Prochains arrivants
+
+- **Fix `makeCompactRow` / `makeLateCompactRow`** : suppression classe `.act` sur les boutons (`.act{width:100%}` écrasait le nom du camion dans les lignes flex) → styles inline purs, noms visibles
+- **Colonne droite remplacée** : `_rightPanelHtml` (timeline + livraisons du camion sélectionné) → `_nextTrucksHtml()` — liste chronologique des camions pas encore arrivés triée par créneau ; code couleur gris=futur (dans Xh), cyan=EN COURS, rouge=+Xm retard ; clic → `openTruckDetail` overlay
+- **`_selectTruck()`** simplifié : ouvre directement `openTruckDetail(tid)` au lieu de mettre à jour la colonne droite
+
+### v1.131 — Monitor : redesign colonne gauche haute densité + centre 2 colonnes
+
+- **`makeLateCompactRow(t,ts,q)`** : nouvelle fonction — ligne ultra-compacte (42px) pour les retards quand 4+ camions sont en retard ; fond rouge pulsé `retardpulse`, bordure gauche rouge 3px, nom en rose + badge `+Xm`, créneau + quai, bouton Arr. rouge compact
+- **Seuils retard adaptatifs** : 1→`makeLateSmall` (grande carte), 2-3→grille 2×`makeMediumCard`, **4+→liste `makeLateCompactRow` avec max-height:220px + scroll** — la section retard ne monopolise plus toute la colonne
+- **Seuils attente simplifiés** : 1-2→`makeCard` (cartes complètes), **3+→`makeCompactRow`** (lignes compactes, seuil descendu de 7 à 3) — 7 camions en attente tiennent dans la colonne
+- **Fix `makeCompactRow`** : nom en 12px/700, hauteur min 44px, bouton Arr. avec label "Arr." (plus clair que l'emoji seul)
+- **Centre 2 colonnes** : 3+ actifs → grille `grid-template-columns:1fr 1fr;gap:8px` — 4 camions actifs s'affichent en 2×2 au lieu de 4 lignes ; 1-2 actifs conservent la pleine largeur
+
+### v1.130 — Monitor : fix détection retards + cartes actives compactes
+
+- **Fix `parseCren` (bug critique)** : le regex exigeait `[h:]` après l'heure (ex: "11h-13h") mais les créneaux sont stockés au format `"11-13"` (sans `h`) → aucun camion n'était jamais détecté en retard → section "⚠️ En retard" jamais affichée. Ajout d'un 3e regex `^(\d{1,2})\s*[-–]\s*(\d{1,2})$` pour ce format.
+- **Animation retard** : `.tc.sretard{animation:retardpulse 2.5s ease-in-out infinite;border-color:rgba(255,82,82,.3)!important}` — la carte retard pulse en rouge, clairement distincte des cartes en attente
+- **Cartes actives compactes** : `.ac-head` padding `12px 14px 10px` → `8px 12px 8px`, `.ac-body` padding `12px 14px` → `8px 12px`, gap réduit — chaque carte gagne ~20px → 4 camions actifs visibles sans scroll excessif
+- **Pourcentage progression** : `ac-prog-pct` font-size `28px` → `22px` — moins encombrant tout en restant lisible
+- **Nom camion** : `ac-name` font-size `14px` → `13px` — cohérent avec la densité compacte
+
+### v1.129 — Monitor : colonne gauche vue adaptative selon le nombre de camions
+
+- **1 retard** : grande carte `makeLateSmall` pleine largeur — très visible
+- **2+ retards** : grille 2 colonnes de cartes moyennes `makeMediumCard` — compact + rouge + +Xmin animé
+- **1-2 en attente** : cartes complètes `makeCard` — toutes les infos
+- **3-6 en attente** : grille 2 colonnes de cartes moyennes — nom + créneau + quai + bouton Arr.
+- **7+ en attente** : lignes ultra-compactes `makeCompactRow` — 44px par ligne, stripe colorée gauche, tout visible d'un coup
+- **Pas de navigation** : tout visible en même temps, scroll molette naturel sur la colonne
+- **`makeMediumCard(t,ts,q,p)`** : carte 2-col — stripe + nom tronqué + créneau + quai + bouton Arr. (140px largor)
+- **`makeCompactRow(t,ts,q,p)`** : ligne compacte — border-left colorée + nom + créneau + quai + delay + bouton 🕐 à droite
+- Suppression carousel/drum/wheel : code simplifié, plus fiable
+
+### v1.128 — Monitor : illusion de roue (drum picker) colonne gauche
+
+- **Effet tambour/roue** : le carousel montre la carte précédente (en haut, estompée) + carte active (plein centre) + carte suivante (en bas, estompée) — donne l'illusion d'un tambour rotatif
+- **Fade directionnel sur les aperçus** : `.whl-peek-top` masque avec gradient bas→transparent (montre le bas de la carte précédente) ; `.whl-peek-bot` masque avec gradient haut→transparent (montre le haut de la carte suivante) — effet "autour de la courbe"
+- **Animation directionnelle** : navigation suivant → carte glisse depuis le bas (`whlpop`) ; navigation précédent → carte glisse depuis le haut (`whlpop-rev`) ; animation rejouée à chaque remplacement innerHTML
+- **`_whlWaitHtml(idx)`** / **`_whlLateHtml(idx)`** : générateurs HTML du tambour (3 emplacements: peek-top + active + peek-bot) ; `_navWait(d)` / `_navLate(d)` mettent à jour `#wait-whl`/`#late-whl` directement sans re-render complet
+- **Fix visibilité carte retard** : le masque CSS est maintenant sur les éléments peek individuels (pas sur le container) → la carte active est toujours 100% visible, même seule
+
+### v1.127 — Monitor : carousel colonne gauche + suppression Gantt SVG + mini-cartes retard
+
+- **Carousel camions en attente** : une seule carte affichée à la fois dans la colonne gauche, navigation ◀/▶ + compteur N/total ; molette souris pour naviguer (addEventListener passive:false) ; index `_waitIdx` + liste `_waitList[]` persistés entre renders — pas de réinitialisation si l'index est encore valide
+- **Carousel retards** : même principe avec `_lateIdx` + `_lateList[]` — affiche `makeLateSmall()` au lieu de `makeLateBar()`
+- **`makeLateSmall(t,ts,quai)`** : carte compacte pour les retards dans le carousel — RETARD +Xmin + nom + quai + créneau + bouton Arrivée pleine largeur
+- **Suppression Gantt SVG** : `_ganttHtml()` retourne uniquement `dockMap` (mini-map quais Q2→Q11) — plus de SVG temporel ; `#gantt-row` hauteur réduite 210px→70px
+- **CSS carousel** : `.csl-wrap`, `.csl-nav`, `.csl-btn` (hover, disabled), `.csl-ind` ajoutés au bloc `_css`
+- **`_attachWheelListeners()`** : attachée après chaque `render()` sur les wraps carousel avec `{passive:false}` pour `preventDefault()` effectif
+
+### v1.126 — Monitor : scroll molette + nom transporteur en premier + bouton compact + gantt sans labels
+- **Scroll molette col-gauche** : `min-height:0` ajouté sur `#col-left/center/right` — fix CSS Grid pour que `overflow-y:auto` fonctionne avec la molette
+- **Nom transporteur en premier** : dans les cartes en attente, le `tc-name` (nom du transporteur) est affiché en premier avant les badges statut/quai/créneau
+- **Bouton arrivée compact** : `padding:5px 8px`, `font-size:11px`, `border-radius:8px` — suppression du bouton "✅ Parti" désactivé (statut déjà visible dans la stripe)
+- **Gantt épuré** : suppression du label "PLAN" et de la légende au-dessus du SVG — la mini-map suffit comme référence visuelle
+
+### v1.125 — Monitor : bouton arrivée prominent + Performance shift + mini-map quais
+- **Bouton arrivée** : `width:100%`, padding agrandi, glow cyan `box-shadow:0 0 14px rgba(0,209,255,.3)`, `event.stopPropagation()` — positionné AVANT le nom/stepper sur les cartes en attente pour visibilité immédiate
+- **Performance shift** : comptage de TOUS les camions (avec ET sans créneau) ; trucks sans créneau arrivés → comptés OK ; trucks non arrivés → En attente ; affiche `X/Y évalués` + `—` si aucune donnée encore
+- **Mini-map quais** : rangée de 10 boxes Q2→Q11 au-dessus du Gantt — fond + bordure colorés par statut (gris=libre, cyan=arrivé, violet=à quai, amber=chargement, vert=chargé/parti) — cliquables pour sélectionner le camion
+- **Gantt amélioré** : marqueur temps courant (trait cyan pointillé), hauteur 210px, ticks toutes les 2h, blocs plus lisibles
+
+### v1.124 — Monitor : Layout 3 colonnes + Gantt + Panel droit + % progression
+- **Layout 3 colonnes fixe** : `#main` passe en `display:grid` avec `grid-template-columns:310px 1fr 320px` + `grid-template-rows:1fr auto` — colonnes col-left/col-center/col-right + ligne gantt-row pleine largeur en bas
+- **Colonne gauche** (`#col-left`) : alertes retard (`makeLateBar`) + TFE placeholder + camions en attente (`makeCard`) — cartes compactes scrollables
+- **Colonne centre** (`#col-center`) : camions actifs (`makeActiveCard`) avec label `QUAI XX` en cyan au-dessus de chaque carte et **% progression en 28px** (`ac-prog-pct`) affiché en grand à droite du nom
+- **Colonne droite** (`#col-right`) : panel fixe avec timeline verticale ARR→QUAI→CHGT→FIN→DÉP du camion sélectionné (`_rightPanelHtml`) + jauge SVG circulaire "Performance shift" (`_perfGaugeHtml`) — % ponctualité du jour
+- **Gantt** (`#gantt-row`, hauteur 176px) : SVG pleine largeur, axe temporel 05h–22h, lignes Q2→Q11, blocs colorés par statut (gris=prévu, cyan=arrivé, amber=chargement, vert=parti) — `_ganttHtml()`
+- **Sélection camion** : clic sur n'importe quelle carte appelle `_selectTruck(tid)` → met à jour le panel droit sans re-render complet ; `_selectedTid` global persiste entre renders
+- **Nouvelles fonctions** : `_rightPanelHtml(tid)`, `_perfGaugeHtml()`, `_ganttHtml(allTrucks,tsm,rq)`, `_selectTruck(tid)`, `_fmtTs(iso)`
+- **CSS ajouté** : `.col-sec-hdr`, `.ac-quai-lbl`, `.ac-prog-pct`, `.rp-card`, `.rp-card-hdr`, `.rp-card-body`, `.tl-step`, `.tl-dot`, `.tl-line`, `.gauge-wrap`, `.gauge-stats`, `.gantt-title`, `.gantt-legend`
+
+### v1.123 — PDF synthèse : fix décalage horaire + header + villes
+- **Fix décalage horaire** : `fmtT(iso)` dans `printMailRecapPDF` utilisait `iso.slice(11,16)` (heure UTC) → remplacé par `new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})` — heure locale correcte (UTC+1/+2 France)
+- **Fix header PDF** : ajout de `-webkit-print-color-adjust:exact;print-color-adjust:exact` sur `.hdr` — fond bleu `#1e3a5f` conservé à l'impression ; `@media print` étendu à `*` pour tous les éléments colorés
+- **Villes dans le PDF** : `fmtVilles(t)` — lookup `APP.deliveries` par IDs livraisons → extrait les `d.ville` uniques ; affichées sous les numéros de livraison (📍 Ville · Ville) dans chaque carte camion
+- **Monitor CSS redesign** : nouveau design system dans le bloc `_css` — `--bg:#050816`, `--r-card:18px`, police JetBrains Mono, top stripe 3px (`.tc-top-stripe`) à la place de left stripe, KPI pills, 72px header
+
+### v1.122 — Monitor : nouveau visuel (design system inspiré React prototype)
+- **CSS Monitor** (`_css` block) : palette `--bg:#050816`, cartes `border-radius:18px`, top stripe 3px par statut (gradient cyan/amber/green/red/purple), KPI chips pills `border-radius:40px`, header 72px, police `JetBrains Mono` pour les chiffres
+- **`.tc` layout** : `display:flex;flex-direction:column` + `.tc-top-stripe` (3px, gradient par statut) + `.tc-body` (padding 14px 16px) — remplacement de la left stripe `grid-template-columns:4px …`
+- **Classes statut** : `.sw` (attente) · `.sa` (arrivé) · `.sd` (à quai/départ) · `.sl` (chargement) · `.slo` (chargé) · `.sretard` (retard)
+
+### v1.121 — Fix login (SyntaxError barre d'outils archive stats)
+- **Bug corrigé** : `row.innerHTML` dans le patch `renderStats3` contenait `document.getElementById('fi-archive').click()` — les guillemets simples dans la chaîne JS terminaient la chaîne prématurément → SyntaxError → script non chargé → connexion impossible
+- **Fix** : remplacement du `row.innerHTML` par construction DOM (`createElement` + `onclick=function(){}`) — aucun risque d'échappement
+
+### v1.120 — Statistiques : refonte sections + KPI cliquables + nouvelles analyses
+- **Supprimé** : "Analyse avancée" et "Top / Flop transporteurs"
+- **KPI ponctualité cliquables** : À l'heure / En avance / En retard / En attente → `filterStatPonct()` → bascule onglet Camions avec filtre actif + bannière "Effacer"
+- **Tendance mensuelle** : combo barres (nb camions, couleur selon ponct) + courbe ponctualité ; tooltip détaillé (date · camions · ponct% · breakdown H/A/R/att)
+- **Tendance ponctualité** : dots r=5 + title riche (date + % + breakdown complet)
+- **Classement transporteurs** `renderCarrierRanking` : tableau depuis archive (rang 🥇🥈🥉, camions, H/A/R/att, ponct%)
+- **Occupation des créneaux** `renderSlotOccupancy` : barre par slot 2h avec partis (vert) et retards
+- **Distribution durées de passage** `renderDurationDistrib` : histogram <1h / 1h–90min / 90min–2h / >2h + moy/min/max
+
+### v1.119 — Fix bouton mail + Logo zoom (correction placement overlay)
+- **Fix mail** : `fmtVille` utilisait `deliveries` (non déclaré) → `APP.deliveries` — ReferenceError qui bloquait `openMailRecap()`
+- **Logo zoom** : `showLogoZoom()` — clic sur `.auth-logo-ico` (login) ou `.logo-ico` (header) → overlay `#logoZoomOverlay` plein écran avec image agrandie (max 600px) ; clic overlay pour fermer
+- **Fix v1.118** : l'overlay avait été injecté dans le bloc JS Monitor au lieu du body HTML — reconstruit depuis v1.117
+
+### v1.118 — Fix bouton mail + Logo zoom
+- **Fix mail** : `fmtVille` utilisait `deliveries` (non déclaré) → `APP.deliveries` — ReferenceError qui bloquait `openMailRecap()`
+- **Logo zoom** : clic sur le logo (écran login `.auth-logo-ico` + header `.logo-ico`) → overlay plein écran `#logoZoomOverlay` avec l'image agrandie (`max 600px`, `cursor:zoom-out` pour fermer)
+
+### v1.117 — Mail récap : corps allégé (camion + créneau + ville + livraisons)
+- **Corps mail** : pour chaque camion En cours / À venir — uniquement `• Nom transporteur — Créneau — Ville` + `Livraisons : XXXXXXXX, …` ; tout le reste (statut, quai, timestamps, partis, décalés) reste dans le PDF uniquement
+- **`fmtVille(t)`** : utilise `t.dest` en priorité, sinon cherche `d.ville` dans les livraisons assignées
+
+### v1.116 — Logo : fond blanc
+- `.logo-ico`, `.auth-logo-ico`, `.mon-logo-ico` : `background:#fff` — fond blanc au lieu de transparent/dégradé
+
+### v1.115 — Fix login + Logo logo_final.png
+- **Fix bug login** : erreur de syntaxe JS dans `openMontageForm()` — ternaire incomplet `(mainItin?' ('+mainItin+')')` → `(mainItin?' ('+mainItin+')':'')` — empêchait le chargement du script et bloquait la connexion + masquait le badge de version
+- **Logo remplacé** : `logo_final.png` embarqué en base64 à la place de l'ancien logo dans les 3 emplacements — écran de login (80×80), header (36×36), header Monitor (32×32 `<img>` remplace l'emoji 🚚)
+
+### v1.114 — Monitor KPI COMPANS + Montage : créneau select 2h + ville livraison
+- **Monitor KPI COMPANS** : `nComp`/`nCompDep` extraits du comptage normal (plus comptés dans "Sur site") — chip amber dédié 🏭 COMPANS + X partis ; COMPANS exclus du total camions standard
+- **Montage créneau select** : remplace l'input texte — liste des créneaux 2h (06-08 → 18-20) ; si le transporteur a un créneau dans `CRENEAU_MAP`, il est pré-sélectionné (ou ajouté comme option spéciale s'il n'est pas un slot 2h standard)
+- **Montage ville optionnelle** : select `mcDest` peuplé des `d.ville` des livraisons sélectionnées (trié, auto-sélectionné si une seule ville) ; stocké en `t.dest` sur le camion (utilisé dans Monitor sub-titre)
+
+### v1.113 — COMPANS : N enlèvements créés d'un coup, numérotés E1/E2/E3
+- **Formulaire COMPANS** : remplace la création caisse-par-caisse — spinbox "Nombre d'enlèvements prévus" (1–20), date, quai optionnel ; affiche le nb d'enlèvements déjà créés pour la journée
+- **`confirmCompans()`** : crée N trucks `type:'compans'` avec `tour:1,2,3…` (continuation de la numérotation existante du jour), sans livraisons assignées
+- **Affichage** : cartes onglet Camions = "🏭 COMPANS E1", "🏭 COMPANS E2"…
+- **Monitor** : `makeCard`, `makeActiveCard`, `makeStrip` affichent "🏭 COMPANS E1" / "🏭 COMPANS E2"
+- **Statistiques** : tableau détaillé par enlèvement (Date / E-num / Arrivée / Départ / Durée / Statut) trié par date puis tour
+
+### v1.112 — Montage : select transporteur + champ nom affiché optionnel
+- **Select transporteur** : remplace l'input texte libre — liste déroulante des noms du `ITIN_MAP` (dédupliqués, triés alphabétiquement), pré-sélection automatique basée sur l'itin dominant des livraisons sélectionnées
+- **Champ "Nom affiché" optionnel** : `t.label` — si renseigné, s'affiche à la place du transporteur partout (ex: "BERNARD AM", "STEF #2")
+- **`_carrierName(t)`** mis à jour : priorité `t.label → t.transporteur → ITIN_MAP[itin] → itin`
+- **Carte camion** `renderTrucks` : utilise `_carrierName(t)` au lieu de `t.transporteur||t.itin`
+
+### v1.111 — Nom transporteur partout (via ITIN_MAP) : planning, timelines, Monitor, log
+- **Helper `_carrierName(t)`** : `t.transporteur || ITIN_MAP[t.itin] || t.itin || '?'` — résout le nom du transporteur depuis le code de route (ex: FRBERN → BERNARD)
+- **Planning risque retard** : affiche `_carrierName` en gras + code itin en petit secondaire (au lieu de itin en gras + transporteur en secondaire)
+- **Timeline active** (popup) : titre principal = `_carrierName(t)` + itin en 10px si différent ; sous-titre = dest | créneau (transporteur retiré du sous-titre car déjà dans le titre)
+- **Timeline archive** (popup) : même traitement que timeline active
+- **Monitor sous-titres** (`.tc-sub`, `.ac-sub`) : `t.dest || t.transporteur || t.itin` — évite d'afficher le code brut quand la destination est vide
+- **Journal d'activité** : `_carrierName(truck)` pour les logs de changement de date camion
+
+### v1.110 — Profil Statistiques : corrections écran vierge + notifications masquées
+- **Écran vierge après import JSON corrigé** : `importSession()` activait `tab-syn` par défaut → masqué en mode `tf-stat-mode` → page blanche. Après `renderAll()`, si `tf_user === '__stat__'`, force-active l'onglet Statistiques (`tab-stat`) et appelle `renderStats()`
+- **Centre de notifications masqué** : `id="hdrBtnNotif"` ajouté sur le div `.notif-btn` (cloche 🔔) — ajouté à la liste `applyProfileRestrictions()` pour le profil `__stat__`
+- **Mode Monitor (menu ⋯) masqué** : `id="hdrMoreMonitor"` ajouté sur le bouton "Mode Monitor (nouvel onglet)" du dropdown — ajouté à la liste `applyProfileRestrictions()` pour le profil `__stat__`
+- **Barre de recherche** : déjà invisible via CSS `body.tf-stat-mode #tab-liv{display:none!important}` (dans `#tab-liv`)
 
 ### v1.109 — Mail récap : message allégé (en cours/à venir) + PDF lisibilité améliorée
 - **Message mail** : uniquement 🔄 En cours + ⏳ À venir — les récupérés et décalés restent dans le PDF uniquement
