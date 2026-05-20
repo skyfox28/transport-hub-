@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.143.html` | v1.143 | **Version courante** |
+| `TruckFlow_v1.144.html` | v1.144 | **Version courante** |
+| `TruckFlow_v1.143.html` | v1.143 | Archivé |
 | `TruckFlow_v1.142.html` | v1.142 | Archivé |
 | `TruckFlow_v1.141.html` | v1.141 | Archivé |
 | `TruckFlow_v1.140.html` | v1.140 | Archivé |
@@ -50,7 +51,7 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 ## Structure de l'application HTML
 
-L'app est organisée en **8 onglets** :
+L'app est organisée en **9 onglets** :
 
 | ID tab | Onglet | Description |
 |--------|--------|-------------|
@@ -62,6 +63,7 @@ L'app est organisée en **8 onglets** :
 | `stat` | **Statistiques** | Ponctualité, comparatif transporteurs, heatmap |
 | `arch` | **Archive** | Camions terminés (10 jours rétention) |
 | `emb` | **Emballages** | Suivi emballages |
+| `hre` | **Heure** | Planning horaire transporteurs +48h/+72h, auto-répartition créneaux |
 
 ---
 
@@ -118,6 +120,20 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.144 — Onglet Heure : planning horaire transporteurs (+48h/+72h)
+
+- **Nouvel onglet `hre` ⏰ Heure** : planning horaire pour communiquer les créneaux aux transporteurs 48h/72h à l'avance
+- **Données source** : utilise les livraisons VL06O importées (`APP.deliveries`) filtrées par date cible — DISPAM (`FRDIS*`) exclu (ils gèrent eux-mêmes)
+- **Groupement par transporteur** : une ligne par `itin`, agrégation palettes silo + colis picking + destinations
+- **Estimé heures** : `hrSilo = palSilo / CADENCE_SILO` + `hrPick = colisPick / CADENCE_PICK` affiché par groupe
+- **Auto-répartition** (`_hrAutoAssign`) : greedy bin-packing — trie les transporteurs par charge décroissante, assigne au créneau le moins chargé parmi `HR_SLOT_PREF = ['10-12','14-16','08-10','16-18','12-14','06-08','18-20']`
+- **Créneaux disponibles** `HR_SLOTS` : 06-08, 08-10, 10-12, 12-14, 14-16, 16-18, 18-20 — modifiable manuellement via select par ligne
+- **Balance visuelle** : 7 barres de charge (une par créneau) — remplissage relatif au créneau le plus chargé, compte transporteurs + heures
+- **Message copier-coller** : génère un texte prêt à envoyer au service transport (transporteur / créneau / villes / volumes) — bouton 📋 Copier
+- **Notes** : champ texte optionnel par transporteur (ex: "appeler avant", "palette haute") — inclus dans le message
+- **Persistance** : `localStorage 'tf_hr_plans'` — plans sauvegardés par date, restaurés au retour sur l'onglet
+- **Profils** : onglet visible pour admins (galaad, caserta) uniquement — masqué pour mccormick, transport, stat, live
 
 ### v1.140 — Fix autoUpdateAllPret : ne pas écraser le "prêt" manuel
 
