@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.144.html` | v1.144 | **Version courante** |
+| `TruckFlow_v1.145.html` | v1.145 | **Version courante** |
+| `TruckFlow_v1.144.html` | v1.144 | Archivé |
 | `TruckFlow_v1.143.html` | v1.143 | Archivé |
 | `TruckFlow_v1.142.html` | v1.142 | Archivé |
 | `TruckFlow_v1.141.html` | v1.141 | Archivé |
@@ -120,6 +121,13 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.145 — Onglet Heure : verrou créneau + fix dropdown + priorité 8h-16h
+
+- **Fix visuel dropdown** : `.hre-slot-sel option{background:#161b22}` — fond sombre sur les options du select créneau
+- **Priorité 8h-16h** : `HR_SLOT_PREF` réordonné `['10-12','14-16','08-10','12-14','16-18','06-08','18-20']` — l'auto-répartition remplit d'abord la plage 8h-16h avant de déborder vers 16-18 puis hors-heures
+- **Verrou par transporteur** : bouton 🔓/🔒 dans chaque ligne — verrouiller fixe le créneau et le select devient grisé ; l'auto-répartition ignore les lignes verrouillées (les pré-charge dans les loads pour équilibrer le reste autour) ; état persisté dans `tf_hr_plans` clé `l`
+- **Toast informatif** : auto-répartition affiche le nombre de créneaux verrouillés préservés
 
 ### v1.144 — Onglet Heure : planning horaire transporteurs (+48h/+72h)
 
