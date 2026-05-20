@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.146.html` | v1.146 | **Version courante** |
+| `TruckFlow_v1.147.html` | v1.147 | **Version courante** |
+| `TruckFlow_v1.146.html` | v1.146 | Archivé |
 | `TruckFlow_v1.145.html` | v1.145 | Archivé |
 | `TruckFlow_v1.144.html` | v1.144 | Archivé |
 | `TruckFlow_v1.143.html` | v1.143 | Archivé |
@@ -122,6 +123,22 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.147 — Onglet Heure : barres d'avancement préparation silo + picking
+
+- **Barres de progression par destination** : dans le tableau de l'onglet Heure, chaque ligne affiche sous le volume silo et le volume picking une mini barre de progression (4px de hauteur) + compteur "fait/total"
+- **Source de données** : `d.hrSilo` et `d.hrPick` sur les livraisons (`APP.deliveries`) — ces champs représentent le temps restant ; la quantité restante est dérivée (`hrSilo × CADENCE_SILO` pour les palettes, `hrPick × CADENCE_PICK` pour les colis)
+- **`_hrGetGroups()` mis à jour** : accumule `palSiloRest` et `colisPickRest` par groupe de destination (avec `Math.min` pour éviter les dépassements)
+- **Code couleur** : gris = 0 % (pas commencé ou données insuffisantes) ; amber = en cours (1–99 %) ; vert = 100 % terminé
+- **CSS ajouté** : `.hre-prog-bar`, `.hre-prog-fill`, `.hre-prog-txt`
+
+### v1.146 — Onglet Heure : groupement par destination + préparateurs
+
+- **Groupement par destination (ville)** : le tableau de l'onglet Heure groupe désormais les livraisons par `d.ville` (au lieu de `d.itin`) — une ligne = une ville de livraison ; la colonne "Transporteur" affiche les itinéraires associés
+- **Boutons +/- préparateurs** : compteurs indépendants `🏭 Silo` et `✋ Picking` — ajustent `_hrNbSilo` / `_hrNbPick` → cadences effectives `_hrEffSilo()` = `CADENCE_SILO × nbSilo`, `_hrEffPick()` = `CADENCE_PICK × nbPick`
+- **Recalcul instantané** : `_hrChangePrep()` met à jour sans re-render les badges ⏱, l'infobar totale et la balance
+- **Message copier** : format "destination (transporteurs)" — ex. `• 10h–12h : LYON (BERNARD) — 12 pal / 450 pk`
+- **Persistance** : `_hrNbSilo` et `_hrNbPick` sauvegardés dans `tf_hr_plans` (`ns`, `np`)
 
 ### v1.145 — Onglet Heure : verrou créneau + fix dropdown + priorité 8h-16h
 
