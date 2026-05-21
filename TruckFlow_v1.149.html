@@ -3618,6 +3618,29 @@ function moveLivToTruck(fromIdx,lid,toIdx){
   save();renderTrucks();showToast('Livraison d\u00e9plac\u00e9e');
 }
 var _trxFromIdx=-1,_trxLivId='';
+function openTransferPicker(fromIdx){
+  var t=trucks[fromIdx];
+  if(!t||(t.deliveries||[]).length===0){showToast('Aucune livraison sur ce camion');return;}
+  if(t.deliveries.length===1){openTransferModal(fromIdx,t.deliveries[0]);return;}
+  // Plusieurs livraisons : afficher une liste de sélection
+  _trxFromIdx=fromIdx;_trxLivId='';
+  var modal=document.getElementById('trxModal');if(!modal)return;
+  var headEl=modal.querySelector('.trx-head');
+  headEl.innerHTML='<h3>↔ Quelle livraison transférer ?</h3>'
+    +'<div class="trx-sub">'+(t.transporteur||t.itin||'?')+' · '+(t.deliveries.length)+' livraisons</div>';
+  var listEl=modal.querySelector('.trx-list');listEl.innerHTML='';
+  (t.deliveries||[]).forEach(function(lid){
+    var d=getDeliv(lid);
+    var item=document.createElement('div');item.className='trx-item';
+    item.innerHTML='<div style="flex:1;min-width:0">'
+      +'<div class="trx-item-name">'+escH(lid)+(d?' — '+escH(d.dest||d.ville||''):'')+'</div>'
+      +'<div class="trx-item-meta">'+(d?(d.ville||'')+(d.palSilo?' · 🏭 '+Math.round(d.palSilo)+'pal':'')+( d.colisPick?' · ✋ '+Math.round(d.colisPick)+'pk':''):'')+'</div>'
+      +'</div>';
+    item.onclick=function(){openTransferModal(fromIdx,lid);};
+    listEl.appendChild(item);
+  });
+  modal.classList.add('open');
+}
 function openTransferModal(fromIdx,livId){
   _trxFromIdx=fromIdx;_trxLivId=livId;
   var d=getDeliv(livId);
@@ -4549,7 +4572,16 @@ function renderTrucks(){
       (function(idx){delBtn.addEventListener('click',function(){delTruck(idx);});})(ti);
       var decBtn=document.createElement('button');decBtn.className='btn-sm';decBtn.style.cssText='font-size:10px;padding:2px 7px;'+(t.decalage?'background:rgba(255,100,0,.15);border-color:rgba(255,100,0,.4);color:#e65100':'');decBtn.textContent=t.decalage?'\u23F1':'\u23F1';decBtn.title=t.decalage?'D\u00e9calage: '+t.decalage.label+' (cliquer pour modifier)':'D\u00e9clarer un d\u00e9calage';
       (function(id){decBtn.addEventListener('click',function(){openDecalageModal(id);});})(t.id);
-      btnGrp.appendChild(splitBtn);btnGrp.appendChild(printBtn);btnGrp.appendChild(lockBtn);btnGrp.appendChild(decBtn);btnGrp.appendChild(delBtn);
+      btnGrp.appendChild(splitBtn);btnGrp.appendChild(printBtn);btnGrp.appendChild(lockBtn);btnGrp.appendChild(decBtn);
+      // Bouton transfert livraison (visible uniquement si le camion a des livraisons et n'est pas fig\u00e9)
+      if(!t.locked && (t.deliveries||[]).length){
+        var trxCardBtn=document.createElement('button');trxCardBtn.className='btn-sm';
+        trxCardBtn.textContent='\u2194';trxCardBtn.title='Transf\u00e9rer une livraison vers un autre camion';
+        trxCardBtn.style.cssText='font-size:10px;padding:2px 7px;color:var(--blue);border-color:rgba(59,130,246,.3)';
+        (function(idx){trxCardBtn.addEventListener('click',function(){openTransferPicker(idx);});})(ti);
+        btnGrp.appendChild(trxCardBtn);
+      }
+      btnGrp.appendChild(delBtn);
       head.appendChild(btnGrp);
     }
     tc.appendChild(head);
