@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.147.html` | v1.147 | **Version courante** |
+| `TruckFlow_v1.148.html` | v1.148 | **Version courante** |
+| `TruckFlow_v1.147.html` | v1.147 | Archivé |
 | `TruckFlow_v1.146.html` | v1.146 | Archivé |
 | `TruckFlow_v1.145.html` | v1.145 | Archivé |
 | `TruckFlow_v1.144.html` | v1.144 | Archivé |
@@ -123,6 +124,12 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.148 — Monitor : fix section EN RETARD (compact rows + scroll naturel)
+
+- **Fix section retard** : les camions en retard utilisent désormais `makeLateCompactRow` quel que soit leur nombre (1, 2-3, 4+) — même format compact que EN ATTENTE
+- **Scroll unifié** : suppression du conteneur `max-height:220px;overflow-y:auto` imbriqué (qui bloquait le défilement à la molette) — tous les retards défilent naturellement via la colonne gauche
+- **Suppression** : `makeLateSmall` et la grille `makeMediumCard` pour les retards ne sont plus utilisées dans le render principal
 
 ### v1.147 — Onglet Heure : barres d'avancement préparation silo + picking
 
