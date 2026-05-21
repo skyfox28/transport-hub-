@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.148.html` | v1.148 | **Version courante** |
+| `TruckFlow_v1.149.html` | v1.149 | **Version courante** |
+| `TruckFlow_v1.148.html` | v1.148 | Archivé |
 | `TruckFlow_v1.147.html` | v1.147 | Archivé |
 | `TruckFlow_v1.146.html` | v1.146 | Archivé |
 | `TruckFlow_v1.145.html` | v1.145 | Archivé |
@@ -124,6 +125,14 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.149 — Camions : transfert de livraison entre camions (modal)
+
+- **Bouton `↔ Transférer`** sur chaque ligne de livraison (section expandée) — remplace le dropdown `→ Déplacer…` difficilement utilisable
+- **Modal de transfert** (`#trxModal`) : liste les autres camions avec nom transporteur, créneau, date, nb livraisons actuelles ; séparés en "Même journée" / "Autre date" ; camions verrouillés grisés et non cliquables
+- **Clic sur un camion** → `moveLivToTruck(fromIdx, livId, toIdx)` + log activité + toast
+- **Fix drag-and-drop** : les lignes de livraison utilisent désormais `row.className='tc-del-row'` (classe manquante qui empêchait `closest('.tc-del-row')` de fonctionner)
+- **CSS ajouté** : `.trx-btn`, `.trx-panel`, `.trx-head`, `.trx-list`, `.trx-item`, `.trx-item.trx-locked`, `.trx-foot`
 
 ### v1.148 — Monitor : fix section EN RETARD (compact rows + scroll naturel)
 
