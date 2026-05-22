@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.149.html` | v1.149 | **Version courante** |
+| `TruckFlow_v1.150.html` | v1.150 | **Version courante** |
+| `TruckFlow_v1.149.html` | v1.149 | Archivé |
 | `TruckFlow_v1.148.html` | v1.148 | Archivé |
 | `TruckFlow_v1.147.html` | v1.147 | Archivé |
 | `TruckFlow_v1.146.html` | v1.146 | Archivé |
@@ -56,7 +57,7 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 ## Structure de l'application HTML
 
-L'app est organisée en **9 onglets** :
+L'app est organisée en **10 onglets** :
 
 | ID tab | Onglet | Description |
 |--------|--------|-------------|
@@ -69,6 +70,7 @@ L'app est organisée en **9 onglets** :
 | `arch` | **Archive** | Camions terminés (10 jours rétention) |
 | `emb` | **Emballages** | Suivi emballages |
 | `hre` | **Heure** | Planning horaire transporteurs +48h/+72h, auto-répartition créneaux |
+| `ale` | **Alertes** | Par jour : camions/créneaux avec livraisons non prêtes (sp≠C/wm≠C), silo restant et picking restant |
 
 ---
 
@@ -125,6 +127,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.150 — Nouvel onglet 🚨 Alertes : commandes non prêtes par camion/créneau
+
+- **Onglet `ale` 🚨 Alertes** : pour un jour donné, liste tous les camions avec leurs créneaux dont au moins une livraison n'est pas prête (sp≠C ou wm≠C)
+- **Sélecteur de date** avec navigation ◀ Veille / Aujourd'hui / Lendemain ▶
+- **KPIs globaux** : camions affectés, livraisons en attente, total palettes silo restantes, total colis picking restants
+- **Par camion** : nom transporteur + créneau + compteurs rapides (nb livr. / pal silo / pk picking) + tableau détaillé des livraisons non-prêtes
+- **Tableau par livraison** : N° livraison, destination, ville, badge SP (A/B/C), badge WM (A/B/C), silo restant (pal), picking restant (pk)
+- **Calcul restant** : dérivé depuis `d.hrSilo * CADENCE_SILO` et `d.hrPick * CADENCE_PICK` (données article du VL06O)
+- **Badge onglet** : nombre de camions affectés affiché dans le badge rouge de l'onglet
+- **Filtre** : commandes avec sp='C' et wm='C' (entièrement prêtes) exclues automatiquement — seules les non-prêtes apparaissent
 
 ### v1.149 — Camions : transfert de livraison entre camions (modal)
 
