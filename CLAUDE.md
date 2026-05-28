@@ -12,7 +12,8 @@ Application web monofichier HTML — outil de gestion logistique d'un hub de tra
 
 | Fichier | Version | État |
 |---------|---------|------|
-| `TruckFlow_v1.150.html` | v1.150 | **Version courante** |
+| `TruckFlow_v1.151.html` | v1.151 | **Version courante** |
+| `TruckFlow_v1.150.html` | v1.150 | Archivé |
 | `TruckFlow_v1.149.html` | v1.149 | Archivé |
 | `TruckFlow_v1.148.html` | v1.148 | Archivé |
 | `TruckFlow_v1.147.html` | v1.147 | Archivé |
@@ -127,6 +128,17 @@ tfPurgeAndQuit()       — purge localStorage + reload
 ---
 
 ## Fonctionnalités récentes (depuis v1.42)
+
+### v1.151 — Monitor : bouton 📋 Résumé du shift
+
+- **Bouton `📋 Résumé`** dans le header Monitor (non-live) : `onclick="openResume()"` — style vert, visible uniquement hors mode live
+- **Overlay glassmorphism** `#_resumeOv` : fermeture au clic fond ou bouton ✕, animation slide-up spring
+- **KPIs globaux** en pills : nb camions partis standard, nb livraisons total, nb palettes total, nb COMPANS, nb TFE
+- **3 sections** pour la date affichée dans `#monDateInp` :
+  - **✅ Partis** : camions standards (`type` ≠ compans/tfe) avec `ts.dep` renseigné (live) + archivés `getCompleted()` — triés par heure d'arrivée ; border gauche verte ; affiche nom transporteur, quai, créneau, durée ⏱, timestamps `ARR → QUAI → CHGT → FIN → DÉP` + liste des livraisons (N°, dest, ville, palettes, colis, badge prêt)
+  - **🏭 COMPANS** : tous les enlèvements du jour (actifs + archivés), triés par numéro de tour ; border gauche amber ; `ARR → DÉP` + durée
+  - **🚌 TFE** : tous les tours du jour (actifs + archivés), triés par numéro de tour ; border gauche cyan ; `ARR → DÉP` + durée
+- **Fonction** : `openResume()` — helpers internes `getTruckDels`, `durStr`, `delRow`, `tsRow`, `truckCard`
 
 ### v1.150 — Nouvel onglet 🚨 Alertes : commandes non prêtes par camion/créneau
 
